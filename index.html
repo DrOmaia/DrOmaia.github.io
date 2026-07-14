@@ -1,86 +1,2948 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en" dir="ltr" data-theme="dark">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#07111d">
-  <meta name="description" content="Academic portfolio of Dr. Omaia Al-Omari — AI and Data Science researcher and educator.">
-  <title>Dr. Omaia Al-Omari | AI & Data Science</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Dr. Omaia Al-Omari","jobTitle":"Assistant Professor, Information Systems","affiliation":{"@type":"CollegeOrUniversity","name":"Prince Sultan University"},"sameAs":["https://scholar.google.com/citations?user=TJnHJX8AAAAJ","https://orcid.org/0000-0002-1638-1771","https://linkedin.com/in/omaiaomari"]}</script>
-  <style>
-    :root{--bg:#07111d;--surface:#0d1a28;--surface2:#122234;--text:#f4f7fa;--muted:#9cafc1;--line:rgba(255,255,255,.1);--gold:#d8b45b;--blue:#68a9ff;--green:#64d5b3;--shadow:0 22px 70px rgba(0,0,0,.28);--radius:24px;--header:76px}
-    [data-theme=light]{--bg:#f4f7fa;--surface:#fff;--surface2:#eaf0f5;--text:#0b1b2a;--muted:#53687b;--line:rgba(10,31,49,.12);--gold:#9a7116;--blue:#1769c2;--green:#087f65;--shadow:0 20px 65px rgba(25,52,75,.12)}
-    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:95px}body{margin:0;background:var(--bg);color:var(--text);font-family:Manrope,sans-serif;line-height:1.65;overflow-x:hidden}html[lang=ar] body{font-family:Tajawal,sans-serif}a{color:inherit}.wrap{width:min(1180px,calc(100% - 40px));margin:auto}.skip{position:fixed;left:12px;top:-80px;background:var(--text);color:var(--bg);padding:10px 16px;z-index:100}.skip:focus{top:10px}.header{height:var(--header);position:fixed;inset:0 0 auto;z-index:40;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}.header-inner{height:100%;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{text-decoration:none;font-weight:800;letter-spacing:-.04em}.brand span{color:var(--gold)}.nav{display:flex;align-items:center;gap:6px}.nav a,.icon-btn{border:0;background:transparent;color:var(--muted);text-decoration:none;padding:10px 12px;border-radius:12px;font:inherit;font-size:.86rem;font-weight:700;cursor:pointer}.nav a:hover,.nav a.active,.icon-btn:hover{color:var(--text);background:var(--surface2)}.controls{display:flex}.menu{display:none}.hero{position:relative;min-height:100svh;display:grid;align-items:center;padding:130px 0 65px}.hero:before{content:"";position:absolute;width:520px;height:520px;right:-160px;top:70px;background:radial-gradient(circle,rgba(104,169,255,.16),transparent 68%);pointer-events:none}.hero-grid{display:grid;grid-template-columns:1.35fr .65fr;gap:50px;align-items:center}.eyebrow{display:flex;align-items:center;gap:10px;color:var(--gold);font-size:.82rem;font-weight:800;text-transform:uppercase;letter-spacing:.13em}.eyebrow:before{content:"";width:34px;height:1px;background:var(--gold)}h1{font-size:clamp(3.25rem,7.5vw,6.8rem);line-height:.93;letter-spacing:-.075em;margin:24px 0}html[lang=ar] h1{letter-spacing:-.035em}.gradient{background:linear-gradient(100deg,var(--text),var(--blue));background-clip:text;color:transparent}.hero h2{font-size:clamp(1.2rem,2vw,1.65rem);margin:0 0 18px;color:var(--text)}.lead{font-size:1.08rem;color:var(--muted);max-width:750px}.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:48px;padding:0 19px;border:1px solid var(--line);border-radius:14px;text-decoration:none;font-weight:800;font-size:.9rem;background:var(--surface);cursor:pointer;color:var(--text)}.btn.primary{background:var(--gold);border-color:var(--gold);color:#10151a}.btn:hover{transform:translateY(-2px);box-shadow:var(--shadow)}.portrait{aspect-ratio:4/5;border:1px solid var(--line);border-radius:40px;position:relative;overflow:hidden;background:linear-gradient(145deg,var(--surface2),var(--surface));box-shadow:var(--shadow);display:grid;place-items:center}.portrait:after{content:"OA";font-size:clamp(5rem,12vw,9rem);font-weight:800;color:color-mix(in srgb,var(--gold) 55%,transparent)}.portrait-note{position:absolute;bottom:22px;background:color-mix(in srgb,var(--bg) 75%,transparent);backdrop-filter:blur(10px);border:1px solid var(--line);padding:9px 13px;border-radius:12px;color:var(--muted);font-size:.77rem}.strip{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--line);border-radius:18px;overflow:hidden;background:var(--surface)}.strip a{text-decoration:none;padding:18px;text-align:center;color:var(--muted);font-size:.82rem;font-weight:800;border-inline-end:1px solid var(--line)}.strip a:last-child{border:0}.strip a:hover{color:var(--gold);background:var(--surface2)}section{padding:110px 0}.section-head{display:grid;grid-template-columns:.75fr 1.25fr;gap:60px;margin-bottom:42px}.kicker{color:var(--gold);font-size:.78rem;text-transform:uppercase;letter-spacing:.14em;font-weight:800}.section-head h2{font-size:clamp(2.1rem,4vw,4rem);line-height:1.05;letter-spacing:-.055em;margin:12px 0}.section-head p{color:var(--muted);margin:34px 0 0}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:28px}.card:hover{border-color:color-mix(in srgb,var(--gold) 50%,var(--line))}.num{font-size:3rem;line-height:1;font-weight:800;color:var(--gold)}.card h3{margin:22px 0 8px}.card p{color:var(--muted);margin:0}.research-shell{background:var(--surface);border:1px solid var(--line);border-radius:32px;padding:clamp(20px,4vw,42px)}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}.metric{padding:18px;background:var(--surface2);border-radius:16px}.metric b{display:block;font-size:1.8rem}.metric span{font-size:.75rem;color:var(--muted)}.search{display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,280px) minmax(155px,210px);gap:10px;margin-bottom:14px}.search input,.select{width:100%;min-height:54px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:15px;padding:0 17px;font:inherit;outline:none}.search input:focus,.select:focus{border-color:var(--blue);box-shadow:0 0 0 4px color-mix(in srgb,var(--blue) 14%,transparent)}.filter-row{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:28px}.filters{display:flex;gap:8px;flex-wrap:wrap}.result-count{white-space:nowrap;color:var(--muted);font-size:.82rem;font-weight:800}.chip{border:1px solid var(--line);color:var(--muted);background:transparent;border-radius:999px;padding:7px 12px;font:inherit;font-size:.78rem;font-weight:700;cursor:pointer}.chip.active{background:var(--text);color:var(--bg)}.pub-list{display:grid;gap:12px}.pub{display:grid;grid-template-columns:84px 1fr auto;gap:20px;padding:23px 0;border-top:1px solid var(--line);align-items:start}.pub-year{font-weight:800;color:var(--gold)}.pub h3{font-size:1.02rem;margin:0 0 7px;line-height:1.45}.pub p{margin:0;color:var(--muted);font-size:.84rem}.pub-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:11px}.tag{font-size:.68rem;padding:4px 8px;border-radius:999px;background:var(--surface2);color:var(--muted)}.type-tag{color:var(--blue);border:1px solid color-mix(in srgb,var(--blue) 35%,transparent);background:color-mix(in srgb,var(--blue) 8%,transparent)}.pub-actions{display:flex;gap:6px}.tiny{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:9px;padding:7px 9px;font:inherit;font-size:.72rem;font-weight:800;text-decoration:none;cursor:pointer}.latest{color:#051c14;background:var(--green)}.no-results{text-align:center;color:var(--muted);padding:34px}.timeline{display:grid;gap:14px}.role{display:grid;grid-template-columns:180px 1fr;gap:28px;padding:28px;border:1px solid var(--line);border-radius:20px;background:var(--surface)}.role time{color:var(--gold);font-weight:800}.role h3{margin:0 0 5px}.role p{margin:0;color:var(--muted)}.verified{display:inline-flex;align-items:center;gap:5px;color:var(--green);font-size:.7rem;font-weight:800;margin-top:12px;text-decoration:none}.split{display:grid;grid-template-columns:1fr 1fr;gap:18px}.list{margin:18px 0 0;padding-inline-start:20px;color:var(--muted)}.list li{margin:9px 0}.contact{background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid var(--line);border-radius:32px;padding:clamp(28px,6vw,70px);display:grid;grid-template-columns:1fr auto;align-items:center;gap:30px}.contact h2{font-size:clamp(2rem,5vw,4.3rem);line-height:1;margin:0 0 15px}.contact p{color:var(--muted);margin:0}.footer{padding:30px 0 100px;color:var(--muted);font-size:.78rem}.footer .wrap{display:flex;justify-content:space-between;gap:15px}.bottom-nav{display:none}.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:80;display:none;place-items:center;padding:20px}.modal.open{display:grid}.dialog{width:min(700px,100%);max-height:85vh;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:26px;box-shadow:var(--shadow)}.dialog-head{display:flex;justify-content:space-between;gap:18px}.dialog pre{white-space:pre-wrap;background:var(--bg);padding:16px;border-radius:12px;color:var(--muted);font-size:.77rem}.toast{position:fixed;bottom:95px;left:50%;transform:translate(-50%,20px);background:var(--text);color:var(--bg);padding:10px 15px;border-radius:10px;opacity:0;pointer-events:none;z-index:100;transition:.25s}.toast.show{opacity:1;transform:translate(-50%,0)}
-    @media(max-width:900px){.nav{position:fixed;top:76px;left:20px;right:20px;display:none;flex-direction:column;align-items:stretch;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:18px}.nav.open{display:flex}.menu{display:block}.hero-grid,.section-head,.contact{grid-template-columns:1fr}.portrait{width:min(370px,88%);margin:auto}.strip{grid-template-columns:repeat(2,1fr)}.strip a{border-bottom:1px solid var(--line)}.grid3{grid-template-columns:1fr}.section-head{gap:10px}.section-head p{margin-top:0}.metrics{grid-template-columns:repeat(2,1fr)}.search{grid-template-columns:1fr 1fr}.search input{grid-column:1/-1}}
-    @media(max-width:620px){:root{--header:66px}.wrap{width:min(100% - 28px,1180px)}.hero{padding-top:104px}.hero-grid{gap:36px}h1{font-size:3.35rem}.portrait{border-radius:28px}.actions .btn{flex:1}.strip{grid-template-columns:1fr 1fr}.strip a{padding:14px 8px;font-size:.72rem}section{padding:80px 0}.research-shell{margin-inline:-5px}.search{grid-template-columns:1fr}.search input{grid-column:auto}.filter-row{align-items:flex-start;flex-direction:column}.result-count{align-self:flex-end}.pub{grid-template-columns:60px 1fr}.pub-actions{grid-column:2}.role{grid-template-columns:1fr;gap:8px;padding:22px}.split{grid-template-columns:1fr}.footer .wrap{display:block}.bottom-nav{display:flex;position:fixed;z-index:35;left:10px;right:10px;bottom:max(10px,env(safe-area-inset-bottom));height:61px;border:1px solid var(--line);border-radius:18px;background:color-mix(in srgb,var(--surface) 90%,transparent);backdrop-filter:blur(18px);justify-content:space-around;align-items:center;box-shadow:var(--shadow);transform:translateY(100px);transition:.3s}.bottom-nav.show{transform:none}.bottom-nav a{font-size:.66rem;text-decoration:none;color:var(--muted);font-weight:800;text-align:center}.bottom-nav b{display:block;font-size:1rem}.contact .actions{display:grid}.contact .btn{width:100%}}
-    main{display:flex;flex-direction:column}#home{order:1}#profile{order:2}#experience{order:3}#teaching{order:4}#research{order:5}#service{order:6}#contact{order:7}.hero-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:30px;max-width:780px}.summary-item{padding:15px 16px;border:1px solid var(--line);border-radius:15px;background:color-mix(in srgb,var(--surface) 76%,transparent)}.summary-item small{display:block;color:var(--muted);font-size:.67rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}.summary-item strong{display:block;font-size:.87rem;line-height:1.45}.intro-note{margin-top:15px;color:var(--muted);font-size:.84rem}.btn,.card,.pub,.role{transition:border-color .15s ease,background-color .15s ease}.btn:hover{transform:none;box-shadow:none;border-color:var(--gold)}.card:hover{border-color:var(--line)}
-    @media(max-width:620px){html{scroll-behavior:auto;scroll-padding-top:76px}.header-inner{gap:8px}.brand{font-size:.87rem;letter-spacing:-.025em;white-space:nowrap}.controls .icon-btn{padding:8px 7px;font-size:.76rem}.hero{min-height:auto;padding:92px 0 42px}.hero:before{width:300px;height:300px;right:-160px;top:20px}.hero-grid{display:block}.hero h1{font-size:clamp(2.75rem,14vw,3.5rem);line-height:.98;margin:18px 0}.hero h2{font-size:1.08rem;line-height:1.45;margin-bottom:12px}.lead{font-size:.94rem;line-height:1.7}.eyebrow{font-size:.67rem;letter-spacing:.075em}.eyebrow:before{width:21px}.portrait{display:none}.actions{margin-top:22px;gap:8px}.actions .btn{min-height:44px;padding:0 13px;font-size:.78rem}.hero-summary{grid-template-columns:1fr 1fr;gap:8px;margin-top:22px}.summary-item{padding:12px;border-radius:12px}.summary-item small{font-size:.58rem;letter-spacing:.05em}.summary-item strong{font-size:.75rem}.strip{margin-top:28px!important;border-radius:14px}.strip a{font-size:.66rem;padding:12px 5px}.strip a:last-child{grid-column:1/-1}.section-head h2{font-size:2rem;line-height:1.12;letter-spacing:-.035em;margin:8px 0}.section-head{margin-bottom:26px}.section-head p{font-size:.9rem;line-height:1.7}.kicker{font-size:.68rem}.grid3{gap:10px}.card{padding:20px;border-radius:17px}.card h3{margin-top:14px}.num{font-size:2rem}section{padding:58px 0}.metrics{gap:7px;margin-bottom:18px}.metric{padding:13px;border-radius:12px}.metric b{font-size:1.35rem}.metric span{font-size:.63rem}.research-shell{padding:14px;border-radius:19px}.search{gap:7px}.search input,.select{min-height:48px;border-radius:12px;font-size:.79rem;padding:0 12px}.chip{font-size:.7rem;padding:6px 10px}.filter-row{gap:10px;margin-bottom:18px}.pub{grid-template-columns:48px minmax(0,1fr);gap:11px;padding:18px 2px}.pub h3{font-size:.91rem;line-height:1.52}.pub p{font-size:.74rem}.pub-year{font-size:.78rem}.pub-actions{grid-column:2}.role{padding:18px;border-radius:16px}.role h3{font-size:1rem}.role p{font-size:.82rem}.contact{padding:25px 20px;border-radius:20px}.contact h2{font-size:2rem}.bottom-nav{transform:none!important;transition:none}.footer{padding-bottom:95px}}
-    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}.btn:hover{transform:none}}
-  </style>
-  <style>
-    .portrait{background-image:url('DrOmaia.jpeg');background-size:cover;background-position:center 28%}
-    .portrait:after,.portrait-note{display:none!important}
-    @media(max-width:620px){.portrait{display:block;width:154px;aspect-ratio:4/5;margin:24px auto 0;border-radius:23px;box-shadow:0 14px 38px rgba(0,0,0,.2)}}
-  </style>
-</head>
-<body>
-<a class="skip" href="#main">Skip to content</a>
-<header class="header"><div class="wrap header-inner"><a class="brand" href="#home">Dr. Omaia <span>Al‑Omari</span></a><nav class="nav" id="nav"><a href="#profile" data-t="navProfile">Profile</a><a href="#research" data-t="navResearch">Research</a><a href="#teaching" data-t="navTeaching">Teaching</a><a href="#experience" data-t="navExperience">Experience</a><a href="#service" data-t="navService">Service</a><a href="#contact" data-t="navContact">Contact</a></nav><div class="controls"><button class="icon-btn" id="lang" aria-label="Change language">العربية</button><button class="icon-btn" id="theme" aria-label="Change theme">◐</button><button class="icon-btn menu" id="menu" aria-label="Open menu">☰</button></div></div></header>
-<main id="main">
-  <section class="hero" id="home"><div class="wrap"><div class="hero-grid"><div><div class="eyebrow" data-t="eyebrow">Assistant Professor · Prince Sultan University</div><h1>Dr. Omaia<br><span class="gradient">Al-Omari</span></h1><h2 data-t="heroRole">AI & Data Science Researcher and Educator</h2><p class="lead" data-t="heroText">Assistant Professor in the Information Systems Department at Prince Sultan University in Riyadh. His academic work connects Artificial Intelligence, Data Science, and Information Systems through research, teaching, and responsible innovation.</p><div class="actions"><a class="btn primary" href="#research" data-t="viewResearch">Explore research</a><a class="btn" href="#teaching" data-t="viewTeaching">Teaching profile</a><a class="btn" href="#" onclick="cvNotice(event)" data-t="downloadCV">Download CV</a></div><div class="hero-summary" aria-label="Academic profile at a glance"><div class="summary-item"><small data-t="currentAppointment">Current appointment</small><strong data-t="currentAppointmentValue">Assistant Professor · PSU</strong></div><div class="summary-item"><small data-t="highestDegree">Highest degree</small><strong data-t="highestDegreeValue">PhD in Computer Science (AI) · UKM</strong></div><div class="summary-item"><small data-t="researchFocus">Research focus</small><strong data-t="researchFocusValue">AI · Data Science · Information Systems</strong></div><div class="summary-item"><small data-t="academicExperience">Experience</small><strong data-t="academicExperienceValue">18+ years across academia & IT</strong></div></div></div><div class="portrait" role="img" aria-label="Temporary profile portrait placeholder"><span class="portrait-note" data-t="photoLater">Professional portrait coming soon</span></div></div><div class="strip" style="margin-top:52px"><a target="_blank" rel="noopener" href="https://orcid.org/0000-0002-1638-1771">ORCID ↗</a><a target="_blank" rel="noopener" href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ">Google Scholar ↗</a><a target="_blank" rel="noopener" href="https://www.scopus.com/authid/detail.uri?authorId=56303160900">Scopus ↗</a><a target="_blank" rel="noopener" href="https://www.webofscience.com/wos/author/record/JGD-2915-2023">Web of Science ↗</a><a target="_blank" rel="noopener" href="https://facultyportal.psu.edu.sa/ViewProfile.aspx?instructorID=1345">PSU Profile ↗</a></div></div></section>
-  <section id="profile"><div class="wrap"><div class="section-head"><div><span class="kicker" data-t="profileKicker">Academic profile</span><h2 data-t="profileTitle">Research that connects ideas to impact.</h2></div><p data-t="profileText">My work sits at the intersection of Artificial Intelligence, Data Science, and Information Systems. I investigate intelligent models while keeping their human, organizational, and ethical contexts in view.</p></div><div class="grid3"><article class="card"><span class="num">01</span><h3 data-t="pillarAI">Artificial Intelligence</h3><p data-t="pillarAITxt">Deep learning, explainable AI, computer vision, NLP, and agentic systems.</p></article><article class="card"><span class="num">02</span><h3 data-t="pillarDS">Data Science</h3><p data-t="pillarDSTxt">Predictive analytics, machine learning, multimodal data, and decision support.</p></article><article class="card"><span class="num">03</span><h3 data-t="pillarIS">Information Systems</h3><p data-t="pillarISTxt">Digital governance, enterprise systems, responsible adoption, and cybersecurity.</p></article></div></div></section>
-  <section id="research"><div class="wrap"><div class="section-head"><div><span class="kicker" data-t="researchKicker">Selected & complete record</span><h2 data-t="researchTitle">Research explorer</h2></div><p data-t="researchText">Search the verified publication collection by title, author, venue, year, or topic. Results update instantly on every device.</p></div><div class="research-shell"><div class="metrics"><div class="metric"><b id="mCount">0</b><span data-t="metricWorks">works indexed</span></div><div class="metric"><b id="mYears">0</b><span data-t="metricYears">active years</span></div><div class="metric"><b id="mTopics">0</b><span data-t="metricTopics">research topics</span></div><div class="metric"><b id="mFirst">0</b><span data-t="metricFirst">first-author works</span></div></div><div class="search"><input id="search" type="search" autocomplete="off" data-placeholder="searchPlaceholder" placeholder="Search title, author, venue, year, or topic…" aria-label="Search publications"><select id="typeFilter" class="select" aria-label="Filter by publication type"><option value="All" data-t="typeAll">All publication types</option><option value="Journal" data-t="typeJournalPlural">Journal articles</option><option value="Conference" data-t="typeConferencePlural">Conference papers</option><option value="Book Chapter" data-t="typeChapterPlural">Book chapters</option></select><select id="sort" class="select" aria-label="Sort publications"><option value="new" data-t="sortNew">Newest first</option><option value="old" data-t="sortOld">Oldest first</option><option value="az" data-t="sortAZ">Title A–Z</option></select></div><div class="filter-row"><div class="filters" id="filters"></div><div class="result-count" id="resultCount" aria-live="polite"></div></div><div class="pub-list" id="pubList"></div><div class="no-results" id="empty" hidden data-t="noResults">No publications match this search.</div></div></div></section>
-  <section id="teaching"><div class="wrap"><div class="section-head"><div><span class="kicker" data-t="teachingKicker">Teaching & mentorship</span><h2 data-t="teachingTitle">Learning by inquiry, practice, and reflection.</h2></div><p data-t="teachingText">My teaching connects rigorous foundations with current practice. Students investigate real problems, evaluate evidence, build solutions, and learn to explain the consequences of technical choices.</p></div><div class="split"><article class="card"><h3 data-t="courseTitle">Teaching areas</h3><ul class="list"><li>Artificial Intelligence & Machine Learning</li><li>Advanced Enterprise Architecture</li><li>Systems Analysis & Design</li><li>Database Management Systems</li><li>Software Engineering</li></ul></article><article class="card"><h3 data-t="methodTitle">Learning experience</h3><ul class="list"><li data-t="method1">Problem- and project-based learning</li><li data-t="method2">Research-informed case analysis</li><li data-t="method3">Interactive workshops and peer feedback</li><li data-t="method4">Responsible use of emerging AI tools</li></ul></article></div></div></section>
-  <section id="experience"><div class="wrap"><div class="section-head"><div><span class="kicker" data-t="experienceKicker">Academic journey</span><h2 data-t="experienceTitle">Experience & education</h2></div><p data-t="experienceText">More than 18 years across academia and information technology, with experience in teaching, research, curriculum, quality, and academic advising.</p></div><div class="timeline"><article class="role"><time>2024 — <span data-t="present">Present</span></time><div><h3 data-t="role1">Assistant Professor · Prince Sultan University</h3><p data-t="role1txt">Information Systems Department, College of Computer and Information Sciences, Riyadh.</p></div></article><article class="role"><time>2014 — 2024</time><div><h3 data-t="role2">Lecturer / Faculty Member · Shaqra University</h3><p data-t="role2txt">Teaching, academic advising, student activities, and quality assurance.</p></div></article><article class="role"><time>2009 — 2012</time><div><h3 data-t="role3">Lecturer · University of Ha'il</h3><p data-t="role3txt">Courses in internet protocols, databases, and web development.</p></div></article><article class="role"><time>2021</time><div><h3 data-t="phd">PhD in Computer Science — Artificial Intelligence</h3><p data-t="phdTxt">The National University of Malaysia (UKM). Research in NLP, feature selection, and document classification.</p></div></article><article class="role"><time>2009</time><div><h3 data-t="msc">MSc in Information Technology and Computer Sciences</h3><p data-t="mscTxt">Yarmouk University · Specialization in Computer Information Systems.</p></div></article><article class="role"><time>2006</time><div><h3 data-t="bsc">BSc in Information Technology and Computer Sciences</h3><p data-t="bscTxt">Yarmouk University, Jordan.</p></div></article></div></div></section>
-  <section id="service"><div class="wrap"><div class="section-head"><div><span class="kicker" data-t="serviceKicker">Academic leadership</span><h2 data-t="serviceTitle">Service to the scholarly community.</h2></div><p data-t="serviceText">Editorial, conference, curriculum, and quality roles that strengthen research exchange and academic standards.</p></div><div class="split"><article class="card"><span class="tag latest" data-t="verifiedRole">Verified leadership role</span><h3>Track Chair · ICEGOV 2026</h3><p data-t="icegovTxt">Supporting the conference’s academic program and international knowledge exchange.</p><a class="verified" target="_blank" rel="noopener" href="https://www.icegov.org/2026/person/omaia-al-omari/">✓ <span data-t="verifySource">View official source</span> ↗</a></article><article class="card"><span class="tag latest" data-t="verifiedEditorial">Verified editorial role</span><h3 data-t="editorialTitle">Editorial Board Member</h3><p><b data-t="journalName">Babylonian Journal of Networking (BJN)</b> · 2026–<span data-t="present">Present</span></p><p data-t="editorialTxt">Supporting editorial and peer-review activities, scholarly quality, and publication standards.</p><a class="verified" target="_blank" rel="noopener" href="https://mesopotamian.press/journals/index.php/BJN/editorialteam">✓ <span data-t="verifySource">View official source</span> ↗</a></article></div></div></section>
-  <section id="contact"><div class="wrap"><div class="contact"><div><span class="kicker" data-t="contactKicker">Academic collaboration</span><h2 data-t="contactTitle">Let’s explore what we can build together.</h2><p data-t="contactText">Available for research collaboration, academic service, teaching opportunities, and scholarly exchange.</p></div><div class="actions"><a class="btn primary" href="mailto:oalomari@psu.edu.sa">oalomari@psu.edu.sa</a><a class="btn" href="mailto:omaiaomari@yahoo.com" data-t="personalEmail">Personal email</a><a class="btn" target="_blank" rel="noopener" href="https://linkedin.com/in/omaiaomari">LinkedIn ↗</a></div></div></div></section>
-</main>
-<footer class="footer"><div class="wrap"><span>© <span id="year"></span> Dr. Omaia Al-Omari.</span><span data-t="tagline">Advancing AI through Research, Teaching, and Responsible Innovation.</span></div></footer>
-<nav class="bottom-nav" id="bottomNav" aria-label="Mobile navigation"><a href="#home"><b>⌂</b><span data-t="mobileHome">Home</span></a><a href="#research"><b>⌕</b><span data-t="navResearch">Research</span></a><a href="#teaching"><b>◇</b><span data-t="navTeaching">Teaching</span></a><a href="#contact"><b>↗</b><span data-t="navContact">Contact</span></a></nav>
-<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="dialog"><div class="dialog-head"><div><span class="kicker" id="modalYear"></span><h2 id="modalTitle"></h2></div><button class="icon-btn" onclick="closeModal()" aria-label="Close">✕</button></div><p id="modalMeta" class="lead"></p><div class="pub-tags" id="modalTags"></div><h3 data-t="citationTitle">Citation formats</h3><pre id="apa"></pre><div class="actions"><button class="btn primary" onclick="copyAPA()" data-t="copyAPA">Copy APA</button><button class="btn" onclick="downloadBib()" data-t="downloadBib">Download BibTeX</button><a class="btn" id="doiLink" target="_blank" rel="noopener">DOI ↗</a></div></div></div><div class="toast" id="toast" data-t="copied">Copied to clipboard</div>
-<script>
-const publications=[
- {y:2026,type:'Journal',t:'Towards Trustworthy Defense AI: Real-Time Military Asset Detection with On-Demand Explainable YOLOv8',a:'Omaia Al-Omari et al.',v:'Engineering, Technology & Applied Science Research',doi:'10.48084/etasr.17259',tags:['AI','Computer Vision','Explainable AI'],first:true,latest:true},
- {y:2026,t:'Phishing Detection Using CNN-RNN With Sparrow Search Optimization Algorithm',a:'Omaia Al-Omari et al.',v:'Journal of Multiscale Modelling',tags:['AI','Cybersecurity','Deep Learning'],first:true},
- {y:2025,t:'A predictive analytics approach to improve telecom’s customer retention',a:'Asem Omari, Omaia Al-Omari, Tariq Al-Omari, Suliman M. Fati',v:'Frontiers in Artificial Intelligence',doi:'10.3389/frai.2025.1600357',tags:['Data Science','Predictive Analytics','AI']},
- {y:2025,t:'Object detection in real-time video surveillance using attention-based Transformer-YOLOv8 model',a:'Divya Nimma, Omaia Al-Omari et al.',v:'Alexandria Engineering Journal',doi:'10.1016/j.aej.2025.01.032',tags:['Computer Vision','Transformers','AI']},
- {y:2025,t:'CNN-Based Automated Detection of Metastatic Cancer in Histopathology Images',a:'Omaia Al-Omari, Omar Alkhatib, Tariq Al-Omari',v:'Engineering, Technology & Applied Science Research',doi:'10.48084/etasr.10888',tags:['Healthcare AI','Computer Vision'],first:true},
- {y:2025,t:'Deep Learning-Based Automated Segmentation of the Parcellated Corpus Callosum in Brain MRI',a:'Suliman M. Fati, Omaia Al-Omari',v:'Engineering, Technology & Applied Science Research',doi:'10.48084/etasr.11783',tags:['Healthcare AI','Deep Learning']},
- {y:2025,t:'Governance and ethical frameworks for AI integration in higher education: Enhancing personalized learning and legal compliance',a:'Omaia Al-Omari et al.',v:'Journal of Ecohumanism',tags:['AI Ethics','Higher Education','Governance'],first:true},
- {y:2025,t:'Artificial intelligence and posthumanism: A philosophical inquiry into consciousness, ethics, and human identity',a:'Omaia Al-Omari, Tariq Al-Omari',v:'Journal of Posthumanism',doi:'10.63332/joph.v5i2.432',tags:['AI Ethics','Human-Centered AI'],first:true},
- {y:2025,t:'Artificial intelligence in healthcare: Bridging innovation and regulation',a:'Awad Alyousef, Omaia Al-Omari',v:'Journal of Ecohumanism',doi:'10.62754/joe.v3i8.5673',tags:['Healthcare AI','Governance','AI Ethics']},
- {y:2025,t:'Applying artificial intelligence techniques on cyber attacks dataset',a:'Omaia Al-Omari et al.',v:'Advanced Information Networking and Applications · Springer',doi:'10.1007/978-3-031-87778-0_7',tags:['Cybersecurity','Machine Learning'],first:true},
- {y:2025,t:'Challenges and Solutions in Agile Software Development: A Managerial Perspective on Implementation Practices',a:'L. S. Geetha et al., Omaia Al-Omari',v:'International Journal of Advanced Computer Science and Applications',tags:['Software Engineering','Information Systems']},
- {y:2024,t:'MuSeRAN: Multimodal Sentiment Analysis with Recurrent Attention Networks',a:'Omaia Al-Omari, Asem Omari, Esam Othman, Atheer A. Alrashed',v:'DASA 2024 · IEEE',tags:['NLP','Multimodal AI','Deep Learning'],first:true},
- {y:2024,t:'Combination of Blockchain and Machine Learning for Decision Making and Secure Supply Chain Authentication Management',a:'Mahmoud Allahham, Atheer A. Alrashed, Omaia Al-Omari, Wasef Almajali',v:'DASA 2024 · IEEE',tags:['Blockchain','Machine Learning','Cybersecurity']},
- {y:2024,t:'Forecasting Stock Market Using Regression Models',a:'Asem Omari, A. Alazzam, Omaia Al-Omari',v:'ICIBE 2024',doi:'10.1145/3716097.3716124',tags:['Data Science','Predictive Analytics']},
- {y:2023,t:'An empirical study on the future of publication repositories and its adaptability in public universities',a:'Nayyar A. Khan, Omaia Al-Omari, Saeed Alshahrani',v:'Computational Intelligence · Springer',tags:['Information Systems','Higher Education']},
- {y:2020,t:'Internet of Things (IoT) Based Educational Data Mining (EDM) System',a:'Nayyar A. Khan, Rund Mahafdah, Omaia Al-Omari et al.',v:'Journal of Mechanics of Continua and Mathematical Sciences',tags:['IoT','Data Mining','Education']},
- {y:2019,t:'Prevention of Web-Form Spamming for Cloud-Based Applications: A Proposed Model',a:'Nayyar A. Khan et al., Omaia Al-Omari',v:'AICAI 2019 · IEEE',tags:['Cybersecurity','Cloud Computing']},
- {y:2019,t:'Intrusion Management to Avoid Web-Form Spamming in Cloud-Based Architectures',a:'Nayyar A. Khan et al., Omaia Al-Omari',v:'ICCIKE 2019 · IEEE',doi:'10.1109/ICCIKE47802.2019.9004302',tags:['Cybersecurity','Cloud Computing']},
- {y:2018,t:'Learning Modal Adaptability to Improve Reading and Writing Skills of Students',a:'Rund F. Mahafdah, Omaia Al-Omari, Nayyar A. Khan',v:'International Journal of Engineering Research & Technology',doi:'10.17577/IJERTV7IS030016',tags:['Education','Information Systems']},
- {y:2017,t:'Ranking and Reputation Based Resource Allocation in P2P System',a:'Nayyar A. Khan, Omaia Al-Omari, Rund Mahafdah',v:'Mediterranean Journal of Basic and Applied Sciences',tags:['P2P Systems','Information Systems']},
- {y:2014,t:'Arabic Part-of-Speech Tagging Using k-Nearest Neighbour and Naive Bayes Classifiers Combination',a:'Rund Mahafdah, Nazlia Omar, Omaia Al-Omari',v:'Journal of Computer Science',tags:['NLP','Arabic Language','Machine Learning']},
- {y:2011,t:'Evaluating the Effect of Stemming in Clustering of Arabic Documents',a:'Omaia Al-Omari',v:'Academic Research International',tags:['NLP','Arabic Language','Text Mining'],first:true}
-];
-const tr={ar:{navProfile:'الملف',navResearch:'الأبحاث',navTeaching:'التدريس',navExperience:'الخبرة',navService:'الخدمة الأكاديمية',navContact:'تواصل',eyebrow:'أستاذ مساعد · جامعة الأمير سلطان',heroRole:'باحث ومُدرّس في الذكاء الاصطناعي وعلوم البيانات',heroText:'أستاذ مساعد في قسم نظم المعلومات بجامعة الأمير سلطان في الرياض. يربط عمله الأكاديمي بين الذكاء الاصطناعي وعلوم البيانات ونظم المعلومات من خلال البحث والتدريس والابتكار المسؤول.',currentAppointment:'المنصب الحالي',currentAppointmentValue:'أستاذ مساعد · جامعة الأمير سلطان',highestDegree:'أعلى مؤهل علمي',highestDegreeValue:'دكتوراه علوم الحاسب (ذكاء اصطناعي) · UKM',researchFocus:'التركيز البحثي',researchFocusValue:'الذكاء الاصطناعي · علوم البيانات · نظم المعلومات',academicExperience:'الخبرة',academicExperienceValue:'أكثر من 18 عامًا في الأكاديميا وتقنية المعلومات',viewResearch:'استكشف الأبحاث',viewTeaching:'ملف التدريس',downloadCV:'تحميل السيرة الذاتية',photoLater:'ستُضاف الصورة المهنية لاحقًا',profileKicker:'الملف الأكاديمي',profileTitle:'بحث يصل بين الأفكار والأثر.',profileText:'يقع عملي عند تقاطع الذكاء الاصطناعي وعلوم البيانات ونظم المعلومات، مع الاهتمام بالسياقات الإنسانية والتنظيمية والأخلاقية للنماذج الذكية.',pillarAI:'الذكاء الاصطناعي',pillarAITxt:'التعلم العميق، والذكاء القابل للتفسير، والرؤية الحاسوبية، ومعالجة اللغة.',pillarDS:'علوم البيانات',pillarDSTxt:'التحليلات التنبؤية، وتعلم الآلة، والبيانات متعددة الوسائط، ودعم القرار.',pillarIS:'نظم المعلومات',pillarISTxt:'الحوكمة الرقمية، ونظم المؤسسات، والتبني المسؤول، والأمن السيبراني.',researchKicker:'مختارات والسجل الكامل',researchTitle:'مستكشف الأبحاث',researchText:'ابحث في مجموعة المنشورات حسب العنوان أو المؤلف أو الدورية أو السنة أو الموضوع، مع تحديث فوري للنتائج.',metricWorks:'بحثًا مفهرسًا',metricYears:'سنة بحث نشطة',metricTopics:'موضوعًا بحثيًا',metricFirst:'بحثًا كمؤلف أول',searchPlaceholder:'ابحث بالعنوان أو المؤلف أو الدورية أو السنة أو الموضوع…',typeAll:'جميع أنواع المنشورات',typeJournalPlural:'مقالات الدوريات',typeConferencePlural:'أبحاث المؤتمرات',typeChapterPlural:'فصول الكتب',typeJournal:'مقالة دورية',typeConference:'بحث مؤتمر',typeChapter:'فصل كتاب',sortNew:'الأحدث أولًا',sortOld:'الأقدم أولًا',sortAZ:'العنوان أ–ي',noResults:'لا توجد أبحاث مطابقة.',results:'نتيجة',teachingKicker:'التدريس والإرشاد',teachingTitle:'التعلّم بالاستقصاء والتطبيق والتأمل.',teachingText:'يربط تدريسي الأسس العلمية بالممارسة الحديثة، فيبحث الطلبة مشكلات حقيقية ويبنون حلولًا ويشرحون آثار قراراتهم التقنية.',courseTitle:'مجالات التدريس',methodTitle:'تجربة التعلّم',method1:'التعلّم القائم على المشكلات والمشروعات',method2:'دراسات حالة مستندة إلى البحث',method3:'ورش تفاعلية وتغذية راجعة بين الأقران',method4:'الاستخدام المسؤول لأدوات الذكاء الاصطناعي',experienceKicker:'المسيرة الأكاديمية',experienceTitle:'الخبرة والتعليم',experienceText:'أكثر من 18 عامًا في الأوساط الأكاديمية وتقنية المعلومات، تشمل التدريس والبحث والمناهج والجودة والإرشاد الأكاديمي.',present:'حتى الآن',role1:'أستاذ مساعد · جامعة الأمير سلطان',role1txt:'قسم نظم المعلومات، كلية علوم الحاسب والمعلومات، الرياض.',role2:'محاضر / عضو هيئة تدريس · جامعة شقراء',role2txt:'التدريس والإرشاد الأكاديمي والأنشطة الطلابية وضمان الجودة.',role3:'محاضر · جامعة حائل',role3txt:'تدريس بروتوكولات الإنترنت وقواعد البيانات وتطوير الويب.',phd:'دكتوراه علوم الحاسب — الذكاء الاصطناعي',phdTxt:'الجامعة الوطنية الماليزية (UKM). بحث في معالجة اللغة واختيار السمات وتصنيف الوثائق.',msc:'ماجستير تقنية المعلومات وعلوم الحاسب',mscTxt:'جامعة اليرموك · تخصص نظم المعلومات الحاسوبية.',bsc:'بكالوريوس تقنية المعلومات وعلوم الحاسب',bscTxt:'جامعة اليرموك، الأردن.',serviceKicker:'القيادة الأكاديمية',serviceTitle:'خدمة المجتمع العلمي.',serviceText:'أدوار تحريرية ومؤتمرات ومناهج وجودة تدعم تبادل المعرفة والمعايير الأكاديمية.',verifiedRole:'دور قيادي موثّق',icegovTxt:'دعم البرنامج الأكاديمي للمؤتمر والتبادل الدولي للمعرفة.',verifySource:'عرض المصدر الرسمي',verifiedEditorial:'دور تحريري موثّق',editorialTitle:'عضو هيئة التحرير',journalName:'المجلة البابلية للشبكات (BJN)',editorialTxt:'المساهمة في الأنشطة التحريرية والتحكيم العلمي ودعم جودة الأبحاث ومعايير النشر الأكاديمي.',contactKicker:'التعاون الأكاديمي',contactTitle:'لنستكشف ما يمكن أن نبنيه معًا.',contactText:'متاح للتعاون البحثي والخدمة الأكاديمية وفرص التدريس والتبادل العلمي.',personalEmail:'البريد الشخصي',tagline:'تطوير الذكاء الاصطناعي بالبحث والتدريس والابتكار المسؤول.',mobileHome:'الرئيسية',citationTitle:'صيغ الاستشهاد',copyAPA:'نسخ APA',downloadBib:'تنزيل BibTeX',copied:'تم النسخ إلى الحافظة',latest:'أحدث بحث',details:'التفاصيل',all:'الكل',cvPending:'سيتم ربط ملف السيرة الذاتية بعد تزويده.'}};
-let lang=(localStorage.getItem('lang')||((navigator.language||'').startsWith('ar')?'ar':'en')),active='All',current=null;
-function applyLang(){document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';document.getElementById('lang').textContent=lang==='ar'?'English':'العربية';document.querySelectorAll('[data-t]').forEach(el=>{const k=el.dataset.t;if(lang==='ar'&&tr.ar[k])el.textContent=tr.ar[k];else if(el.dataset.en)el.textContent=el.dataset.en});const s=document.getElementById('search');s.placeholder=lang==='ar'?tr.ar.searchPlaceholder:'Search title, author, venue, year, or topic…';renderFilters();renderPubs()}
-document.querySelectorAll('[data-t]').forEach(el=>el.dataset.en=el.textContent);
-function renderFilters(){const years=[...new Set(publications.map(p=>p.y))].sort((a,b)=>b-a);document.getElementById('filters').innerHTML=['All',...years].map(x=>`<button class="chip ${String(active)===String(x)?'active':''}" data-filter="${x}">${x==='All'?(lang==='ar'?'الكل':'All'):x}</button>`).join('');document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{active=b.dataset.filter;renderFilters();renderPubs()})}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function publicationType(p){if(p.type)return p.type;if(/AICAI|ICCIKE|DASA|ICIBE|IEEE/i.test(p.v))return 'Conference';if(/Computational Intelligence|Advanced Information Networking and Applications/i.test(p.v))return 'Book Chapter';return 'Journal'}
-function typeLabel(type){if(lang!=='ar')return type==='Journal'?'Journal Article':type==='Conference'?'Conference Paper':'Book Chapter';return type==='Journal'?tr.ar.typeJournal:type==='Conference'?tr.ar.typeConference:tr.ar.typeChapter}
-function renderPubs(){let q=document.getElementById('search').value.trim().toLowerCase(),sort=document.getElementById('sort').value,type=document.getElementById('typeFilter').value;let rows=publications.filter(p=>(active==='All'||String(p.y)===String(active))&&(type==='All'||publicationType(p)===type)&&(!q||[p.t,p.a,p.v,p.y,publicationType(p),...p.tags].join(' ').toLowerCase().includes(q)));rows.sort(sort==='old'?(a,b)=>a.y-b.y:sort==='az'?(a,b)=>a.t.localeCompare(b.t):(a,b)=>b.y-a.y);document.getElementById('resultCount').textContent=rows.length+' '+(lang==='ar'?tr.ar.results:(rows.length===1?'result':'results'));document.getElementById('empty').hidden=rows.length>0;document.getElementById('pubList').innerHTML=rows.map((p)=>{let i=publications.indexOf(p);return `<article class="pub"><div class="pub-year">${p.y}${p.latest?`<span class="tag latest" style="display:block;margin-top:6px">${lang==='ar'?'أحدث بحث':'Latest'}</span>`:''}</div><div><h3>${esc(p.t)}</h3><p>${esc(p.a)} · <i>${esc(p.v)}</i></p><div class="pub-tags"><span class="tag type-tag">${typeLabel(publicationType(p))}</span>${p.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div></div><div class="pub-actions"><button class="tiny" onclick="openPub(${i})">${lang==='ar'?'التفاصيل':'Details'}</button>${p.doi?`<a class="tiny" target="_blank" rel="noopener" href="https://doi.org/${p.doi}">DOI</a>`:''}</div></article>`}).join('')}
-function openPub(i){current=publications[i];document.getElementById('modalYear').textContent=current.y;document.getElementById('modalTitle').textContent=current.t;document.getElementById('modalMeta').textContent=current.a+' · '+current.v;document.getElementById('modalTags').innerHTML=`<span class="tag type-tag">${typeLabel(publicationType(current))}</span>`+current.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('');document.getElementById('apa').textContent=apa(current);const d=document.getElementById('doiLink');d.style.display=current.doi?'inline-flex':'none';if(current.doi)d.href='https://doi.org/'+current.doi;document.getElementById('modal').classList.add('open');document.body.style.overflow='hidden'}
-function closeModal(){document.getElementById('modal').classList.remove('open');document.body.style.overflow=''}function apa(p){return `${p.a} (${p.y}). ${p.t}. ${p.v}.${p.doi?' https://doi.org/'+p.doi:''}`}
-function copyAPA(){navigator.clipboard.writeText(apa(current)).then(showToast)}function bib(p){let key='alomari'+p.y+p.t.split(/\s+/)[0].toLowerCase().replace(/[^a-z]/g,'');return `@article{${key},\n  title={${p.t}},\n  author={${p.a}},\n  journal={${p.v}},\n  year={${p.y}}${p.doi?',\n  doi={'+p.doi+'}':''}\n}`}function downloadBib(){let b=new Blob([bib(current)],{type:'text/plain'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='alomari-'+current.y+'.bib';a.click();URL.revokeObjectURL(a.href)}function showToast(){let t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1700)}
-function cvNotice(e){e.preventDefault();alert(lang==='ar'?tr.ar.cvPending:'The CV file will be connected when provided.')}
-document.getElementById('search').oninput=renderPubs;document.getElementById('sort').onchange=renderPubs;document.getElementById('typeFilter').onchange=renderPubs;document.getElementById('lang').onclick=()=>{lang=lang==='ar'?'en':'ar';localStorage.setItem('lang',lang);location.reload()};document.getElementById('theme').onclick=()=>{let n=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=n;localStorage.setItem('theme',n)};document.documentElement.dataset.theme=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');document.getElementById('menu').onclick=()=>document.getElementById('nav').classList.toggle('open');document.querySelectorAll('.nav a').forEach(a=>a.onclick=()=>document.getElementById('nav').classList.remove('open'));document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')closeModal()};document.onkeydown=e=>{if(e.key==='Escape')closeModal()};window.onscroll=()=>document.getElementById('bottomNav').classList.toggle('show',scrollY>500);
-document.getElementById('year').textContent=new Date().getFullYear();document.getElementById('mCount').textContent=publications.length;document.getElementById('mYears').textContent=new Set(publications.map(p=>p.y)).size;document.getElementById('mTopics').textContent=new Set(publications.flatMap(p=>p.tags)).size;document.getElementById('mFirst').textContent=publications.filter(p=>p.first).length;applyLang();
-</script>
-<script>const portrait=document.querySelector('.portrait');if(portrait){portrait.setAttribute('role','img');portrait.setAttribute('aria-label','Professional portrait of Dr. Omaia Al-Omari');}</script>
-</body></html>
+  <head>
+    <meta charset="utf-8" >
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    >
+    <meta name="theme-color" content="#07111d" >
+    <meta
+      name="description"
+      content="Academic portfolio of Dr. Omaia Al-Omari, Assistant Professor at Prince Sultan University. Research in AI, Data Science, Information Systems, responsible AI, healthcare analytics, and intelligent decision support."
+    >
+    <link rel="canonical" href="https://dromaia.xyz/" >
+    <meta property="og:type" content="profile" >
+    <meta property="og:url" content="https://dromaia.xyz/" >
+    <meta
+      property="og:title"
+      content="Dr. Omaia Al-Omari | AI & Data Science"
+    >
+    <meta
+      property="og:description"
+      content="Assistant Professor, AI and Data Science researcher, and educator at Prince Sultan University."
+    >
+    <meta
+      property="og:image"
+      content="https://dromaia.xyz/DrOmaia.jpeg"
+    >
+    <meta
+      property="og:image:alt"
+      content="Professional portrait of Dr. Omaia Al-Omari"
+    >
+    <meta name="twitter:card" content="summary_large_image" >
+    <meta
+      name="twitter:title"
+      content="Dr. Omaia Al-Omari | Academic Portfolio"
+    >
+    <meta
+      name="twitter:description"
+      content="Research, teaching, publications, and academic service in AI, Data Science, and Information Systems."
+    >
+    <meta
+      name="twitter:image"
+      content="https://dromaia.xyz/DrOmaia.jpeg"
+    >
+    <link rel="icon" href="DrOmaia.jpeg" type="image/jpeg" >
+    <title>Dr. Omaia Al-Omari | AI &amp; Data Science</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" >
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin >
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    >
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "ProfilePage",
+        "@id": "https://dromaia.xyz/#profile-page",
+        "url": "https://dromaia.xyz/",
+        "dateModified": "2026-07-14",
+        "mainEntity": {
+          "@type": "Person",
+          "@id": "https://dromaia.xyz/#omaia-al-omari",
+          "name": "Dr. Omaia Al-Omari",
+          "alternateName": "Omaia Mohammed Al-Omari",
+          "image": "https://dromaia.xyz/DrOmaia.jpeg",
+          "url": "https://dromaia.xyz/",
+          "jobTitle": "Assistant Professor",
+          "worksFor": {
+            "@type": "CollegeOrUniversity",
+            "name": "Prince Sultan University",
+            "url": "https://www.psu.edu.sa/"
+          },
+          "alumniOf": [
+            {
+              "@type": "CollegeOrUniversity",
+              "name": "Universiti Kebangsaan Malaysia"
+            },
+            { "@type": "CollegeOrUniversity", "name": "Yarmouk University" }
+          ],
+          "knowsAbout": [
+            "Artificial Intelligence",
+            "Data Science",
+            "Information Systems",
+            "Explainable AI",
+            "Natural Language Processing",
+            "Healthcare Analytics"
+          ],
+          "sameAs": [
+            "https://scholar.google.com/citations?user=TJnHJX8AAAAJ",
+            "https://orcid.org/0000-0002-1638-1771",
+            "https://www.scopus.com/authid/detail.uri?authorId=56303160900",
+            "https://www.webofscience.com/wos/author/record/JGD-2915-2023",
+            "https://linkedin.com/in/omaiaomari"
+          ]
+        }
+      }
+    </script>
+    <style>
+      :root {
+        --bg: #07111d;
+        --surface: #0d1a28;
+        --surface2: #122234;
+        --text: #f4f7fa;
+        --muted: #9cafc1;
+        --line: rgba(255, 255, 255, 0.1);
+        --gold: #d8b45b;
+        --blue: #68a9ff;
+        --green: #64d5b3;
+        --shadow: 0 22px 70px rgba(0, 0, 0, 0.28);
+        --radius: 24px;
+        --header: 76px;
+      }
+      [data-theme="light"] {
+        --bg: #f4f7fa;
+        --surface: #fff;
+        --surface2: #eaf0f5;
+        --text: #0b1b2a;
+        --muted: #53687b;
+        --line: rgba(10, 31, 49, 0.12);
+        --gold: #835d05;
+        --blue: #1769c2;
+        --green: #087f65;
+        --shadow: 0 20px 65px rgba(25, 52, 75, 0.12);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: auto;
+        scroll-padding-top: 95px;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Manrope, sans-serif;
+        line-height: 1.65;
+        overflow-x: hidden;
+      }
+      html[lang="ar"] body {
+        font-family: Tajawal, sans-serif;
+      }
+      a {
+        color: inherit;
+      }
+      a:focus-visible,
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible {
+        outline: 3px solid var(--blue);
+        outline-offset: 3px;
+      }
+      .wrap {
+        width: min(1180px, calc(100% - 40px));
+        margin: auto;
+      }
+      .skip {
+        position: fixed;
+        left: 12px;
+        top: -80px;
+        background: var(--text);
+        color: var(--bg);
+        padding: 10px 16px;
+        z-index: 100;
+      }
+      .skip:focus {
+        top: 10px;
+      }
+      .header {
+        height: var(--header);
+        position: fixed;
+        inset: 0 0 auto;
+        z-index: 40;
+        background: color-mix(in srgb, var(--bg) 82%, transparent);
+        backdrop-filter: blur(18px);
+        border-bottom: 1px solid var(--line);
+      }
+      .header-inner {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+      .brand {
+        text-decoration: none;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+      }
+      .brand span {
+        color: var(--gold);
+      }
+      .nav {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .nav a,
+      .icon-btn {
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        text-decoration: none;
+        padding: 10px 12px;
+        border-radius: 12px;
+        font: inherit;
+        font-size: 0.86rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .nav a:hover,
+      .nav a.active,
+      .icon-btn:hover {
+        color: var(--text);
+        background: var(--surface2);
+      }
+      .nav a.active,
+      .bottom-nav a.active {
+        color: var(--gold);
+      }
+      .controls {
+        display: flex;
+      }
+      .menu {
+        display: none;
+      }
+      .hero {
+        position: relative;
+        min-height: 100svh;
+        display: grid;
+        align-items: center;
+        padding: 130px 0 65px;
+        overflow: clip;
+      }
+      .hero:before {
+        content: "";
+        position: absolute;
+        width: 520px;
+        height: 520px;
+        right: -160px;
+        top: 70px;
+        background: radial-gradient(
+          circle,
+          rgba(104, 169, 255, 0.16),
+          transparent 68%
+        );
+        pointer-events: none;
+      }
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1.35fr 0.65fr;
+        gap: 50px;
+        align-items: center;
+      }
+      .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--gold);
+        font-size: 0.82rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.13em;
+      }
+      .eyebrow:before {
+        content: "";
+        width: 34px;
+        height: 1px;
+        background: var(--gold);
+      }
+      h1 {
+        font-size: clamp(3.25rem, 7.5vw, 6.8rem);
+        line-height: 0.93;
+        letter-spacing: -0.075em;
+        margin: 24px 0;
+      }
+      html[lang="ar"] h1 {
+        letter-spacing: -0.035em;
+      }
+      .gradient {
+        background: linear-gradient(100deg, var(--text), var(--blue));
+        background-clip: text;
+        color: transparent;
+      }
+      .hero h2 {
+        font-size: clamp(1.2rem, 2vw, 1.65rem);
+        margin: 0 0 18px;
+        color: var(--text);
+      }
+      .lead {
+        font-size: 1.08rem;
+        color: var(--muted);
+        max-width: 750px;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 32px;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        min-height: 48px;
+        padding: 0 19px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        text-decoration: none;
+        font-weight: 800;
+        font-size: 0.9rem;
+        background: var(--surface);
+        cursor: pointer;
+        color: var(--text);
+      }
+      .btn.primary {
+        background: var(--gold);
+        border-color: var(--gold);
+        color: #10151a;
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+      }
+      .portrait {
+        aspect-ratio: 4/5;
+        border: 1px solid var(--line);
+        border-radius: 40px;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(145deg, var(--surface2), var(--surface));
+        box-shadow: var(--shadow);
+        display: grid;
+        place-items: center;
+      }
+      .portrait img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+        object-position: center 28%;
+      }
+      .portrait:after {
+        content: none;
+      }
+      .portrait-note {
+        position: absolute;
+        bottom: 22px;
+        background: color-mix(in srgb, var(--bg) 75%, transparent);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--line);
+        padding: 9px 13px;
+        border-radius: 12px;
+        color: var(--muted);
+        font-size: 0.77rem;
+      }
+      .strip {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        margin-top: 52px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        overflow: hidden;
+        background: var(--surface);
+      }
+      .strip a {
+        text-decoration: none;
+        padding: 18px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 800;
+        border-inline-end: 1px solid var(--line);
+      }
+      .strip a:last-child {
+        border: 0;
+      }
+      .strip a:hover {
+        color: var(--gold);
+        background: var(--surface2);
+      }
+      section {
+        padding: 110px 0;
+      }
+      .section-head {
+        display: grid;
+        grid-template-columns: 0.75fr 1.25fr;
+        gap: 60px;
+        margin-bottom: 42px;
+      }
+      .kicker {
+        color: var(--gold);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 800;
+      }
+      .section-head h2 {
+        font-size: clamp(2.1rem, 4vw, 4rem);
+        line-height: 1.05;
+        letter-spacing: -0.055em;
+        margin: 12px 0;
+      }
+      .section-head p {
+        color: var(--muted);
+        margin: 34px 0 0;
+      }
+      .grid3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+      }
+      .research-direction {
+        margin-top: 18px;
+        padding: 28px;
+        display: grid;
+        grid-template-columns: 0.42fr 1fr;
+        gap: 28px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: linear-gradient(135deg, var(--surface), var(--surface2));
+      }
+      .research-direction h3 {
+        margin: 0;
+        font-size: 1.35rem;
+      }
+      .research-direction p {
+        margin: 0;
+        color: var(--muted);
+      }
+      .featured-head {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 20px;
+        margin: 56px 0 20px;
+      }
+      .featured-head h3 {
+        margin: 5px 0 0;
+        font-size: 1.65rem;
+      }
+      .featured-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+      .featured-card {
+        display: flex;
+        flex-direction: column;
+        min-height: 270px;
+      }
+      .featured-card h4 {
+        margin: 18px 0 10px;
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+      .featured-card p {
+        font-size: 0.84rem;
+      }
+      .featured-card .verified {
+        margin-top: auto;
+        padding-top: 18px;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 28px;
+      }
+      .card:hover {
+        border-color: color-mix(in srgb, var(--gold) 50%, var(--line));
+      }
+      .num {
+        font-size: 3rem;
+        line-height: 1;
+        font-weight: 800;
+        color: var(--gold);
+      }
+      .card h3 {
+        margin: 22px 0 8px;
+      }
+      .card p {
+        color: var(--muted);
+        margin: 0;
+      }
+      .research-shell {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 32px;
+        padding: clamp(20px, 4vw, 42px);
+      }
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 28px;
+      }
+      .metric {
+        padding: 18px;
+        background: var(--surface2);
+        border-radius: 16px;
+      }
+      .metric b {
+        display: block;
+        font-size: 1.8rem;
+      }
+      .metric span {
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+      .search {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(190px, 280px) minmax(
+            155px,
+            210px
+          );
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .search input,
+      .select {
+        width: 100%;
+        min-height: 54px;
+        border: 1px solid var(--line);
+        background: var(--bg);
+        color: var(--text);
+        border-radius: 15px;
+        padding: 0 17px;
+        font: inherit;
+        outline: none;
+      }
+      .search input:focus,
+      .select:focus {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--blue) 14%, transparent);
+      }
+      .filter-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 28px;
+      }
+      .filters {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .result-count {
+        white-space: nowrap;
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 800;
+      }
+      .chip {
+        border: 1px solid var(--line);
+        color: var(--muted);
+        background: transparent;
+        border-radius: 999px;
+        padding: 7px 12px;
+        font: inherit;
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .chip.active {
+        background: var(--text);
+        color: var(--bg);
+      }
+      .pub-list {
+        display: grid;
+        gap: 12px;
+      }
+      .pub {
+        display: grid;
+        grid-template-columns: 84px 1fr auto;
+        gap: 20px;
+        padding: 23px 0;
+        border-top: 1px solid var(--line);
+        align-items: start;
+      }
+      .pub-year {
+        font-weight: 800;
+        color: var(--gold);
+      }
+      .pub h3 {
+        font-size: 1.02rem;
+        margin: 0 0 7px;
+        line-height: 1.45;
+      }
+      .pub p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.84rem;
+      }
+      .pub-tags {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 11px;
+      }
+      .tag {
+        font-size: 0.68rem;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: var(--surface2);
+        color: var(--muted);
+      }
+      .type-tag {
+        color: var(--blue);
+        border: 1px solid color-mix(in srgb, var(--blue) 35%, transparent);
+        background: color-mix(in srgb, var(--blue) 8%, transparent);
+      }
+      .pub-actions {
+        display: flex;
+        gap: 6px;
+      }
+      .tiny {
+        border: 1px solid var(--line);
+        background: transparent;
+        color: var(--text);
+        border-radius: 9px;
+        padding: 7px 9px;
+        font: inherit;
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .latest {
+        color: #051c14;
+        background: var(--green);
+      }
+      .no-results {
+        text-align: center;
+        color: var(--muted);
+        padding: 34px;
+      }
+      .timeline {
+        display: grid;
+        gap: 14px;
+      }
+      .timeline-label {
+        margin: 20px 0 0;
+        color: var(--gold);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+      .role {
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        gap: 28px;
+        padding: 28px;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: var(--surface);
+      }
+      .role time {
+        color: var(--gold);
+        font-weight: 800;
+      }
+      .role h3 {
+        margin: 0 0 5px;
+      }
+      .role p {
+        margin: 0;
+        color: var(--muted);
+      }
+      .verified {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--green);
+        font-size: 0.7rem;
+        font-weight: 800;
+        margin-top: 12px;
+        text-decoration: none;
+      }
+      .split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+      }
+      .list {
+        margin: 18px 0 0;
+        padding-inline-start: 20px;
+        color: var(--muted);
+      }
+      .list li {
+        margin: 9px 0;
+      }
+      .contact {
+        background: linear-gradient(135deg, var(--surface), var(--surface2));
+        border: 1px solid var(--line);
+        border-radius: 32px;
+        padding: clamp(28px, 6vw, 70px);
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 30px;
+      }
+      .contact h2 {
+        font-size: clamp(2rem, 5vw, 4.3rem);
+        line-height: 1;
+        margin: 0 0 15px;
+      }
+      .contact p {
+        color: var(--muted);
+        margin: 0;
+      }
+      .footer {
+        padding: 30px 0 100px;
+        color: var(--muted);
+        font-size: 0.78rem;
+      }
+      .footer .wrap {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+      }
+      .bottom-nav {
+        display: none;
+      }
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        z-index: 80;
+        display: none;
+        place-items: center;
+        padding: 20px;
+      }
+      .modal.open {
+        display: grid;
+      }
+      .dialog {
+        width: min(700px, 100%);
+        max-height: 85vh;
+        overflow: auto;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 26px;
+        box-shadow: var(--shadow);
+      }
+      .dialog-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+      }
+      .dialog pre {
+        white-space: pre-wrap;
+        background: var(--bg);
+        padding: 16px;
+        border-radius: 12px;
+        color: var(--muted);
+        font-size: 0.77rem;
+      }
+      .toast {
+        position: fixed;
+        bottom: 95px;
+        left: 50%;
+        transform: translate(-50%, 20px);
+        background: var(--text);
+        color: var(--bg);
+        padding: 10px 15px;
+        border-radius: 10px;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 100;
+        transition: 0.25s;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+      @media (max-width: 900px) {
+        .nav {
+          position: fixed;
+          top: 76px;
+          left: 20px;
+          right: 20px;
+          display: none;
+          flex-direction: column;
+          align-items: stretch;
+          padding: 12px;
+          background: var(--surface);
+          border: 1px solid var(--line);
+          border-radius: 18px;
+        }
+        .nav.open {
+          display: flex;
+        }
+        .menu {
+          display: block;
+        }
+        .hero-grid,
+        .section-head,
+        .contact {
+          grid-template-columns: 1fr;
+        }
+        .portrait {
+          width: min(370px, 88%);
+          margin: auto;
+        }
+        .strip {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .strip a {
+          border-bottom: 1px solid var(--line);
+        }
+        .grid3 {
+          grid-template-columns: 1fr;
+        }
+        .section-head {
+          gap: 10px;
+        }
+        .section-head p {
+          margin-top: 0;
+        }
+        .metrics {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .search {
+          grid-template-columns: 1fr 1fr;
+        }
+        .search input {
+          grid-column: 1/-1;
+        }
+      }
+      @media (max-width: 620px) {
+        :root {
+          --header: 66px;
+        }
+        .wrap {
+          width: min(100% - 28px, 1180px);
+        }
+        .hero {
+          padding-top: 104px;
+        }
+        .hero-grid {
+          gap: 36px;
+        }
+        h1 {
+          font-size: 3.35rem;
+        }
+        .portrait {
+          border-radius: 28px;
+        }
+        .actions .btn {
+          flex: 1;
+        }
+        .strip {
+          grid-template-columns: 1fr 1fr;
+        }
+        .strip a {
+          padding: 14px 8px;
+          font-size: 0.72rem;
+        }
+        section {
+          padding: 80px 0;
+        }
+        .research-shell {
+          margin-inline: -5px;
+        }
+        .search {
+          grid-template-columns: 1fr;
+        }
+        .search input {
+          grid-column: auto;
+        }
+        .filter-row {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+        .result-count {
+          align-self: flex-end;
+        }
+        .pub {
+          grid-template-columns: 60px 1fr;
+        }
+        .pub-actions {
+          grid-column: 2;
+        }
+        .role {
+          grid-template-columns: 1fr;
+          gap: 8px;
+          padding: 22px;
+        }
+        .split {
+          grid-template-columns: 1fr;
+        }
+        .footer .wrap {
+          display: block;
+        }
+        .bottom-nav {
+          display: flex;
+          position: fixed;
+          z-index: 35;
+          left: 10px;
+          right: 10px;
+          bottom: max(10px, env(safe-area-inset-bottom));
+          height: 61px;
+          border: 1px solid var(--line);
+          border-radius: 18px;
+          background: color-mix(in srgb, var(--surface) 90%, transparent);
+          backdrop-filter: blur(18px);
+          justify-content: space-around;
+          align-items: center;
+          box-shadow: var(--shadow);
+          transform: translateY(100px);
+          transition: 0.3s;
+        }
+        .bottom-nav.show {
+          transform: none;
+        }
+        .bottom-nav a {
+          font-size: 0.66rem;
+          text-decoration: none;
+          color: var(--muted);
+          font-weight: 800;
+          text-align: center;
+        }
+        .bottom-nav b {
+          display: block;
+          font-size: 1rem;
+        }
+        .contact .actions {
+          display: grid;
+        }
+        .contact .btn {
+          width: 100%;
+        }
+      }
+      .hero-summary {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 30px;
+        max-width: 780px;
+      }
+      .summary-item {
+        padding: 15px 16px;
+        border: 1px solid var(--line);
+        border-radius: 15px;
+        background: color-mix(in srgb, var(--surface) 76%, transparent);
+      }
+      .summary-item small {
+        display: block;
+        color: var(--muted);
+        font-size: 0.67rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 3px;
+      }
+      .summary-item strong {
+        display: block;
+        font-size: 0.87rem;
+        line-height: 1.45;
+      }
+      .intro-note {
+        margin-top: 15px;
+        color: var(--muted);
+        font-size: 0.84rem;
+      }
+      .btn,
+      .card,
+      .pub,
+      .role {
+        transition:
+          border-color 0.15s ease,
+          background-color 0.15s ease;
+      }
+      .btn:hover {
+        transform: none;
+        box-shadow: none;
+        border-color: var(--gold);
+      }
+      .card:hover {
+        border-color: var(--line);
+      }
+      @media (max-width: 620px) {
+        html {
+          scroll-behavior: auto;
+          scroll-padding-top: 76px;
+        }
+        .header-inner {
+          gap: 8px;
+        }
+        .brand {
+          font-size: 0.87rem;
+          letter-spacing: -0.025em;
+          white-space: nowrap;
+        }
+        .controls .icon-btn {
+          padding: 8px 7px;
+          font-size: 0.76rem;
+        }
+        .hero {
+          min-height: auto;
+          padding: 92px 0 42px;
+        }
+        .hero:before {
+          width: 300px;
+          height: 300px;
+          right: -160px;
+          top: 20px;
+        }
+        .hero-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 0;
+        }
+        .hero-grid > div:first-child {
+          display: contents;
+        }
+        .eyebrow {
+          order: 1;
+        }
+        .hero h1 {
+          order: 2;
+        }
+        .hero h2 {
+          order: 3;
+        }
+        .portrait {
+          order: 4;
+        }
+        .lead {
+          order: 5;
+        }
+        .actions {
+          order: 6;
+        }
+        .hero-summary {
+          order: 7;
+        }
+        .hero h1 {
+          font-size: clamp(2.75rem, 14vw, 3.5rem);
+          line-height: 0.98;
+          margin: 18px 0;
+        }
+        .hero h2 {
+          font-size: 1.08rem;
+          line-height: 1.45;
+          margin-bottom: 12px;
+        }
+        .lead {
+          font-size: 0.94rem;
+          line-height: 1.7;
+        }
+        .eyebrow {
+          font-size: 0.67rem;
+          letter-spacing: 0.075em;
+        }
+        .eyebrow:before {
+          width: 21px;
+        }
+        .portrait {
+          display: block;
+          width: 174px;
+          aspect-ratio: 4/5;
+          margin: 26px auto 0;
+          border-radius: 24px;
+          box-shadow: 0 14px 38px rgba(0, 0, 0, 0.2);
+        }
+        .actions {
+          margin-top: 22px;
+          gap: 8px;
+        }
+        .actions .btn {
+          min-height: 44px;
+          padding: 0 13px;
+          font-size: 0.78rem;
+        }
+        .hero-summary {
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+          margin-top: 22px;
+        }
+        .summary-item {
+          padding: 12px;
+          border-radius: 12px;
+        }
+        .summary-item small {
+          font-size: 0.7rem;
+          letter-spacing: 0.05em;
+        }
+        .summary-item strong {
+          font-size: 0.84rem;
+        }
+        .tag,
+        .verified {
+          font-size: 0.75rem;
+        }
+        .strip {
+          margin-top: 28px !important;
+          border-radius: 14px;
+        }
+        .strip a {
+          font-size: 0.75rem;
+          padding: 12px 5px;
+        }
+        .strip a:last-child {
+          grid-column: 1/-1;
+        }
+        .section-head h2 {
+          font-size: 2rem;
+          line-height: 1.12;
+          letter-spacing: -0.035em;
+          margin: 8px 0;
+        }
+        .section-head {
+          margin-bottom: 26px;
+        }
+        .section-head p {
+          font-size: 0.9rem;
+          line-height: 1.7;
+        }
+        .kicker {
+          font-size: 0.68rem;
+        }
+        .grid3 {
+          gap: 10px;
+        }
+        .card {
+          padding: 20px;
+          border-radius: 17px;
+        }
+        .card h3 {
+          margin-top: 14px;
+        }
+        .num {
+          font-size: 2rem;
+        }
+        section {
+          padding: 58px 0;
+        }
+        .metrics {
+          gap: 7px;
+          margin-bottom: 18px;
+        }
+        .metric {
+          padding: 13px;
+          border-radius: 12px;
+        }
+        .metric b {
+          font-size: 1.35rem;
+        }
+        .metric span {
+          font-size: 0.74rem;
+        }
+        .research-shell {
+          padding: 14px;
+          border-radius: 19px;
+        }
+        .search {
+          gap: 7px;
+        }
+        .search input,
+        .select {
+          min-height: 48px;
+          border-radius: 12px;
+          font-size: 0.79rem;
+          padding: 0 12px;
+        }
+        .chip {
+          font-size: 0.78rem;
+          padding: 6px 10px;
+        }
+        .filter-row {
+          gap: 10px;
+          margin-bottom: 18px;
+        }
+        .pub {
+          grid-template-columns: 48px minmax(0, 1fr);
+          gap: 11px;
+          padding: 18px 2px;
+        }
+        .pub h3 {
+          font-size: 0.91rem;
+          line-height: 1.52;
+        }
+        .pub p {
+          font-size: 0.82rem;
+        }
+        .pub-year {
+          font-size: 0.84rem;
+        }
+        .pub-actions {
+          grid-column: 2;
+        }
+        .role {
+          padding: 18px;
+          border-radius: 16px;
+        }
+        .role h3 {
+          font-size: 1rem;
+        }
+        .role p {
+          font-size: 0.82rem;
+        }
+        .contact {
+          padding: 25px 20px;
+          border-radius: 20px;
+        }
+        .contact h2 {
+          font-size: 2rem;
+        }
+        .research-direction {
+          grid-template-columns: 1fr;
+          gap: 10px;
+          padding: 20px;
+        }
+        .featured-head {
+          align-items: flex-start;
+          flex-direction: column;
+          margin-top: 38px;
+        }
+        .featured-grid {
+          grid-template-columns: 1fr;
+        }
+        .featured-card {
+          min-height: auto;
+        }
+        .bottom-nav {
+          transform: none !important;
+          transition: none;
+        }
+        .bottom-nav a {
+          min-width: 64px;
+          min-height: 44px;
+          display: grid;
+          place-content: center;
+          font-size: 0.74rem;
+        }
+        .footer {
+          padding-bottom: 95px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          scroll-behavior: auto !important;
+          transition: none !important;
+        }
+        .btn:hover {
+          transform: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="header">
+      <div class="wrap header-inner">
+        <a class="brand" href="#home">Dr. Omaia <span>Al‑Omari</span></a>
+        <nav class="nav" id="nav" aria-label="Primary navigation">
+          <a href="#profile" data-t="navProfile">Profile</a
+          ><a href="#research" data-t="navResearch">Research</a
+          ><a href="#teaching" data-t="navTeaching">Teaching</a
+          ><a href="#experience" data-t="navExperience">Experience</a
+          ><a href="#service" data-t="navService">Service</a
+          ><a href="#contact" data-t="navContact">Contact</a>
+        </nav>
+        <div class="controls">
+          <button
+            class="icon-btn"
+            id="lang"
+            type="button"
+            aria-label="Change language"
+          >
+            العربية</button
+          ><button
+            class="icon-btn"
+            id="theme"
+            type="button"
+            aria-label="Use light theme"
+            aria-pressed="false"
+          >
+            ◐</button
+          ><button
+            class="icon-btn menu"
+            id="menu"
+            type="button"
+            aria-label="Open menu"
+            aria-controls="nav"
+            aria-expanded="false"
+          >
+            ☰
+          </button>
+        </div>
+      </div>
+    </header>
+    <main id="main">
+      <section class="hero" id="home">
+        <div class="wrap">
+          <div class="hero-grid">
+            <div>
+              <div class="eyebrow" data-t="eyebrow">
+                Assistant Professor · Prince Sultan University
+              </div>
+              <h1>Dr. Omaia<br ><span class="gradient">Al-Omari</span></h1>
+              <h2 data-t="heroRole">
+                AI &amp; Data Science Researcher and Educator
+              </h2>
+              <p class="lead" data-t="heroText">
+                Assistant Professor in the Information Systems Department at
+                Prince Sultan University in Riyadh. His academic work connects
+                Artificial Intelligence, Data Science, and Information Systems
+                through research, teaching, and responsible innovation.
+              </p>
+              <div class="actions">
+                <a class="btn primary" href="#research" data-t="viewResearch"
+                  >Explore research</a
+                ><a class="btn" href="#teaching" data-t="viewTeaching"
+                  >Teaching profile</a
+                ><a
+                  class="btn"
+                  href="https://facultyportal.psu.edu.sa/ViewProfile.aspx?instructorID=1345"
+                  target="_blank"
+                  rel="noopener"
+                  data-t="officialProfile"
+                  >Official PSU profile ↗</a
+                >
+              </div>
+              <div
+                class="hero-summary"
+                role="group"
+                aria-label="Academic profile at a glance"
+              >
+                <div class="summary-item">
+                  <small data-t="currentAppointment">Current appointment</small
+                  ><strong data-t="currentAppointmentValue"
+                    >Assistant Professor · PSU</strong
+                  >
+                </div>
+                <div class="summary-item">
+                  <small data-t="highestDegree">Highest degree</small
+                  ><strong data-t="highestDegreeValue"
+                    >PhD in Computer Science (AI) · UKM</strong
+                  >
+                </div>
+                <div class="summary-item">
+                  <small data-t="researchFocus">Research focus</small
+                  ><strong data-t="researchFocusValue"
+                    >AI · Data Science · Information Systems</strong
+                  >
+                </div>
+                <div class="summary-item">
+                  <small data-t="academicExperience">Experience</small
+                  ><strong data-t="academicExperienceValue"
+                    >18+ years across academia &amp; IT</strong
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="portrait">
+              <img
+                src="DrOmaia.jpeg"
+                width="768"
+                height="949"
+                alt="Professional portrait of Dr. Omaia Al-Omari"
+                fetchpriority="high"
+              >
+            </div>
+          </div>
+          <div class="strip">
+            <a
+              target="_blank"
+              rel="noopener"
+              href="https://orcid.org/0000-0002-1638-1771"
+              >ORCID ↗</a
+            ><a
+              target="_blank"
+              rel="noopener"
+              href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ"
+              >Google Scholar ↗</a
+            ><a
+              target="_blank"
+              rel="noopener"
+              href="https://www.scopus.com/authid/detail.uri?authorId=56303160900"
+              >Scopus ↗</a
+            ><a
+              target="_blank"
+              rel="noopener"
+              href="https://www.webofscience.com/wos/author/record/JGD-2915-2023"
+              >Web of Science ↗</a
+            ><a
+              target="_blank"
+              rel="noopener"
+              href="https://facultyportal.psu.edu.sa/ViewProfile.aspx?instructorID=1345"
+              >PSU Profile ↗</a
+            >
+          </div>
+        </div>
+      </section>
+      <section id="profile">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <span class="kicker" data-t="profileKicker"
+                >Academic profile</span
+              >
+              <h2 data-t="profileTitle">
+                Research that connects ideas to impact.
+              </h2>
+            </div>
+            <p data-t="profileText">
+              My work sits at the intersection of Artificial Intelligence, Data
+              Science, and Information Systems. I investigate intelligent models
+              while keeping their human, organizational, and ethical contexts in
+              view.
+            </p>
+          </div>
+          <div class="grid3">
+            <article class="card">
+              <span class="num">01</span>
+              <h3 data-t="pillarAI">Artificial Intelligence</h3>
+              <p data-t="pillarAITxt">
+                Deep learning, explainable AI, computer vision, NLP, and agentic
+                systems.
+              </p>
+            </article>
+            <article class="card">
+              <span class="num">02</span>
+              <h3 data-t="pillarDS">Data Science</h3>
+              <p data-t="pillarDSTxt">
+                Predictive analytics, machine learning, multimodal data, and
+                decision support.
+              </p>
+            </article>
+            <article class="card">
+              <span class="num">03</span>
+              <h3 data-t="pillarIS">Information Systems</h3>
+              <p data-t="pillarISTxt">
+                Digital governance, enterprise systems, responsible adoption,
+                and cybersecurity.
+              </p>
+            </article>
+          </div>
+          <div class="research-direction">
+            <h3 data-t="directionTitle">Current research direction</h3>
+            <p data-t="directionText">
+              Developing trustworthy and explainable AI systems that turn
+              complex data into transparent decisions, with applications in
+              healthcare, cybersecurity, intelligent services, and higher
+              education. This agenda connects model performance with responsible
+              adoption in real organizational settings.
+            </p>
+          </div>
+          <div class="featured-head">
+            <div>
+              <span class="kicker" data-t="featuredKicker"
+                >Research in focus</span
+              >
+              <h3 data-t="featuredTitle">Selected contributions</h3>
+            </div>
+            <a class="verified" href="#research" data-t="browseAllPublications"
+              >Browse the curated publication record ↓</a
+            >
+          </div>
+          <div class="featured-grid">
+            <article class="card featured-card">
+              <span class="tag latest" data-t="latestPublication"
+                >Latest publication</span
+              >
+              <h4>
+                Towards Trustworthy Defense AI: Real-Time Military Asset
+                Detection with On-Demand Explainable YOLOv8
+              </h4>
+              <p data-t="featuredDefense">
+                A 2026 study combining real-time computer vision with on-demand
+                explanations for more transparent high-stakes AI.
+              </p>
+              <a
+                class="verified"
+                href="https://doi.org/10.48084/etasr.17259"
+                target="_blank"
+                rel="noopener"
+                >DOI ↗</a
+              >
+            </article>
+            <article class="card featured-card">
+              <span class="tag type-tag" data-t="featuredAnalyticsTag"
+                >Predictive analytics</span
+              >
+              <h4>
+                A Predictive Analytics Approach to Improve Telecom Customer
+                Retention
+              </h4>
+              <p data-t="featuredAnalytics">
+                Demonstrates how machine-learning analysis can support practical
+                customer-retention decisions in information-intensive services.
+              </p>
+              <a
+                class="verified"
+                href="https://doi.org/10.3389/frai.2025.1600357"
+                target="_blank"
+                rel="noopener"
+                >DOI ↗</a
+              >
+            </article>
+            <article class="card featured-card">
+              <span class="tag type-tag" data-t="featuredGovernanceTag"
+                >Responsible AI</span
+              >
+              <h4>
+                Governance and Ethical Frameworks for AI Integration in Higher
+                Education
+              </h4>
+              <p data-t="featuredGovernance">
+                Connects personalized AI-enabled learning with governance,
+                ethical safeguards, and legal compliance in higher education.
+              </p>
+              <a
+                class="verified"
+                href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ"
+                target="_blank"
+                rel="noopener"
+                data-t="verifyScholar"
+                >View on Google Scholar ↗</a
+              >
+            </article>
+          </div>
+        </div>
+      </section>
+      <section id="research">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <span class="kicker" data-t="researchKicker"
+                >Curated publication record</span
+              >
+              <h2 data-t="researchTitle">Research explorer</h2>
+            </div>
+            <p data-t="researchText">
+              Search the curated publication collection by title, author, venue,
+              year, type, or topic. For citation totals and the complete live
+              profile, use Google Scholar or ORCID.
+            </p>
+          </div>
+          <div class="research-shell">
+            <div class="metrics">
+              <div class="metric">
+                <b id="mCount">0</b
+                ><span data-t="metricWorks">works indexed</span>
+              </div>
+              <div class="metric">
+                <b id="mYears">0</b
+                ><span data-t="metricYears">active years</span>
+              </div>
+              <div class="metric">
+                <b id="mJournal">0</b
+                ><span data-t="metricJournals">journal articles</span>
+              </div>
+              <div class="metric">
+                <b id="mConference">0</b
+                ><span data-t="metricConferences">conference papers</span>
+              </div>
+            </div>
+            <div class="search">
+              <input
+                id="search"
+                type="search"
+                autocomplete="off"
+                data-placeholder="searchPlaceholder"
+                placeholder="Search title, author, venue, year, or topic…"
+                aria-label="Search publications"
+              ><select
+                id="typeFilter"
+                class="select"
+                aria-label="Filter by publication type"
+              >
+                <option value="All" data-t="typeAll">
+                  All publication types
+                </option>
+                <option value="Journal" data-t="typeJournalPlural">
+                  Journal articles
+                </option>
+                <option value="Conference" data-t="typeConferencePlural">
+                  Conference papers
+                </option>
+                <option value="Book Chapter" data-t="typeChapterPlural">
+                  Book chapters
+                </option></select
+              ><select id="sort" class="select" aria-label="Sort publications">
+                <option value="new" data-t="sortNew">Newest first</option>
+                <option value="old" data-t="sortOld">Oldest first</option>
+                <option value="az" data-t="sortAZ">Title A–Z</option>
+              </select>
+            </div>
+            <div class="filter-row">
+              <div class="filters" id="filters"></div>
+              <div
+                class="result-count"
+                id="resultCount"
+                aria-live="polite"
+              ></div>
+            </div>
+            <div class="pub-list" id="pubList"></div>
+            <div class="no-results" id="empty" hidden data-t="noResults">
+              No publications match this search.
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="teaching">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <span class="kicker" data-t="teachingKicker"
+                >Teaching &amp; mentorship</span
+              >
+              <h2 data-t="teachingTitle">
+                Learning by inquiry, practice, and reflection.
+              </h2>
+            </div>
+            <p data-t="teachingText">
+              My teaching connects rigorous foundations with current practice.
+              Students investigate real problems, evaluate evidence, build
+              solutions, and learn to explain the consequences of technical
+              choices.
+            </p>
+          </div>
+          <div class="grid3">
+            <article class="card">
+              <h3 data-t="courseTitle">Teaching areas</h3>
+              <ul class="list">
+                <li>Artificial Intelligence &amp; Machine Learning</li>
+                <li>Advanced Enterprise Architecture</li>
+                <li>Systems Analysis &amp; Design</li>
+                <li>Database Management Systems</li>
+                <li>Software Engineering</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3 data-t="methodTitle">Learning experience</h3>
+              <ul class="list">
+                <li data-t="method1">Problem- and project-based learning</li>
+                <li data-t="method2">Research-informed case analysis</li>
+                <li data-t="method3">
+                  Interactive workshops and peer feedback
+                </li>
+                <li data-t="method4">Responsible use of emerging AI tools</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3 data-t="teachingContributionTitle">Academic contribution</h3>
+              <ul class="list">
+                <li data-t="teachingContribution1">
+                  Course coordination and curriculum development
+                </li>
+                <li data-t="teachingContribution2">
+                  Academic advising and student-project support
+                </li>
+                <li data-t="teachingContribution3">
+                  Quality assurance and learning-outcome alignment
+                </li>
+                <li data-t="teachingContribution4">
+                  Integration of responsible AI into learning activities
+                </li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section id="experience">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <span class="kicker" data-t="experienceKicker"
+                >Academic journey</span
+              >
+              <h2 data-t="experienceTitle">Experience &amp; education</h2>
+            </div>
+            <p data-t="experienceText">
+              More than 18 years across academia and information technology,
+              with experience in teaching, research, curriculum, quality, and
+              academic advising.
+            </p>
+          </div>
+          <div class="timeline">
+            <h3 class="timeline-label" data-t="appointmentsLabel">
+              Academic appointments
+            </h3>
+            <article class="role">
+              <time>2024 — <span data-t="present">Present</span></time>
+              <div>
+                <h3 data-t="role1">
+                  Assistant Professor · Prince Sultan University
+                </h3>
+                <p data-t="role1txt">
+                  Information Systems Department, College of Computer and
+                  Information Sciences, Riyadh.
+                </p>
+              </div>
+            </article>
+            <article class="role">
+              <time>2014 — 2024</time>
+              <div>
+                <h3 data-t="role2">
+                  Lecturer / Faculty Member · Shaqra University
+                </h3>
+                <p data-t="role2txt">
+                  Teaching, academic advising, student activities, and quality
+                  assurance.
+                </p>
+              </div>
+            </article>
+            <article class="role">
+              <time>2009 — 2012</time>
+              <div>
+                <h3 data-t="role3">Lecturer · University of Ha'il</h3>
+                <p data-t="role3txt">
+                  Courses in internet protocols, databases, and web development.
+                </p>
+              </div>
+            </article>
+            <h3 class="timeline-label" data-t="educationLabel">Education</h3>
+            <article class="role">
+              <time>2021</time>
+              <div>
+                <h3 data-t="phd">
+                  PhD in Computer Science — Artificial Intelligence
+                </h3>
+                <p data-t="phdTxt">
+                  The National University of Malaysia (UKM). Research in NLP,
+                  feature selection, and document classification.
+                </p>
+              </div>
+            </article>
+            <article class="role">
+              <time>2009</time>
+              <div>
+                <h3 data-t="msc">
+                  MSc in Information Technology and Computer Sciences
+                </h3>
+                <p data-t="mscTxt">
+                  Yarmouk University · Specialization in Computer Information
+                  Systems.
+                </p>
+              </div>
+            </article>
+            <article class="role">
+              <time>2006</time>
+              <div>
+                <h3 data-t="bsc">
+                  BSc in Information Technology and Computer Sciences
+                </h3>
+                <p data-t="bscTxt">Yarmouk University, Jordan.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section id="service">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <span class="kicker" data-t="serviceKicker"
+                >Academic leadership</span
+              >
+              <h2 data-t="serviceTitle">Service to the scholarly community.</h2>
+            </div>
+            <p data-t="serviceText">
+              Editorial, conference, curriculum, and quality roles that
+              strengthen research exchange and academic standards.
+            </p>
+          </div>
+          <div class="grid3">
+            <article class="card">
+              <span class="tag latest" data-t="verifiedRole"
+                >Verified leadership role</span
+              >
+              <h3>Track Chair · ICEGOV 2026</h3>
+              <p data-t="icegovTxt">
+                Supporting the conference’s academic program and international
+                knowledge exchange.
+              </p>
+              <a
+                class="verified"
+                target="_blank"
+                rel="noopener"
+                href="https://www.icegov.org/2026/person/omaia-al-omari/"
+                >✓ <span data-t="verifySource">View official source</span> ↗</a
+              >
+            </article>
+            <article class="card">
+              <span class="tag latest" data-t="verifiedEditorial"
+                >Verified editorial role</span
+              >
+              <h3 data-t="editorialTitle">Editorial Board Member</h3>
+              <p>
+                <b data-t="journalName"
+                  >Babylonian Journal of Networking (BJN)</b
+                >
+                · 2026–<span data-t="present">Present</span>
+              </p>
+              <p data-t="editorialTxt">
+                Supporting editorial and peer-review activities, scholarly
+                quality, and publication standards.
+              </p>
+              <a
+                class="verified"
+                target="_blank"
+                rel="noopener"
+                href="https://mesopotamian.press/journals/index.php/BJN/editorialteam"
+                >✓ <span data-t="verifySource">View official source</span> ↗</a
+              >
+            </article>
+            <article class="card">
+              <span class="tag type-tag" data-t="academicServiceTag"
+                >Institutional service</span
+              >
+              <h3 data-t="academicServiceTitle">
+                Curriculum, Quality &amp; Coordination
+              </h3>
+              <p data-t="academicServiceText">
+                Contributing to curriculum review, academic quality, course and
+                examination coordination, and student advising within computing
+                and information systems.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section id="contact">
+        <div class="wrap">
+          <div class="contact">
+            <div>
+              <span class="kicker" data-t="contactKicker"
+                >Academic collaboration</span
+              >
+              <h2 data-t="contactTitle">
+                Let’s explore what we can build together.
+              </h2>
+              <p data-t="contactText">
+                Available for research collaboration, academic service, teaching
+                opportunities, and scholarly exchange.
+              </p>
+            </div>
+            <div class="actions">
+              <a class="btn primary" href="mailto:oalomari@psu.edu.sa"
+                >oalomari@psu.edu.sa</a
+              ><a
+                class="btn"
+                href="mailto:omaiaomari@yahoo.com"
+                data-t="personalEmail"
+                >Personal email</a
+              ><a
+                class="btn"
+                target="_blank"
+                rel="noopener"
+                href="https://linkedin.com/in/omaiaomari"
+                >LinkedIn ↗</a
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="footer">
+      <div class="wrap">
+        <span>© <span id="year"></span> Dr. Omaia Al-Omari.</span
+        ><span data-t="tagline"
+          >Advancing AI through Research, Teaching, and Responsible
+          Innovation.</span
+        >
+      </div>
+    </footer>
+    <nav class="bottom-nav" id="bottomNav" aria-label="Mobile navigation">
+      <a href="#home"><b>⌂</b><span data-t="mobileHome">Home</span></a
+      ><a href="#research"><b>⌕</b><span data-t="navResearch">Research</span></a
+      ><a href="#teaching"><b>◇</b><span data-t="navTeaching">Teaching</span></a
+      ><a href="#contact"><b>↗</b><span data-t="navContact">Contact</span></a>
+    </nav>
+    <div
+      class="modal"
+      id="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalTitle"
+      aria-describedby="modalMeta"
+    >
+      <div class="dialog">
+        <div class="dialog-head">
+          <div>
+            <span class="kicker" id="modalYear"></span>
+            <h2 id="modalTitle">Publication details</h2>
+          </div>
+          <button
+            class="icon-btn"
+            id="modalClose"
+            type="button"
+            onclick="closeModal()"
+            aria-label="Close publication details"
+          >
+            ✕
+          </button>
+        </div>
+        <p id="modalMeta" class="lead"></p>
+        <div class="pub-tags" id="modalTags"></div>
+        <h3 data-t="citationTitle">Citation &amp; export</h3>
+        <pre id="apa"></pre>
+        <div class="actions">
+          <button
+            class="btn primary"
+            type="button"
+            onclick="copyAPA()"
+            data-t="copyAPA"
+          >
+            Copy citation</button
+          ><button
+            class="btn"
+            type="button"
+            onclick="downloadBib()"
+            data-t="downloadBib"
+          >
+            Download BibTeX</button
+          ><a
+            class="btn"
+            id="doiLink"
+            href="https://doi.org/"
+            target="_blank"
+            rel="noopener"
+            hidden
+            >DOI ↗</a
+          >
+        </div>
+      </div>
+    </div>
+    <div
+      class="toast"
+      id="toast"
+      role="status"
+      aria-live="polite"
+      data-t="copied"
+    >
+      Copied to clipboard
+    </div>
+    <script>
+      const publications = [
+        {
+          y: 2026,
+          type: "Journal",
+          t: "Towards Trustworthy Defense AI: Real-Time Military Asset Detection with On-Demand Explainable YOLOv8",
+          authors: [
+            "Omaia Al-Omari",
+            "Awad Alyousef",
+            "Suliman Mohamed Fati",
+            "Esam Othman",
+            "Muhammad Rashid Naeem",
+          ],
+          v: "Engineering, Technology & Applied Science Research",
+          volume: "16",
+          issue: "2",
+          pages: "33971–33978",
+          doi: "10.48084/etasr.17259",
+          tags: ["Explainable AI", "Computer Vision", "Trustworthy AI"],
+          latest: true,
+        },
+        {
+          y: 2026,
+          type: "Journal",
+          t: "Phishing Detection Using CNN-RNN With Sparrow Search Optimization Algorithm",
+          authors: ["Yazan Alshboul", "Omaia Al-Omari", "Abedalraoof Bsoul"],
+          v: "Journal of Multiscale Modelling",
+          tags: ["Cybersecurity", "Deep Learning", "Optimization"],
+        },
+        {
+          y: 2025,
+          type: "Journal",
+          t: "A Predictive Analytics Approach to Improve Telecom’s Customer Retention",
+          authors: [
+            "Asem Omari",
+            "Omaia Al-Omari",
+            "Tariq Al-Omari",
+            "Suliman Mohamed Fati",
+          ],
+          v: "Frontiers in Artificial Intelligence",
+          volume: "8",
+          pages: "1600357",
+          doi: "10.3389/frai.2025.1600357",
+          tags: [
+            "Predictive Analytics",
+            "Machine Learning",
+            "Customer Retention",
+          ],
+        },
+        {
+          y: 2025,
+          type: "Journal",
+          t: "Object Detection in Real-Time Video Surveillance Using Attention-Based Transformer-YOLOv8 Model",
+          authors: [
+            "Divya Nimma",
+            "Omaia Al-Omari",
+            "Rahul Pradhan",
+            "Zoirov Ulmas",
+            "R. V. V. Krishna",
+            "Yousef A. Baker El-Ebiary",
+            "Vuda Sreenivasa Rao",
+          ],
+          v: "Alexandria Engineering Journal",
+          volume: "118",
+          pages: "482–495",
+          doi: "10.1016/j.aej.2025.01.032",
+          tags: ["Computer Vision", "Transformers", "YOLOv8"],
+        },
+        {
+          y: 2025,
+          type: "Journal",
+          t: "CNN-Based Automated Detection of Metastatic Cancer in Histopathology Images",
+          authors: ["Omaia Al-Omari", "Omar Alkhatib", "Tariq Al-Omari"],
+          v: "Engineering, Technology & Applied Science Research",
+          volume: "15",
+          issue: "4",
+          pages: "24478–24485",
+          doi: "10.48084/etasr.10888",
+          tags: ["Healthcare AI", "CNN", "Medical Imaging"],
+        },
+        {
+          y: 2025,
+          type: "Journal",
+          t: "Deep Learning-Based Automated Segmentation of the Parcellated Corpus Callosum in Brain MRI",
+          authors: ["Suliman Mohamed Fati", "Omaia Al-Omari"],
+          v: "Engineering, Technology & Applied Science Research",
+          doi: "10.48084/etasr.11783",
+          tags: ["Healthcare AI", "Deep Learning", "MRI"],
+        },
+        {
+          y: 2025,
+          type: "Journal",
+          t: "Governance and Ethical Frameworks for AI Integration in Higher Education: Enhancing Personalized Learning and Legal Compliance",
+          authors: [
+            "Omaia Al-Omari",
+            "Awad Alyousef",
+            "Suliman Fati",
+            "Fatima Shannaq",
+            "Asem Omari",
+          ],
+          v: "Journal of Ecohumanism",
+          volume: "4",
+          issue: "2",
+          pages: "80–86",
+          tags: ["AI Governance", "Higher Education", "Responsible AI"],
+        },
+        {
+          y: 2025,
+          type: "Journal",
+          t: "Artificial Intelligence and Posthumanism: A Philosophical Inquiry into Consciousness, Ethics, and Human Identity",
+          authors: ["Omaia Al-Omari", "Tariq Al-Omari"],
+          v: "Journal of Posthumanism",
+          volume: "5",
+          issue: "2",
+          pages: "458–469",
+          doi: "10.63332/joph.v5i2.432",
+          tags: ["AI Ethics", "Human-Centered AI", "Posthumanism"],
+        },
+        {
+          y: 2025,
+          type: "Book Chapter",
+          t: "Applying Artificial Intelligence Techniques on Cyber Attacks Dataset",
+          authors: [
+            "Omaia Al-Omari",
+            "Yazan AlShboul",
+            "Awad Alyousef",
+            "Fatima Shannaq",
+            "Asem Omari",
+          ],
+          v: "Advanced Information Networking and Applications",
+          pages: "74–84",
+          publisher: "Springer Nature Switzerland",
+          doi: "10.1007/978-3-031-87778-0_7",
+          tags: ["Cybersecurity", "Machine Learning", "Threat Detection"],
+        },
+        {
+          y: 2025,
+          type: "Journal",
+          t: "Challenges and Solutions in Agile Software Development: A Managerial Perspective on Implementation Practices",
+          authors: [
+            "L. S. Geetha",
+            "Yousef A. Baker El-Ebiary",
+            "Bandla Srinivasa Rao",
+            "Revati Ramrao Rautrao",
+            "T. Subha Mastan Rao",
+            "Janjhyam Venkata Naga Ramesh",
+            "Omaia Al-Omari",
+          ],
+          v: "International Journal of Advanced Computer Science and Applications",
+          volume: "16",
+          issue: "3",
+          tags: ["Agile", "Software Engineering", "Information Systems"],
+        },
+        {
+          y: 2025,
+          type: "Conference",
+          t: "KAN-ALSTM: A Clinical Decision Aid for Predicting Parkinson’s Disease Progression via Kolmogorov-Arnold Networks and Attention-Based LSTMs",
+          authors: [
+            "Omaia Al-Omari",
+            "Mohammad Yousef Alzoubi",
+            "Awad Alyousef",
+            "Esam Othman",
+            "Asem Omari",
+            "Atheer Ahmed Alrashed",
+          ],
+          v: "2025 International Conference on Decision Aid Sciences and Applications (DASA)",
+          pages: "2190–2194",
+          doi: "10.1109/DASA68193.2025.11498856",
+          tags: ["Healthcare AI", "Parkinson’s Disease", "Decision Support"],
+        },
+        {
+          y: 2025,
+          type: "Conference",
+          t: "XAI-Driven Decision Aid for Chronic Disease Progression: Combining Gradient Boosting and SHAP for Transparent Clinical Forecasting",
+          authors: [
+            "Omaia Al-Omari",
+            "Yazan AlShboul",
+            "Rund Mahafdah",
+            "Mohammad Yousef Alzoubi",
+            "Asem Omari",
+            "Atheer Ahmed Alrashed",
+          ],
+          v: "2025 International Conference on Decision Aid Sciences and Applications (DASA)",
+          pages: "1015–1019",
+          doi: "10.1109/DASA68193.2025.11498906",
+          tags: ["Explainable AI", "Healthcare AI", "SHAP"],
+        },
+        {
+          y: 2025,
+          type: "Conference",
+          t: "LSTM Networks for Improved Environmental Monitoring and Biodiversity Conservation",
+          authors: [
+            "Dara Raju",
+            "Omaia Al-Omari",
+            "Ganesh Kumar Anbazhagan",
+            "Kuttimarks Muthu Selladurai",
+            "Malik Bader Alazzam",
+            "M. Karthik",
+          ],
+          v: "International Conference on Emerging Smart Computing and Informatics (ESCI)",
+          pages: "1–5",
+          tags: ["LSTM", "Environmental Monitoring", "Deep Learning"],
+        },
+        {
+          y: 2025,
+          type: "Conference",
+          t: "AI-Powered Climate Change Analytics Approach",
+          authors: [
+            "Asem Omari",
+            "Azmi Alazzam",
+            "Said Badreddine",
+            "Omaia Al-Omari",
+          ],
+          v: "International Conference on Artificial Intelligence, Metaverse, and Cybersecurity (ICAMAC)",
+          pages: "1–5",
+          tags: [
+            "Climate Analytics",
+            "Artificial Intelligence",
+            "Sustainability",
+          ],
+        },
+        {
+          y: 2025,
+          type: "Journal",
+          t: "LiDAR-Based Climate Change Imaging in Geoscience Using Spatio Extreme Fuzzy Gradient Model",
+          authors: [
+            "V. S. Krushnasamy",
+            "Omaia Al-Omari",
+            "Ajith Sundaram",
+            "Issac K. Varghese",
+            "Elangovan Muniyandy",
+            "M. V. A. L. Narasimha Rao",
+          ],
+          v: "Remote Sensing in Earth Systems Sciences",
+          volume: "8",
+          issue: "2",
+          pages: "465–472",
+          doi: "10.1007/s41976-025-00197-5",
+          tags: ["LiDAR", "Climate Analytics", "Remote Sensing"],
+        },
+        {
+          y: 2025,
+          type: "Journal",
+          t: "Enhancement of Cybersecurity in IoT Based on Ant Colony Optimized Artificial Neural Adaptive TensorFlow",
+          authors: [
+            "Vijaya Bhaskar Sadu",
+            "Kumar Abhishek",
+            "Omaia Al-Omari",
+            "Sandhya Rani Nallola",
+            "Rajeev Kumar Sharma",
+            "Mohammad Shadab Khan",
+          ],
+          v: "Network: Computation in Neural Systems",
+          volume: "36",
+          issue: "3",
+          pages: "598–614",
+          tags: ["IoT", "Cybersecurity", "Optimization"],
+        },
+        {
+          y: 2025,
+          type: "Conference",
+          t: "A Machine Learning Approach to Analyze the Shift from In-Person to Virtual Care for Mental Health Services",
+          authors: ["Asem Omari", "Omaia Al-Omari", "Said Badreddine"],
+          v: "Mediterranean Conference on Embedded Computing (MECO)",
+          pages: "1–5",
+          tags: ["Healthcare Analytics", "Virtual Care", "Machine Learning"],
+        },
+        {
+          y: 2024,
+          type: "Journal",
+          t: "Artificial Intelligence in Healthcare: Bridging Innovation and Regulation",
+          authors: ["Awad Alyousef", "Omaia Al-Omari"],
+          v: "Journal of Ecohumanism",
+          volume: "3",
+          issue: "8",
+          doi: "10.62754/joe.v3i8.5673",
+          tags: ["Healthcare AI", "Regulation", "Responsible AI"],
+        },
+        {
+          y: 2024,
+          type: "Conference",
+          t: "MuSeRAN: Multimodal Sentiment Analysis with Recurrent Attention Networks",
+          authors: [
+            "Omaia Al-Omari",
+            "Asem Omari",
+            "Esam Othman",
+            "Atheer Ahmed Alrashed",
+          ],
+          v: "International Conference on Decision Aid Sciences and Applications (DASA)",
+          pages: "1–5",
+          tags: ["NLP", "Multimodal AI", "Sentiment Analysis"],
+        },
+        {
+          y: 2024,
+          type: "Conference",
+          t: "Combination of Blockchain and Machine Learning for Decision Making and Secure Supply Chain Authentication Management",
+          authors: [
+            "Mahmoud Allahham",
+            "Atheer Ahmed Alrashed",
+            "Omaia Al-Omari",
+            "Wasef Ibrahim Almajali",
+          ],
+          v: "International Conference on Decision Aid Sciences and Applications (DASA)",
+          pages: "1–4",
+          tags: ["Blockchain", "Supply Chain", "Machine Learning"],
+        },
+        {
+          y: 2024,
+          type: "Conference",
+          t: "Forecasting Stock Market Using Regression Models",
+          authors: ["Asem Omari", "Azmi Alazzam", "Omaia Al-Omari"],
+          v: "International Conference on Industrial and Business Engineering (ICIBE)",
+          pages: "111–118",
+          doi: "10.1145/3716097.3716124",
+          tags: ["Forecasting", "Regression", "Data Science"],
+        },
+        {
+          y: 2024,
+          type: "Book Chapter",
+          t: "Smart Cloud Data Management Based on Deep Reinforcement Learning with Spider Swarm Optimization Algorithm",
+          authors: [
+            "Sandhya Rani Nallola",
+            "Omaia Al-Omari",
+            "Vadivel Ayyasamy",
+            "A. Inbavalli",
+          ],
+          v: "Advancing Sustainable Science and Technology for a Resilient Future",
+          pages: "11–15",
+          publisher: "CRC Press",
+          tags: ["Cloud Computing", "Reinforcement Learning", "Optimization"],
+        },
+        {
+          y: 2024,
+          type: "Conference",
+          t: "Enhancing Feedback Mechanisms in English Language Assessments Through Deep Learning Models",
+          authors: [
+            "M. D. Thamarai Selvi",
+            "G. Ahmed Zeeshan",
+            "Omaia Al-Omari",
+            "Amit Kumar Mishra",
+            "E. G. Dorcas",
+            "Fredrick Ruban Alphonse",
+          ],
+          v: "International Conference on Artificial Intelligence and Quantum Computation-Based Sensor Application (ICAIQSA)",
+          pages: "1–5",
+          tags: ["Deep Learning", "Assessment", "Education"],
+        },
+        {
+          y: 2023,
+          type: "Book Chapter",
+          t: "An Empirical Study on the Future of Publication Repositories and Its Adaptability in Public Universities",
+          authors: [
+            "Nayyar Ahmed Khan",
+            "Omaia Al-Omari",
+            "Saeed Masoud Alshahrani",
+          ],
+          v: "Computational Intelligence: Select Proceedings of InCITe 2022",
+          pages: "823–829",
+          publisher: "Springer Nature Singapore",
+          tags: [
+            "Publication Repositories",
+            "Higher Education",
+            "Information Systems",
+          ],
+        },
+        {
+          y: 2023,
+          type: "Conference",
+          t: "IoT and Machine Learning Models to Develop the Architecture for Assessment of Security Threats",
+          authors: [
+            "Mohammed Masaad Alotibi",
+            "Sivaram Rajeyyagari",
+            "Omaia Al-Omari",
+            "Mofadal Alymani",
+          ],
+          v: "International Conference on New Frontiers in Communication, Automation, Management and Security (ICCAMS)",
+          pages: "1–6",
+          tags: ["IoT", "Security", "Machine Learning"],
+        },
+        {
+          y: 2020,
+          type: "Journal",
+          t: "Internet of Things (IoT) Based Educational Data Mining (EDM) System",
+          authors: [
+            "Nayyar Ahmed Khan",
+            "Rund Fareed Mahafdah",
+            "Omaia Al-Omari",
+            "Samia Dardouri",
+            "Ahmed Masih Uddin Siddiqi",
+            "Mohammad Ahmad Mohammad Nasimuddin",
+          ],
+          v: "Journal of Mechanics of Continua and Mathematical Sciences",
+          volume: "15",
+          issue: "3",
+          pages: "271–284",
+          tags: ["IoT", "Educational Data Mining", "Information Systems"],
+        },
+        {
+          y: 2020,
+          type: "Journal",
+          t: "Analytical Assessment of Noun-Verb Term Extraction for Document Classification Using T-Test",
+          authors: ["Omaia Al-Omari"],
+          v: "Journal of Mechanics of Continua and Mathematical Sciences",
+          doi: "10.26782/jmcms.2020.03.00021",
+          tags: ["NLP", "Document Classification", "Text Mining"],
+        },
+        {
+          y: 2020,
+          type: "Journal",
+          t: "Modeling and Performance Evaluation of Packet Scheduling in Uplink 3GPP LTE Systems",
+          authors: [
+            "Samia Dardouri",
+            "Rund Fareed Mahafdah",
+            "Omaia Al-Omari",
+            "Ridha Bouallegue",
+          ],
+          v: "Journal of Mechanics of Continua and Mathematical Sciences",
+          volume: "15",
+          issue: "3",
+          pages: "285–296",
+          tags: ["LTE", "Networks", "Performance"],
+        },
+        {
+          y: 2019,
+          type: "Journal",
+          t: "Enhanced Document Classification Using Noun-Verb Terms Extraction Approach",
+          authors: ["Omaia Al-Omari", "Nazlia Omar"],
+          v: "International Journal of Advanced Trends in Computer Science and Engineering",
+          volume: "8",
+          issue: "1",
+          pages: "85–92",
+          tags: ["NLP", "Document Classification", "Feature Extraction"],
+        },
+        {
+          y: 2019,
+          type: "Conference",
+          t: "Prevention of Web-Form Spamming for Cloud-Based Applications: A Proposed Model",
+          authors: [
+            "Nayyar Ahmed Khan",
+            "Ahmed Masih Uddin Siddiqi",
+            "Mohammad Ahmad Mohammad",
+            "Danish Ahmad",
+            "Shabi Alam Hameed",
+            "Omaia Al-Omari",
+          ],
+          v: "Amity International Conference on Artificial Intelligence (AICAI)",
+          pages: "249–254",
+          tags: ["Cloud Computing", "Spam Prevention", "Cybersecurity"],
+        },
+        {
+          y: 2019,
+          type: "Conference",
+          t: "Intrusion Management to Avoid Web-Form Spamming in Cloud-Based Architectures",
+          authors: [
+            "Nayyar Ahmed Khan",
+            "Rund Fareed Mahafdah",
+            "Mohammad Ahmad Mohammad Nasimuddin",
+            "Omaia Al-Omari",
+            "Ahmed Masih Uddin Siddiqi",
+            "Danish Ahamad",
+          ],
+          v: "International Conference on Computational Intelligence and Knowledge Economy (ICCIKE)",
+          pages: "437–442",
+          doi: "10.1109/ICCIKE47802.2019.9004302",
+          tags: ["Intrusion Management", "Cloud Computing", "Cybersecurity"],
+        },
+        {
+          y: 2018,
+          type: "Journal",
+          t: "Learning Modal Adaptability to Improve Reading and Writing Skills of Students",
+          authors: [
+            "Rund Fareed Mahafdah",
+            "Omaia Al-Omari",
+            "Nayyar Ahmed Khan",
+          ],
+          v: "International Journal of Engineering Research & Technology",
+          volume: "7",
+          issue: "3",
+          doi: "10.17577/IJERTV7IS030016",
+          tags: ["Educational Technology", "Learning", "Information Systems"],
+        },
+        {
+          y: 2017,
+          type: "Journal",
+          t: "Ranking and Reputation Based Resource Allocation in P2P System",
+          authors: ["Nayyar Ahmed Khan", "Omaia Al-Omari", "Rund Mahafdah"],
+          v: "Mediterranean Journal of Basic and Applied Sciences",
+          volume: "1",
+          issue: "1",
+          pages: "293–301",
+          tags: ["P2P Systems", "Resource Allocation", "Reputation"],
+        },
+        {
+          y: 2014,
+          type: "Journal",
+          t: "Arabic Part-of-Speech Tagging Using k-Nearest Neighbour and Naive Bayes Classifiers Combination",
+          authors: ["Rund Mahafdah", "Nazlia Omar", "Omaia Al-Omari"],
+          v: "Journal of Computer Science",
+          volume: "10",
+          issue: "9",
+          pages: "1865–1873",
+          tags: ["Arabic NLP", "Part-of-Speech Tagging", "Machine Learning"],
+        },
+        {
+          y: 2011,
+          type: "Journal",
+          t: "Evaluating the Effect of Stemming in Clustering of Arabic Documents",
+          authors: ["Omaia Al-Omari"],
+          v: "Academic Research International",
+          volume: "1",
+          issue: "1",
+          pages: "284–291",
+          tags: ["Arabic NLP", "Stemming", "Document Clustering"],
+        },
+      ];
+      const tr = {
+        ar: {
+          navProfile: "الملف",
+          navResearch: "الأبحاث",
+          navTeaching: "التدريس",
+          navExperience: "الخبرة",
+          navService: "الخدمة الأكاديمية",
+          navContact: "تواصل",
+          eyebrow: "أستاذ مساعد · جامعة الأمير سلطان",
+          heroRole: "باحث ومُدرّس في الذكاء الاصطناعي وعلوم البيانات",
+          heroText:
+            "أستاذ مساعد في قسم نظم المعلومات بجامعة الأمير سلطان في الرياض. يربط عمله الأكاديمي بين الذكاء الاصطناعي وعلوم البيانات ونظم المعلومات من خلال البحث والتدريس والابتكار المسؤول.",
+          officialProfile: "الملف الرسمي في جامعة الأمير سلطان ↗",
+          currentAppointment: "المنصب الحالي",
+          currentAppointmentValue: "أستاذ مساعد · جامعة الأمير سلطان",
+          highestDegree: "أعلى مؤهل علمي",
+          highestDegreeValue: "دكتوراه علوم الحاسب (ذكاء اصطناعي) · UKM",
+          researchFocus: "التركيز البحثي",
+          researchFocusValue:
+            "الذكاء الاصطناعي · علوم البيانات · نظم المعلومات",
+          academicExperience: "الخبرة",
+          academicExperienceValue:
+            "أكثر من 18 عامًا في الأكاديميا وتقنية المعلومات",
+          viewResearch: "استكشف الأبحاث",
+          viewTeaching: "ملف التدريس",
+          profileKicker: "الملف الأكاديمي",
+          profileTitle: "بحث يصل بين الأفكار والأثر.",
+          profileText:
+            "يقع عملي عند تقاطع الذكاء الاصطناعي وعلوم البيانات ونظم المعلومات، مع الاهتمام بالسياقات الإنسانية والتنظيمية والأخلاقية للنماذج الذكية.",
+          pillarAI: "الذكاء الاصطناعي",
+          pillarAITxt:
+            "التعلم العميق، والذكاء القابل للتفسير، والرؤية الحاسوبية، ومعالجة اللغة.",
+          pillarDS: "علوم البيانات",
+          pillarDSTxt:
+            "التحليلات التنبؤية، وتعلم الآلة، والبيانات متعددة الوسائط، ودعم القرار.",
+          pillarIS: "نظم المعلومات",
+          pillarISTxt:
+            "الحوكمة الرقمية، ونظم المؤسسات، والتبني المسؤول، والأمن السيبراني.",
+          directionTitle: "الاتجاه البحثي الحالي",
+          directionText:
+            "تطوير أنظمة ذكاء اصطناعي موثوقة وقابلة للتفسير تحوّل البيانات المعقدة إلى قرارات شفافة، مع تطبيقات في الرعاية الصحية والأمن السيبراني والخدمات الذكية والتعليم العالي، وربط أداء النماذج بالتبني المسؤول داخل المؤسسات.",
+          featuredKicker: "أبحاث تحت الضوء",
+          featuredTitle: "مساهمات مختارة",
+          browseAllPublications: "استعرض سجل المنشورات المختار ↓",
+          latestPublication: "أحدث منشور",
+          featuredDefense:
+            "دراسة لعام 2026 تجمع بين الرؤية الحاسوبية الفورية والتفسيرات عند الطلب لتعزيز شفافية الذكاء الاصطناعي في التطبيقات الحساسة.",
+          featuredAnalyticsTag: "التحليلات التنبؤية",
+          featuredAnalytics:
+            "توضح كيف يمكن لتحليل تعلم الآلة دعم قرارات عملية للاحتفاظ بالعملاء في الخدمات كثيفة المعلومات.",
+          featuredGovernanceTag: "الذكاء الاصطناعي المسؤول",
+          featuredGovernance:
+            "تربط التعلم المخصص المدعوم بالذكاء الاصطناعي بالحوكمة والضوابط الأخلاقية والامتثال القانوني في التعليم العالي.",
+          verifyScholar: "عرض في Google Scholar ↗",
+          researchKicker: "سجل منشورات مختار",
+          researchTitle: "مستكشف الأبحاث",
+          researchText:
+            "ابحث في مجموعة المنشورات المختارة حسب العنوان أو المؤلف أو جهة النشر أو السنة أو النوع أو الموضوع. للاطلاع على الاستشهادات والسجل الحي الكامل، استخدم Google Scholar أو ORCID.",
+          metricWorks: "بحثًا مفهرسًا",
+          metricYears: "سنة بحث نشطة",
+          metricJournals: "مقالة في دورية",
+          metricConferences: "ورقة مؤتمر",
+          searchPlaceholder:
+            "ابحث بالعنوان أو المؤلف أو الدورية أو السنة أو الموضوع…",
+          typeAll: "جميع أنواع المنشورات",
+          typeJournalPlural: "مقالات الدوريات",
+          typeConferencePlural: "أبحاث المؤتمرات",
+          typeChapterPlural: "فصول الكتب",
+          typeJournal: "مقالة دورية",
+          typeConference: "بحث مؤتمر",
+          typeChapter: "فصل كتاب",
+          sortNew: "الأحدث أولًا",
+          sortOld: "الأقدم أولًا",
+          sortAZ: "العنوان أ–ي",
+          noResults: "لا توجد أبحاث مطابقة.",
+          results: "نتيجة",
+          teachingKicker: "التدريس والإرشاد",
+          teachingTitle: "التعلّم بالاستقصاء والتطبيق والتأمل.",
+          teachingText:
+            "يربط تدريسي الأسس العلمية بالممارسة الحديثة، فيبحث الطلبة مشكلات حقيقية ويبنون حلولًا ويشرحون آثار قراراتهم التقنية.",
+          courseTitle: "مجالات التدريس",
+          methodTitle: "تجربة التعلّم",
+          method1: "التعلّم القائم على المشكلات والمشروعات",
+          method2: "دراسات حالة مستندة إلى البحث",
+          method3: "ورش تفاعلية وتغذية راجعة بين الأقران",
+          method4: "الاستخدام المسؤول لأدوات الذكاء الاصطناعي",
+          teachingContributionTitle: "المساهمة الأكاديمية",
+          teachingContribution1: "تنسيق المقررات وتطوير المناهج",
+          teachingContribution2: "الإرشاد الأكاديمي ودعم مشاريع الطلبة",
+          teachingContribution3: "ضمان الجودة ومواءمة مخرجات التعلم",
+          teachingContribution4:
+            "دمج الاستخدام المسؤول للذكاء الاصطناعي في أنشطة التعلم",
+          experienceKicker: "المسيرة الأكاديمية",
+          experienceTitle: "الخبرة والتعليم",
+          experienceText:
+            "أكثر من 18 عامًا في الأوساط الأكاديمية وتقنية المعلومات، تشمل التدريس والبحث والمناهج والجودة والإرشاد الأكاديمي.",
+          appointmentsLabel: "المناصب الأكاديمية",
+          educationLabel: "المؤهلات العلمية",
+          present: "حتى الآن",
+          role1: "أستاذ مساعد · جامعة الأمير سلطان",
+          role1txt: "قسم نظم المعلومات، كلية علوم الحاسب والمعلومات، الرياض.",
+          role2: "محاضر / عضو هيئة تدريس · جامعة شقراء",
+          role2txt:
+            "التدريس والإرشاد الأكاديمي والأنشطة الطلابية وضمان الجودة.",
+          role3: "محاضر · جامعة حائل",
+          role3txt: "تدريس بروتوكولات الإنترنت وقواعد البيانات وتطوير الويب.",
+          phd: "دكتوراه علوم الحاسب — الذكاء الاصطناعي",
+          phdTxt:
+            "الجامعة الوطنية الماليزية (UKM). بحث في معالجة اللغة واختيار السمات وتصنيف الوثائق.",
+          msc: "ماجستير تقنية المعلومات وعلوم الحاسب",
+          mscTxt: "جامعة اليرموك · تخصص نظم المعلومات الحاسوبية.",
+          bsc: "بكالوريوس تقنية المعلومات وعلوم الحاسب",
+          bscTxt: "جامعة اليرموك، الأردن.",
+          serviceKicker: "القيادة الأكاديمية",
+          serviceTitle: "خدمة المجتمع العلمي.",
+          serviceText:
+            "أدوار تحريرية ومؤتمرات ومناهج وجودة تدعم تبادل المعرفة والمعايير الأكاديمية.",
+          verifiedRole: "دور قيادي موثّق",
+          icegovTxt: "دعم البرنامج الأكاديمي للمؤتمر والتبادل الدولي للمعرفة.",
+          verifySource: "عرض المصدر الرسمي",
+          verifiedEditorial: "دور تحريري موثّق",
+          editorialTitle: "عضو هيئة التحرير",
+          journalName: "المجلة البابلية للشبكات (BJN)",
+          editorialTxt:
+            "المساهمة في الأنشطة التحريرية والتحكيم العلمي ودعم جودة الأبحاث ومعايير النشر الأكاديمي.",
+          academicServiceTag: "خدمة مؤسسية",
+          academicServiceTitle: "المناهج والجودة والتنسيق",
+          academicServiceText:
+            "المساهمة في مراجعة المناهج والجودة الأكاديمية وتنسيق المقررات والاختبارات والإرشاد الطلابي في مجالي الحوسبة ونظم المعلومات.",
+          contactKicker: "التعاون الأكاديمي",
+          contactTitle: "لنستكشف ما يمكن أن نبنيه معًا.",
+          contactText:
+            "متاح للتعاون البحثي والخدمة الأكاديمية وفرص التدريس والتبادل العلمي.",
+          personalEmail: "البريد الشخصي",
+          tagline: "تطوير الذكاء الاصطناعي بالبحث والتدريس والابتكار المسؤول.",
+          mobileHome: "الرئيسية",
+          citationTitle: "الاستشهاد والتصدير",
+          copyAPA: "نسخ الاستشهاد",
+          downloadBib: "تنزيل BibTeX",
+          copied: "تم النسخ إلى الحافظة",
+          latest: "أحدث بحث",
+          details: "التفاصيل",
+          all: "الكل",
+        },
+      };
+      let lang =
+          localStorage.getItem("lang") ||
+          ((navigator.language || "").startsWith("ar") ? "ar" : "en"),
+        active = "All",
+        current = null;
+      function applyLang() {
+        document.documentElement.lang = lang;
+        document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+        document.getElementById("lang").textContent =
+          lang === "ar" ? "English" : "العربية";
+        document
+          .getElementById("lang")
+          .setAttribute(
+            "aria-label",
+            lang === "ar" ? "Switch to English" : "التبديل إلى العربية",
+          );
+        document
+          .getElementById("nav")
+          .setAttribute(
+            "aria-label",
+            lang === "ar" ? "التنقل الرئيسي" : "Primary navigation",
+          );
+        document
+          .getElementById("bottomNav")
+          .setAttribute(
+            "aria-label",
+            lang === "ar" ? "التنقل على الجوال" : "Mobile navigation",
+          );
+        document
+          .getElementById("menu")
+          .setAttribute(
+            "aria-label",
+            lang === "ar" ? "فتح القائمة" : "Open menu",
+          );
+        document
+          .getElementById("modalClose")
+          .setAttribute(
+            "aria-label",
+            lang === "ar" ? "إغلاق تفاصيل البحث" : "Close publication details",
+          );
+        document.querySelectorAll("[data-t]").forEach((el) => {
+          const k = el.dataset.t;
+          if (lang === "ar" && tr.ar[k]) el.textContent = tr.ar[k];
+          else if (el.dataset.en) el.textContent = el.dataset.en;
+        });
+        const s = document.getElementById("search");
+        s.placeholder =
+          lang === "ar"
+            ? tr.ar.searchPlaceholder
+            : "Search title, author, venue, year, or topic…";
+        updateThemeControl();
+        renderFilters();
+        renderPubs();
+      }
+      document
+        .querySelectorAll("[data-t]")
+        .forEach((el) => (el.dataset.en = el.textContent));
+      function renderFilters() {
+        const years = [...new Set(publications.map((p) => p.y))].sort(
+          (a, b) => b - a,
+        );
+        document.getElementById("filters").innerHTML = ["All", ...years]
+          .map(
+            (x) =>
+              `<button class="chip ${String(active) === String(x) ? "active" : ""}" data-filter="${x}" aria-pressed="${String(active) === String(x)}">${x === "All" ? (lang === "ar" ? "الكل" : "All") : x}</button>`,
+          )
+          .join("");
+        document.querySelectorAll("[data-filter]").forEach(
+          (b) =>
+            (b.onclick = () => {
+              active = b.dataset.filter;
+              renderFilters();
+              renderPubs();
+            }),
+        );
+      }
+      function esc(s) {
+        return String(s).replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      }
+      function publicationType(p) {
+        return p.type;
+      }
+      function typeLabel(type) {
+        if (lang !== "ar")
+          return type === "Journal"
+            ? "Journal Article"
+            : type === "Conference"
+              ? "Conference Paper"
+              : "Book Chapter";
+        return type === "Journal"
+          ? tr.ar.typeJournal
+          : type === "Conference"
+            ? tr.ar.typeConference
+            : tr.ar.typeChapter;
+      }
+      function renderPubs() {
+        let q = document.getElementById("search").value.trim().toLowerCase(),
+          sort = document.getElementById("sort").value,
+          type = document.getElementById("typeFilter").value;
+        let rows = publications.filter(
+          (p) =>
+            (active === "All" || String(p.y) === String(active)) &&
+            (type === "All" || publicationType(p) === type) &&
+            (!q ||
+              [p.t, ...p.authors, p.v, p.y, publicationType(p), ...p.tags]
+                .join(" ")
+                .toLowerCase()
+                .includes(q)),
+        );
+        rows.sort(
+          sort === "old"
+            ? (a, b) => a.y - b.y
+            : sort === "az"
+              ? (a, b) => a.t.localeCompare(b.t)
+              : (a, b) => b.y - a.y,
+        );
+        document.getElementById("resultCount").textContent =
+          rows.length +
+          " " +
+          (lang === "ar"
+            ? tr.ar.results
+            : rows.length === 1
+              ? "result"
+              : "results");
+        document.getElementById("empty").hidden = rows.length > 0;
+        document.getElementById("pubList").innerHTML = rows
+          .map((p) => {
+            let i = publications.indexOf(p);
+            return `<article class="pub"><div class="pub-year">${p.y}${p.latest ? `<span class="tag latest" style="display:block;margin-top:6px">${lang === "ar" ? "أحدث بحث" : "Latest"}</span>` : ""}</div><div><h3>${esc(p.t)}</h3><p>${esc(p.authors.join(", "))} · <i>${esc(p.v)}</i>${p.volume ? ` · ${esc(p.volume)}${p.issue ? `(${esc(p.issue)})` : ""}` : ""}${p.pages ? ` · ${esc(p.pages)}` : ""}</p><div class="pub-tags"><span class="tag type-tag">${typeLabel(publicationType(p))}</span>${p.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join("")}</div></div><div class="pub-actions"><button class="tiny" type="button" onclick="openPub(${i},this)">${lang === "ar" ? "التفاصيل" : "Details"}</button>${p.doi ? `<a class="tiny" target="_blank" rel="noopener" href="https://doi.org/${p.doi}" aria-label="Open DOI for ${esc(p.t)}">DOI</a>` : ""}</div></article>`;
+          })
+          .join("");
+      }
+      let lastModalTrigger = null;
+      function openPub(i, trigger) {
+        current = publications[i];
+        lastModalTrigger = trigger || document.activeElement;
+        document.getElementById("modalYear").textContent = current.y;
+        document.getElementById("modalTitle").textContent = current.t;
+        document.getElementById("modalMeta").textContent =
+          current.authors.join(", ") + " · " + current.v;
+        document.getElementById("modalTags").innerHTML =
+          `<span class="tag type-tag">${typeLabel(publicationType(current))}</span>` +
+          current.tags
+            .map((t) => `<span class="tag">${esc(t)}</span>`)
+            .join("");
+        document.getElementById("apa").textContent = citation(current);
+        const d = document.getElementById("doiLink");
+        d.hidden = !current.doi;
+        if (current.doi) d.href = "https://doi.org/" + current.doi;
+        document.getElementById("modal").classList.add("open");
+        document.body.style.overflow = "hidden";
+        requestAnimationFrame(() =>
+          document.getElementById("modalClose").focus(),
+        );
+      }
+      function closeModal() {
+        document.getElementById("modal").classList.remove("open");
+        document.body.style.overflow = "";
+        if (lastModalTrigger) lastModalTrigger.focus();
+      }
+      function citation(p) {
+        const issue = p.volume
+          ? `, ${p.volume}${p.issue ? `(${p.issue})` : ""}`
+          : "";
+        const pages = p.pages ? `, ${p.pages}` : "";
+        return `${p.authors.join(", ")} (${p.y}). ${p.t}. ${p.v}${issue}${pages}.${p.doi ? " https://doi.org/" + p.doi : ""}`;
+      }
+      function copyAPA() {
+        navigator.clipboard.writeText(citation(current)).then(showToast);
+      }
+      function bib(p) {
+        const entryType =
+          p.type === "Journal"
+            ? "article"
+            : p.type === "Conference"
+              ? "inproceedings"
+              : "incollection";
+        const key = `alomari${p.y}${p.t
+          .split(/\s+/)
+          .find((w) => w.length > 4)
+          .toLowerCase()
+          .replace(/[^a-z]/g, "")}`;
+        const fields = [
+          `  title={${p.t}}`,
+          `  author={${p.authors.join(" and ")}}`,
+          `  ${p.type === "Journal" ? "journal" : "booktitle"}={${p.v}}`,
+          `  year={${p.y}}`,
+          p.volume && `  volume={${p.volume}}`,
+          p.issue && `  number={${p.issue}}`,
+          p.pages && `  pages={${p.pages.replace("–", "--")}}`,
+          p.publisher && `  publisher={${p.publisher}}`,
+          p.doi && `  doi={${p.doi}}`,
+        ].filter(Boolean);
+        return `@${entryType}{${key},\n${fields.join(",\n")}\n}`;
+      }
+      function downloadBib() {
+        let b = new Blob([bib(current)], { type: "text/plain" }),
+          a = document.createElement("a");
+        a.href = URL.createObjectURL(b);
+        a.download = `alomari-${current.y}-${current.t
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .slice(0, 42)}.bib`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+      function showToast() {
+        let t = document.getElementById("toast");
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 1700);
+      }
+      document.getElementById("search").oninput = renderPubs;
+      document.getElementById("sort").onchange = renderPubs;
+      document.getElementById("typeFilter").onchange = renderPubs;
+      document.getElementById("lang").onclick = () => {
+        lang = lang === "ar" ? "en" : "ar";
+        localStorage.setItem("lang", lang);
+        applyLang();
+      };
+      document.getElementById("theme").onclick = () => {
+        let n =
+          document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+        document.documentElement.dataset.theme = n;
+        localStorage.setItem("theme", n);
+        updateThemeControl();
+      };
+      document.documentElement.dataset.theme =
+        localStorage.getItem("theme") ||
+        (matchMedia("(prefers-color-scheme:light)").matches ? "light" : "dark");
+      function updateThemeControl() {
+        const isLight = document.documentElement.dataset.theme === "light";
+        const themeButton = document.getElementById("theme");
+        themeButton.setAttribute("aria-pressed", String(isLight));
+        themeButton.setAttribute(
+          "aria-label",
+          lang === "ar"
+            ? isLight
+              ? "استخدام الوضع الداكن"
+              : "استخدام الوضع الفاتح"
+            : isLight
+              ? "Use dark theme"
+              : "Use light theme",
+        );
+      }
+      updateThemeControl();
+      document.getElementById("menu").onclick = () => {
+        const open = document.getElementById("nav").classList.toggle("open");
+        const menuButton = document.getElementById("menu");
+        menuButton.setAttribute("aria-expanded", String(open));
+        menuButton.setAttribute(
+          "aria-label",
+          lang === "ar"
+            ? open
+              ? "إغلاق القائمة"
+              : "فتح القائمة"
+            : open
+              ? "Close menu"
+              : "Open menu",
+        );
+      };
+      document.querySelectorAll(".nav a").forEach(
+        (a) =>
+          (a.onclick = () => {
+            document.getElementById("nav").classList.remove("open");
+            document
+              .getElementById("menu")
+              .setAttribute("aria-expanded", "false");
+            document
+              .getElementById("menu")
+              .setAttribute(
+                "aria-label",
+                lang === "ar" ? "فتح القائمة" : "Open menu",
+              );
+          }),
+      );
+      const sectionObserver = new IntersectionObserver(
+        (entries) => {
+          const visible = entries
+            .filter((entry) => entry.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+          if (!visible) return;
+          const id = visible.target.id;
+          document
+            .querySelectorAll('.nav a[href^="#"], .bottom-nav a[href^="#"]')
+            .forEach((link) => {
+              const activeLink = link.getAttribute("href") === `#${id}`;
+              link.classList.toggle("active", activeLink);
+              if (activeLink) link.setAttribute("aria-current", "location");
+              else link.removeAttribute("aria-current");
+            });
+        },
+        { rootMargin: "-22% 0px -62%", threshold: [0, 0.1, 0.35] },
+      );
+      document
+        .querySelectorAll("main section[id]")
+        .forEach((section) => sectionObserver.observe(section));
+      document.getElementById("modal").onclick = (e) => {
+        if (e.target.id === "modal") closeModal();
+      };
+      document.onkeydown = (e) => {
+        const modal = document.getElementById("modal");
+        if (!modal.classList.contains("open")) return;
+        if (e.key === "Escape") closeModal();
+        if (e.key === "Tab") {
+          const focusable = [
+            ...modal.querySelectorAll("button:not([disabled]),a[href]"),
+          ].filter((el) => el.offsetParent !== null);
+          if (!focusable.length) return;
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      };
+      document.getElementById("year").textContent = new Date().getFullYear();
+      document.getElementById("mCount").textContent = publications.length;
+      document.getElementById("mYears").textContent = new Set(
+        publications.map((p) => p.y),
+      ).size;
+      document.getElementById("mJournal").textContent = publications.filter(
+        (p) => p.type === "Journal",
+      ).length;
+      document.getElementById("mConference").textContent = publications.filter(
+        (p) => p.type === "Conference",
+      ).length;
+      applyLang();
+    </script>
+  </body>
+</html>
