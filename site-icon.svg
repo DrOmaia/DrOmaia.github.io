@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">OA monogram</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#07111d"/>
+      <stop offset="1" stop-color="#16324d"/>
+    </linearGradient>
+    <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f5d98f"/>
+      <stop offset="1" stop-color="#d8b45b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+  <rect x="18" y="18" width="476" height="476" rx="102" fill="none" stroke="#ffffff" stroke-opacity=".12" stroke-width="12"/>
+  <text x="256" y="326" text-anchor="middle" fill="url(#mark)" font-family="Georgia, 'Times New Roman', serif" font-size="216" font-weight="700" letter-spacing="-20">OA</text>
+</svg>
