@@ -59,7 +59,7 @@
         "@type": "ProfilePage",
         "@id": "https://dromaia.github.io/#profile-page",
         "url": "https://dromaia.github.io/",
-        "dateModified": "2026-07-16",
+        "dateModified": "2026-07-24",
         "mainEntity": {
           "@type": "Person",
           "@id": "https://dromaia.github.io/#omaia-al-omari",
@@ -99,6 +99,7 @@
         }
       }
     </script>
+    <link rel="stylesheet" href="research-assistant.css" >
     <style>
       :root {
         --bg: #07111d;
@@ -1671,6 +1672,35 @@
         background: var(--surface2);
       }
       .research-footer p { margin: 0; color: var(--muted); }
+      .research-corpus-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin: 0 0 18px;
+      }
+      .research-corpus-stats div {
+        padding: 17px 18px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--surface2);
+      }
+      .research-corpus-stats strong {
+        display: block;
+        color: var(--section-accent);
+        font-size: 1.45rem;
+        line-height: 1;
+      }
+      .research-corpus-stats span {
+        display: block;
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 0.72rem;
+      }
+      .research-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
       .teaching-innovations {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1821,6 +1851,7 @@
         .academic-links { grid-template-columns: repeat(2, 1fr); }
         .academic-links a { border-bottom: 1px solid var(--line); }
         .research-grid { grid-template-columns: 1fr; }
+        .research-corpus-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .case-study { grid-template-columns: 1fr; }
         .flagship-courses { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       }
@@ -1884,6 +1915,7 @@
         >
         <nav class="nav" id="nav" aria-label="Primary navigation">
           <a href="#research" data-t="navResearch">Research</a
+          ><a href="publications.html" data-t="navPublications">Publications</a
           ><a href="#teaching" data-t="navTeaching">Teaching</a
           ><a href="#education" data-t="navEducation">Education</a
           ><a href="#experience" data-t="navExperience">Experience</a
@@ -1993,25 +2025,30 @@
           <div class="section-head">
             <div>
               <span class="kicker" data-t="researchKicker">Research profile</span>
-              <h2 data-t="researchTitle">Applied AI, responsibly translated into impact.</h2>
+              <h2 data-t="researchTitle">From Arabic NLP to trustworthy applied AI, 2011-2026.</h2>
             </div>
             <p data-t="researchText">
-              My research connects computer vision, healthcare AI, and responsible
-              AI governance with practical challenges in intelligent systems and
-              higher education.
+              A verified portfolio of 37 works connects prediction, optimization,
+              explanation, and responsible decision support across six application
+              areas.
             </p>
+          </div>
+          <div class="research-corpus-stats" aria-label="Verified portfolio summary">
+            <div><strong>37</strong><span data-t="verifiedWorks">Verified works</span></div>
+            <div><strong>20</strong><span data-t="journalArticles">Journal articles</span></div>
+            <div><strong>13</strong><span data-t="conferencePapers">Conference papers</span></div>
+            <div><strong>4</strong><span data-t="bookChapters">Book chapters</span></div>
           </div>
           <div class="research-grid">
             <article class="research-card">
-              <span class="research-label" data-t="visionLabel">Computer Vision</span>
-              <h3>Object Detection in Real-Time Video Surveillance Using Attention-Based Transformer–YOLOv8</h3>
-              <p class="venue">Alexandria Engineering Journal · Elsevier · 2025</p>
-              <p data-t="visionSummary">
-                The study integrates attention and Transformer components with
-                YOLOv8 for complex real-time scenes, reaching 96.78% precision,
-                96.89% recall, and 89.67% mAP.
+              <span class="research-label" data-t="trustworthyVisionLabel">Trustworthy Vision AI</span>
+              <h3>Towards Trustworthy Defense AI: Real-Time Military Asset Detection with On-Demand Explainable YOLOv8</h3>
+              <p class="venue">Engineering, Technology &amp; Applied Science Research · 2026</p>
+              <p data-t="trustworthyVisionSummary">
+                YOLOv8l is paired with on-demand SHAP explanations for twelve
+                asset classes, reporting 92.3% mAP@0.5 and 35 frames per second.
               </p>
-              <a class="source-link" href="https://doi.org/10.1016/j.aej.2025.01.032" target="_blank" rel="noopener" data-t="viewPaper">View paper ↗</a>
+              <a class="source-link" href="https://doi.org/10.48084/etasr.17259" target="_blank" rel="noopener" data-t="viewPaper">View paper ↗</a>
             </article>
             <article class="research-card">
               <span class="research-label" data-t="healthLabel">Healthcare AI</span>
@@ -2037,8 +2074,11 @@
             </article>
           </div>
           <div class="research-footer">
-            <p data-t="researchFooter">A focused selection is shown here; the complete and current publication record is maintained on Google Scholar.</p>
-            <a class="btn primary" href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ" target="_blank" rel="noopener" data-t="scholarCta">Explore all publications ↗</a>
+            <p data-t="researchFooter">Explore the verified catalog by title, theme, year, output type, methodology, or keyword. Verification cutoff: 24 July 2026.</p>
+            <div class="research-actions">
+              <a class="btn primary" href="publications.html" data-t="exploreVerifiedWorks">Explore all 37 verified works</a>
+              <a class="btn secondary" href="Dr-Omaia-Al-Omari-Verified-Research-Portfolio-2011-2026.pdf" download data-t="downloadResearchPortfolio">Download research portfolio · PDF</a>
+            </div>
           </div>
         </div>
       </section>
@@ -2443,6 +2483,7 @@
           latest: "أحدث بحث",
           details: "التفاصيل",
           navResearch: "البحث",
+          navPublications: "المنشورات",
           skipContent: "تجاوز إلى المحتوى",
           eyebrow: "قسم نظم المعلومات · جامعة الأمير سلطان",
           heroRole: "أستاذ مساعد في الذكاء الاصطناعي ونظم المعلومات",
@@ -2454,9 +2495,16 @@
           scholarMetrics: "عرض ملف Google Scholar الموثق ↗",
           metricsUpdated: "تم التحقق في يوليو 2026",
           researchKicker: "الملف البحثي",
-          researchTitle: "ذكاء اصطناعي تطبيقي يتحول بمسؤولية إلى أثر.",
+          researchTitle: "من معالجة اللغة العربية إلى الذكاء الاصطناعي التطبيقي الموثوق، 2011-2026.",
           researchText:
-            "تربط أبحاثي الرؤية الحاسوبية والذكاء الاصطناعي في الرعاية الصحية وحوكمة الذكاء الاصطناعي المسؤول بالتحديات العملية في الأنظمة الذكية والتعليم العالي.",
+            "تربط محفظة موثقة تضم 37 عملاً بين التنبؤ والتحسين والتفسير ودعم القرار المسؤول عبر ستة مجالات تطبيقية.",
+          verifiedWorks: "عملاً موثقاً",
+          journalArticles: "مقالة دورية",
+          conferencePapers: "ورقة مؤتمر",
+          bookChapters: "فصول كتب",
+          trustworthyVisionLabel: "رؤية حاسوبية موثوقة",
+          trustworthyVisionSummary:
+            "تجمع الدراسة YOLOv8l مع تفسيرات SHAP عند الطلب لاثنتي عشرة فئة، وتبلغ عن mAP@0.5 بنسبة 92.3% وسرعة 35 إطاراً في الثانية.",
           visionLabel: "الرؤية الحاسوبية",
           visionSummary:
             "تدمج الدراسة آليات الانتباه والمحوّلات مع YOLOv8 لمعالجة المشاهد المعقدة في الوقت الحقيقي، محققة دقة 96.78% واستدعاء 96.89% وmAP بنسبة 89.67%.",
@@ -2468,7 +2516,9 @@
             "بصفتي المؤلف الأول، بحثت كيف يمكن للخصوصية والتحيز الخوارزمي والمساءلة وبناء القدرات والامتثال القانوني أن توجه التبني المسؤول للذكاء الاصطناعي في التعليم العالي.",
           viewPaper: "عرض البحث ↗",
           researchFooter:
-            "تظهر هنا عينة مركزة؛ أما السجل الكامل والمحدّث للمنشورات فيُعرض على Google Scholar.",
+            "استعرض الفهرس الموثق حسب العنوان أو المجال أو السنة أو النوع أو المنهجية أو الكلمة المفتاحية. تاريخ التحقق: 24 يوليو 2026.",
+          exploreVerifiedWorks: "استعراض جميع الأعمال الموثقة وعددها 37",
+          downloadResearchPortfolio: "تنزيل ملف الأعمال البحثية · PDF",
           scholarCta: "استعراض جميع المنشورات ↗",
           teachingKicker: "الملف التدريسي",
           teachingTitle: "تعلم مصمم حول التطبيق والتأمل.",
@@ -2723,5 +2773,7 @@
       document.getElementById("year").textContent = new Date().getFullYear();
       applyLang();
     </script>
+    <script src="research-data.js"></script>
+    <script src="research-assistant.js"></script>
   </body>
 </html>
