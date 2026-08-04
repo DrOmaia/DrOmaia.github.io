@@ -49,7 +49,6 @@
     >
     <meta name="twitter:image" content="https://dromaia.github.io/social-preview.png" >
     <link rel="icon" href="site-icon.svg" type="image/svg+xml" >
-    <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png" >
     <link rel="apple-touch-icon" href="apple-touch-icon.png" >
     <link rel="preload" href="DrOmaia.jpeg" as="image" fetchpriority="high" >
     <title>Dr. Omaia Al-Omari | AI &amp; Information Systems</title>
@@ -59,7 +58,7 @@
         "@type": "ProfilePage",
         "@id": "https://dromaia.github.io/#profile-page",
         "url": "https://dromaia.github.io/",
-        "dateModified": "2026-07-24",
+        "dateModified": "2026-08-01",
         "mainEntity": {
           "@type": "Person",
           "@id": "https://dromaia.github.io/#omaia-al-omari",
@@ -1552,9 +1551,18 @@
         text-decoration: underline;
         text-underline-offset: 5px;
       }
+      .design-note {
+        max-width: 760px;
+        margin: 24px 0 0;
+        padding-inline-start: 14px;
+        border-inline-start: 2px solid color-mix(in srgb, var(--gold) 62%, var(--line));
+        color: var(--muted);
+        font-size: 0.78rem;
+        line-height: 1.65;
+      }
       .metrics-bar {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(220px, 1.35fr);
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         margin-top: 32px;
         overflow: hidden;
         border: 1px solid var(--line);
@@ -1562,9 +1570,15 @@
         background: color-mix(in srgb, var(--surface) 84%, transparent);
       }
       .metric {
+        display: block;
         padding: 18px 20px;
         border-inline-end: 1px solid var(--line);
+        color: inherit;
+        text-decoration: none;
       }
+      .metric:last-child { border-inline-end: 0; }
+      a.metric:hover { background: var(--surface2); }
+      a.metric:hover span { color: var(--gold); }
       .metric strong {
         display: block;
         color: var(--text);
@@ -1701,6 +1715,26 @@
         flex-wrap: wrap;
         gap: 10px;
       }
+      .research-snapshot {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: clamp(24px, 5vw, 72px);
+        padding: clamp(26px, 4vw, 44px);
+        border: 1px solid var(--line);
+        border-inline-start: 4px solid var(--section-accent);
+        border-radius: 24px;
+        background: var(--surface);
+      }
+      .research-snapshot h3 {
+        margin: 0 0 10px;
+        font-size: clamp(1.25rem, 2.2vw, 1.85rem);
+      }
+      .research-snapshot p {
+        max-width: 760px;
+        margin: 0;
+        color: var(--muted);
+      }
       .teaching-innovations {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1787,6 +1821,50 @@
         margin: 36px 0 15px;
         font-size: 1.25rem;
       }
+      .peer-review-intro {
+        max-width: 820px;
+        margin: -6px 0 16px;
+        color: var(--muted);
+        font-size: 0.86rem;
+      }
+      .peer-review-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .peer-review-card {
+        display: flex;
+        min-height: 150px;
+        flex-direction: column;
+        padding: 22px;
+        border: 1px solid var(--line);
+        border-radius: 19px;
+        color: var(--text);
+        background: var(--surface);
+        text-decoration: none;
+      }
+      .peer-review-card:hover {
+        border-color: color-mix(in srgb, var(--section-accent) 48%, var(--line));
+        background: var(--surface2);
+      }
+      .peer-review-card span {
+        color: var(--section-accent);
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .peer-review-card strong {
+        margin-top: 18px;
+        font-size: 1rem;
+        line-height: 1.45;
+      }
+      .peer-review-card small {
+        margin-top: auto;
+        padding-top: 12px;
+        color: var(--muted);
+        font-size: 0.75rem;
+      }
       .recognition-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1852,6 +1930,7 @@
         .academic-links a { border-bottom: 1px solid var(--line); }
         .research-grid { grid-template-columns: 1fr; }
         .research-corpus-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .research-snapshot { grid-template-columns: 1fr; }
         .case-study { grid-template-columns: 1fr; }
         .flagship-courses { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       }
@@ -1877,7 +1956,7 @@
         .metric { padding: 14px 8px; text-align: center; }
         .metric strong { font-size: 1.2rem; }
         .metric span { font-size: 0.58rem; letter-spacing: 0.03em; }
-        .metric-source { padding: 13px; }
+        .design-note { margin-top: 20px; }
         .academic-links { margin-top: 12px; }
         .academic-links a { padding: 12px 8px; font-size: 0.7rem; }
         .section-head h2 { font-size: 2.2rem; }
@@ -1886,6 +1965,7 @@
         .teaching-innovations,
         .case-steps,
         .flagship-courses,
+        .peer-review-grid,
         .recognition-grid,
         .contact-paths.four { grid-template-columns: 1fr; }
         .flagship-course { min-height: auto; }
@@ -1914,10 +1994,10 @@
           <span data-t="brandFamily">Al‑Omari</span></a
         >
         <nav class="nav" id="nav" aria-label="Primary navigation">
-          <a href="#research" data-t="navResearch">Research</a
+          <a href="#education" data-t="navEducation">Education</a
+          ><a href="#research" data-t="navResearch">Research</a
           ><a href="publications.html" data-t="navPublications">Publications</a
           ><a href="#teaching" data-t="navTeaching">Teaching</a
-          ><a href="#education" data-t="navEducation">Education</a
           ><a href="#experience" data-t="navExperience">Experience</a
           ><a href="#service" data-t="navService">Service</a
           ><a href="#contact" data-t="navContact">Contact</a>
@@ -1972,10 +2052,10 @@
                 education, and intelligent systems.
               </p>
               <div class="actions">
-                <a class="btn primary" href="#research" data-t="viewResearch"
-                  >Research Profile</a
-                ><a class="btn secondary" href="#teaching" data-t="viewTeaching"
-                  >Teaching Profile</a
+                <a class="btn primary" href="#education" data-t="viewEducation"
+                  >Education</a
+                ><a class="btn secondary" href="publications.html" data-t="viewPublications"
+                  >Explore Publications</a
                 ><a
                   class="btn textual"
                   href="Dr-Omaia-Al-Omari-Concise-Academic-CV.pdf"
@@ -1985,19 +2065,21 @@
                   >View Academic CV · PDF · 3 pages ↗</a
                 >
               </div>
-              <div id="metricsBar" class="metrics-bar" role="group" aria-label="Google Scholar metrics">
-                <div class="metric"><strong>397</strong><span data-t="citations">Citations</span></div>
-                <div class="metric"><strong>12</strong><span>h-index</span></div>
-                <div class="metric"><strong>14</strong><span>i10-index</span></div>
+              <p class="design-note" data-t="aiDesignDisclosure">
+                Designed by Dr. Omaia Al-Omari with AI-assisted tools, guided by his expertise in prompt engineering and iterative human review.
+              </p>
+              <div id="metricsBar" class="metrics-bar" role="group" aria-label="Academic profile highlights">
+                <div class="metric"><strong>18+</strong><span data-t="yearsExperience">Years of experience</span></div>
                 <a
-                  class="metric-source"
+                  class="metric"
                   href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ"
                   target="_blank"
                   rel="noopener"
                 >
-                  <strong data-t="scholarMetrics">View verified Google Scholar profile ↗</strong>
-                  <span data-t="metricsUpdated">Verified July 2026</span>
+                  <strong>400+</strong>
+                  <span data-t="citationsScholar">Citations · Google Scholar ↗</span>
                 </a>
+                <div class="metric"><strong>30+</strong><span data-t="verifiedWorks">Verified works</span></div>
               </div>
             </div>
             <div class="portrait">
@@ -2020,63 +2102,59 @@
         </div>
       </section>
 
+      <section id="education">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <span class="kicker" data-t="educationKicker">Education</span>
+              <h2 data-t="educationTitle">An academic foundation built through inquiry.</h2>
+            </div>
+            <p data-t="educationText">Three degrees trace a focused progression from Computer Information Systems to advanced research in Artificial Intelligence and Arabic document analysis.</p>
+          </div>
+          <div class="education-layout">
+            <article class="degree-card featured">
+              <div class="degree-top"><span class="degree-year">2021</span><span class="degree-kind" data-t="doctorate">Doctorate</span></div>
+              <h3 data-t="phd">PhD in Computer Science — Artificial Intelligence</h3>
+              <div class="degree-institution" data-t="ukmName">The National University of Malaysia (UKM)</div>
+              <a class="ranking-link" href="https://www.topuniversities.com/universities/universiti-kebangsaan-malaysia-ukm" target="_blank" rel="noopener" data-t="ukmWorldRanking">QS World University Rankings 2027 · #130 ↗</a>
+              <div class="degree-detail"><small data-t="thesisTitle">Thesis</small><p data-t="phdThesis">Noun Verb Extraction and Hybrid Krill Herd as Feature Selection for Document Classification</p></div>
+            </article>
+            <div class="degree-stack">
+              <article class="degree-card">
+                <div class="degree-top"><span class="degree-year">2009</span><span class="degree-kind" data-t="mastersDegree">Master’s degree</span></div>
+                <h3 data-t="msc">MSc in Information Technology and Computer Sciences</h3>
+                <div class="degree-institution" data-t="yarmoukName">Yarmouk University · Jordan</div>
+                <div class="degree-detail"><small data-t="thesisTitle">Thesis</small><p data-t="mscThesis">Evaluation of the Effect of Stemming on Clustering of Arabic Documents</p></div>
+              </article>
+              <article class="degree-card">
+                <div class="degree-top"><span class="degree-year">2006</span><span class="degree-kind" data-t="bachelorsDegree">Bachelor’s degree</span></div>
+                <h3 data-t="bsc">BSc in Information Technology and Computer Sciences</h3>
+                <div class="degree-institution" data-t="yarmoukName">Yarmouk University · Jordan</div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="research">
         <div class="wrap">
           <div class="section-head">
             <div>
               <span class="kicker" data-t="researchKicker">Research profile</span>
-              <h2 data-t="researchTitle">From Arabic NLP to trustworthy applied AI, 2011-2026.</h2>
+              <h2 data-t="researchTitle">Applied AI research with a responsible, practical focus.</h2>
             </div>
             <p data-t="researchText">
-              A verified portfolio of 37 works connects prediction, optimization,
-              explanation, and responsible decision support across six application
-              areas.
+              Research spanning Arabic NLP, explainable AI, healthcare, cybersecurity,
+              computer vision, and intelligent decision support.
             </p>
           </div>
-          <div class="research-corpus-stats" aria-label="Verified portfolio summary">
-            <div><strong>37</strong><span data-t="verifiedWorks">Verified works</span></div>
-            <div><strong>20</strong><span data-t="journalArticles">Journal articles</span></div>
-            <div><strong>13</strong><span data-t="conferencePapers">Conference papers</span></div>
-            <div><strong>4</strong><span data-t="bookChapters">Book chapters</span></div>
-          </div>
-          <div class="research-grid">
-            <article class="research-card">
-              <span class="research-label" data-t="trustworthyVisionLabel">Trustworthy Vision AI</span>
-              <h3>Towards Trustworthy Defense AI: Real-Time Military Asset Detection with On-Demand Explainable YOLOv8</h3>
-              <p class="venue">Engineering, Technology &amp; Applied Science Research · 2026</p>
-              <p data-t="trustworthyVisionSummary">
-                YOLOv8l is paired with on-demand SHAP explanations for twelve
-                asset classes, reporting 92.3% mAP@0.5 and 35 frames per second.
-              </p>
-              <a class="source-link" href="https://doi.org/10.48084/etasr.17259" target="_blank" rel="noopener" data-t="viewPaper">View paper ↗</a>
-            </article>
-            <article class="research-card">
-              <span class="research-label" data-t="healthLabel">Healthcare AI</span>
-              <h3>CNN-Based Automated Detection of Metastatic Cancer in Histopathology Images</h3>
-              <p class="venue">Engineering, Technology &amp; Applied Science Research · 2025</p>
-              <p data-t="healthSummary">
-                As first and corresponding author, I presented an EfficientNetB3
-                and Grad-CAM framework that achieved 92.33% test accuracy and
-                localized malignant regions in over 95% of test samples.
-              </p>
-              <a class="source-link" href="https://doi.org/10.48084/etasr.10888" target="_blank" rel="noopener" data-t="viewPaper">View paper ↗</a>
-            </article>
-            <article class="research-card">
-              <span class="research-label" data-t="governanceLabel">Responsible AI</span>
-              <h3>Governance and Ethical Frameworks for AI Integration in Higher Education</h3>
-              <p class="venue">Journal of Ecohumanism · 2025</p>
-              <p data-t="governanceSummary">
-                As first author, I examined how privacy, algorithmic bias,
-                accountability, capacity building, and legal compliance can guide
-                responsible AI adoption in higher education.
-              </p>
-              <a class="source-link" href="https://doi.org/10.62754/joe.v4i2.5781" target="_blank" rel="noopener" data-t="viewPaper">View paper ↗</a>
-            </article>
-          </div>
-          <div class="research-footer">
-            <p data-t="researchFooter">Explore the verified catalog by title, theme, year, output type, methodology, or keyword. Verification cutoff: 24 July 2026.</p>
+          <div class="research-snapshot">
+            <div>
+              <h3 data-t="researchSnapshotTitle">A concise overview here; complete evidence in Publications.</h3>
+              <p data-t="researchFooter">Search the full catalog by title, year, output type, methodology, topic, or keyword. Every record includes a clearly displayed APA 7 reference and a DOI link when available.</p>
+            </div>
             <div class="research-actions">
-              <a class="btn primary" href="publications.html" data-t="exploreVerifiedWorks">Explore all 37 verified works</a>
+              <a class="btn primary" href="publications.html" data-t="exploreVerifiedWorks">Explore 30+ verified works</a>
               <a class="btn secondary" href="Dr-Omaia-Al-Omari-Verified-Research-Portfolio-2011-2026.pdf" download data-t="downloadResearchPortfolio">Download research portfolio · PDF</a>
             </div>
           </div>
@@ -2143,40 +2221,6 @@
         </div>
       </section>
 
-      <section id="education">
-        <div class="wrap">
-          <div class="section-head">
-            <div>
-              <span class="kicker" data-t="educationKicker">Education</span>
-              <h2 data-t="educationTitle">An academic foundation built through inquiry.</h2>
-            </div>
-            <p data-t="educationText">Three degrees trace a focused progression from Computer Information Systems to advanced research in Artificial Intelligence and Arabic document analysis.</p>
-          </div>
-          <div class="education-layout">
-            <article class="degree-card featured">
-              <div class="degree-top"><span class="degree-year">2021</span><span class="degree-kind" data-t="doctorate">Doctorate</span></div>
-              <h3 data-t="phd">PhD in Computer Science — Artificial Intelligence</h3>
-              <div class="degree-institution" data-t="ukmName">The National University of Malaysia (UKM)</div>
-              <a class="ranking-link" href="https://www.topuniversities.com/universities/universiti-kebangsaan-malaysia-ukm" target="_blank" rel="noopener" data-t="ukmWorldRanking">QS World University Rankings 2027 · #130 ↗</a>
-              <div class="degree-detail"><small data-t="thesisTitle">Thesis</small><p data-t="phdThesis">Noun Verb Extraction and Hybrid Krill Herd as Feature Selection for Document Classification</p></div>
-            </article>
-            <div class="degree-stack">
-              <article class="degree-card">
-                <div class="degree-top"><span class="degree-year">2009</span><span class="degree-kind" data-t="mastersDegree">Master’s degree</span></div>
-                <h3 data-t="msc">MSc in Information Technology and Computer Sciences</h3>
-                <div class="degree-institution" data-t="yarmoukName">Yarmouk University · Jordan</div>
-                <div class="degree-detail"><small data-t="thesisTitle">Thesis</small><p data-t="mscThesis">Evaluation of the Effect of Stemming on Clustering of Arabic Documents</p></div>
-              </article>
-              <article class="degree-card">
-                <div class="degree-top"><span class="degree-year">2006</span><span class="degree-kind" data-t="bachelorsDegree">Bachelor’s degree</span></div>
-                <h3 data-t="bsc">BSc in Information Technology and Computer Sciences</h3>
-                <div class="degree-institution" data-t="yarmoukName">Yarmouk University · Jordan</div>
-              </article>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section id="experience">
         <div class="wrap">
           <div class="section-head">
@@ -2236,6 +2280,30 @@
               <p data-t="curriculumText">Contributing to curriculum review, course alignment, and continuous improvement in computing and Information Systems.</p>
             </article>
           </div>
+          <h3 class="recognition-title" data-t="peerReviewTitle">Selected peer-review service</h3>
+          <p class="peer-review-intro" data-t="peerReviewText">Independent manuscript assessment for journals spanning artificial intelligence, digital education, oncology, and applied research. Manuscript titles are omitted where reviewer confidentiality applies.</p>
+          <div class="peer-review-grid" aria-label="Selected peer-review service">
+            <a class="peer-review-card" href="https://www.frontiersin.org/journals/education/articles/10.3389/feduc.2025.1704820/full" target="_blank" rel="noopener">
+              <span data-t="publicReviewerCredit">Public reviewer credit</span>
+              <strong>Frontiers in Education</strong>
+              <small data-t="officialJournalRecord">Official journal record ↗</small>
+            </a>
+            <a class="peer-review-card" href="https://www.frontiersin.org/journals/oncology" target="_blank" rel="noopener">
+              <span data-t="reviewService">Peer-review service</span>
+              <strong>Frontiers in Oncology</strong>
+              <small data-t="editorialAssignment2026">Editorial assignment · 2026 ↗</small>
+            </a>
+            <a class="peer-review-card" href="https://link.springer.com/journal/44163" target="_blank" rel="noopener">
+              <span data-t="reviewService">Peer-review service</span>
+              <strong>Discover Artificial Intelligence</strong>
+              <small data-t="editorialAssignment2026">Editorial assignment · 2026 ↗</small>
+            </a>
+            <a class="peer-review-card" href="https://pr.sdiarticle5.com/review-history/136753" target="_blank" rel="noopener">
+              <span data-t="openReviewRecord">Open review record</span>
+              <strong>Journal of Pharmaceutical Research International</strong>
+              <small data-t="officialReviewHistory">Official review history · 2025 ↗</small>
+            </a>
+          </div>
           <h3 class="recognition-title" data-t="recentRecognition">Recent recognition</h3>
           <div class="recognition-grid">
             <article class="recognition-card"><time>2023</time><h3 data-t="qualityAmbassadorTitle">Practicing Quality Ambassador</h3><p data-t="qualityAmbassadorText">Shaqra University · Membership No. 20230035</p></article>
@@ -2289,7 +2357,7 @@
     <footer class="footer">
       <div class="wrap">
         <span>© <span id="year"></span> Dr. Omaia Al-Omari.</span
-        ><span data-t="profileUpdated">Profile last updated: July 2026</span
+        ><span data-t="profileUpdated">Profile last updated: August 2026</span
         ><span data-t="tagline"
           >Advancing AI through Research, Teaching, and Responsible
           Innovation.</span
@@ -2489,15 +2557,19 @@
           heroRole: "أستاذ مساعد في الذكاء الاصطناعي ونظم المعلومات",
           heroText:
             "أربط البحث التطبيقي في الذكاء الاصطناعي بالتعليم المتمحور حول الطالب، لصناعة أثر مسؤول وعملي في الرعاية الصحية والتعليم والأنظمة الذكية.",
-          viewResearch: "الملف البحثي",
-          viewTeaching: "الملف التدريسي",
+          viewEducation: "التعليم",
+          viewPublications: "استعراض المنشورات",
+          aiDesignDisclosure:
+            "صمّم الدكتور أمية العمري هذا الموقع بالاستعانة بأدوات الذكاء الاصطناعي، اعتماداً على خبرته في هندسة الأوامر والمراجعة البشرية التكرارية.",
+          yearsExperience: "عاماً من الخبرة",
+          citationsScholar: "استشهاد · Google Scholar ↗",
           citations: "استشهادات",
           scholarMetrics: "عرض ملف Google Scholar الموثق ↗",
           metricsUpdated: "تم التحقق في يوليو 2026",
           researchKicker: "الملف البحثي",
-          researchTitle: "من معالجة اللغة العربية إلى الذكاء الاصطناعي التطبيقي الموثوق، 2011-2026.",
+          researchTitle: "بحث تطبيقي في الذكاء الاصطناعي برؤية مسؤولة وعملية.",
           researchText:
-            "تربط محفظة موثقة تضم 37 عملاً بين التنبؤ والتحسين والتفسير ودعم القرار المسؤول عبر ستة مجالات تطبيقية.",
+            "أبحاث تمتد من معالجة اللغة العربية والذكاء الاصطناعي التفسيري إلى الرعاية الصحية والأمن السيبراني والرؤية الحاسوبية ودعم القرار الذكي.",
           verifiedWorks: "عملاً موثقاً",
           journalArticles: "مقالة دورية",
           conferencePapers: "ورقة مؤتمر",
@@ -2516,8 +2588,9 @@
             "بصفتي المؤلف الأول، بحثت كيف يمكن للخصوصية والتحيز الخوارزمي والمساءلة وبناء القدرات والامتثال القانوني أن توجه التبني المسؤول للذكاء الاصطناعي في التعليم العالي.",
           viewPaper: "عرض البحث ↗",
           researchFooter:
-            "استعرض الفهرس الموثق حسب العنوان أو المجال أو السنة أو النوع أو المنهجية أو الكلمة المفتاحية. تاريخ التحقق: 24 يوليو 2026.",
-          exploreVerifiedWorks: "استعراض جميع الأعمال الموثقة وعددها 37",
+            "ابحث في الفهرس الكامل حسب العنوان أو السنة أو النوع أو المنهجية أو الموضوع أو الكلمة المفتاحية. يظهر مرجع APA 7 بوضوح في كل سجل، مع رابط DOI عند توفره.",
+          researchSnapshotTitle: "ملخص موجز هنا، والتفاصيل الموثقة كاملة في صفحة المنشورات.",
+          exploreVerifiedWorks: "استعراض أكثر من 30 عملاً موثقاً",
           downloadResearchPortfolio: "تنزيل ملف الأعمال البحثية · PDF",
           scholarCta: "استعراض جميع المنشورات ↗",
           teachingKicker: "الملف التدريسي",
@@ -2570,6 +2643,15 @@
           serviceTitle: "مساهمة تتجاوز قاعة التدريس.",
           serviceText:
             "خدمة تحريرية وقيادة للمناهج ولجان مؤسسية ومشاركة مجتمعية وتكريمات مرتبطة بالجودة الأكاديمية.",
+          peerReviewTitle: "خدمة مختارة في التحكيم العلمي",
+          peerReviewText:
+            "تقييم مستقل للمخطوطات في مجلات تغطي الذكاء الاصطناعي والتعليم الرقمي والأورام والبحوث التطبيقية. تُحذف عناوين المخطوطات عندما تقتضي سرية التحكيم ذلك.",
+          publicReviewerCredit: "إشادة علنية بالمراجع",
+          reviewService: "خدمة تحكيم علمي",
+          officialJournalRecord: "السجل الرسمي للمجلة ↗",
+          editorialAssignment2026: "تكليف عبر منصة التحرير · 2026 ↗",
+          openReviewRecord: "سجل تحكيم مفتوح",
+          officialReviewHistory: "سجل التحكيم الرسمي · 2025 ↗",
           communityServiceTitle: "خدمة مجتمعية موثقة",
           communityServiceText:
             "مشاركة تطوعية مستمرة منذ 2021، تشمل مبادرات تعليمية ومهنية وطلابية ومجتمعية.",
@@ -2598,7 +2680,7 @@
           contactText:
             "اختر قناة التواصل الأنسب لرسالتك. البريد الجامعي الرسمي هو الخيار المفضل للمراسلات الأكاديمية.",
           downloadCv: "عرض السيرة الأكاديمية · PDF · 3 صفحات ↗",
-          profileUpdated: "آخر تحديث للملف: يوليو 2026",
+          profileUpdated: "آخر تحديث للملف: أغسطس 2026",
           officialEmail: "البريد الرسمي",
           officialEmailNote: "المفضل للمراسلات الأكاديمية",
           personalEmail: "البريد الشخصي",
@@ -2634,7 +2716,7 @@
           .getElementById("metricsBar")
           .setAttribute(
             "aria-label",
-            lang === "ar" ? "مؤشرات Google Scholar" : "Google Scholar metrics",
+            lang === "ar" ? "أبرز مؤشرات الملف الأكاديمي" : "Academic profile highlights",
           );
         document
           .getElementById("academicLinks")
