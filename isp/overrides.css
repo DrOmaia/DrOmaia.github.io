@@ -1,0 +1,27 @@
+.required-upload {
+  grid-column: 1 / -1 !important;
+  border-style: solid !important;
+  border-color: #7daebf !important;
+  background: #f6fbfc;
+}
+.rule-strip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+.rule-strip span {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 10px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 11px;
+}
+.rule-strip strong { display:block; color:var(--navy); font-size:12px; margin-bottom:2px; }
+.cal-head small { display:block; font-size:9px; color:var(--muted); margin-top:2px; text-transform:none; }
+.day-off { background:#f1f4f6 !important; }
+.download-links { display:flex; gap:16px; flex-wrap:wrap; }
+@media(max-width:980px) { .rule-strip { grid-template-columns:repeat(3,1fr); } }
+@media(max-width:650px) { .rule-strip { grid-template-columns:repeat(2,1fr); } }
