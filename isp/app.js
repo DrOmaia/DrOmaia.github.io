@@ -812,7 +812,9 @@ function renderOffering() {
         p = sectionPlan(c);
       if (state.included[k] === undefined)
         state.included[k] =
-          c.offer_status === "" ? true : isYes(c.offer_status);
+          c.offer_status == null || c.offer_status === ""
+            ? true
+            : isYes(c.offer_status);
       return `<tr><td><input class="check offer-check" data-course="${esc(k)}" type="checkbox" ${state.included[k] ? "checked" : ""}></td><td><strong>${esc(c.code)}</strong><br><small>${esc(c.title)}</small></td><td>${esc(c.campus)}</td><td>${p.demand}</td><td>${p.count}</td><td>${p.distribution.join(" / ")} <small>(max ${p.cap})</small></td><td>${p.low ? '<span class="pill warn">Below minimum</span>' : isYes(c.required) ? '<span class="pill good">Required</span>' : '<span class="pill">Elective</span>'}</td></tr>`;
     })
     .join("");
