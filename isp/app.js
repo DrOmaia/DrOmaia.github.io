@@ -20,11 +20,11 @@ const demo = {
     {code:'CS330',title:'Introduction to Operating Systems',campus:'Male',base_demand:0,level:'External',meeting_pattern:'Sun/Tue',needs_lab:'No',required:'No',external:'Yes',fixed_slot:'ST-0900'}
   ],
   faculty: [
-    {instructor:'Dr. Faculty A',campus:'Male',qualified_courses:'IS201, IS205, IS361',preferred_slots:'ST-0900,MW-1000',unavailable_slots:'ST-1300',max_sections:3},
-    {instructor:'Dr. Faculty B',campus:'Male',qualified_courses:'IS231, IS321, IS499',preferred_slots:'MW-0900,TH-1000',unavailable_slots:'ST-0800',max_sections:3},
-    {instructor:'Dr. Faculty C',campus:'Male',qualified_courses:'IS241, IS311',preferred_slots:'ST-1000,MW-1100',unavailable_slots:'MW-0800',max_sections:3},
-    {instructor:'Dr. Faculty D',campus:'Male',qualified_courses:'IS371, IS450',preferred_slots:'ST-1100,MW-1300',unavailable_slots:'MW-0900',max_sections:3},
-    {instructor:'Dr. Faculty E',campus:'Female',qualified_courses:'IS201, IS205, IS231',preferred_slots:'MW-0900,MW-1000',unavailable_slots:'ST-0800',max_sections:3}
+    {instructor:'Dr. Faculty A',campus:'Male',qualified_courses:'IS201, IS205, IS361',preferred_slots:'ST-0900,MW-1000',unavailable_slots:'ST-1300',max_sections:8},
+    {instructor:'Dr. Faculty B',campus:'Male',qualified_courses:'IS231, IS321, IS499',preferred_slots:'MW-0900,TH-1000',unavailable_slots:'ST-0800',max_sections:8},
+    {instructor:'Dr. Faculty C',campus:'Male',qualified_courses:'IS241, IS311',preferred_slots:'ST-1000,MW-1100',unavailable_slots:'MW-0800',max_sections:8},
+    {instructor:'Dr. Faculty D',campus:'Male',qualified_courses:'IS371, IS450',preferred_slots:'ST-1100,MW-1300',unavailable_slots:'MW-0900',max_sections:8},
+    {instructor:'Dr. Faculty E',campus:'Female',qualified_courses:'IS201, IS205, IS231',preferred_slots:'MW-0900,MW-1000',unavailable_slots:'ST-0800',max_sections:8}
   ],
   students: [
     {student_id:'S001',campus:'Male',planned_courses:'IS201,IS205',current_prerequisites:'',repeat_courses:'',preferred_slots:'ST-0900,MW-1000',avoid_slots:'ST-0800'},
@@ -52,6 +52,7 @@ const demo = {
     {slot_id:'F-ST-1100',days:'Sunday/Tuesday',start:'11:00',end:'12:15',campus:'Female',room:'W-Lab1',room_type:'Lab',room_capacity:27}
   ]
 };
+demo.slots.push(...demo.slots.filter(s=>s.campus==='Male').map((s,i)=>({...s,room:/lab/i.test(s.room_type)?`Lab ${i+5}`:`2-B${String(i+1).padStart(2,'0')}`})));
 
 let state = {
   version:1, step:1, term:'', defaultCapacity:20, adjustment:15,
