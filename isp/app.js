@@ -3,6 +3,10 @@ const $ = (s, r=document) => r.querySelector(s);
 const $$ = (s, r=document) => [...r.querySelectorAll(s)];
 const MAX_CAPACITY = 27;
 const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday'];
+const TEACHING_DAYS = 'Sunday/Monday/Tuesday/Wednesday';
+const DELIVERY_PATTERN = 'Sun Campus · Mon Campus · Tue Online · Wed Campus';
+function addMinutes(time,minutes){const [h,m]=String(time).split(':').map(Number);const total=h*60+m+minutes;return `${String(Math.floor(total/60)).padStart(2,'0')}:${String(total%60).padStart(2,'0')}`}
+function canonicalSlot(s){const start=String(s.start||'').slice(0,5);return {...s,slot_id:s.slot_id||`${s.campus||'Male'}-${start}`,days:TEACHING_DAYS,start,end:addMinutes(start,50),delivery_pattern:DELIVERY_PATTERN}}
 
 const demo = {
   courses: [
@@ -57,6 +61,8 @@ demo.slots.push(
   {slot_id:'ST-0900-L',days:'Sunday/Tuesday',start:'09:30',end:'10:45',campus:'Male',room:'Lab 11',room_type:'Lab',room_capacity:27},
   {slot_id:'MW-0900-L',days:'Monday/Wednesday',start:'09:30',end:'10:45',campus:'Male',room:'Lab 12',room_type:'Lab',room_capacity:27}
 );
+demo.courses=demo.courses.filter(c=>c.code!=='IS499').map(c=>({...c,meeting_pattern:DELIVERY_PATTERN}));
+demo.slots=demo.slots.filter(s=>String(s.start).endsWith(':00')&&s.start!=='12:00').map(canonicalSlot);
 
 let state = {
   version:1, step:1, term:'', defaultCapacity:20, adjustment:15,
@@ -84,7 +90,24 @@ function validate(kind,rows){
 }
 async function readWorkbook(file,kind){
   if(!window.XLSX)throw new Error('The Excel reader is still loading. Please try again.');
-  const data=await file.arrayBuffer();const wb=XLSX.read(data,{type:'array'});const preferred={courses:'Courses',faculty:'Faculty',students:'Students',slots:'TimeSlots'}[kind];const ws=wb.Sheets[preferred]||wb.Sheets[wb.SheetNames[0]];
+  const data=await file.arrayBuffer();const wb=XLSX.read(data,{type:'array'});
+  if(kind==='setup'){
+    const courseSheet=wb.Sheets.OfferedCourses||wb.Sheets.Courses,slotSheet=wb.Sheets.TimeSlots;
+    if(!courseSheet||!slotSheet)throw new Error('Semester Setup must contain OfferedCourses and TimeSlots sheets.');
+    const catalogSheet=wb.Sheets.CourseCatalog;const catalogRows=catalogSheet?normalizeRows(XLSX.utils.sheet_to_json(catalogSheet,{defval:''})):[];const catalog=Object.fromEntries(catalogRows.map(c=>[String(c.code||'').toUpperCase(),c.title]));
+    const courses=normalizeRows(XLSX.utils.sheet_to_json(courseSheet,{defval:''})).map(c=>({...c,code:String(c.code||'').toUpperCase(),title:c.title||catalog[String(c.code||'').toUpperCase()]||'Title requires review',meeting_pattern:DELIVERY_PATTERN}));
+    let slots=normalizeRows(XLSX.utils.sheet_to_json(slotSheet,{defval:''}));
+    const courseError=validate('courses',courses),slotError=validate('slots',slots);if(courseError||slotError)throw new Error(courseError||slotError);
+    slots=slots.filter(s=>String(s.start).slice(0,5)!=='12:00'&&String(s.start).slice(0,5).endsWith(':00')).map(canonicalSlot);
+    if(!slots.length)throw new Error('No valid hourly slots found. Classes must start on the hour; 12:00–13:00 is excluded.');
+    const facultySheet=wb.Sheets.FacultyResponses||wb.Sheets.FacultyDirectory,studentSheet=wb.Sheets.StudentResponses,rulesSheet=wb.Sheets.Rules;
+    const faculty=facultySheet?normalizeRows(XLSX.utils.sheet_to_json(facultySheet,{defval:''})):[];
+    const students=studentSheet?normalizeRows(XLSX.utils.sheet_to_json(studentSheet,{defval:''})):[];
+    const rules=rulesSheet?normalizeRows(XLSX.utils.sheet_to_json(rulesSheet,{defval:''})):[];
+    const settings=Object.fromEntries(rules.map(r=>[normKey(r.setting||r.item),r.value]));
+    return {courses,slots,faculty,students,settings};
+  }
+  const preferred={faculty:'FacultyResponses',students:'StudentResponses'}[kind];const ws=wb.Sheets[preferred]||wb.Sheets[wb.SheetNames[0]];
   const rows=normalizeRows(XLSX.utils.sheet_to_json(ws,{defval:''}));const error=validate(kind,rows);if(error)throw new Error(error);return rows;
 }
 
@@ -107,10 +130,10 @@ function recommendedAdjustment(){
 function updateTop(){const term=state.term||$('#termInput').value.trim();$$('.term-inline').forEach(x=>x.textContent=term||'—');$('#termLabel').textContent=term?`Term ${term}`:'Not set'}
 function showStep(n){state.step=n;$$('.view').forEach(v=>v.classList.toggle('active',Number(v.dataset.view)===n));$$('.step').forEach(b=>b.classList.toggle('active',Number(b.dataset.step)===n));updateTop();window.scrollTo({top:0,behavior:'smooth'});autosave();if(n===2)renderDemand();if(n===3)renderOffering();if(n===4)renderSchedules();if(n===5)renderExport()}
 function updateInputs(){
-  const ready=Object.keys(state.inputs).filter(k=>state.inputs[k].length).length;$('#inputStatus').textContent=`${ready} of 4 inputs ready`;
-  $$('.upload').forEach(el=>{const k=el.dataset.kind;el.classList.toggle('ready',!!state.inputs[k].length);if(state.filenames[k])el.querySelector('em').textContent=state.filenames[k]});
-  const ok=ready===4 && ($('#termInput').value.trim()||state.term);$('#toDemandBtn').disabled=!ok;
-  const c=$('#dataCheck');if(ok){c.className='callout success';c.innerHTML=`<span>✓</span><div><strong>All inputs passed the initial check</strong><p>${state.inputs.courses.length} course rows, ${state.inputs.faculty.length} faculty rows, ${state.inputs.students.length} student responses, and ${state.inputs.slots.length} official room slots are ready.</p></div>`}
+  const setupReady=state.inputs.courses.length&&state.inputs.slots.length;$('#inputStatus').textContent=setupReady?'Required setup ready':'Setup file required';
+  $$('.upload').forEach(el=>{const k=el.dataset.kind;const isReady=k==='setup'?setupReady:!!state.inputs[k].length;el.classList.toggle('ready',isReady);if(state.filenames[k])el.querySelector('em').textContent=state.filenames[k]});
+  const ok=setupReady&&($('#termInput').value.trim()||state.term);$('#toDemandBtn').disabled=!ok;
+  const c=$('#dataCheck');if(ok){c.className='callout success';c.innerHTML=`<span>✓</span><div><strong>Semester setup is ready</strong><p>${state.inputs.courses.length} course rows and ${state.inputs.slots.length} valid hourly slots loaded. ${state.inputs.students.length} student responses and ${state.inputs.faculty.length} faculty preference responses are available.</p></div>`}
 }
 
 function renderMetrics(target,items){$(target).innerHTML=items.map(x=>`<div class="metric"><span>${esc(x.label)}</span><strong>${esc(x.value)}</strong><small>${esc(x.note||'')}</small></div>`).join('')}
@@ -137,7 +160,7 @@ function generateOne(mode,index){
   included.forEach(c=>{
     const p=sectionPlan(c);
     p.distribution.forEach((expected,i)=>{
-      const qualified=state.inputs.faculty.filter(f=>String(f.campus).toLowerCase()===String(c.campus).toLowerCase()&&list(f.qualified_courses).map(x=>x.toUpperCase()).includes(String(c.code).toUpperCase())&&(facultyLoads[f.instructor]||0)<num(f.max_sections,99));
+      const qualified=state.inputs.faculty.filter(f=>String(f.campus).toLowerCase()===String(c.campus).toLowerCase()&&(!list(f.qualified_courses).length||list(f.qualified_courses).map(x=>x.toUpperCase()).includes(String(c.code).toUpperCase()))&&(facultyLoads[f.instructor]||0)<num(f.max_sections,99));
       let candidates=[];
       qualified.forEach(f=>state.inputs.slots.filter(s=>{const tk=`${s.days}|${s.start}|${s.end}`;return String(s.campus).toLowerCase()===String(c.campus).toLowerCase()&&(!isYes(c.needs_lab)||/lab/i.test(s.room_type||''))&&num(s.room_capacity,99)>=Math.min(expected,p.cap)&&!occupiedRoom.has(`${tk}|${s.room}`)&&!occupiedFaculty.has(`${tk}|${f.instructor}`)&&!list(f.unavailable_slots).includes(s.slot_id)}).forEach(s=>{
         let sc=slotPreferenceScore(s,c,mode);if(list(f.preferred_slots).includes(s.slot_id))sc+=mode==='faculty'?8:4;sc-=num(facultyLoads[f.instructor]);
@@ -156,7 +179,7 @@ function generateOne(mode,index){
 function buildOptions(){state.options=[generateOne('student',0),generateOne('balanced',1),generateOne('faculty',2)];state.selectedOption=0;autosave()}
 function renderSchedules(){if(!state.options.length)buildOptions();const o=state.options[state.selectedOption];$('#optionTabs').innerHTML=state.options.map((x,i)=>`<button class="option-tab ${i===state.selectedOption?'active':''}" data-option="${i}"><strong>${esc(x.name)}</strong><small>Score ${Math.round(x.score)} · ${x.manual} manual</small></button>`).join('');$('#optionTitle').textContent=o.name;$('#optionDesc').textContent=o.description;renderMetrics('#scheduleMetrics',[{label:'Option score',value:Math.round(o.score),note:'Decision-support rating'},{label:'Student conflicts',value:o.studentConflicts,note:'Likely overlaps'},{label:'Faculty preference',value:`${o.facultyPreference}%`,note:'Preferred slots met'},{label:'Manual scheduling',value:o.manual,note:'Unresolved sections'}]);renderCalendar(o);renderSections(o);$('#issueList').innerHTML=(o.issues.length?o.issues.map(x=>`<div class="issue"><strong>Review required</strong><small>${esc(x)}</small></div>`):'<div class="issue good"><strong>No capacity alerts</strong><small>All proposed sections meet the minimum enrollment threshold.</small></div>')}
 function renderCalendar(o){
-  const campus=$('#campusFilter').value;const sections=o.sections.filter(x=>campus==='all'||x.campus===campus);const times=[...new Set(state.inputs.slots.map(s=>s.start).filter(Boolean))].sort();let html='<div class="calendar-grid"><div class="cal-head">Time</div>'+DAYS.map(d=>`<div class="cal-head">${d.slice(0,3)}</div>`).join('');times.forEach(t=>{html+=`<div class="cal-time">${t}</div>`;DAYS.forEach(d=>{const hits=sections.filter(x=>x.start===t&&String(x.days).includes(d));html+=`<div class="cal-cell">${hits.map(x=>`<div class="class-card ${String(x.campus).toLowerCase()}"><strong>${esc(x.code)} · S${x.section}</strong>${esc(x.instructor)}<br>${esc(x.room)}</div>`).join('')}</div>`})});html+='</div>';$('#calendar').innerHTML=html;
+  const campus=$('#campusFilter').value;const sections=o.sections.filter(x=>campus==='all'||x.campus===campus);const times=[...new Set(state.inputs.slots.map(s=>s.start).filter(Boolean))].sort();let html='<div class="calendar-grid"><div class="cal-head">Time</div>'+DAYS.map(d=>`<div class="cal-head">${d.slice(0,3)}${d==='Tuesday'?'<small>Online</small>':d==='Thursday'?'<small>No classes</small>':'<small>Campus</small>'}</div>`).join('');times.forEach(t=>{html+=`<div class="cal-time">${t}<br><small>${addMinutes(t,50)}</small></div>`;DAYS.forEach(d=>{const hits=d==='Thursday'?[]:sections.filter(x=>x.start===t&&String(x.days).includes(d));html+=`<div class="cal-cell ${d==='Thursday'?'day-off':''}">${hits.map(x=>`<div class="class-card ${String(x.campus).toLowerCase()}"><strong>${esc(x.code)} · S${x.section}</strong>${esc(x.instructor)}<br>${d==='Tuesday'?'Online':esc(x.room)}</div>`).join('')}</div>`})});html+='</div>';$('#calendar').innerHTML=html;
 }
 function renderSections(o){$('#sectionBody').innerHTML=o.sections.map(x=>`<tr><td><strong>${esc(x.code)}</strong></td><td>${x.section}</td><td>${esc(x.campus)}</td><td>${x.expected} / ${x.capacity}</td><td>${esc(x.days)}<br><small>${esc(x.start)}${x.end?'–'+esc(x.end):''}</small></td><td>${esc(x.instructor)}</td><td>${esc(x.room)}</td><td><span class="pill ${x.status==='Scheduled'?'good':x.status==='Chair review'?'warn':'bad'}">${esc(x.status)}</span></td></tr>`).join('')}
 function renderExport(){const o=state.options[state.selectedOption]||{sections:[],manual:0,studentConflicts:0};$('#exportSummary').innerHTML=[['Term',state.term],['Courses',new Set(o.sections.map(x=>x.code)).size],['Sections',o.sections.length],['Alerts',o.issues?.length||0]].map(x=>`<div class="summary-item"><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join('')}
@@ -171,7 +194,8 @@ function workbookFromState(){
   [['Section Requests',requests],['Faculty Schedule',facRows],['Conflict Report',issues.length?issues:[{'Issue':'No open alerts','Status':'Clear'}]],['Summary',summary]].forEach(([n,r])=>{const ws=XLSX.utils.json_to_sheet(r);XLSX.utils.book_append_sheet(wb,ws,n)});return wb;
 }
 
-function templateWorkbook(){const wb=XLSX.utils.book_new();const sheets={Courses:[{code:'IS231',title:'Systems Analysis and Design',campus:'Male',base_demand:40,level:'Year 2',meeting_pattern:'Sun/Tue',needs_lab:'No',required:'Yes',external:'No',fixed_slot:''},{code:'CS330',title:'Introduction to Operating Systems',campus:'Male',base_demand:0,level:'External',meeting_pattern:'Sun/Tue',needs_lab:'No',required:'No',external:'Yes',fixed_slot:'ST-0900'}],Faculty:[{instructor:'Dr. Name',campus:'Male',qualified_courses:'IS231, IS361',preferred_slots:'ST-0900, MW-1000',unavailable_slots:'ST-1300',max_sections:3}],Students:[{student_id:'Optional ID',campus:'Male',planned_courses:'IS231, IS241',current_prerequisites:'IS201',repeat_courses:'',preferred_slots:'ST-0900, MW-1000',avoid_slots:'ST-0800'}],TimeSlots:[{slot_id:'ST-0900',days:'Sunday/Tuesday',start:'09:30',end:'10:45',campus:'Male',room:'2-A01',room_type:'Classroom',room_capacity:30}]};Object.entries(sheets).forEach(([n,r])=>XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(r),n));return wb}
+function templateWorkbook(){const wb=XLSX.utils.book_new();const sheets={OfferedCourses:[{code:'IS231',title:'',campus:'Male',base_demand:40,level:'Year 2',needs_lab:'No',required:'Yes',external:'No',fixed_slot:''}],TimeSlots:[{slot_id:'Male-09:00',days:'Auto',start:'09:00',end:'Auto',campus:'Male',room:'2-A01',room_type:'Classroom',room_capacity:27}],FacultyDirectory:[{instructor:'Dr. Name',campus:'Male',qualified_courses:'IS231, IS361',preferred_slots:'',unavailable_slots:'',max_sections:3}],CourseCatalog:[{code:'IS231',title:'Systems Analysis and Design',department:'IS'}],Rules:[{setting:'Default Capacity',value:20},{setting:'Minimum Enrollment',value:10},{setting:'Maximum Capacity',value:27},{setting:'Sunday',value:'On Campus'},{setting:'Monday',value:'On Campus'},{setting:'Tuesday',value:'Online'},{setting:'Wednesday',value:'On Campus'},{setting:'Thursday',value:'No Classes'},{setting:'Lecture Duration',value:'50 minutes'},{setting:'Daily Break',value:'12:00–13:00'}],Instructions:[{item:'Required file',value:'Keep OfferedCourses, TimeSlots, FacultyDirectory, CourseCatalog and Rules in this workbook.'},{item:'Optional data',value:'StudentResponses and FacultyResponses may be included here or uploaded separately.'},{item:'Privacy',value:'The browser processes this file locally; do not publish it to GitHub.'}]};Object.entries(sheets).forEach(([n,r])=>XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(r),n));return wb}
+function demoWorkbook(){const wb=XLSX.utils.book_new();const sheets={OfferedCourses:demo.courses,TimeSlots:demo.slots,FacultyDirectory:demo.faculty,CourseCatalog:[...new Map(demo.courses.map(c=>[c.code,{code:c.code,title:c.title,department:c.code.replace(/\d/g,'')}])).values()],Rules:[{setting:'Default Capacity',value:20},{setting:'Minimum Enrollment',value:10},{setting:'Maximum Capacity',value:27},{setting:'Sunday',value:'On Campus'},{setting:'Monday',value:'On Campus'},{setting:'Tuesday',value:'Online'},{setting:'Wednesday',value:'On Campus'},{setting:'Thursday',value:'No Classes'},{setting:'Lecture Duration',value:'50 minutes'},{setting:'Daily Break',value:'12:00–13:00'}],StudentResponses:demo.students,FacultyResponses:demo.faculty};Object.entries(sheets).forEach(([n,r])=>XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(r),n));return wb}
 
 async function deriveKey(password,salt){const enc=new TextEncoder();const material=await crypto.subtle.importKey('raw',enc.encode(password),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:150000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
 async function encryptProject(password){const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),key=await deriveKey(password,salt),plain=new TextEncoder().encode(JSON.stringify({...state,savedAt:new Date().toISOString()})),cipher=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,plain));return new Blob([JSON.stringify({format:'ISP1',salt:Array.from(salt),iv:Array.from(iv),data:Array.from(cipher)})],{type:'application/json'})}
@@ -179,11 +203,12 @@ async function decryptProject(bytes,password){const obj=JSON.parse(new TextDecod
 function openModal(mode){modalMode=mode;$('#passwordModal').hidden=false;$('#projectPassword').value='';$('#modalError').textContent='';$('#modalTitle').textContent=mode==='save'?'Protect your project':'Unlock your project';$('#modalText').textContent=mode==='save'?'Enter a password. You will need it to resume this project.':'Enter the password used when this project was saved.';$('#projectPassword').focus()}
 function closeModal(){$('#passwordModal').hidden=true;pendingProjectBytes=null}
 
-$$('.upload input').forEach(inp=>inp.addEventListener('change',async e=>{const wrap=e.target.closest('.upload'),kind=wrap.dataset.kind,file=e.target.files[0];if(!file)return;try{state.inputs[kind]=await readWorkbook(file,kind);state.filenames[kind]=file.name;state.approved=false;state.options=[];updateInputs();autosave();toast(`${kind[0].toUpperCase()+kind.slice(1)} loaded successfully`)}catch(err){toast(err.message);e.target.value=''}}));
+$$('.upload input').forEach(inp=>inp.addEventListener('change',async e=>{const wrap=e.target.closest('.upload'),kind=wrap.dataset.kind,file=e.target.files[0];if(!file)return;try{const rows=await readWorkbook(file,kind);if(kind==='setup'){state.inputs.courses=rows.courses;state.inputs.slots=rows.slots;if(rows.faculty.length)state.inputs.faculty=rows.faculty;if(rows.students.length)state.inputs.students=rows.students;state.defaultCapacity=Math.max(10,Math.min(MAX_CAPACITY,num(rows.settings.default_capacity,state.defaultCapacity)));$('#defaultCapacity').value=state.defaultCapacity}else state.inputs[kind]=rows;state.filenames[kind]=file.name;state.approved=false;state.options=[];updateInputs();autosave();toast(`${kind==='setup'?'Semester setup':kind[0].toUpperCase()+kind.slice(1)} loaded successfully`)}catch(err){toast(err.message);e.target.value=''}}));
 $('#termInput').addEventListener('input',e=>{state.term=e.target.value.trim();updateTop();updateInputs();autosave()});
 $('#defaultCapacity').addEventListener('change',e=>{state.defaultCapacity=Math.max(10,Math.min(MAX_CAPACITY,num(e.target.value,20)));e.target.value=state.defaultCapacity;state.approved=false;state.options=[];autosave()});
-$('#demoBtn').addEventListener('click',()=>{state.inputs=structuredClone(demo);state.filenames={courses:'Demo Courses.xlsx',faculty:'Demo Faculty.xlsx',students:'Demo Students.xlsx',slots:'Demo Time Slots.xlsx'};state.term=$('#termInput').value.trim()||'Demo';$('#termInput').value=state.term;state.included={};state.capacities={};state.approved=false;state.options=[];updateInputs();updateTop();autosave();toast('Demo workspace loaded')});
-$('#templateBtn').addEventListener('click',()=>{if(!window.XLSX)return toast('Excel tools are still loading');XLSX.writeFile(templateWorkbook(),'ISP_Input_Templates.xlsx')});
+$('#demoBtn').addEventListener('click',()=>{state.inputs=structuredClone(demo);state.filenames={setup:'Demo Semester Setup.xlsx',faculty:'Built-in IS faculty',students:'Demo Student Responses.xlsx'};state.term=$('#termInput').value.trim()||'Demo';$('#termInput').value=state.term;state.included={};state.capacities={};state.approved=false;state.options=[];updateInputs();updateTop();autosave();toast('Demo workspace loaded')});
+$('#templateBtn').addEventListener('click',()=>{if(!window.XLSX)return toast('Excel tools are still loading');XLSX.writeFile(templateWorkbook(),'ISP_Semester_Setup_Template.xlsx')});
+$('#demoFileBtn').addEventListener('click',()=>{if(!window.XLSX)return toast('Excel tools are still loading');XLSX.writeFile(demoWorkbook(),'ISP_Demo_Input.xlsx')});
 $('#toDemandBtn').addEventListener('click',()=>{state.term=$('#termInput').value.trim();showStep(2)});
 $('#adjustment').addEventListener('input',e=>{state.adjustment=num(e.target.value);state.approved=false;state.options=[];renderDemand();autosave()});
 $('#aiRecommendBtn').addEventListener('click',()=>{state.adjustment=recommendedAdjustment();state.approved=false;state.options=[];renderDemand();toast(`Recommended adjustment applied: +${state.adjustment}%`)});
