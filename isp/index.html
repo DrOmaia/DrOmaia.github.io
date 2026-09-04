@@ -8,9 +8,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1">
+  <link rel="stylesheet" href="styles.css?v=2">
+  <link rel="stylesheet" href="overrides.css?v=1">
   <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script defer src="app.js?v=3"></script>
+  <script defer src="app.js?v=4"></script>
 </head>
 <body>
   <header class="topbar">
@@ -41,7 +42,7 @@
     <main>
       <section class="view active" data-view="1">
         <div class="page-head">
-          <div><span class="eyebrow">Step 1 of 5</span><h1>Prepare the planning workspace</h1><p>Set the term, then load the four inputs. You can start with the demo to explore the complete workflow.</p></div>
+          <div><span class="eyebrow">Step 1 of 5</span><h1>Prepare the planning workspace</h1><p>Set the term and upload one required setup file. Student and faculty responses are optional.</p></div>
           <button class="btn dark" id="demoBtn">Load demo workspace</button>
         </div>
 
@@ -56,17 +57,17 @@
           </article>
 
           <article class="panel inputs-panel">
-            <div class="panel-title"><span class="icon">02</span><div><h2>Planning files</h2><p>Upload Excel or CSV. Headers are checked before planning.</p></div></div>
+            <div class="panel-title"><span class="icon">02</span><div><h2>Planning files</h2><p>All files stay in this browser. Use the template for the simplest setup.</p></div></div>
             <div class="upload-list">
-              <label class="upload" data-kind="courses"><input type="file" accept=".xlsx,.xls,.csv"><span class="upload-icon">C</span><span><strong>Course offering</strong><small>Courses proposed for the term</small></span><em>Choose file</em></label>
-              <label class="upload" data-kind="faculty"><input type="file" accept=".xlsx,.xls,.csv"><span class="upload-icon">F</span><span><strong>Faculty preferences</strong><small>Qualifications and availability</small></span><em>Choose file</em></label>
-              <label class="upload" data-kind="students"><input type="file" accept=".xlsx,.xls,.csv"><span class="upload-icon">S</span><span><strong>Student preferences</strong><small>Plans, repeats and prerequisites</small></span><em>Choose file</em></label>
-              <label class="upload" data-kind="slots"><input type="file" accept=".xlsx,.xls,.csv"><span class="upload-icon">T</span><span><strong>Official time slots</strong><small>Days, times and available rooms</small></span><em>Choose file</em></label>
+              <label class="upload required-upload" data-kind="setup"><input type="file" accept=".xlsx,.xls"><span class="upload-icon">1</span><span><strong>Semester setup</strong><small>Required · Courses and official time slots</small></span><em>Choose file</em></label>
+              <label class="upload" data-kind="students"><input type="file" accept=".xlsx,.xls,.csv"><span class="upload-icon">S</span><span><strong>Student responses</strong><small>Optional · Direct Google Form export</small></span><em>Choose file</em></label>
+              <label class="upload" data-kind="faculty"><input type="file" accept=".xlsx,.xls,.csv"><span class="upload-icon">F</span><span><strong>Faculty responses</strong><small>Optional · Direct Google Form export</small></span><em>Choose file</em></label>
             </div>
-            <div class="panel-foot"><button class="text-btn" id="templateBtn">Download Excel templates</button><span id="inputStatus">0 of 4 inputs ready</span></div>
+            <div class="panel-foot"><div class="download-links"><button class="text-btn" id="templateBtn">Download blank template</button><button class="text-btn" id="demoFileBtn">Download demo Excel</button></div><span id="inputStatus">Setup file required</span></div>
           </article>
         </div>
-        <div class="callout" id="dataCheck"><span>i</span><div><strong>Ready for source files</strong><p>Load all four files to continue. External-department courses may be included in student plans to help protect IS students from conflicts.</p></div></div>
+        <div class="callout" id="dataCheck"><span>i</span><div><strong>One required file</strong><p>Upload Semester Setup. The system already knows the CCIS course catalog, IS faculty directory, and fixed weekly delivery rules.</p></div></div>
+        <div class="rule-strip"><span><strong>Sun</strong>Campus</span><span><strong>Mon</strong>Campus</span><span><strong>Tue</strong>Online</span><span><strong>Wed</strong>Campus</span><span><strong>Thu</strong>No classes</span><span><strong>12–1</strong>Break</span></div>
         <div class="footer-actions"><span></span><button class="btn primary" id="toDemandBtn" disabled>Review demand <span>→</span></button></div>
       </section>
 
