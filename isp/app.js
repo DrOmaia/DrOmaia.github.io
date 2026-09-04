@@ -53,6 +53,10 @@ const demo = {
   ]
 };
 demo.slots.push(...demo.slots.filter(s=>s.campus==='Male').map((s,i)=>({...s,room:/lab/i.test(s.room_type)?`Lab ${i+5}`:`2-B${String(i+1).padStart(2,'0')}`})));
+demo.slots.push(
+  {slot_id:'ST-0900-L',days:'Sunday/Tuesday',start:'09:30',end:'10:45',campus:'Male',room:'Lab 11',room_type:'Lab',room_capacity:27},
+  {slot_id:'MW-0900-L',days:'Monday/Wednesday',start:'09:30',end:'10:45',campus:'Male',room:'Lab 12',room_type:'Lab',room_capacity:27}
+);
 
 let state = {
   version:1, step:1, term:'', defaultCapacity:20, adjustment:15,
@@ -145,7 +149,7 @@ function generateOne(mode,index){
       if(expected<10)issues.push(`${c.code} Section ${i+1} has ${expected} expected students; Chair decision required.`)
     })
   });
-  let studentConflicts=0;state.inputs.students.forEach(st=>{const wanted=list(st.planned_courses).map(x=>x.toUpperCase());const chosen=sections.filter(x=>wanted.includes(String(x.code).toUpperCase()));for(let i=0;i<chosen.length;i++)for(let j=i+1;j<chosen.length;j++)if(chosen[i].time_key&&chosen[i].time_key===chosen[j].time_key)studentConflicts++;const externalSlots=state.inputs.courses.filter(x=>isYes(x.external)&&wanted.includes(String(x.code).toUpperCase())).map(x=>x.fixed_slot).filter(Boolean);chosen.forEach(x=>{if(externalSlots.includes(x.slot_id))studentConflicts++})});
+  let studentConflicts=0;state.inputs.students.forEach(st=>{const wanted=list(st.planned_courses).map(x=>x.toUpperCase());for(let i=0;i<wanted.length;i++)for(let j=i+1;j<wanted.length;j++){const a=[...new Set(sections.filter(x=>String(x.code).toUpperCase()===wanted[i]&&x.time_key).map(x=>x.time_key))],b=[...new Set(sections.filter(x=>String(x.code).toUpperCase()===wanted[j]&&x.time_key).map(x=>x.time_key))];if(a.length&&b.length&&!a.some(x=>b.some(y=>x!==y)))studentConflicts++}const externalSlots=state.inputs.courses.filter(x=>isYes(x.external)&&wanted.includes(String(x.code).toUpperCase())).map(x=>x.fixed_slot).filter(Boolean);wanted.forEach(code=>{const available=sections.filter(x=>String(x.code).toUpperCase()===code&&x.slot_id).map(x=>x.slot_id);if(available.length&&available.every(x=>externalSlots.includes(x)))studentConflicts++})});
   const facultyMatches=sections.filter(x=>{const f=state.inputs.faculty.find(f=>f.instructor===x.instructor);return f&&list(f.preferred_slots).includes(x.slot_id)}).length;const pref=Math.round(100*facultyMatches/Math.max(1,sections.filter(x=>x.slot_id).length));
   return {mode,name:mode==='student'?'Student priority':mode==='faculty'?'Faculty priority':'Balanced',description:mode==='student'?'Minimizes likely student course clashes.':mode==='faculty'?'Gives stronger weight to faculty time preferences.':'Balances student conflicts, faculty preferences, and resource use.',sections,issues,studentConflicts,facultyPreference:pref,manual:sections.filter(x=>!x.slot_id).length,score:Math.max(0,100-studentConflicts*7-sections.filter(x=>!x.slot_id).length*10-Math.max(0,70-pref)/4)}
 }
