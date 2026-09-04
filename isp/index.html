@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Private, browser-based schedule decision support for the PSU Information Systems Department.">
+  <title>ISP · IS Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark">ISP</span>
+      <div><strong>IS Planner</strong><small>Information Systems Department</small></div>
+    </div>
+    <div class="top-actions">
+      <span class="privacy"><i></i> Local processing</span>
+      <button class="btn ghost" id="resumeBtn">Resume project</button>
+      <button class="btn primary" id="saveBtn">Save project</button>
+    </div>
+  </header>
+
+  <div class="shell">
+    <aside class="rail" aria-label="Planning steps">
+      <div class="term-chip"><span>Planning term</span><strong id="termLabel">Not set</strong></div>
+      <nav id="stepNav">
+        <button class="step active" data-step="1"><b>1</b><span>Setup<small>Term and source files</small></span></button>
+        <button class="step" data-step="2"><b>2</b><span>Demand<small>Projection and capacity</small></span></button>
+        <button class="step" data-step="3"><b>3</b><span>Offering<small>Final course approval</small></span></button>
+        <button class="step" data-step="4"><b>4</b><span>Schedules<small>Compare three options</small></span></button>
+        <button class="step" data-step="5"><b>5</b><span>Export<small>Registration workbook</small></span></button>
+      </nav>
+      <div class="rail-note"><strong>Private by design</strong><p>Your spreadsheets are processed in this browser and are never uploaded to this website.</p></div>
+    </aside>
+
+    <main>
+      <section class="view active" data-view="1">
+        <div class="page-head">
+          <div><span class="eyebrow">Step 1 of 5</span><h1>Prepare the planning workspace</h1><p>Set the term, then load the four inputs. You can start with the demo to explore the complete workflow.</p></div>
+          <button class="btn dark" id="demoBtn">Load demo workspace</button>
+        </div>
+
+        <div class="setup-grid">
+          <article class="panel term-panel">
+            <div class="panel-title"><span class="icon">01</span><div><h2>Term details</h2><p>Used in saved projects and exported reports.</p></div></div>
+            <label>Academic term<input id="termInput" placeholder="e.g., 262" autocomplete="off"></label>
+            <div class="inline-fields">
+              <label>Default section capacity<input id="defaultCapacity" type="number" min="10" max="27" value="20"></label>
+              <label>Maximum capacity<input value="27" disabled></label>
+            </div>
+          </article>
+
+          <article class="panel inputs-panel">
+            <div class="panel-title"><span class="icon">02</span><div><h2>Planning files</h2><p>Upload Excel or CSV. Headers are checked before planning.</p></div></div>
+            <div class="upload-list">
+              <label class="upload" data-kind="courses"><input type="file" accept=".xlsx,.xls,.csv"><span class="upload-icon">C</span><span><strong>Course offering</strong><small>Courses proposed for the term</small></span><em>Choose file</em></label>
+              <label class="upload" data-kind="faculty"><input type="file" accept=".xlsx,.xls,.csv"><span class="upload-icon">F</span><span><strong>Faculty preferences</strong><small>Qualifications and availability</small></span><em>Choose file</em></label>
+              <label class="upload" data-kind="students"><input type="file" accept=".xlsx,.xls,.csv"><span class="upload-icon">S</span><span><strong>Student preferences</strong><small>Plans, repeats and prerequisites</small></span><em>Choose file</em></label>
+              <label class="upload" data-kind="slots"><input type="file" accept=".xlsx,.xls,.csv"><span class="upload-icon">T</span><span><strong>Official time slots</strong><small>Days, times and available rooms</small></span><em>Choose file</em></label>
+            </div>
+            <div class="panel-foot"><button class="text-btn" id="templateBtn">Download Excel templates</button><span id="inputStatus">0 of 4 inputs ready</span></div>
+          </article>
+        </div>
+        <div class="callout" id="dataCheck"><span>i</span><div><strong>Ready for source files</strong><p>Load all four files to continue. External-department courses may be included in student plans to help protect IS students from conflicts.</p></div></div>
+        <div class="footer-actions"><span></span><button class="btn primary" id="toDemandBtn" disabled>Review demand <span>→</span></button></div>
+      </section>
+
+      <section class="view" data-view="2">
+        <div class="page-head compact"><div><span class="eyebrow">Step 2 of 5</span><h1>Demand projection</h1><p>Use the response gap to model students who did not complete the survey.</p></div></div>
+        <div class="metric-row" id="demandMetrics"></div>
+        <article class="panel projection-panel">
+          <div class="projection-top">
+            <div><h2>Response gap adjustment</h2><p>Applied to the collected demand across the full offering.</p></div>
+            <button class="btn soft" id="aiRecommendBtn">Use recommended</button>
+          </div>
+          <div class="slider-wrap">
+            <input id="adjustment" type="range" min="0" max="30" step="5" value="15">
+            <output id="adjustmentValue">+15%</output>
+          </div>
+          <div class="recommendation" id="recommendationText"></div>
+        </article>
+        <article class="panel table-panel"><div class="table-head"><div><h2>Projected course demand</h2><p>Capacity is editable per course from 10 to 27.</p></div><div class="legend"><span class="dot warning"></span>Chair review</div></div><div class="table-scroll"><table><thead><tr><th>Course</th><th>Campus</th><th>Collected</th><th>Base demand</th><th>Projected</th><th>Capacity</th><th>Sections</th><th>Status</th></tr></thead><tbody id="demandBody"></tbody></table></div></article>
+        <div class="footer-actions"><button class="btn ghost" data-back="1">Back</button><button class="btn primary" data-next="3">Review offering <span>→</span></button></div>
+      </section>
+
+      <section class="view" data-view="3">
+        <div class="page-head compact"><div><span class="eyebrow">Step 3 of 5</span><h1>Final course offering</h1><p>Confirm exactly what will be offered. The schedule cannot be generated before your approval.</p></div><div class="approval-state" id="approvalState">Awaiting Chair approval</div></div>
+        <article class="panel table-panel"><div class="table-head"><div><h2>Courses proposed for Term <span class="term-inline">—</span></h2><p>Exclude, edit capacity, or confirm each item.</p></div><button class="text-btn" id="selectAllBtn">Select all</button></div><div class="table-scroll"><table><thead><tr><th>Offer</th><th>Course</th><th>Campus</th><th>Projected demand</th><th>Sections</th><th>Capacity plan</th><th>Notes</th></tr></thead><tbody id="offeringBody"></tbody></table></div></article>
+        <div class="approval-box"><div><strong>Chair approval gate</strong><p>Approval locks the current offering for schedule generation. You can unlock it later if the offering changes.</p></div><button class="btn approve" id="approveBtn">Approve course offering</button></div>
+        <div class="footer-actions"><button class="btn ghost" data-back="2">Back</button><button class="btn primary" id="generateBtn" disabled>Build schedule options <span>→</span></button></div>
+      </section>
+
+      <section class="view" data-view="4">
+        <div class="page-head compact"><div><span class="eyebrow">Step 4 of 5</span><h1>Schedule options</h1><p>Compare the alternatives, inspect warnings, and select the working schedule.</p></div><button class="btn soft" id="rebuildBtn">Rebuild options</button></div>
+        <div class="option-tabs" id="optionTabs"></div>
+        <div class="metric-row" id="scheduleMetrics"></div>
+        <div class="schedule-layout">
+          <article class="panel calendar-panel"><div class="table-head"><div><h2 id="optionTitle">Weekly schedule</h2><p id="optionDesc"></p></div><div class="filter-group"><select id="campusFilter"><option value="all">All campuses</option><option value="Male">Male</option><option value="Female">Female</option></select></div></div><div class="calendar" id="calendar"></div></article>
+          <aside class="panel issue-panel"><h2>Decision notes</h2><div id="issueList"></div></aside>
+        </div>
+        <article class="panel table-panel"><div class="table-head"><div><h2>Section details</h2><p>Assignments are proposed until the final export is approved.</p></div></div><div class="table-scroll"><table><thead><tr><th>Course</th><th>Section</th><th>Campus</th><th>Expected</th><th>Days & time</th><th>Instructor</th><th>Room</th><th>Status</th></tr></thead><tbody id="sectionBody"></tbody></table></div></article>
+        <div class="footer-actions"><button class="btn ghost" data-back="3">Back</button><button class="btn primary" data-next="5">Prepare export <span>→</span></button></div>
+      </section>
+
+      <section class="view" data-view="5">
+        <div class="page-head compact"><div><span class="eyebrow">Step 5 of 5</span><h1>Export the working plan</h1><p>Download the Registration workbook or save the complete project for later revision.</p></div></div>
+        <div class="export-grid">
+          <article class="export-card featured"><span class="export-icon">XLSX</span><h2>Registration workbook</h2><p>Section requests, detailed schedule, faculty schedule, conflict report, and summary.</p><button class="btn primary" id="exportExcelBtn">Export Excel workbook</button></article>
+          <article class="export-card"><span class="export-icon">ISP</span><h2>Encrypted project</h2><p>Preserves inputs, preferences, decisions, options, and your last completed step.</p><button class="btn dark" id="saveProjectBtn">Save project file</button></article>
+        </div>
+        <article class="panel final-summary"><h2>Export summary</h2><div class="summary-grid" id="exportSummary"></div><div class="privacy-line"><span>✓</span>Student identifiers and individual preferences are excluded from the Registration workbook.</div></article>
+        <div class="footer-actions"><button class="btn ghost" data-back="4">Back</button><button class="btn ghost" id="newProjectBtn">Start a new project</button></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal" id="passwordModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
+    <div class="modal-card"><button class="modal-close" aria-label="Close">×</button><span class="modal-kicker">Encrypted project</span><h2 id="modalTitle">Protect your project</h2><p id="modalText">Enter a password. You will need it to resume this project.</p><label>Password<input id="projectPassword" type="password" minlength="6" autocomplete="new-password"></label><div class="modal-actions"><button class="btn ghost modal-cancel">Cancel</button><button class="btn primary" id="modalConfirm">Continue</button></div><small id="modalError"></small></div>
+  </div>
+  <input id="projectFile" type="file" accept=".isp,.json" hidden>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
