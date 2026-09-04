@@ -1512,6 +1512,9 @@ $("#demoBtn").addEventListener("click", () => {
   state.term = $("#termInput").value.trim() || "Demo";
   $("#termInput").value = state.term;
   state.included = {};
+  demo.courses
+    .filter((c) => !isYes(c.external))
+    .forEach((c) => (state.included[courseKey(c)] = true));
   state.capacities = {};
   state.approved = false;
   state.options = [];
