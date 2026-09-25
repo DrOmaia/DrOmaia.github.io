@@ -464,6 +464,11 @@ h1 {
   box-shadow: 0 12px 44px rgba(0, 0, 0, 0.06);
 }
 
+/* Keep filtered cards out of the layout despite their grid display rule. */
+.publication-card[hidden] {
+  display: none;
+}
+
 .pub-index {
   display: flex;
   flex-direction: column;

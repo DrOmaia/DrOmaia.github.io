@@ -80,5 +80,15 @@
     });
   });
 
+  const params = new URLSearchParams(location.search);
+  [["theme", theme], ["year", year], ["type", type]].forEach(([key, control]) => {
+    const value = params.get(key);
+    if (value !== null && [...control.options].some((option) => option.value === value)) {
+      control.value = value;
+    }
+  });
+  search.value = params.get("q") || "";
+
   applyFilters();
 })();
+

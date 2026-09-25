@@ -17,9 +17,9 @@
         const path = location.pathname;
         const wantsArabic = lang === "ar" || (!lang && /^ar\b/i.test(navigator.language || ""));
         if (here === "en" && wantsArabic) {
-          location.replace("/ar" + (path === "/" ? "/" : path) + location.hash);
+          location.replace("/ar" + (path === "/" ? "/" : path) + location.search + location.hash);
         } else if (here === "ar" && lang === "en") {
-          location.replace(path.replace(/^\/ar\/?/, "/") + location.hash);
+          location.replace(path.replace(/^\/ar\/?/, "/") + location.search + location.hash);
         }
       })();
     </script>
@@ -480,7 +480,7 @@
         background: var(--surface2);
       }
       main > section {
-        padding: 110px 0;
+        padding: 84px 0;
       }
       main {
         counter-reset: portfolio-section;
@@ -533,7 +533,7 @@
         display: grid;
         grid-template-columns: 0.75fr 1.25fr;
         gap: 60px;
-        margin-bottom: 42px;
+        margin-bottom: 30px;
       }
       .kicker {
         color: var(--gold);
@@ -543,7 +543,7 @@
         font-weight: 800;
       }
       .section-head h2 {
-        font-size: clamp(2.1rem, 4vw, 4rem);
+        font-size: clamp(1.9rem, 3vw, 2.9rem);
         line-height: 1.05;
         letter-spacing: -0.055em;
         margin: 12px 0;
@@ -628,11 +628,6 @@
         color: var(--muted);
         margin: 0;
       }
-      .education-layout {
-        display: grid;
-        grid-template-columns: 1.15fr 0.85fr;
-        gap: 18px;
-      }
       .degree-card {
         position: relative;
         overflow: hidden;
@@ -640,32 +635,6 @@
         border: 1px solid var(--line);
         border-radius: 28px;
         padding: 30px;
-      }
-      .degree-card.featured {
-        min-height: 100%;
-        background:
-          radial-gradient(
-            circle at 90% 5%,
-            color-mix(in srgb, var(--blue) 19%, transparent),
-            transparent 42%
-          ),
-          linear-gradient(145deg, var(--surface), var(--surface2));
-        border-color: color-mix(in srgb, var(--gold) 42%, var(--line));
-      }
-      .degree-card.featured::after {
-        content: "PhD";
-        position: absolute;
-        inset-inline-end: -10px;
-        bottom: -42px;
-        color: color-mix(in srgb, var(--text) 4%, transparent);
-        font-size: 9rem;
-        line-height: 1;
-        font-weight: 800;
-        pointer-events: none;
-      }
-      .degree-stack {
-        display: grid;
-        gap: 18px;
       }
       .degree-top {
         display: flex;
@@ -695,9 +664,6 @@
         margin: 0 0 8px;
         font-size: clamp(1.25rem, 2.3vw, 2rem);
         line-height: 1.22;
-      }
-      .degree-stack .degree-card h3 {
-        font-size: 1.15rem;
       }
       .degree-institution {
         color: var(--blue);
@@ -1387,20 +1353,9 @@
           grid-template-columns: 1fr;
           gap: 10px;
         }
-        .education-layout {
-          grid-template-columns: 1fr;
-          gap: 10px;
-        }
-        .degree-stack {
-          gap: 10px;
-        }
         .degree-card {
           padding: 20px;
           border-radius: 18px;
-        }
-        .degree-card.featured::after {
-          font-size: 6rem;
-          bottom: -25px;
         }
         .degree-top {
           margin-bottom: 18px;
@@ -1408,8 +1363,7 @@
         .degree-year {
           font-size: 1.25rem;
         }
-        .degree-card h3,
-        .degree-stack .degree-card h3 {
+      .degree-card h3 {
           font-size: 1.05rem;
         }
         .degree-detail {
@@ -2113,6 +2067,33 @@
           transform: none;
         }
       }
+
+      .recent { display: flex; flex-wrap: wrap; gap: 8px 22px; padding: 0; margin: 18px 0 0; list-style: none; font-size: .82rem; color: var(--muted); }
+      .recent time { color: var(--gold); font-weight: 800; }
+      .theme-strip { display: flex; flex-wrap: wrap; gap: 9px; padding: 0; margin: 0 0 22px; list-style: none; }
+      .theme-strip a { display: block; padding: 8px 13px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted); font-size: .76rem; font-weight: 800; text-decoration: none; }
+      .theme-strip a:hover { color: var(--section-accent); }
+      .degree-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 22px; }
+      .degree-row .degree-card { padding: 20px; border-radius: 18px; }
+      .degree-row .degree-top { margin-bottom: 12px; }
+      .degree-row h3 { font-size: 1.1rem; }
+      .degree-row .degree-institution { font-size: .85rem; }
+      .degree-row .ranking-link { font-size: .72rem; }
+      .compact-details > .degree-detail { margin: 0 18px 18px; }
+      #service .community-impact { display: block; padding: 18px 22px; margin-bottom: 18px; color: var(--muted); font-size: .9rem; }
+      .review-summary, .recognition-summary { color: var(--muted); font-size: .9rem; margin: 22px 0; }
+      @media (max-width: 700px) { .degree-row, #service .grid2 { grid-template-columns: 1fr; } }
+      @media (min-width: 981px) {
+        .research-snapshot { grid-template-columns: minmax(0, 1fr) auto; gap: 28px; padding: 26px; }
+        .research-snapshot .research-actions { flex-direction: column; }
+        .case-study { grid-template-columns: 1fr 1fr; padding: 26px; }
+        .timeline .role { padding: 14px 22px; }
+        .section-head { grid-template-columns: 1fr 1fr; gap: 32px; }
+        .featured-work { padding: 20px; }
+        .hero { padding-top: 110px; }
+        .hero .actions, .hero .metrics-bar { margin-top: 24px; }
+        main > section:not(.hero) .section-head > div:first-child::before { margin-bottom: 12px; }
+      }
     </style>
   </head>
   <body>
@@ -2123,15 +2104,7 @@
           ><b data-ar="د. أمية">Dr. Omaia</b>
           <span data-ar="العمري">Al‑Omari</span></a
         >
-        <nav class="nav" id="nav" aria-label="Primary navigation" data-ar-aria-label="التنقل الرئيسي">
-          <a href="#education" data-ar="التعليم">Education</a
-          ><a href="#research" data-ar="البحث">Research</a
-          ><a href="publications.html" data-ar="المنشورات">Publications</a
-          ><a href="#teaching" data-ar="التدريس">Teaching</a
-          ><a href="#experience" data-ar="الخبرة">Experience</a
-          ><a href="#service" data-ar="الخدمة">Service</a
-          ><a href="#contact" data-ar="تواصل">Contact</a>
-        </nav>
+        <nav aria-label="Primary navigation" class="nav" data-ar-aria-label="التنقل الرئيسي" id="nav"><a data-ar="البحث" href="#research">Research</a><a data-ar="المنشورات" href="publications.html">Publications</a><a data-ar="الخدمة" href="#service">Service</a><a data-ar="التدريس" href="#teaching">Teaching</a><a data-ar="الخبرة" href="#experience">Experience</a><a data-ar="تواصل" href="#contact">Contact</a></nav>
         <div class="controls">
           <a
             class="icon-btn lang-link"
@@ -2177,366 +2150,253 @@
       </div>
     </header>
     <main id="main">
-      <section class="hero" id="home">
-        <div class="wrap">
-          <div class="hero-grid">
-            <div class="hero-copy">
-              <div class="eyebrow" data-ar="قسم نظم المعلومات · جامعة الأمير سلطان">
+
+
+
+
+
+
+
+<section class="hero" id="home">
+<div class="wrap">
+<div class="hero-grid">
+<div class="hero-copy">
+<div class="eyebrow" data-ar="قسم نظم المعلومات · جامعة الأمير سلطان">
                 Information Systems Department · Prince Sultan University
               </div>
-              <h1>
-                <span data-ar="د. أمية">Dr. Omaia</span><br >
-                <span class="gradient" data-ar="العمري">Al-Omari</span>
-              </h1>
-              <h2 data-ar="رئيس قسم نظم المعلومات · أستاذ مساعد في الذكاء الاصطناعي ونظم المعلومات">
+<h1>
+<span data-ar="د. أمية">Dr. Omaia</span><br/>
+<span class="gradient" data-ar="العمري">Al-Omari</span>
+</h1>
+<h2 data-ar="رئيس قسم نظم المعلومات · أستاذ مساعد في الذكاء الاصطناعي ونظم المعلومات">
                 Chair, Information Systems Department · Assistant Professor of AI &amp; Information Systems
               </h2>
-              <p class="lead" data-ar="أربط البحث التطبيقي في الذكاء الاصطناعي بالتعليم المتمحور حول الطالب، لصناعة أثر مسؤول وعملي في الرعاية الصحية والتعليم والأنظمة الذكية.">
-                Bridging applied AI research and student-centered education to
-                create responsible, practical impact across healthcare,
-                education, and intelligent systems.
-              </p>
-              <div class="actions">
-                <a class="btn primary" href="#education" data-ar="التعليم"
-                  >Education</a
-                ><a class="btn secondary" href="publications.html" data-ar="استعراض المنشورات"
-                  >Explore Publications</a
-                ><a
-                  class="btn textual"
-                  href="Dr-Omaia-Al-Omari-Concise-Academic-CV.pdf"
-                  target="_blank"
-                  rel="noopener"
-                  data-ar="عرض السيرة الأكاديمية · PDF · 3 صفحات ↗"
-                  >View Academic CV · PDF · 3 pages ↗</a
-                >
-              </div>
-              <div id="metricsBar" class="metrics-bar" role="group" aria-label="Academic profile highlights" data-ar-aria-label="أبرز مؤشرات الملف الأكاديمي">
-                <div class="metric"><strong>18+</strong><span data-ar="عاماً من الخبرة">Years of experience</span></div>
-                <a
-                  class="metric"
-                  href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ"
-                  target="_blank"
-                  rel="noopener"
-                >
-                  <strong>450+</strong>
-                  <span data-ar="استشهاد · Google Scholar ↗">Citations · Google Scholar ↗</span>
-                </a>
-                <a
-                  class="metric"
-                  href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ"
-                  target="_blank"
-                  rel="noopener"
-                >
-                  <strong>12</strong>
-                  <span data-ar="مؤشر h · Google Scholar ↗">h-index · Google Scholar ↗</span>
-                </a>
-                <a class="metric" href="publications.html">
-                  <strong>37</strong>
-                  <span data-ar="عملاً موثقاً">Verified works</span>
-                </a>
-              </div>
-            </div>
-            <div class="portrait">
-              <img
-                src="PhotoDrOmaia.webp"
-                width="1127"
-                height="1396"
-                id="portraitImage"
-                alt="Professional portrait of Dr. Omaia Al-Omari"
-                data-ar-alt="صورة مهنية للدكتور أمية العمري"
-                fetchpriority="high"
-              >
-            </div>
-          </div>
-          <div id="academicLinks" class="academic-links" role="group" aria-label="Verified academic profiles" data-ar-aria-label="الحسابات الأكاديمية الموثقة">
-            <a target="_blank" rel="noopener" href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ">Google Scholar ↗</a>
-            <a target="_blank" rel="noopener" href="https://orcid.org/0000-0002-1638-1771">ORCID ↗</a>
-            <a target="_blank" rel="noopener" href="https://www.scopus.com/authid/detail.uri?authorId=56303160900">Scopus ↗</a>
-            <a target="_blank" rel="noopener" href="https://facultyportal.psu.edu.sa/ViewProfile.aspx?instructorID=1345" data-ar="الملف في جامعة الأمير سلطان ↗">PSU Profile ↗</a>
-          </div>
-        </div>
-      </section>
+<p class="lead" data-ar="أبني أنظمة ذكاء اصطناعي قابلة للتفسير في الرعاية الصحية والأمن السيبراني والرؤية الحاسوبية، وأرأس قسم نظم المعلومات في جامعة الأمير سلطان بالرياض.">I build explainable AI systems for healthcare, cybersecurity and computer vision, and I chair the Information Systems Department at Prince Sultan University in Riyadh.</p>
+<div class="actions">
+<a class="btn primary" data-ar="البحث" href="#research">Research</a><a class="btn secondary" data-ar="استعراض المنشورات" href="publications.html">Explore Publications</a><a class="btn textual" data-ar="عرض السيرة الأكاديمية · PDF · 3 صفحات ↗" href="Dr-Omaia-Al-Omari-Concise-Academic-CV.pdf" rel="noopener" target="_blank">View Academic CV · PDF · 3 pages ↗</a>
+</div>
+<div aria-label="Academic profile highlights" class="metrics-bar" data-ar-aria-label="أبرز مؤشرات الملف الأكاديمي" id="metricsBar" role="group">
+<div class="metric"><strong>18+</strong><span data-ar="عاماً من الخبرة">Years of experience</span></div>
+<a class="metric" href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ" rel="noopener" target="_blank">
+<strong>450+</strong>
+<span data-ar="استشهاد · Google Scholar ↗">Citations · Google Scholar ↗</span>
+</a>
+<a class="metric" href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ" rel="noopener" target="_blank">
+<strong>12</strong>
+<span data-ar="مؤشر h · Google Scholar ↗">h-index · Google Scholar ↗</span>
+</a>
+<a class="metric" href="publications.html">
+<strong>37</strong>
+<span data-ar="عملاً موثقاً">Verified works</span>
+</a>
+</div><ul aria-label="Recent" class="recent" data-ar-aria-label="المستجدات"><li><time datetime="2026">2026</time> — <span data-ar="رئيس قسم نظم المعلومات، جامعة الأمير سلطان">Chair, Information Systems Department, PSU</span></li><li><time datetime="2026">2026</time> — <span data-ar="مقالتان جديدتان: YOLOv8 قابل للتفسير للتطبيقات الدفاعية (ETASR) وكشف التصيد الاحتيالي (J. Multiscale Modelling)">Two new journal articles: explainable YOLOv8 for defense (ETASR) and phishing detection (J. Multiscale Modelling)</span></li><li><time datetime="2026">2026</time> — <span data-ar="عضو هيئة تحرير المجلة البابلية للشبكات">Editorial board member, Babylonian Journal of Networking</span></li></ul>
+</div>
+<div class="portrait">
+<img alt="Professional portrait of Dr. Omaia Al-Omari" data-ar-alt="صورة مهنية للدكتور أمية العمري" fetchpriority="high" height="1396" id="portraitImage" src="PhotoDrOmaia.webp" width="1127"/>
+</div>
+</div>
+<div aria-label="Academic profiles" class="academic-links" data-ar-aria-label="الحسابات الأكاديمية" id="academicLinks" role="group">
+<a href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ" rel="noopener" target="_blank">Google Scholar ↗</a>
+<a href="https://orcid.org/0000-0002-1638-1771" rel="noopener" target="_blank">ORCID ↗</a>
+<a href="https://www.scopus.com/authid/detail.uri?authorId=56303160900" rel="noopener" target="_blank">Scopus ↗</a>
+<a data-ar="الملف في جامعة الأمير سلطان ↗" href="https://facultyportal.psu.edu.sa/ViewProfile.aspx?instructorID=1345" rel="noopener" target="_blank">PSU Profile ↗</a>
+</div>
+</div>
+</section><section id="research">
+<div class="wrap">
+<div class="section-head">
+<div>
+<span class="kicker" data-ar="البحث">Research</span>
+<h2 data-ar="ما أعمل عليه.">What I work on.</h2>
+</div>
+<p data-ar="تغطي أبحاثي ستة موضوعات و37 عملاً محكّماً، وأركز على نماذج يمكن للناس الوثوق بها وتفسيرها.">My research spans six themes and 37 peer-reviewed works, with a focus on models people can trust and explain.</p>
+</div>
+<ul class="theme-strip"><li><a data-ar="الأمن السيبراني وإنترنت الأشياء والسحابة · 9 أعمال" href="publications.html?theme=Cybersecurity%2C%20IoT%2C%20and%20cloud%20infrastructure">Cybersecurity, IoT &amp; cloud · 9 works</a></li><li><a data-ar="معالجة اللغة والتعليم ونظم المعرفة · 8" href="publications.html?theme=NLP%2C%20education%2C%20and%20knowledge%20systems">NLP, education &amp; knowledge systems · 8</a></li><li><a data-ar="الرعاية الصحية ودعم القرار السريري · 6" href="publications.html?theme=Healthcare%20and%20clinical%20decision%20support">Healthcare &amp; clinical decision support · 6</a></li><li><a data-ar="تحليلات القرار والأنظمة الذكية · 6" href="publications.html?theme=Decision%20analytics%20and%20intelligent%20systems">Decision analytics &amp; intelligent systems · 6</a></li><li><a data-ar="الرؤية الحاسوبية والذكاء البيئي · 5" href="publications.html?theme=Computer%20vision%20and%20environmental%20intelligence">Computer vision &amp; environmental intelligence · 5</a></li><li><a data-ar="الذكاء الاصطناعي المسؤول والحوكمة والمجتمع · 3" href="publications.html?theme=Responsible%20AI%2C%20governance%2C%20and%20society">Responsible AI, governance &amp; society · 3</a></li></ul><div aria-label="Selected recent works" class="featured-works" data-ar-aria-label="أعمال مختارة حديثة" role="list">
+<article class="featured-work" role="listitem">
+<div class="featured-top"><span class="featured-label" data-ar="رؤية حاسوبية موثوقة">Trustworthy computer vision</span><time datetime="2026">2026</time></div>
+<h3 dir="ltr" lang="en">Towards Trustworthy Defense AI: Real-Time Military Asset Detection with On-Demand Explainable YOLOv8</h3>
+<p data-ar="يكشف الأصول العسكرية في الفيديو المباشر ويفسّر الكشف فقط عندما يطلبه المشغّل، محافظاً على السرعة الآنية (35 إطاراً/ثانية) مع جعل القرارات عالية الخطورة قابلة للتدقيق.">Detects military assets in live video and explains a detection only when an operator asks, keeping real-time speed (35 fps) while making high-risk calls auditable.</p>
+<a class="featured-link" data-ar="عرض البحث ↗" href="https://doi.org/10.48084/etasr.17259" rel="noopener" target="_blank">View paper ↗</a>
+</article>
+<article class="featured-work" role="listitem">
+<div class="featured-top"><span class="featured-label" data-ar="الرؤية الحاسوبية">Computer vision</span><time datetime="2025">2025</time></div>
+<h3 dir="ltr" lang="en">Object Detection in Real-Time Video Surveillance Using Attention-Based Transformer-YOLOv8 Model</h3>
+<p data-ar="يحسّن قدرة كاميرات المراقبة على رصد الأجسام في المشاهد المزدحمة آنياً بإضافة آليات الانتباه وسياق المحوّلات إلى YOLOv8 (دقة 96.8%).">Makes surveillance cameras better at spotting objects in crowded scenes in real time by adding attention and transformer context to YOLOv8 (96.8% precision).</p>
+<a class="featured-link" data-ar="عرض البحث ↗" href="https://doi.org/10.1016/j.aej.2025.01.032" rel="noopener" target="_blank">View paper ↗</a>
+</article>
+<article class="featured-work" role="listitem">
+<div class="featured-top"><span class="featured-label" data-ar="الذكاء الاصطناعي الصحي · المؤلف الأول">Healthcare AI · first author</span><time datetime="2025">2025</time></div>
+<h3 dir="ltr" lang="en">CNN-Based Automated Detection of Metastatic Cancer in Histopathology Images</h3>
+<p data-ar="يرصد السرطان النقيلي في شرائح الأنسجة المرضية للثدي ويُبرز المناطق التي بُني عليها القرار، ليتمكن أخصائيو علم الأمراض من مراجعة منطق النموذج (دقة اختبار 92.3%).">Flags metastatic cancer in breast histopathology slides and highlights the regions that drove the decision, so pathologists can check the model's reasoning (92.3% test accuracy).</p>
+<a class="featured-link" data-ar="عرض البحث ↗" href="https://doi.org/10.48084/etasr.10888" rel="noopener" target="_blank">View paper ↗</a>
+</article>
+<article class="featured-work" role="listitem">
+<div class="featured-top"><span class="featured-label" data-ar="الذكاء الاصطناعي المسؤول · المؤلف الأول">Responsible AI · first author</span><time datetime="2025">2025</time></div>
+<h3 dir="ltr" lang="en">Governance and Ethical Frameworks for AI Integration in Higher Education</h3>
+<p data-ar="إطار حوكمة للجامعات التي تتبنى الذكاء الاصطناعي: كيف تُخصّص التعلم مع حماية الخصوصية وضبط التحيز والالتزام القانوني.">A governance framework for universities adopting AI: how to personalize learning while protecting privacy, controlling bias and staying legally compliant.</p>
+<a class="featured-link" data-ar="عرض البحث ↗" href="https://doi.org/10.62754/joe.v4i2.5781" rel="noopener" target="_blank">View paper ↗</a>
+</article>
+</div>
+<div class="research-snapshot">
+<div>
+<h3 data-ar="الفهرس الكامل مع مراجع APA وروابط DOI.">The full catalog, with APA references and DOIs.</h3>
 
-      <section id="education">
-        <div class="wrap">
-          <div class="section-head">
-            <div>
-              <span class="kicker" data-ar="التعليم">Education</span>
-              <h2 data-ar="أساس أكاديمي بُني بالبحث والاستقصاء.">An academic foundation built through inquiry.</h2>
-            </div>
-            <p data-ar="ترسم الدرجات الثلاث مساراً مركزاً من نظم المعلومات الحاسوبية إلى البحث المتقدم في الذكاء الاصطناعي وتحليل الوثائق العربية.">Three degrees trace a focused progression from Computer Information Systems to advanced research in Artificial Intelligence and Arabic document analysis.</p>
-          </div>
-          <div class="education-layout">
-            <article class="degree-card featured">
-              <div class="degree-top"><span class="degree-year">2021</span><span class="degree-kind" data-ar="الدكتوراه">Doctorate</span></div>
-              <h3 data-ar="دكتوراه علوم الحاسب — الذكاء الاصطناعي">PhD in Computer Science — Artificial Intelligence</h3>
-              <div class="degree-institution" data-ar="الجامعة الوطنية الماليزية (UKM)">The National University of Malaysia (UKM)</div>
-              <a class="ranking-link" href="https://www.topuniversities.com/universities/universiti-kebangsaan-malaysia-ukm" target="_blank" rel="noopener" data-ar="تصنيف QS العالمي للجامعات 2027 · المرتبة 130 ↗">QS World University Rankings 2027 · #130 ↗</a>
-              <div class="degree-detail"><small data-ar="عنوان الرسالة">Thesis</small><p data-ar="استخراج الأسماء والأفعال وخوارزمية قطيع الكريل الهجينة لاختيار السمات في تصنيف الوثائق">Noun Verb Extraction and Hybrid Krill Herd as Feature Selection for Document Classification</p></div>
-            </article>
-            <div class="degree-stack">
-              <article class="degree-card">
-                <div class="degree-top"><span class="degree-year">2009</span><span class="degree-kind" data-ar="الماجستير">Master’s degree</span></div>
-                <h3 data-ar="ماجستير تقنية المعلومات وعلوم الحاسب">MSc in Information Technology and Computer Sciences</h3>
-                <div class="degree-institution" data-ar="جامعة اليرموك · الأردن">Yarmouk University · Jordan</div>
-                <div class="degree-detail"><small data-ar="عنوان الرسالة">Thesis</small><p data-ar="تقييم أثر التجذير في عنقدة الوثائق العربية">Evaluation of the Effect of Stemming on Clustering of Arabic Documents</p></div>
-              </article>
-              <article class="degree-card">
-                <div class="degree-top"><span class="degree-year">2006</span><span class="degree-kind" data-ar="البكالوريوس">Bachelor’s degree</span></div>
-                <h3 data-ar="بكالوريوس تقنية المعلومات وعلوم الحاسب">BSc in Information Technology and Computer Sciences</h3>
-                <div class="degree-institution" data-ar="جامعة اليرموك · الأردن">Yarmouk University · Jordan</div>
-              </article>
-            </div>
-          </div>
-        </div>
-      </section>
+</div>
+<div class="research-actions">
+<a class="btn primary" data-ar="استعراض الأعمال الموثقة الـ37" href="publications.html">Explore all 37 verified works</a>
+<a class="btn secondary" data-ar="تنزيل ملف الأعمال البحثية · PDF" download="" href="Dr-Omaia-Al-Omari-Verified-Research-Portfolio-2011-2026.pdf">Download research portfolio · PDF</a>
+</div>
+</div>
+</div>
+</section><section id="service">
+<div class="wrap">
+<div class="section-head">
+<div>
+<span class="kicker" data-ar="القيادة والخدمة">Leadership &amp; service</span>
+<h2 data-ar="القيادة والخدمة.">Leadership and service.</h2>
+</div>
+<p data-ar="أقود قسمي، وأسهم في العمل التحريري والتحكيم، وأخدم مجتمعي.">I lead my department, contribute to editorial and reviewing work, and serve my community.</p>
+</div>
+<article class="community-impact" data-ar="أكثر من 700 ساعة تطوع موثقة · شهادة المنصة الوطنية للعمل التطوعي، أغسطس 2026">700+ documented volunteer hours · National Volunteer Work Platform certificate, Aug 2026</article>
+<div class="grid2">
+<article class="card">
+<span class="tag latest" data-ar="خدمة تحريرية">Editorial service</span>
+<h3 data-ar="عضو هيئة التحرير">Editorial Board Member</h3>
+<p><b data-ar="المجلة البابلية للشبكات (BJN)">Babylonian Journal of Networking (BJN)</b> · 2026–<span data-ar="حتى الآن">Present</span></p>
+<p data-ar="المساهمة في التحكيم العلمي ودعم جودة الأبحاث ومعايير النشر الأكاديمي.">Contributing to peer review and supporting academic quality and publication standards.</p>
+<a class="verified" data-ar="صفحة هيئة التحرير ↗" href="https://mesopotamian.press/journals/index.php/BJN/editorialteam" rel="noopener" target="_blank">Editorial team page ↗</a>
+</article>
 
-      <section id="research">
-        <div class="wrap">
-          <div class="section-head">
-            <div>
-              <span class="kicker" data-ar="الملف البحثي">Research profile</span>
-              <h2 data-ar="بحث تطبيقي في الذكاء الاصطناعي برؤية مسؤولة وعملية.">Applied AI research with a responsible, practical focus.</h2>
-            </div>
-            <p data-ar="أبحاث تمتد من معالجة اللغة العربية والذكاء الاصطناعي التفسيري إلى الرعاية الصحية والأمن السيبراني والرؤية الحاسوبية ودعم القرار الذكي.">
-              Research spanning Arabic NLP, explainable AI, healthcare, cybersecurity,
-              computer vision, and intelligent decision support.
-            </p>
-          </div>
-          <div class="featured-works" role="list" aria-label="Selected recent works" data-ar-aria-label="أعمال مختارة حديثة">
-            <article class="featured-work" role="listitem">
-              <div class="featured-top"><span class="featured-label" data-ar="رؤية حاسوبية موثوقة">Trustworthy computer vision</span><time datetime="2026">2026</time></div>
-              <h3 lang="en" dir="ltr">Towards Trustworthy Defense AI: Real-Time Military Asset Detection with On-Demand Explainable YOLOv8</h3>
-              <p data-ar="يدمج YOLOv8l مع تفسيرات SHAP عند الطلب لاثنتي عشرة فئة من الأصول، ويبلغ عن mAP@0.5 بنسبة 92.3% بسرعة 35 إطاراً في الثانية.">Integrates YOLOv8l with on-demand SHAP explanations across twelve asset classes, reporting 92.3% mAP@0.5 at 35 frames per second.</p>
-              <a class="featured-link" href="https://doi.org/10.48084/etasr.17259" target="_blank" rel="noopener" data-ar="عرض البحث ↗">View paper ↗</a>
-            </article>
-            <article class="featured-work" role="listitem">
-              <div class="featured-top"><span class="featured-label" data-ar="الرؤية الحاسوبية">Computer vision</span><time datetime="2025">2025</time></div>
-              <h3 lang="en" dir="ltr">Object Detection in Real-Time Video Surveillance Using Attention-Based Transformer-YOLOv8 Model</h3>
-              <p data-ar="يجمع آليات الانتباه ونمذجة السياق بالمحوّلات مع YOLOv8 للمراقبة الآنية، محققاً دقة 96.78% واستدعاء 96.89% وmAP بنسبة 89.67%.">Combines attention and transformer context modeling with YOLOv8 for real-time surveillance, reporting 96.78% precision, 96.89% recall and 89.67% mAP.</p>
-              <a class="featured-link" href="https://doi.org/10.1016/j.aej.2025.01.032" target="_blank" rel="noopener" data-ar="عرض البحث ↗">View paper ↗</a>
-            </article>
-            <article class="featured-work" role="listitem">
-              <div class="featured-top"><span class="featured-label" data-ar="الذكاء الاصطناعي الصحي">Healthcare AI</span><time datetime="2025">2025</time></div>
-              <h3 lang="en" dir="ltr">CNN-Based Automated Detection of Metastatic Cancer in Histopathology Images</h3>
-              <p data-ar="بصفتي المؤلف الأول: إطار يجمع EfficientNetB3 وGrad-CAM على صور الأنسجة المرضية BreaKHis، بدقة اختبار 92.33% مع تحديد المناطق ذات الدلالة التشخيصية.">First author. An EfficientNetB3 and Grad-CAM framework on BreaKHis histopathology images, reaching 92.33% test accuracy while localizing diagnostically relevant regions.</p>
-              <a class="featured-link" href="https://doi.org/10.48084/etasr.10888" target="_blank" rel="noopener" data-ar="عرض البحث ↗">View paper ↗</a>
-            </article>
-            <article class="featured-work" role="listitem">
-              <div class="featured-top"><span class="featured-label" data-ar="الذكاء الاصطناعي المسؤول">Responsible AI</span><time datetime="2025">2025</time></div>
-              <h3 lang="en" dir="ltr">Governance and Ethical Frameworks for AI Integration in Higher Education</h3>
-              <p data-ar="بصفتي المؤلف الأول: إطار حوكمة يربط التعلم المخصص بالخصوصية وضبط التحيز والامتثال القانوني وبناء القدرات والمساءلة المؤسسية.">First author. A governance framework linking personalized learning with privacy, bias control, legal compliance, capacity building and institutional accountability.</p>
-              <a class="featured-link" href="https://doi.org/10.62754/joe.v4i2.5781" target="_blank" rel="noopener" data-ar="عرض البحث ↗">View paper ↗</a>
-            </article>
-          </div>
-          <div class="research-snapshot">
-            <div>
-              <h3 data-ar="ملخص موجز هنا، والتفاصيل الموثقة كاملة في صفحة المنشورات.">A concise overview here; complete evidence in Publications.</h3>
-              <p data-ar="ابحث في الفهرس الكامل حسب العنوان أو السنة أو النوع أو المنهجية أو الموضوع أو الكلمة المفتاحية. يظهر مرجع APA 7 بوضوح في كل سجل، مع رابط DOI عند توفره.">Search the full catalog by title, year, output type, methodology, topic, or keyword. Every record includes a clearly displayed APA 7 reference and a DOI link when available.</p>
-            </div>
-            <div class="research-actions">
-              <a class="btn primary" href="publications.html" data-ar="استعراض الأعمال الموثقة الـ37">Explore all 37 verified works</a>
-              <a class="btn secondary" href="Dr-Omaia-Al-Omari-Verified-Research-Portfolio-2011-2026.pdf" download data-ar="تنزيل ملف الأعمال البحثية · PDF">Download research portfolio · PDF</a>
-            </div>
-          </div>
-        </div>
-      </section>
+<article class="card">
+<span class="tag" data-ar="خدمة المناهج">Curriculum service</span>
+<h3 data-ar="لجنتا مناهج CCIS ونظم المعلومات">CCIS &amp; IS Curriculum Committees</h3>
+<p data-ar="المساهمة في مراجعة المناهج ومواءمة المقررات والتحسين المستمر في الحوسبة ونظم المعلومات.">Contributing to curriculum review, course alignment, and continuous improvement in computing and Information Systems.</p>
+</article>
+</div>
 
-      <section id="teaching">
-        <div class="wrap">
-          <div class="section-head">
-            <div>
-              <span class="kicker" data-ar="الملف التدريسي">Teaching profile</span>
-              <h2 data-ar="تعلم مصمم حول التطبيق والتأمل.">Learning designed around practice and reflection.</h2>
-            </div>
-            <p data-ar="أساعد الطلبة على الانتقال من المفاهيم إلى قرارات يمكن الدفاع عنها من خلال المشروعات التطبيقية ودراسات الحالة المستندة إلى البحث والتغذية الراجعة المنظمة.">
-              My teaching helps students move from concepts to defensible
-              decisions through applied projects, research-informed cases, and
-              structured feedback.
-            </p>
-          </div>
-          <div class="teaching-innovations">
-            <article class="innovation-card">
-              <span class="num">01</span>
-              <h3 data-ar="التعلم القائم على المشروعات">Project-Based Learning</h3>
-              <p data-ar="يستقصي الطلبة مشكلات واقعية، ويبنون حلولاً قائمة على الأدلة، ويشرحون المنطق وراء اختياراتهم.">Students investigate authentic problems, build evidence-based solutions, and communicate the reasoning behind their choices.</p>
-            </article>
-            <article class="innovation-card">
-              <span class="num">02</span>
-              <h3 data-ar="إشراف مرتبط بمتطلبات الصناعة">Industry-Aligned Supervision</h3>
-              <p data-ar="تربط مشروعات التخرج والتدريب التعاوني المتطلبات الأكاديمية بالممارسة المهنية والتوثيق وتوقعات بيئة العمل.">Senior projects and cooperative training connect academic requirements with professional practice, documentation, and workplace expectations.</p>
-            </article>
-          </div>
-          <article class="case-study">
-            <div>
-              <span class="kicker" data-ar="حالة تدريسية · IS453">Teaching case · IS453</span>
-              <h3 data-ar="من تقنية ناشئة إلى خريطة طريق للتحول الرقمي.">From an emerging technology to a digital transformation roadmap.</h3>
-              <p data-ar="تقيّم فرق الطلبة تقنية ناشئة، ثم تحول التحليل إلى استراتيجية واضحة يمكن للمؤسسة فهمها وتنفيذها.">Student teams evaluate a technology and translate their analysis into a strategy that an organization could understand and act upon.</p>
-            </div>
-            <div class="case-steps">
-              <div class="case-step"><strong data-ar="التشخيص">Assess</strong><span data-ar="النضج الرقمي والسياق التنظيمي">Digital maturity and organizational context</span></div>
-              <div class="case-step"><strong data-ar="التقييم">Evaluate</strong><span data-ar="التقنية والإطار والفوائد والمخاطر">Technology, framework, benefits, and risks</span></div>
-              <div class="case-step"><strong data-ar="التصميم">Design</strong><span data-ar="خريطة الطريق والمؤشرات والحوكمة والأخلاقيات">Roadmap, KPIs, governance, and ethics</span></div>
-              <div class="case-step"><strong data-ar="التواصل">Communicate</strong><span data-ar="تقرير استراتيجي موجز وعرض تنفيذي">A concise strategy report and executive presentation</span></div>
-            </div>
-          </article>
-          <div id="flagshipCourses" class="flagship-courses" role="group" aria-label="Flagship courses" data-ar-aria-label="المقررات الرئيسية">
-            <article class="flagship-course"><span>IS453</span><strong data-ar="اتجاهات التقنية في التحول الرقمي">Technology Trends in Digital Transformation</strong></article>
-            <article class="flagship-course"><span>IS452</span><strong data-ar="إدارة التغيير للتحول الرقمي">Change Management for Digital Transformation</strong></article>
-            <article class="flagship-course"><span>IS321</span><strong data-ar="هندسة المؤسسات">Enterprise Architecture</strong></article>
-            <article class="flagship-course"><span>IS499</span><strong data-ar="مشروع التخرج">Senior Project</strong></article>
-          </div>
-          <details class="compact-details">
-            <summary data-ar="عرض المقررات الثمانية الحديثة">View all eight recent courses</summary>
-            <div class="course-grid">
-              <article class="course-item"><span class="course-code">IS101</span><strong data-ar="مقدمة في تقنية المعلومات">Introduction to Information Technology</strong></article>
-              <article class="course-item"><span class="course-code">IS201</span><strong data-ar="مقدمة في نظم المعلومات">Introduction to Information Systems</strong></article>
-              <article class="course-item"><span class="course-code">IS231</span><strong data-ar="تحليل وتصميم النظم">Systems Analysis and Design</strong></article>
-              <article class="course-item"><span class="course-code">IS321</span><strong data-ar="هندسة المؤسسات">Enterprise Architecture</strong></article>
-              <article class="course-item"><span class="course-code">IS452</span><strong data-ar="إدارة التغيير للتحول الرقمي">Change Management for Digital Transformation</strong></article>
-              <article class="course-item"><span class="course-code">IS453</span><strong data-ar="اتجاهات التقنية في التحول الرقمي">Technology Trends in Digital Transformation</strong></article>
-              <article class="course-item"><span class="course-code">IS492</span><strong data-ar="التدريب التعاوني">Cooperative Training</strong></article>
-              <article class="course-item"><span class="course-code">IS499</span><strong data-ar="مشروع التخرج">Senior Project</strong></article>
-            </div>
-          </details>
-          <a class="verified" href="https://facultyportal.psu.edu.sa/ViewProfile.aspx?instructorID=1345" target="_blank" rel="noopener" data-ar="موثق في بوابة أعضاء هيئة التدريس الرسمية ↗">Verified on the official faculty portal ↗</a>
-        </div>
-      </section>
 
-      <section id="experience">
-        <div class="wrap">
-          <div class="section-head">
-            <div>
-              <span class="kicker" data-ar="المسيرة الأكاديمية">Academic journey</span>
-              <h2 data-ar="الخبرة الأكاديمية">Academic experience</h2>
-            </div>
-            <p data-ar="مسيرة تشمل التدريس والبحث والإرشاد الأكاديمي وتطوير المناهج وضمان الجودة والأنشطة الطلابية في الأردن وماليزيا والمملكة العربية السعودية.">A career spanning teaching, research, academic advising, curriculum development, quality assurance, and student engagement across Jordan, Malaysia, and Saudi Arabia.</p>
-          </div>
-          <div class="timeline">
-              <article class="role"><time>2026 — <span data-ar="حتى الآن">Present</span></time><div><h3 data-ar="رئيس قسم نظم المعلومات · جامعة الأمير سلطان">Chair, Information Systems Department · Prince Sultan University</h3><p data-ar="القيادة الأكاديمية لقسم نظم المعلومات في كلية علوم الحاسب والمعلومات، إلى جانب التدريس والبحث والإرشاد والمناهج والخدمة المؤسسية.">Academic leadership of the Information Systems Department, CCIS, alongside teaching, research, advising, curriculum, and institutional service.</p></div></article>
-              <article class="role"><time>2024 — <span data-ar="حتى الآن">Present</span></time><div><h3 data-ar="أستاذ مساعد · جامعة الأمير سلطان">Assistant Professor · Prince Sultan University</h3><p data-ar="قسم نظم المعلومات، كلية علوم الحاسب والمعلومات · التدريس والبحث والإرشاد والمناهج والخدمة المؤسسية.">Information Systems Department, CCIS · Teaching, research, advising, curriculum, and institutional service.</p></div></article>
-            <article class="role"><time>2014 — 2024</time><div><h3 data-ar="محاضر / عضو هيئة تدريس · جامعة شقراء">Lecturer / Faculty Member · Shaqra University</h3><p data-ar="التدريس في برامج الحوسبة مع قيادة أعمال الإرشاد الأكاديمي والأنشطة الطلابية والخدمة المجتمعية وضمان الجودة.">Teaching across computing programs with leadership in academic advising, student activities, community service, and quality assurance.</p></div></article>
-            <article class="role"><time>2013 — 2014</time><div><h3 data-ar="مساعد باحث للدراسات العليا · UKM">Graduate Research Assistant · UKM</h3><p data-ar="دعم بحثي في تحليل بيانات الأسماء المركبة باللغة الماليزية وإعدادها.">Research support in analysis and preparation of Malay-language compound-noun data.</p></div></article>
-            <article class="role"><time>2009 — 2012</time><div><h3 data-ar="محاضر · جامعة حائل">Lecturer · University of Ha’il</h3><p data-ar="تدريس بروتوكولات الإنترنت ونظم قواعد البيانات وتطوير تطبيقات الويب.">Undergraduate teaching in internet protocols, database systems, and web application development.</p></div></article>
-          </div>
-          <details class="compact-details">
-            <summary data-ar="الأدوار الأكاديمية السابقة">Earlier academic roles</summary>
-            <div class="timeline">
-              <article class="role"><time>2009</time><div><h3 data-ar="مدرس · جامعة جرش الخاصة">Instructor · Jerash Private University</h3><p data-ar="تحليل النظم ومفاهيم البرمجة ومقدمة في الحوسبة.">Systems analysis, programming concepts, and introductory computing.</p></div></article>
-              <article class="role"><time>2007 — 2009</time><div><h3 data-ar="مدرس حاسوب · مدرسة كفر أسد الثانوية">Computer Instructor · Kufr Asad Secondary School</h3><p data-ar="مقررات ومختبرات الحاسوب للصفوف من السابع إلى الثاني عشر.">Computer courses and laboratories for grades 7–12.</p></div></article>
-              <article class="role"><time>2006 — 2007</time><div><h3 data-ar="مساعد تدريس · جامعة اليرموك">Teaching Assistant · Yarmouk University</h3><p data-ar="المساعدة في تدريس نظم الوسائط المتعددة والتقييم.">Supported Multimedia Systems teaching and assessment.</p></div></article>
-            </div>
-          </details>
-        </div>
-      </section>
+<p class="review-summary"><span data-ar="محكّم في ">Reviewer for </span><a data-ar="Frontiers in Education" href="https://www.frontiersin.org/journals/education/articles/10.3389/feduc.2025.1704820/full" rel="noopener" target="_blank">Frontiers in Education</a><span data-ar=" (إشادة علنية) و"> (public credit), </span><a data-ar="Frontiers in Oncology" href="https://www.frontiersin.org/journals/oncology" rel="noopener" target="_blank">Frontiers in Oncology</a><span data-ar=" و">, </span><a data-ar="Discover Artificial Intelligence" href="https://link.springer.com/journal/44163" rel="noopener" target="_blank">Discover Artificial Intelligence</a><span data-ar=" و">, and the </span><a data-ar="Journal of Pharmaceutical Research International" href="https://pr.sdiarticle5.com/review-history/136753" rel="noopener" target="_blank">Journal of Pharmaceutical Research International</a>.</p>
 
-      <section id="service">
-        <div class="wrap">
-          <div class="section-head">
-            <div>
-              <span class="kicker" data-ar="القيادة والخدمة والتكريم">Leadership, service &amp; recognition</span>
-              <h2 data-ar="مساهمة تتجاوز قاعة التدريس.">Contribution beyond the classroom.</h2>
-            </div>
-            <p data-ar="خدمة تحريرية وقيادة للمناهج ولجان مؤسسية ومشاركة مجتمعية وتكريمات مرتبطة بالجودة الأكاديمية.">Editorial service, curriculum leadership, institutional committees, community engagement, and recognition for academic quality.</p>
-          </div>
-          <article class="community-impact">
-            <div class="volunteer-number"><strong>700+</strong><span data-ar="ساعة تطوعية">Volunteer hours</span></div>
-            <div class="community-copy"><h3 data-ar="خدمة مجتمعية موثقة رسميًا">Officially documented community service</h3><p data-ar="747.5 ساعة موثقة في مبادرات تعليمية ومهنية وطلابية ومجتمعية، مسجلة من أبريل 2010 حتى أغسطس 2026.">747.5 verified hours across educational, professional, student, and community initiatives, recorded from April 2010 through August 2026.</p></div>
-            <span class="verified-badge" data-ar="شهادة رسمية · المنصة الوطنية للعمل التطوعي · أغسطس 2026">Official certificate · National Volunteer Work Platform · Aug 2026</span>
-          </article>
-          <div class="grid3">
-            <article class="card">
-              <span class="tag latest" data-ar="خدمة تحريرية">Editorial service</span>
-              <h3 data-ar="عضو هيئة التحرير">Editorial Board Member</h3>
-              <p><b data-ar="المجلة البابلية للشبكات (BJN)">Babylonian Journal of Networking (BJN)</b> · 2026–<span data-ar="حتى الآن">Present</span></p>
-              <p data-ar="المساهمة في التحكيم العلمي ودعم جودة الأبحاث ومعايير النشر الأكاديمي.">Contributing to peer review and supporting academic quality and publication standards.</p>
-              <a class="verified" target="_blank" rel="noopener" href="https://mesopotamian.press/journals/index.php/BJN/editorialteam">✓ <span data-ar="عرض المصدر الرسمي">View official source</span> ↗</a>
-            </article>
-            <article class="card">
-              <span class="tag" data-ar="قيادة أكاديمية">Academic leadership</span>
-              <h3 data-ar="رئيس قسم نظم المعلومات">Chair · Information Systems Department</h3>
-              <p data-ar="مكلّف بقيادة قسم نظم المعلومات في جامعة الأمير سلطان للعام الأكاديمي 2026–2027.">Appointed to lead the Information Systems Department at Prince Sultan University for Academic Year 2026–2027.</p>
-            </article>
-            <article class="card">
-              <span class="tag" data-ar="خدمة المناهج">Curriculum service</span>
-              <h3 data-ar="لجنتا مناهج CCIS ونظم المعلومات">CCIS &amp; IS Curriculum Committees</h3>
-              <p data-ar="المساهمة في مراجعة المناهج ومواءمة المقررات والتحسين المستمر في الحوسبة ونظم المعلومات.">Contributing to curriculum review, course alignment, and continuous improvement in computing and Information Systems.</p>
-            </article>
-          </div>
-          <h3 class="recognition-title" data-ar="خدمة مختارة في التحكيم العلمي">Selected peer-review service</h3>
-          <p class="peer-review-intro" data-ar="تقييم مستقل للمخطوطات في مجلات تغطي الذكاء الاصطناعي والتعليم الرقمي والأورام والبحوث التطبيقية. تُحذف عناوين المخطوطات عندما تقتضي سرية التحكيم ذلك.">Independent manuscript assessment for journals spanning artificial intelligence, digital education, oncology, and applied research. Manuscript titles are omitted where reviewer confidentiality applies.</p>
-          <div class="peer-review-grid" aria-label="Selected peer-review service">
-            <a class="peer-review-card" href="https://www.frontiersin.org/journals/education/articles/10.3389/feduc.2025.1704820/full" target="_blank" rel="noopener">
-              <span data-ar="إشادة علنية بالمراجع">Public reviewer credit</span>
-              <strong>Frontiers in Education</strong>
-              <small data-ar="السجل الرسمي للمجلة ↗">Official journal record ↗</small>
-            </a>
-            <a class="peer-review-card" href="https://www.frontiersin.org/journals/oncology" target="_blank" rel="noopener">
-              <span data-ar="خدمة تحكيم علمي">Peer-review service</span>
-              <strong>Frontiers in Oncology</strong>
-              <small data-ar="تكليف عبر منصة التحرير · 2026 ↗">Editorial assignment · 2026 ↗</small>
-            </a>
-            <a class="peer-review-card" href="https://link.springer.com/journal/44163" target="_blank" rel="noopener">
-              <span data-ar="خدمة تحكيم علمي">Peer-review service</span>
-              <strong>Discover Artificial Intelligence</strong>
-              <small data-ar="تكليف عبر منصة التحرير · 2026 ↗">Editorial assignment · 2026 ↗</small>
-            </a>
-            <a class="peer-review-card" href="https://pr.sdiarticle5.com/review-history/136753" target="_blank" rel="noopener">
-              <span data-ar="سجل تحكيم مفتوح">Open review record</span>
-              <strong>Journal of Pharmaceutical Research International</strong>
-              <small data-ar="سجل التحكيم الرسمي · 2025 ↗">Official review history · 2025 ↗</small>
-            </a>
-          </div>
-          <h3 class="recognition-title" data-ar="تكريمات حديثة">Recent recognition</h3>
-          <div class="recognition-grid">
-            <article class="recognition-card"><time>2023</time><h3 data-ar="سفير جودة ممارس">Practicing Quality Ambassador</h3><p data-ar="جامعة شقراء · رقم العضوية 20230035">Shaqra University · Membership No. 20230035</p></article>
-            <article class="recognition-card"><time datetime="2023">2023</time><h3 data-ar="تكريم المساهمة في الاعتماد البرامجي">Program Accreditation Recognition</h3><p data-ar="تكريم من مدير جامعة شقراء للمساهمات في مشروع اعتماد برنامج علوم الحاسب.">Recognition from the Rector of Shaqra University for contributions to the Computer Science program accreditation project.</p></article>
-          </div>
-          <details class="compact-details">
-            <summary data-ar="عرض مزيد من الخدمة الأكاديمية">View more academic service</summary>
-            <div class="society-grid">
-              <article class="society-item"><span class="society-org">PSU</span><span class="society-role" data-ar="مسؤول موقع كلية علوم الحاسب والمعلومات">CCIS website administrator</span></article>
-              <article class="society-item"><span class="society-org">PSU</span><span class="society-role" data-ar="اللجنة المشتركة بين الكليات">Intercollegiate Committee</span></article>
-              <article class="society-item"><span class="society-org">PSU</span><span class="society-role" data-ar="لجنة تنسيق الاختبارات 2026">Exam Coordination Committee 2026</span></article>
-              <article class="society-item"><span class="society-org">PSU</span><span class="society-role" data-ar="تحديث الكتب الدراسية لنظم المعلومات">IS Textbooks Update</span></article>
-              <article class="society-item"><span class="society-org" data-ar="جامعة شقراء">Shaqra University</span><span class="society-role" data-ar="عضو لجنة ضمان الجودة">Quality Assurance Committee</span></article>
-              <article class="society-item"><span class="society-org" data-ar="جامعة شقراء">Shaqra University</span><span class="society-role" data-ar="تنسيق الأنشطة الطلابية والمسابقات والخدمة المجتمعية">Student activities, competitions, and community-service coordination</span></article>
-            </div>
-          </details>
-          <details class="compact-details">
-            <summary data-ar="المنح والتكريمات الأكاديمية السابقة">Earlier academic distinctions</summary>
-            <div class="award-grid">
-              <article class="award-card"><time>2009</time><h3 data-ar="منحة الماجستير">MSc Scholarship</h3><p data-ar="منحة للتفوق الأكاديمي من وزارة التعليم العالي في الأردن.">Academic-excellence scholarship from Jordan’s Ministry of Higher Education.</p></article>
-              <article class="award-card"><time>2006</time><h3 data-ar="منحة البكالوريوس">BSc Scholarship</h3><p data-ar="منحة للتفوق الأكاديمي من وزارة التعليم العالي في الأردن.">Academic-excellence scholarship from Jordan’s Ministry of Higher Education.</p></article>
-              <article class="award-card"><time data-ar="خمسة فصول دراسية">Five semesters</time><h3 data-ar="قائمة شرف العميد">Dean’s Honor List</h3><p data-ar="تكريم للتميز الأكاديمي المستمر خلال دراسة البكالوريوس في جامعة اليرموك.">Recognized for sustained academic excellence during the BSc at Yarmouk University.</p></article>
-            </div>
-          </details>
-        </div>
-      </section>
+<p class="recognition-summary" data-ar="2023 · سفير جودة ممارس، وتكريم من مدير جامعة شقراء للمساهمة في اعتماد برنامج علوم الحاسب.">2023 · Practicing Quality Ambassador, and Rector's recognition for the Computer Science program accreditation, Shaqra University.</p>
+<details class="compact-details">
+<summary data-ar="عرض مزيد من الخدمة الأكاديمية">View more academic service</summary>
+<div class="society-grid">
+<article class="society-item"><span class="society-org">PSU</span><span class="society-role" data-ar="مسؤول موقع كلية علوم الحاسب والمعلومات">CCIS website administrator</span></article>
+<article class="society-item"><span class="society-org">PSU</span><span class="society-role" data-ar="اللجنة المشتركة بين الكليات">Intercollegiate Committee</span></article>
+<article class="society-item"><span class="society-org">PSU</span><span class="society-role" data-ar="لجنة تنسيق الاختبارات 2026">Exam Coordination Committee 2026</span></article>
+<article class="society-item"><span class="society-org">PSU</span><span class="society-role" data-ar="تحديث الكتب الدراسية لنظم المعلومات">IS Textbooks Update</span></article>
+<article class="society-item"><span class="society-org" data-ar="جامعة شقراء">Shaqra University</span><span class="society-role" data-ar="عضو لجنة ضمان الجودة">Quality Assurance Committee</span></article>
+<article class="society-item"><span class="society-org" data-ar="جامعة شقراء">Shaqra University</span><span class="society-role" data-ar="تنسيق الأنشطة الطلابية والمسابقات والخدمة المجتمعية">Student activities, competitions, and community-service coordination</span></article>
+</div>
+</details>
 
-      <section id="contact">
-        <div class="wrap">
-          <div class="contact">
-            <div>
-              <span class="kicker" data-ar="التواصل">Contact</span>
-              <h2 data-ar="لنواصل الحوار.">Continue the conversation.</h2>
-              <p data-ar="اختر قناة التواصل الأنسب لرسالتك. البريد الجامعي الرسمي هو الخيار المفضل للمراسلات الأكاديمية.">Use the channel most appropriate for your message. The official university email is the preferred academic contact.</p>
-            </div>
-            <div class="contact-paths four">
-              <a class="contact-path" href="mailto:oalomari@psu.edu.sa?subject=Academic%20Collaboration%20%2F%20Faculty%20Opportunity" data-ar-href="mailto:oalomari@psu.edu.sa?subject=%D8%AA%D8%B9%D8%A7%D9%88%D9%86%20%D8%A3%D9%83%D8%A7%D8%AF%D9%8A%D9%85%D9%8A"><span class="contact-label" data-ar="البريد الرسمي">Official email</span><strong>oalomari@psu.edu.sa</strong><span data-ar="المفضل للمراسلات الأكاديمية">Preferred for academic correspondence</span></a>
-              <a class="contact-path" href="mailto:omaiaomari@yahoo.com?subject=Academic%20Collaboration%20%2F%20Faculty%20Opportunity" data-ar-href="mailto:omaiaomari@yahoo.com?subject=%D8%AA%D8%B9%D8%A7%D9%88%D9%86%20%D8%A3%D9%83%D8%A7%D8%AF%D9%8A%D9%85%D9%8A"><span class="contact-label" data-ar="البريد الشخصي">Personal email</span><strong>omaiaomari@yahoo.com</strong><span data-ar="وسيلة تواصل بديلة">Alternative contact</span></a>
-              <a class="contact-path phone" href="tel:+966598377884"><span class="contact-label" data-ar="الجوال · السعودية">Mobile&nbsp;·&nbsp;KSA</span><strong>+966&nbsp;59&nbsp;837&nbsp;7884</strong><span data-ar="اضغط للاتصال">Tap&nbsp;to&nbsp;call</span></a>
-              <a class="contact-path" href="https://linkedin.com/in/omaiaomari" target="_blank" rel="noopener"><span class="contact-label">LinkedIn</span><strong data-ar="الملف المهني ↗">Professional profile ↗</strong><span data-ar="التواصل والتحديثات المهنية">Network and professional updates</span></a>
-            </div>
-            <div class="contact-links">
-              <a class="btn primary" href="Dr-Omaia-Al-Omari-Concise-Academic-CV.pdf" target="_blank" rel="noopener" data-ar="عرض السيرة الأكاديمية · PDF · 3 صفحات ↗">View Academic CV · PDF · 3 pages ↗</a>
-              <a class="btn" target="_blank" rel="noopener" href="https://facultyportal.psu.edu.sa/ViewProfile.aspx?instructorID=1345" data-ar="الملف الرسمي في جامعة الأمير سلطان ↗">Official PSU profile ↗</a>
-              <a class="btn" target="_blank" rel="noopener" href="https://orcid.org/0000-0002-1638-1771">ORCID ↗</a>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
+</div>
+</section><section id="teaching">
+<div class="wrap">
+<div class="section-head">
+<div>
+<span class="kicker" data-ar="التدريس">Teaching</span>
+<h2 data-ar="المقررات وطريقتي في التدريس.">Courses and how I teach.</h2>
+</div>
+<p data-ar="أُدرّس التحول الرقمي وهندسة المؤسسات وتحليل النظم، وأشرف على مشاريع التخرج والتدريب التعاوني. يعمل الطلبة على مؤسسات حقيقية ويدافعون عن قراراتهم.">I teach digital transformation, enterprise architecture and systems analysis, and I supervise senior projects and cooperative training. Students work on real organizations and defend their decisions.</p>
+</div>
+
+<article class="case-study">
+<div>
+<span class="kicker" data-ar="حالة تدريسية · IS453">Teaching case · IS453</span>
+<h3 data-ar="من تقنية ناشئة إلى خريطة طريق للتحول الرقمي.">From an emerging technology to a digital transformation roadmap.</h3>
+<p data-ar="تقيّم فرق الطلبة مؤسسة ما، وتدرس تقنية ناشئة، وتحوّل التحليل إلى خريطة طريق يمكن للإدارة تنفيذها.">Student teams assess an organization, evaluate an emerging technology, and turn the analysis into a roadmap that management can act on.</p>
+</div>
+<div class="case-steps">
+<div class="case-step"><strong data-ar="التشخيص">Assess</strong><span data-ar="النضج الرقمي والسياق التنظيمي">Digital maturity and organizational context</span></div>
+<div class="case-step"><strong data-ar="التقييم">Evaluate</strong><span data-ar="التقنية والإطار والفوائد والمخاطر">Technology, framework, benefits, and risks</span></div>
+<div class="case-step"><strong data-ar="التصميم">Design</strong><span data-ar="خريطة الطريق والمؤشرات والحوكمة والأخلاقيات">Roadmap, KPIs, governance, and ethics</span></div>
+<div class="case-step"><strong data-ar="التواصل">Communicate</strong><span data-ar="تقرير استراتيجي موجز وعرض تنفيذي">A concise strategy report and executive presentation</span></div>
+</div>
+</article>
+<div aria-label="Flagship courses" class="flagship-courses" data-ar-aria-label="المقررات الرئيسية" id="flagshipCourses" role="group">
+<article class="flagship-course"><span>IS453</span><strong data-ar="اتجاهات التقنية في التحول الرقمي">Technology Trends in Digital Transformation</strong></article>
+<article class="flagship-course"><span>IS452</span><strong data-ar="إدارة التغيير للتحول الرقمي">Change Management for Digital Transformation</strong></article>
+<article class="flagship-course"><span>IS321</span><strong data-ar="هندسة المؤسسات">Enterprise Architecture</strong></article>
+<article class="flagship-course"><span>IS499</span><strong data-ar="مشروع التخرج">Senior Project</strong></article>
+</div>
+<details class="compact-details">
+<summary data-ar="عرض المقررات الثمانية الحديثة">View all eight recent courses</summary>
+<div class="course-grid">
+<article class="course-item"><span class="course-code">IS101</span><strong data-ar="مقدمة في تقنية المعلومات">Introduction to Information Technology</strong></article>
+<article class="course-item"><span class="course-code">IS201</span><strong data-ar="مقدمة في نظم المعلومات">Introduction to Information Systems</strong></article>
+<article class="course-item"><span class="course-code">IS231</span><strong data-ar="تحليل وتصميم النظم">Systems Analysis and Design</strong></article>
+<article class="course-item"><span class="course-code">IS321</span><strong data-ar="هندسة المؤسسات">Enterprise Architecture</strong></article>
+<article class="course-item"><span class="course-code">IS452</span><strong data-ar="إدارة التغيير للتحول الرقمي">Change Management for Digital Transformation</strong></article>
+<article class="course-item"><span class="course-code">IS453</span><strong data-ar="اتجاهات التقنية في التحول الرقمي">Technology Trends in Digital Transformation</strong></article>
+<article class="course-item"><span class="course-code">IS492</span><strong data-ar="التدريب التعاوني">Cooperative Training</strong></article>
+<article class="course-item"><span class="course-code">IS499</span><strong data-ar="مشروع التخرج">Senior Project</strong></article>
+</div>
+</details>
+<a class="verified" data-ar="قائمة المقررات من بوابة أعضاء هيئة التدريس ↗" href="https://facultyportal.psu.edu.sa/ViewProfile.aspx?instructorID=1345" rel="noopener" target="_blank">Course list from the PSU faculty portal ↗</a>
+</div>
+</section><section id="experience">
+<div class="wrap">
+<div class="section-head">
+<div>
+<span class="kicker" data-ar="المسيرة">Career</span>
+<h2 data-ar="المسيرة والتعليم.">Career and education.</h2>
+</div>
+<p data-ar="تمتد مسيرتي لأكثر من 18 عاماً بين الأردن وماليزيا والسعودية: تدريس وبحث وضمان جودة، ومنذ 2026 قيادة القسم.">My career spans 18+ years across Jordan, Malaysia and Saudi Arabia: teaching, research, quality assurance and, since 2026, department leadership.</p>
+</div>
+<div class="timeline">
+<article class="role"><time>2026 — <span data-ar="حتى الآن">Present</span></time><div><h3 data-ar="رئيس قسم نظم المعلومات · جامعة الأمير سلطان">Chair, Information Systems Department · Prince Sultan University</h3><p data-ar="القيادة الأكاديمية لقسم نظم المعلومات في كلية علوم الحاسب والمعلومات، إلى جانب التدريس والبحث والإرشاد والمناهج والخدمة المؤسسية.">Academic leadership of the Information Systems Department, CCIS, alongside teaching, research, advising, curriculum, and institutional service.</p></div></article>
+<article class="role"><time>2024 — <span data-ar="حتى الآن">Present</span></time><div><h3 data-ar="أستاذ مساعد · جامعة الأمير سلطان">Assistant Professor · Prince Sultan University</h3><p data-ar="قسم نظم المعلومات، كلية علوم الحاسب والمعلومات · التدريس والبحث والإرشاد والمناهج والخدمة المؤسسية.">Information Systems Department, CCIS · Teaching, research, advising, curriculum, and institutional service.</p></div></article>
+<article class="role"><time>2014 — 2024</time><div><h3 data-ar="محاضر / عضو هيئة تدريس · جامعة شقراء">Lecturer / Faculty Member · Shaqra University</h3><p data-ar="التدريس في برامج الحوسبة مع قيادة أعمال الإرشاد الأكاديمي والأنشطة الطلابية والخدمة المجتمعية وضمان الجودة.">Teaching across computing programs with leadership in academic advising, student activities, community service, and quality assurance.</p></div></article>
+<article class="role"><time>2013 — 2014</time><div><h3 data-ar="مساعد باحث للدراسات العليا · UKM">Graduate Research Assistant · UKM</h3><p data-ar="دعم بحثي في تحليل بيانات الأسماء المركبة باللغة الماليزية وإعدادها.">Research support in analysis and preparation of Malay-language compound-noun data.</p></div></article>
+<article class="role"><time>2009 — 2012</time><div><h3 data-ar="محاضر · جامعة حائل">Lecturer · University of Ha’il</h3><p data-ar="تدريس بروتوكولات الإنترنت ونظم قواعد البيانات وتطوير تطبيقات الويب.">Undergraduate teaching in internet protocols, database systems, and web application development.</p></div></article>
+</div>
+<details class="compact-details">
+<summary data-ar="الأدوار الأكاديمية السابقة">Earlier academic roles</summary>
+<div class="timeline">
+<article class="role"><time>2009</time><div><h3 data-ar="مدرس · جامعة جرش الخاصة">Instructor · Jerash Private University</h3><p data-ar="تحليل النظم ومفاهيم البرمجة ومقدمة في الحوسبة.">Systems analysis, programming concepts, and introductory computing.</p></div></article>
+<article class="role"><time>2007 — 2009</time><div><h3 data-ar="مدرس حاسوب · مدرسة كفر أسد الثانوية">Computer Instructor · Kufr Asad Secondary School</h3><p data-ar="مقررات ومختبرات الحاسوب للصفوف من السابع إلى الثاني عشر.">Computer courses and laboratories for grades 7–12.</p></div></article>
+<article class="role"><time>2006 — 2007</time><div><h3 data-ar="مساعد تدريس · جامعة اليرموك">Teaching Assistant · Yarmouk University</h3><p data-ar="المساعدة في تدريس نظم الوسائط المتعددة والتقييم.">Supported Multimedia Systems teaching and assessment.</p></div></article>
+</div>
+</details>
+<div class="degree-row"><article class="degree-card">
+<div class="degree-top"><span class="degree-year">2021</span></div>
+<h3 data-ar="دكتوراه علوم الحاسب — الذكاء الاصطناعي">PhD in Computer Science (AI)</h3>
+<div class="degree-institution" data-ar="الجامعة الوطنية الماليزية (UKM)">The National University of Malaysia (UKM)</div>
+<a class="ranking-link" data-ar="تصنيف QS العالمي للجامعات 2027 · المرتبة 130 ↗" href="https://www.topuniversities.com/universities/universiti-kebangsaan-malaysia-ukm" rel="noopener" target="_blank">QS World University Rankings 2027 · #130 ↗</a>
+
+</article><article class="degree-card">
+<div class="degree-top"><span class="degree-year">2009</span></div>
+<h3 data-ar="ماجستير تقنية المعلومات وعلوم الحاسب">MSc in IT and Computer Sciences</h3>
+<div class="degree-institution" data-ar="جامعة اليرموك · الأردن">Yarmouk University · Jordan</div>
+
+</article><article class="degree-card">
+<div class="degree-top"><span class="degree-year">2006</span></div>
+<h3 data-ar="بكالوريوس تقنية المعلومات وعلوم الحاسب">BSc in IT and Computer Sciences</h3>
+<div class="degree-institution" data-ar="جامعة اليرموك · الأردن">Yarmouk University · Jordan</div>
+</article></div><details class="compact-details"><summary data-ar="عناوين الرسائل">Thesis titles</summary><div class="degree-detail"><small data-ar="عنوان الرسالة">Thesis</small><p data-ar="استخراج الأسماء والأفعال وخوارزمية قطيع الكريل الهجينة لاختيار السمات في تصنيف الوثائق">Noun Verb Extraction and Hybrid Krill Herd as Feature Selection for Document Classification</p></div><div class="degree-detail"><small data-ar="عنوان الرسالة">Thesis</small><p data-ar="تقييم أثر التجذير في عنقدة الوثائق العربية">Evaluation of the Effect of Stemming on Clustering of Arabic Documents</p></div></details></div>
+</section><section id="contact">
+<div class="wrap">
+<div class="contact">
+<div>
+<span class="kicker" data-ar="التواصل">Contact</span>
+<h2 data-ar="لنواصل الحوار.">Continue the conversation.</h2>
+<p data-ar="اختر قناة التواصل الأنسب لرسالتك. البريد الجامعي الرسمي هو الخيار المفضل للمراسلات الأكاديمية.">Use the channel most appropriate for your message. The official university email is the preferred academic contact.</p>
+</div>
+<div class="contact-paths four">
+<a class="contact-path" data-ar-href="mailto:oalomari@psu.edu.sa?subject=%D8%AA%D8%B9%D8%A7%D9%88%D9%86%20%D8%A3%D9%83%D8%A7%D8%AF%D9%8A%D9%85%D9%8A" href="mailto:oalomari@psu.edu.sa?subject=Academic%20Collaboration%20%2F%20Faculty%20Opportunity"><span class="contact-label" data-ar="البريد الرسمي">Official email</span><strong>oalomari@psu.edu.sa</strong><span data-ar="المفضل للمراسلات الأكاديمية">Preferred for academic correspondence</span></a>
+<a class="contact-path" data-ar-href="mailto:omaiaomari@yahoo.com?subject=%D8%AA%D8%B9%D8%A7%D9%88%D9%86%20%D8%A3%D9%83%D8%A7%D8%AF%D9%8A%D9%85%D9%8A" href="mailto:omaiaomari@yahoo.com?subject=Academic%20Collaboration%20%2F%20Faculty%20Opportunity"><span class="contact-label" data-ar="البريد الشخصي">Personal email</span><strong>omaiaomari@yahoo.com</strong><span data-ar="وسيلة تواصل بديلة">Alternative contact</span></a>
+<a class="contact-path phone" href="tel:+966598377884"><span class="contact-label" data-ar="الجوال · السعودية">Mobile · KSA</span><strong>+966 59 837 7884</strong><span data-ar="اضغط للاتصال">Tap to call</span></a>
+<a class="contact-path" href="https://linkedin.com/in/omaiaomari" rel="noopener" target="_blank"><span class="contact-label">LinkedIn</span><strong data-ar="الملف المهني ↗">Professional profile ↗</strong><span data-ar="التواصل والتحديثات المهنية">Network and professional updates</span></a>
+</div>
+<div class="contact-links">
+<a class="btn primary" data-ar="عرض السيرة الأكاديمية · PDF · 3 صفحات ↗" href="Dr-Omaia-Al-Omari-Concise-Academic-CV.pdf" rel="noopener" target="_blank">View Academic CV · PDF · 3 pages ↗</a>
+<a class="btn" data-ar="الملف الرسمي في جامعة الأمير سلطان ↗" href="https://facultyportal.psu.edu.sa/ViewProfile.aspx?instructorID=1345" rel="noopener" target="_blank">Official PSU profile ↗</a>
+<a class="btn" href="https://orcid.org/0000-0002-1638-1771" rel="noopener" target="_blank">ORCID ↗</a>
+</div>
+</div>
+</div>
+</section></main>
     <footer class="footer">
       <div class="wrap">
         <span>© <span id="year"></span> Dr. Omaia Al-Omari.</span
@@ -2572,3 +2432,4 @@
     <script src="research-assistant.js"></script>
   </body>
 </html>
+

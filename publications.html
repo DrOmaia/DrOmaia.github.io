@@ -17,9 +17,9 @@
         const path = location.pathname;
         const wantsArabic = lang === "ar" || (!lang && /^ar\b/i.test(navigator.language || ""));
         if (here === "en" && wantsArabic) {
-          location.replace("/ar" + (path === "/" ? "/" : path) + location.hash);
+          location.replace("/ar" + (path === "/" ? "/" : path) + location.search + location.hash);
         } else if (here === "ar" && lang === "en") {
-          location.replace(path.replace(/^\/ar\/?/, "/") + location.hash);
+          location.replace(path.replace(/^\/ar\/?/, "/") + location.search + location.hash);
         }
       })();
     </script>
@@ -73,15 +73,7 @@
           ><b data-ar="د. أمية">Dr. Omaia</b>
           <span data-ar="العمري">Al‑Omari</span></a
         >
-        <nav class="nav" id="nav" aria-label="Primary navigation" data-ar-aria-label="التنقل الرئيسي">
-          <a href="index.html#education" data-ar="التعليم">Education</a
-          ><a href="index.html#research" data-ar="البحث">Research</a
-          ><a class="active" href="publications.html" aria-current="page" data-ar="المنشورات">Publications</a
-          ><a href="index.html#teaching" data-ar="التدريس">Teaching</a
-          ><a href="index.html#experience" data-ar="الخبرة">Experience</a
-          ><a href="index.html#service" data-ar="الخدمة">Service</a
-          ><a href="index.html#contact" data-ar="تواصل">Contact</a>
-        </nav>
+        <nav aria-label="Primary navigation" class="nav" data-ar-aria-label="التنقل الرئيسي" id="nav"><a data-ar="البحث" href="index.html#research">Research</a><a aria-current="page" class="active" data-ar="المنشورات" href="publications.html">Publications</a><a data-ar="الخدمة" href="index.html#service">Service</a><a data-ar="التدريس" href="index.html#teaching">Teaching</a><a data-ar="الخبرة" href="index.html#experience">Experience</a><a data-ar="تواصل" href="index.html#contact">Contact</a></nav>
         <div class="controls">
           <a
             class="icon-btn lang-link"
@@ -1745,3 +1737,4 @@
     <script src="research-assistant.js"></script>
   </body>
 </html>
+

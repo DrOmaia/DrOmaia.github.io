@@ -75,7 +75,7 @@ def rewrite_relative_urls(source: str) -> str:
 
     def swap(match: re.Match) -> str:
         attr, value = match.groups()
-        if value.startswith(SKIP_PREFIXES) or value.endswith(".html") or ".html#" in value or value == "":
+        if value.startswith(SKIP_PREFIXES) or value.endswith(".html") or ".html#" in value or ".html?" in value or value == "":
             return match.group(0)
         return f'{attr}="../{value}"'
 
@@ -112,3 +112,4 @@ if __name__ == "__main__":
     for page, spec in PAGES.items():
         build(page, spec)
     sys.exit(0)
+

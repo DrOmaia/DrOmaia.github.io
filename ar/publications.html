@@ -18,9 +18,9 @@
         const path = location.pathname;
         const wantsArabic = lang === "ar" || (!lang && /^ar\b/i.test(navigator.language || ""));
         if (here === "en" && wantsArabic) {
-          location.replace("/ar" + (path === "/" ? "/" : path) + location.hash);
+          location.replace("/ar" + (path === "/" ? "/" : path) + location.search + location.hash);
         } else if (here === "ar" && lang === "en") {
-          location.replace(path.replace(/^\/ar\/?/, "/") + location.hash);
+          location.replace(path.replace(/^\/ar\/?/, "/") + location.search + location.hash);
         }
       })();
     </script>
@@ -74,9 +74,7 @@
           ><b>د. أمية</b>
           <span>العمري</span></a
         >
-        <nav class="nav" id="nav" aria-label="التنقل الرئيسي">
-          <a href="index.html#education">التعليم</a><a href="index.html#research">البحث</a><a class="active" href="publications.html" aria-current="page">المنشورات</a><a href="index.html#teaching">التدريس</a><a href="index.html#experience">الخبرة</a><a href="index.html#service">الخدمة</a><a href="index.html#contact">تواصل</a>
-        </nav>
+        <nav aria-label="التنقل الرئيسي" class="nav" id="nav"><a href="index.html#research">البحث</a><a aria-current="page" class="active" href="publications.html">المنشورات</a><a href="index.html#service">الخدمة</a><a href="index.html#teaching">التدريس</a><a href="index.html#experience">الخبرة</a><a href="index.html#contact">تواصل</a></nav>
         <div class="controls">
           <a
             class="icon-btn lang-link"
@@ -1735,3 +1733,4 @@
     <script src="../research-assistant.js"></script>
   </body>
 </html>
+
