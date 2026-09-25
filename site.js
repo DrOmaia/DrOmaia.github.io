@@ -66,6 +66,59 @@
     });
   }
 
+
+  /* Reading progress on both language versions of the home and publications pages. */
+  const progress = document.querySelector(".progress");
+  if (progress) {
+    let scheduled = false;
+    const renderProgress = () => {
+      const doc = document.documentElement;
+      const remaining = doc.scrollHeight - doc.clientHeight;
+      progress.style.width = `${remaining > 0 ? Math.min(100, Math.max(0, doc.scrollTop / remaining * 100)) : 0}%`;
+      scheduled = false;
+    };
+    const requestProgress = () => {
+      if (!scheduled) {
+        scheduled = true;
+        requestAnimationFrame(renderProgress);
+      }
+    };
+    addEventListener("scroll", requestProgress, { passive: true });
+    addEventListener("resize", requestProgress, { passive: true });
+    requestProgress();
+  }
+
+  /* Reveal home-page cards only after JS loads; respect reduced motion. */
+  if (document.getElementById("research") && "IntersectionObserver" in window) {
+    const cards = document.querySelectorAll(".featured-work, .card, .service-notes, .flagship-course, .timeline .role, .degree-card");
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("in");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    cards.forEach((card) => {
+      if (card.closest("details:not([open])")) return;
+      card.classList.add("reveal");
+      observer.observe(card);
+    });
+  }
+
+  /* On a phone, show the assistant after the first screen so it cannot cover the metrics link. */
+  if (document.getElementById("home")) {
+    const syncAssistantPosition = () => {
+      document.body.classList.toggle(
+        "home-before-fold",
+        matchMedia("(max-width: 620px)").matches && scrollY < innerHeight,
+      );
+    };
+    addEventListener("scroll", syncAssistantPosition, { passive: true });
+    addEventListener("resize", syncAssistantPosition, { passive: true });
+    syncAssistantPosition();
+  }
+
   /* Footer year */
   const year = document.getElementById("year");
   if (year) year.textContent = String(new Date().getFullYear());

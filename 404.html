@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Page not found · الصفحة غير موجودة</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Noto+Naskh+Arabic:wght@400;700&display=swap">
+  <style>
+    :root { color-scheme: dark light; --bg:#07111d; --surface:#0d1a28; --text:#e9eef4; --muted:#9cafc1; --line:rgba(255,255,255,.1); --gold:#d8b45b; }
+    @media (prefers-color-scheme: light) { :root { --bg:#f4f7fa; --surface:#fff; --text:#0b1b2a; --muted:#53687b; --line:rgba(10,31,49,.12); --gold:#835d05; } }
+    * { box-sizing:border-box; }
+    body { min-height:100vh; margin:0; display:grid; place-items:center; padding:24px; background:var(--bg); color:var(--text); font-family:Manrope,Arial,sans-serif; text-align:center; line-height:1.65; }
+    main { width:min(600px,100%); padding:clamp(28px,6vw,60px); border:1px solid var(--line); border-radius:20px; background:var(--surface); }
+    h1,h2 { margin:0 0 6px; line-height:1.2; }
+    h1 { font-size:clamp(2rem,5vw,3.2rem); }
+    h2 { font-size:clamp(1.6rem,4vw,2.4rem); }
+    p { margin:0; color:var(--muted); }
+    section + section { margin-top:26px; padding-top:26px; border-top:1px solid var(--line); }
+    section[lang="ar"] { font-family:"Noto Naskh Arabic",Tahoma,Arial,sans-serif; }
+    nav { display:flex; flex-wrap:wrap; justify-content:center; gap:12px 22px; margin-top:28px; }
+    a { color:var(--gold); font-weight:800; text-underline-offset:4px; }
+    a:focus-visible { outline:3px solid var(--gold); outline-offset:4px; }
+  </style>
+</head>
+<body>
+<main>
+  <section lang="en"><h1>Page not found</h1><p>The page you asked for does not exist or has moved.</p></section>
+  <section lang="ar" dir="rtl"><h2>الصفحة غير موجودة</h2><p>الصفحة التي طلبتها غير موجودة أو تم نقلها.</p></section>
+  <nav aria-label="Navigation"><a href="/">Home / الرئيسية</a><a href="/publications.html">Publications / المنشورات</a><a href="/ar/" lang="ar">العربية</a></nav>
+</main>
+</body>
+</html>

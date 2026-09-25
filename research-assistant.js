@@ -92,11 +92,11 @@
 
   function syncAssistantLanguage() {
     const ar = document.documentElement.lang === "ar";
-    launcher.textContent = ar ? "المساعد البحثي" : "Research Assistant";
-    panel.setAttribute("aria-label", ar ? "المساعد البحثي" : "Research Assistant");
+    launcher.textContent = ar ? "اسأل عن أبحاثي" : "Ask about my research";
+    panel.setAttribute("aria-label", ar ? "اسأل عن أبحاثي" : "Ask about my research");
     panel.querySelector(".assistant-header strong").textContent = ar
-      ? "المساعد البحثي"
-      : "Research Assistant";
+      ? "اسأل عن أبحاثي"
+      : "Ask about my research";
     panel.querySelector(".assistant-header small").textContent = ar
       ? "موثق في 37 عملاً · تاريخ القطع 24 يوليو 2026"
       : "Grounded in 37 verified works · cutoff 24 July 2026";

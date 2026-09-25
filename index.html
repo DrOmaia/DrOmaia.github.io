@@ -90,7 +90,7 @@
         "@id": "https://dromaia.github.io/#profile-page",
         "url": "https://dromaia.github.io/",
         "inLanguage": "en",
-        "dateModified": "2026-09-25",
+        "dateModified": "2026-09-26",
         "mainEntity": {
           "@type": "Person",
           "@id": "https://dromaia.github.io/#omaia-al-omari",
@@ -139,7 +139,7 @@
         --bg: #07111d;
         --surface: #0d1a28;
         --surface2: #122234;
-        --text: #f4f7fa;
+        --text: #e9eef4;
         --muted: #9cafc1;
         --line: rgba(255, 255, 255, 0.1);
         --gold: #d8b45b;
@@ -555,12 +555,12 @@
       .grid3 {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 18px;
+        gap: 16px;
       }
       .grid2 {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 18px;
+        gap: 16px;
       }
       .focus-row {
         display: flex;
@@ -666,7 +666,7 @@
         line-height: 1.22;
       }
       .degree-institution {
-        color: var(--blue);
+        color: var(--gold);
         font-weight: 800;
       }
       .ranking-link {
@@ -767,67 +767,13 @@
         margin: 0;
         color: var(--muted);
       }
-      .community-impact {
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr) auto;
-        align-items: center;
-        gap: clamp(22px, 4vw, 52px);
-        margin-bottom: 18px;
-        padding: clamp(24px, 4vw, 42px);
-        overflow: hidden;
-        border: 1px solid color-mix(in srgb, var(--green) 38%, var(--line));
-        border-radius: 28px;
-        background:
-          radial-gradient(
-            circle at 8% 15%,
-            color-mix(in srgb, var(--green) 16%, transparent),
-            transparent 36%
-          ),
-          linear-gradient(135deg, var(--surface), var(--surface2));
-      }
-      .volunteer-number {
-        display: flex;
-        align-items: baseline;
-        gap: 9px;
-        min-width: 205px;
-      }
-      .volunteer-number strong {
-        color: var(--green);
-        font-size: clamp(3.7rem, 7vw, 6.3rem);
-        line-height: 0.9;
-        letter-spacing: -0.08em;
-      }
-      .volunteer-number span {
-        color: var(--muted);
-        font-size: 0.78rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-      }
-      .community-copy h3 {
-        margin: 0 0 8px;
-        font-size: clamp(1.3rem, 2vw, 1.8rem);
-      }
-      .community-copy p {
-        max-width: 680px;
-        margin: 0;
-        color: var(--muted);
-      }
-      .verified-badge {
-        padding: 8px 12px;
-        border: 1px solid color-mix(in srgb, var(--green) 40%, var(--line));
-        border-radius: 999px;
-        color: var(--green);
-        font-size: 0.7rem;
-        font-weight: 800;
-        white-space: nowrap;
-      }
+
       .verified {
         display: inline-flex;
         align-items: center;
         gap: 5px;
         min-height: 28px;
-        color: var(--green);
+        color: var(--gold);
         font-size: 0.7rem;
         font-weight: 800;
         margin-top: 10px;
@@ -926,32 +872,6 @@
         font-size: 0.84rem;
         font-weight: 700;
       }
-      .award-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 12px;
-      }
-      .award-card {
-        min-height: 190px;
-        padding: 23px;
-        border: 1px solid var(--line);
-        border-radius: 20px;
-        background: var(--surface);
-      }
-      .award-card time {
-        color: var(--gold);
-        font-weight: 800;
-      }
-      .award-card h3 {
-        margin: 22px 0 8px;
-        font-size: 1rem;
-        line-height: 1.45;
-      }
-      .award-card p {
-        margin: 0;
-        color: var(--muted);
-        font-size: 0.8rem;
-      }
       .contact {
         background: linear-gradient(135deg, var(--surface), var(--surface2));
         border: 1px solid var(--line);
@@ -962,7 +882,7 @@
         gap: 30px;
       }
       .contact h2 {
-        font-size: clamp(2rem, 5vw, 4.3rem);
+        font-size: clamp(1.9rem, 3vw, 2.9rem);
         line-height: 1;
         margin: 0 0 15px;
       }
@@ -1054,9 +974,6 @@
         .grid3 {
           grid-template-columns: 1fr;
         }
-        .award-grid {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
         .section-head {
           gap: 10px;
         }
@@ -1094,7 +1011,7 @@
           font-size: 0.72rem;
         }
         main > section {
-          padding: 80px 0;
+          padding: 64px 0;
         }
         .role {
           grid-template-columns: 1fr;
@@ -1348,7 +1265,6 @@
           gap: 10px;
         }
         .grid2,
-        .award-grid,
         .contact-paths {
           grid-template-columns: 1fr;
           gap: 10px;
@@ -1405,7 +1321,7 @@
           font-size: 2rem;
         }
         main > section {
-          padding: 58px 0;
+          padding: 52px 0;
         }
         main > section:not(.hero) .section-head > div:first-child::before,
         main > section:not(.hero) .contact > div:first-child::before {
@@ -1428,32 +1344,13 @@
         .role p {
           font-size: 0.82rem;
         }
-        .community-impact {
-          grid-template-columns: 1fr;
-          gap: 17px;
-          padding: 22px 20px;
-          border-radius: 19px;
-        }
-        .volunteer-number {
-          min-width: 0;
-        }
-        .volunteer-number strong {
-          font-size: 4rem;
-        }
-        .verified-badge {
-          justify-self: start;
-          white-space: normal;
-        }
-        .award-card {
-          min-height: 0;
-          padding: 19px;
-        }
+
         .contact {
           padding: 25px 20px;
           border-radius: 20px;
         }
         .contact h2 {
-          font-size: 2rem;
+          font-size: clamp(1.9rem, 3vw, 2.9rem);
         }
         .research-direction {
           grid-template-columns: 1fr;
@@ -1504,7 +1401,6 @@
       [data-theme="light"] .btn.primary { color: #fff; }
       /* Numbers keep their left-to-right order on the Arabic page */
       html[dir="rtl"] .metric strong,
-      html[dir="rtl"] .volunteer-number strong,
       html[dir="rtl"] .degree-year,
       html[dir="rtl"] .featured-top time {
         direction: ltr;
@@ -1513,7 +1409,7 @@
       .featured-works {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 14px;
+        gap: 16px;
         margin-bottom: 16px;
       }
       .featured-work {
@@ -1525,7 +1421,7 @@
         background: var(--surface);
       }
       .featured-work:hover {
-        border-color: color-mix(in srgb, var(--section-accent) 48%, var(--line));
+        border-color: color-mix(in srgb, var(--gold) 48%, var(--line));
       }
       .featured-top {
         display: flex;
@@ -1534,7 +1430,7 @@
         gap: 12px;
       }
       .featured-label {
-        color: var(--section-accent);
+        color: var(--gold);
         font-size: 0.68rem;
         font-weight: 800;
         letter-spacing: 0.08em;
@@ -1564,7 +1460,7 @@
         min-height: 28px;
         margin-top: auto;
         padding-top: 14px;
-        color: var(--section-accent);
+        color: var(--gold);
         font-size: 0.78rem;
         font-weight: 800;
         text-decoration: none;
@@ -1585,12 +1481,12 @@
       }
       main > section:not(.hero) .section-head > div:first-child::before,
       main > section:not(.hero) .contact > div:first-child::before {
-        border-color: color-mix(in srgb, var(--section-accent) 56%, var(--line));
-        border-inline-start-color: var(--section-accent);
-        color: var(--section-accent);
+        border-color: color-mix(in srgb, var(--gold) 56%, var(--line));
+        border-inline-start-color: var(--gold);
+        color: var(--gold);
       }
       main > section:not(.hero) .kicker {
-        color: var(--section-accent);
+        color: var(--gold);
       }
       .hero {
         min-height: auto;
@@ -1726,12 +1622,12 @@
         flex-direction: column;
         padding: 26px;
         border: 1px solid var(--line);
-        border-top: 3px solid var(--section-accent);
+        border-top: 3px solid var(--gold);
         border-radius: 22px;
         background: var(--surface);
       }
       .research-card .research-label {
-        color: var(--section-accent);
+        color: var(--gold);
         font-size: 0.71rem;
         font-weight: 800;
         letter-spacing: 0.1em;
@@ -1783,7 +1679,7 @@
       }
       .research-corpus-stats strong {
         display: block;
-        color: var(--section-accent);
+        color: var(--gold);
         font-size: 1.45rem;
         line-height: 1;
       }
@@ -1805,7 +1701,7 @@
         gap: clamp(24px, 5vw, 72px);
         padding: clamp(26px, 4vw, 44px);
         border: 1px solid var(--line);
-        border-inline-start: 4px solid var(--section-accent);
+        border-inline-start: 4px solid var(--gold);
         border-radius: 24px;
         background: var(--surface);
       }
@@ -1818,34 +1714,16 @@
         margin: 0;
         color: var(--muted);
       }
-      .teaching-innovations {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 16px;
-      }
-      .innovation-card {
-        padding: 26px;
-        border: 1px solid var(--line);
-        border-radius: 22px;
-        background: var(--surface);
-      }
-      .innovation-card .num {
-        color: var(--section-accent);
-        font-size: 1rem;
-        letter-spacing: 0.08em;
-      }
-      .innovation-card h3 { margin: 13px 0 8px; }
-      .innovation-card p { margin: 0; color: var(--muted); }
       .case-study {
         display: grid;
         grid-template-columns: 0.62fr 1.38fr;
         gap: 28px;
         margin-top: 16px;
         padding: clamp(24px, 4vw, 38px);
-        border: 1px solid color-mix(in srgb, var(--section-accent) 42%, var(--line));
+        border: 1px solid color-mix(in srgb, var(--gold) 42%, var(--line));
         border-radius: 26px;
         background:
-          radial-gradient(circle at 5% 10%, color-mix(in srgb, var(--section-accent) 13%, transparent), transparent 38%),
+          radial-gradient(circle at 5% 10%, color-mix(in srgb, var(--gold) 13%, transparent), transparent 38%),
           linear-gradient(135deg, var(--surface), var(--surface2));
       }
       .case-study h3 { margin: 9px 0; font-size: clamp(1.35rem, 2.5vw, 2rem); }
@@ -1876,7 +1754,7 @@
         border-radius: 18px;
         background: var(--surface);
       }
-      .flagship-course span { color: var(--section-accent); font-size: 0.74rem; font-weight: 800; }
+      .flagship-course span { color: var(--gold); font-size: 0.74rem; font-weight: 800; }
       .flagship-course strong { display: block; margin-top: 22px; font-size: 0.9rem; line-height: 1.5; }
       .compact-details {
         margin-top: 14px;
@@ -1893,12 +1771,11 @@
       }
       .compact-details .course-grid,
       .compact-details .timeline,
-      .compact-details .award-grid,
       .compact-details .society-grid {
         margin: 0 16px 16px;
       }
       .timeline .role {
-        border-inline-start: 3px solid var(--section-accent);
+        border-inline-start: 3px solid var(--gold);
       }
       .recognition-title {
         margin: 36px 0 15px;
@@ -1910,63 +1787,11 @@
         color: var(--muted);
         font-size: 0.86rem;
       }
-      .peer-review-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-      }
-      .peer-review-card {
-        display: flex;
-        min-height: 150px;
-        flex-direction: column;
-        padding: 22px;
-        border: 1px solid var(--line);
-        border-radius: 19px;
-        color: var(--text);
-        background: var(--surface);
-        text-decoration: none;
-      }
-      .peer-review-card:hover {
-        border-color: color-mix(in srgb, var(--section-accent) 48%, var(--line));
-        background: var(--surface2);
-      }
-      .peer-review-card span {
-        color: var(--section-accent);
-        font-size: 0.68rem;
-        font-weight: 800;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-      .peer-review-card strong {
-        margin-top: 18px;
-        font-size: 1rem;
-        line-height: 1.45;
-      }
-      .peer-review-card small {
-        margin-top: auto;
-        padding-top: 12px;
-        color: var(--muted);
-        font-size: 0.75rem;
-      }
-      .recognition-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-      }
-      .recognition-card {
-        padding: 23px;
-        border: 1px solid var(--line);
-        border-radius: 19px;
-        background: var(--surface);
-      }
-      .recognition-card time { color: var(--section-accent); font-weight: 800; }
-      .recognition-card h3 { margin: 14px 0 7px; }
-      .recognition-card p { margin: 0; color: var(--muted); }
       .contact-paths.four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .contact-path .contact-label {
         display: block;
         margin-bottom: 4px;
-        color: var(--section-accent);
+        color: var(--gold);
         font-size: 0.69rem;
         font-weight: 800;
         letter-spacing: 0.08em;
@@ -2043,14 +1868,11 @@
         .metric span { font-size: 0.58rem; letter-spacing: 0.03em; }
         .academic-links { margin-top: 12px; }
         .academic-links a { padding: 12px 8px; font-size: 0.7rem; }
-        .section-head h2 { font-size: 2.2rem; }
+        .section-head h2 { font-size: clamp(1.9rem, 3vw, 2.9rem); }
         .research-card { padding: 21px; }
         .research-footer { align-items: stretch; flex-direction: column; }
-        .teaching-innovations,
         .case-steps,
         .flagship-courses,
-        .peer-review-grid,
-        .recognition-grid,
         .contact-paths.four { grid-template-columns: 1fr; }
         .flagship-course { min-height: auto; }
         .flagship-course strong { margin-top: 12px; }
@@ -2072,7 +1894,7 @@
       .recent time { color: var(--gold); font-weight: 800; }
       .theme-strip { display: flex; flex-wrap: wrap; gap: 9px; padding: 0; margin: 0 0 22px; list-style: none; }
       .theme-strip a { display: block; padding: 8px 13px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted); font-size: .76rem; font-weight: 800; text-decoration: none; }
-      .theme-strip a:hover { color: var(--section-accent); }
+      .theme-strip a:hover { color: var(--gold); }
       .degree-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 22px; }
       .degree-row .degree-card { padding: 20px; border-radius: 18px; }
       .degree-row .degree-top { margin-bottom: 12px; }
@@ -2080,7 +1902,6 @@
       .degree-row .degree-institution { font-size: .85rem; }
       .degree-row .ranking-link { font-size: .72rem; }
       .compact-details > .degree-detail { margin: 0 18px 18px; }
-      #service .community-impact { display: block; padding: 18px 22px; margin-bottom: 18px; color: var(--muted); font-size: .9rem; }
       .review-summary, .recognition-summary { color: var(--muted); font-size: .9rem; margin: 22px 0; }
       @media (max-width: 700px) { .degree-row, #service .grid2 { grid-template-columns: 1fr; } }
       @media (min-width: 981px) {
@@ -2094,9 +1915,39 @@
         .hero .actions, .hero .metrics-bar { margin-top: 24px; }
         main > section:not(.hero) .section-head > div:first-child::before { margin-bottom: 12px; }
       }
+
+      :root:not([data-theme="light"]) h1,
+      :root:not([data-theme="light"]) h2,
+      :root:not([data-theme="light"]) h3 { color: #f4f7fa; }
+      .section-head p, .featured-work p, .card p, .service-notes p,
+      .timeline .role p, .case-study p { max-width: 68ch; }
+      .card, .featured-work, .degree-card, .flagship-course, .service-notes,
+      .compact-details, .timeline .role, .research-snapshot, .case-study { border-radius: 20px; }
+      .service-notes { border: 1px solid var(--line); background: var(--surface); padding: 18px 22px; margin: 16px 0; }
+      .service-notes p { color: var(--muted); margin: 0; font-size: .9rem; }
+      .service-notes p + p { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; }
+      .service-notes a { color: var(--gold); }
+      .card .tag { color: var(--gold); font-size: .78rem; font-weight: 800; }
+      .progress { position: fixed; top: 0; inset-inline-start: 0; width: 0; height: 2px; z-index: 100; background: var(--gold); pointer-events: none; }
+      .reveal { opacity: 0; transform: translateY(12px); transition: opacity .45s ease, transform .45s ease; }
+      .reveal.in { opacity: 1; transform: none; }
+      @media (min-width: 901px) {
+        .academic-links { margin-bottom: 72px; }
+        .hero { padding-bottom: 2px; }
+      }
+      @media (max-width: 620px) {
+        .theme-strip { flex-wrap: nowrap; overflow-x: auto; gap: 8px; padding-bottom: 6px; scrollbar-width: thin; }
+        .theme-strip li { flex: 0 0 auto; }
+        body.home-before-fold .research-assistant-launcher { visibility: hidden; pointer-events: none; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .progress { display: none; }
+        .reveal { opacity: 1; transform: none; transition: none; }
+      }
     </style>
   </head>
   <body>
+    <div class="progress" aria-hidden="true"></div>
     <a class="skip" href="#main" data-ar="تجاوز إلى المحتوى">Skip to content</a>
     <header class="header">
       <div class="wrap header-inner">
@@ -2174,7 +2025,7 @@
 <p class="lead" data-ar="أبني أنظمة ذكاء اصطناعي قابلة للتفسير في الرعاية الصحية والأمن السيبراني والرؤية الحاسوبية، وأرأس قسم نظم المعلومات في جامعة الأمير سلطان بالرياض.">I build explainable AI systems for healthcare, cybersecurity and computer vision, and I chair the Information Systems Department at Prince Sultan University in Riyadh.</p>
 <div class="actions">
 <a class="btn primary" data-ar="البحث" href="#research">Research</a><a class="btn secondary" data-ar="استعراض المنشورات" href="publications.html">Explore Publications</a><a class="btn textual" data-ar="عرض السيرة الأكاديمية · PDF · 3 صفحات ↗" href="Dr-Omaia-Al-Omari-Concise-Academic-CV.pdf" rel="noopener" target="_blank">View Academic CV · PDF · 3 pages ↗</a>
-</div>
+</div><p class="availability-note" data-ar="متاح للتعاون البحثي والمحاضرات المدعوة.">Open to research collaboration and invited talks.</p>
 <div aria-label="Academic profile highlights" class="metrics-bar" data-ar-aria-label="أبرز مؤشرات الملف الأكاديمي" id="metricsBar" role="group">
 <div class="metric"><strong>18+</strong><span data-ar="عاماً من الخبرة">Years of experience</span></div>
 <a class="metric" href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ" rel="noopener" target="_blank">
@@ -2257,8 +2108,8 @@
 </div>
 <p data-ar="أقود قسمي، وأسهم في العمل التحريري والتحكيم، وأخدم مجتمعي.">I lead my department, contribute to editorial and reviewing work, and serve my community.</p>
 </div>
-<article class="community-impact" data-ar="أكثر من 700 ساعة تطوع موثقة · شهادة المنصة الوطنية للعمل التطوعي، أغسطس 2026">700+ documented volunteer hours · National Volunteer Work Platform certificate, Aug 2026</article>
-<div class="grid2">
+
+<div class="grid3">
 <article class="card">
 <span class="tag latest" data-ar="خدمة تحريرية">Editorial service</span>
 <h3 data-ar="عضو هيئة التحرير">Editorial Board Member</h3>
@@ -2266,18 +2117,14 @@
 <p data-ar="المساهمة في التحكيم العلمي ودعم جودة الأبحاث ومعايير النشر الأكاديمي.">Contributing to peer review and supporting academic quality and publication standards.</p>
 <a class="verified" data-ar="صفحة هيئة التحرير ↗" href="https://mesopotamian.press/journals/index.php/BJN/editorialteam" rel="noopener" target="_blank">Editorial team page ↗</a>
 </article>
-
 <article class="card">
 <span class="tag" data-ar="خدمة المناهج">Curriculum service</span>
 <h3 data-ar="لجنتا مناهج CCIS ونظم المعلومات">CCIS &amp; IS Curriculum Committees</h3>
 <p data-ar="المساهمة في مراجعة المناهج ومواءمة المقررات والتحسين المستمر في الحوسبة ونظم المعلومات.">Contributing to curriculum review, course alignment, and continuous improvement in computing and Information Systems.</p>
 </article>
-</div>
+<article class="card"><span class="tag" data-ar="الخدمة المجتمعية">Community service</span><h3 data-ar="أكثر من 700 ساعة تطوعية">700+ volunteer hours</h3><p data-ar="عمل تطوعي موثق منذ 2010 في مبادرات تعليمية ومهنية وطلابية ومجتمعية — 747.5 ساعة معتمدة من المنصة الوطنية للعمل التطوعي (أغسطس 2026).">Documented volunteer work since 2010 in educational, professional, student and community initiatives — 747.5 hours certified by the National Volunteer Work Platform (Aug 2026).</p></article></div>
+<div class="service-notes"><p class="review-summary"><span data-ar="محكّم في ">Reviewer for </span><a data-ar="Frontiers in Education" href="https://www.frontiersin.org/journals/education/articles/10.3389/feduc.2025.1704820/full" rel="noopener" target="_blank">Frontiers in Education</a><span data-ar=" (إشادة علنية) و"> (public credit), </span><a data-ar="Frontiers in Oncology" href="https://www.frontiersin.org/journals/oncology" rel="noopener" target="_blank">Frontiers in Oncology</a><span data-ar=" و">, </span><a data-ar="Discover Artificial Intelligence" href="https://link.springer.com/journal/44163" rel="noopener" target="_blank">Discover Artificial Intelligence</a><span data-ar=" و">, and the </span><a data-ar="Journal of Pharmaceutical Research International" href="https://pr.sdiarticle5.com/review-history/136753" rel="noopener" target="_blank">Journal of Pharmaceutical Research International</a>.</p><p class="recognition-summary" data-ar="2023 · سفير جودة ممارس، وتكريم من مدير جامعة شقراء للمساهمة في اعتماد برنامج علوم الحاسب.">2023 · Practicing Quality Ambassador, and Rector's recognition for the Computer Science program accreditation, Shaqra University.</p></div>
 
-
-<p class="review-summary"><span data-ar="محكّم في ">Reviewer for </span><a data-ar="Frontiers in Education" href="https://www.frontiersin.org/journals/education/articles/10.3389/feduc.2025.1704820/full" rel="noopener" target="_blank">Frontiers in Education</a><span data-ar=" (إشادة علنية) و"> (public credit), </span><a data-ar="Frontiers in Oncology" href="https://www.frontiersin.org/journals/oncology" rel="noopener" target="_blank">Frontiers in Oncology</a><span data-ar=" و">, </span><a data-ar="Discover Artificial Intelligence" href="https://link.springer.com/journal/44163" rel="noopener" target="_blank">Discover Artificial Intelligence</a><span data-ar=" و">, and the </span><a data-ar="Journal of Pharmaceutical Research International" href="https://pr.sdiarticle5.com/review-history/136753" rel="noopener" target="_blank">Journal of Pharmaceutical Research International</a>.</p>
-
-<p class="recognition-summary" data-ar="2023 · سفير جودة ممارس، وتكريم من مدير جامعة شقراء للمساهمة في اعتماد برنامج علوم الحاسب.">2023 · Practicing Quality Ambassador, and Rector's recognition for the Computer Science program accreditation, Shaqra University.</p>
 <details class="compact-details">
 <summary data-ar="عرض مزيد من الخدمة الأكاديمية">View more academic service</summary>
 <div class="society-grid">
@@ -2287,9 +2134,8 @@
 <article class="society-item"><span class="society-org">PSU</span><span class="society-role" data-ar="تحديث الكتب الدراسية لنظم المعلومات">IS Textbooks Update</span></article>
 <article class="society-item"><span class="society-org" data-ar="جامعة شقراء">Shaqra University</span><span class="society-role" data-ar="عضو لجنة ضمان الجودة">Quality Assurance Committee</span></article>
 <article class="society-item"><span class="society-org" data-ar="جامعة شقراء">Shaqra University</span><span class="society-role" data-ar="تنسيق الأنشطة الطلابية والمسابقات والخدمة المجتمعية">Student activities, competitions, and community-service coordination</span></article>
-</div>
+<article class="society-item"><span class="society-org">ICEGOV 2026</span><span class="society-role" data-ar="رئيس مسار في المؤتمر الدولي لنظرية وممارسة الحوكمة الإلكترونية">Track Chair, International Conference on Theory and Practice of Electronic Governance</span></article><article class="society-item"><span class="society-org">PSU</span><span class="society-role" data-ar="رئيس معرض كلية علوم الحاسب والمعلومات 2026">Chair, CCIS EXPO 2026</span></article></div>
 </details>
-
 </div>
 </section><section id="teaching">
 <div class="wrap">
@@ -2432,4 +2278,3 @@
     <script src="research-assistant.js"></script>
   </body>
 </html>
-
