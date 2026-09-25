@@ -30,6 +30,8 @@ Target website: <https://dromaia.github.io/>
     - Home: <https://dromaia.github.io/>
     - Publications: <https://dromaia.github.io/publications.html>
     - Sitemap: <https://dromaia.github.io/sitemap.xml>
+    - Arabic home: <https://dromaia.github.io/ar/>
+    - Arabic publications: <https://dromaia.github.io/ar/publications.html>
     - Research PDF:
       <https://dromaia.github.io/Dr-Omaia-Al-Omari-Verified-Research-Portfolio-2011-2026.pdf>
 
@@ -53,3 +55,8 @@ GitHub's official instructions:
 
 Replace only the files that changed, then commit the update to `main`. GitHub
 Pages republishes changes made to the configured source branch and folder.
+
+The Arabic pages under `ar/` are generated from the English pages: after any
+change to `index.html` or `publications.html`, run `python3 tools/build-arabic.py`
+and upload the regenerated `ar/index.html` and `ar/publications.html` as well
+(see README.md).

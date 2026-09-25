@@ -36,6 +36,8 @@
   z-index: 80;
   width: min(420px, calc(100vw - 24px));
   max-height: min(680px, calc(100vh - 105px));
+  padding: 0; /* page-level section rules must not leak into the panel */
+  margin: 0;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   overflow: hidden;
@@ -227,9 +229,19 @@ html[dir="rtl"] .assistant-message ul {
 }
 
 @media (max-width: 560px) {
+  /* Icon-only launcher on phones so it covers less content; the text stays for screen readers */
   .research-assistant-launcher {
     right: 12px;
     bottom: 12px;
+    gap: 0;
+    padding: 0.45rem;
+    font-size: 0;
+  }
+
+  .research-assistant-launcher::before {
+    width: 36px;
+    height: 36px;
+    font-size: 0.72rem;
   }
 
   .research-assistant {
@@ -243,4 +255,10 @@ html[dir="rtl"] .assistant-message ul {
     right: auto;
     left: 12px;
   }
+}
+
+/* Work titles and metadata are English even on the Arabic page: keep them left-to-right inside the answer lists */
+html[dir="rtl"] .assistant-message li {
+  direction: ltr;
+  text-align: left;
 }

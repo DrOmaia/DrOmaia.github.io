@@ -6,12 +6,14 @@
   --text: #f4f7fa;
   --muted: #9cafc1;
   --line: rgba(255, 255, 255, 0.1);
-  --teal: #64d5b3;
-  --teal-dark: #087f65;
+  --accent: #d8b45b;       /* same gold as the home page */
+  --accent-strong: #d8b45b;
+  --accent-text: #10151a;  /* text on an accent background */
+  --blue: #68a9ff;
   --amber: #d8b45b;
-  --navy: #102d3d;
   --shadow: 0 22px 70px rgba(0, 0, 0, 0.28);
   --radius: 24px;
+  --header: 76px;
 }
 
 html[data-theme="light"] {
@@ -22,8 +24,10 @@ html[data-theme="light"] {
   --text: #0b1b2a;
   --muted: #53687b;
   --line: rgba(10, 31, 49, 0.12);
-  --teal: #087f65;
-  --teal-dark: #075f4d;
+  --accent: #7a5405;
+  --accent-strong: #835d05;
+  --accent-text: #ffffff;
+  --blue: #1769c2;
   --amber: #835d05;
   --shadow: 0 20px 65px rgba(25, 52, 75, 0.12);
 }
@@ -39,7 +43,7 @@ html {
 body {
   margin: 0;
   background:
-    radial-gradient(circle at 82% 2%, color-mix(in srgb, var(--teal) 12%, transparent), transparent 30rem),
+    radial-gradient(circle at 82% 2%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 30rem),
     var(--bg);
   color: var(--text);
   font-family: Manrope, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
@@ -67,8 +71,8 @@ select {
   left: 1rem;
   z-index: 100;
   border-radius: 0.7rem;
-  background: var(--teal);
-  color: #061317;
+  background: var(--accent-strong);
+  color: var(--accent-text);
   padding: 0.7rem 1rem;
 }
 
@@ -76,16 +80,17 @@ select {
   top: 1rem;
 }
 
-.site-header {
+.header {
   position: sticky;
   top: 0;
   z-index: 40;
+  min-height: var(--header);
   border-bottom: 1px solid var(--line);
   background: color-mix(in srgb, var(--bg) 86%, transparent);
   backdrop-filter: blur(18px);
 }
 
-.nav-shell,
+.header-inner,
 .hero,
 .trajectory,
 .catalog-shell,
@@ -94,75 +99,104 @@ footer {
   margin-inline: auto;
 }
 
-.nav-shell {
-  min-height: 78px;
+.header-inner {
+  min-height: var(--header);
   display: flex;
   align-items: center;
-  gap: 2rem;
+  justify-content: space-between;
+  gap: 24px;
 }
 
 .brand {
+  text-decoration: none;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.brand span {
+  color: var(--accent);
+}
+
+.brand b {
+  color: var(--text);
+  font: inherit;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav a,
+.icon-btn {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.nav a:hover,
+.nav a.active,
+.icon-btn:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.nav a.active {
+  color: var(--accent);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+}
+
+.icon-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.8rem;
-  text-decoration: none;
-  margin-right: auto;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  line-height: 1;
 }
 
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 43px;
-  height: 43px;
-  border-radius: 14px;
-  background: linear-gradient(140deg, var(--teal), color-mix(in srgb, var(--teal) 60%, var(--navy)));
-  color: #06171c;
-  font-weight: 900;
-}
-
-.brand strong,
-.brand small {
+.icon-btn .icon {
   display: block;
 }
 
-.brand strong {
-  line-height: 1.2;
+.icon-btn .icon-close {
+  display: none;
 }
 
-.brand small {
-  color: var(--muted);
-  font-size: 0.72rem;
+body.nav-open .menu .icon-menu {
+  display: none;
 }
 
-nav {
-  display: flex;
-  gap: 1.15rem;
+body.nav-open .menu .icon-close {
+  display: block;
 }
 
-nav a {
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 0.88rem;
-  font-weight: 700;
+body.nav-open {
+  overflow: hidden;
 }
 
-nav a:hover,
-nav a.active {
-  color: var(--text);
+.menu {
+  display: none;
 }
 
-.tools {
-  display: flex;
-  gap: 0.45rem;
-}
-
-.tools button {
-  min-height: 38px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--surface);
-  color: var(--text);
-  padding: 0.4rem 0.78rem;
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 3px;
 }
 
 .hero {
@@ -176,7 +210,7 @@ nav a.active {
 
 .eyebrow {
   margin: 0 0 0.8rem;
-  color: var(--teal);
+  color: var(--accent);
   font-size: 0.76rem;
   font-weight: 900;
   letter-spacing: 0.16em;
@@ -230,13 +264,13 @@ h1 {
 
 .button:hover {
   transform: translateY(-2px);
-  border-color: var(--teal);
+  border-color: var(--accent);
 }
 
 .button.primary {
   border-color: transparent;
-  background: var(--teal);
-  color: #06171c;
+  background: var(--accent-strong);
+  color: var(--accent-text);
 }
 
 .button.secondary {
@@ -279,7 +313,7 @@ h1 {
 
 .summary-card strong {
   display: block;
-  color: var(--teal);
+  color: var(--accent);
   font-family: Georgia, "Times New Roman", serif;
   font-size: 2.6rem;
   line-height: 1;
@@ -438,7 +472,7 @@ h1 {
 }
 
 .pub-index strong {
-  color: var(--teal);
+  color: var(--accent);
   font-size: 1.18rem;
 }
 
@@ -461,7 +495,7 @@ h1 {
   margin: 0.6rem 0 0;
   border-radius: 999px;
   background: var(--surface-2);
-  color: var(--teal);
+  color: var(--accent);
   padding: 0.25rem 0.55rem;
   font-size: 0.7rem;
   font-weight: 850;
@@ -492,13 +526,13 @@ h1 {
   margin-top: 0.9rem;
   border-top: 1px solid var(--line);
   border-radius: 0 0 14px 14px;
-  background: color-mix(in srgb, var(--teal) 7%, transparent);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
   padding: 0.8rem 0.9rem 0.9rem;
 }
 
 .apa-label {
   margin: 0 0 0.35rem;
-  color: var(--teal);
+  color: var(--accent);
   font-size: 0.72rem;
   font-weight: 900;
   letter-spacing: 0.08em;
@@ -543,7 +577,7 @@ h1 {
 
 .pub-actions a:hover,
 .copy-reference:hover {
-  border-color: var(--teal);
+  border-color: var(--accent);
 }
 
 .empty-state {
@@ -559,7 +593,7 @@ footer {
   justify-content: space-between;
   gap: 1rem;
   border-top: 1px solid var(--line);
-  padding-block: 2.4rem;
+  padding-block: 2.4rem 110px; /* room for the floating assistant launcher */
   color: var(--muted);
   font-size: 0.78rem;
 }
@@ -574,6 +608,8 @@ footer div {
 }
 
 footer a {
+  display: inline-block;
+  padding: 4px 0;
   text-decoration: none;
 }
 
@@ -607,18 +643,53 @@ html[dir="rtl"] .apa-label {
   }
 }
 
-@media (max-width: 760px) {
-  .site-header nav {
+@media (max-width: 900px) {
+  .header {
+    background: var(--bg);
+    backdrop-filter: none;
+  }
+
+  .nav {
+    position: fixed;
+    top: var(--header);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
     display: none;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 4px;
+    padding: 28px;
+    background: color-mix(in srgb, var(--bg) 97%, transparent);
+    backdrop-filter: blur(20px);
   }
 
-  .nav-shell {
-    gap: 0.6rem;
+  .nav.open {
+    display: flex;
   }
 
-  .brand strong {
-    font-size: 0.87rem;
+  .nav a {
+    width: min(100%, 520px);
+    margin-inline: auto;
+    padding: 13px 18px;
+    color: var(--text);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(1.25rem, 5vw, 2rem);
+    text-align: center;
   }
+
+  html[lang="ar"] .nav a {
+    font-family: "Noto Naskh Arabic", Tahoma, serif;
+  }
+
+  .menu {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 760px) {
 
   .hero {
     min-height: auto;
@@ -677,4 +748,36 @@ html[dir="rtl"] .apa-label {
     scroll-behavior: auto !important;
     transition: none !important;
   }
+}
+
+/* Arabic page typography (the paper titles and references stay in their original language) */
+html[lang="ar"] body,
+html[lang="ar"] h1,
+html[lang="ar"] h2 {
+  font-family: "Noto Naskh Arabic", Tahoma, Arial, sans-serif;
+}
+
+html[lang="ar"] h1 {
+  letter-spacing: 0;
+  line-height: 1.15;
+}
+
+html[lang="ar"] .publication-card h3,
+html[lang="ar"] .pub-contribution,
+html[lang="ar"] .method-list {
+  direction: ltr;
+  text-align: left;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+html[lang="ar"] .pub-contribution,
+html[lang="ar"] .method-list {
+  font-family: Manrope, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+}
+
+html[lang="ar"] .pub-index strong,
+html[lang="ar"] .summary-card strong,
+html[lang="ar"] .trajectory time {
+  direction: ltr;
+  unicode-bidi: isolate;
 }

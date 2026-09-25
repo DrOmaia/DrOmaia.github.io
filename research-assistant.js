@@ -23,7 +23,7 @@
     ],
     "Healthcare and clinical decision support": [
       "health", "healthcare", "clinical", "medical", "cancer", "parkinson", "mri",
-      "صحة", "طبي", "سريري", "سرطان", "باركنسون", "رنين",
+      "صحة", "صحي", "طبي", "سريري", "سرطان", "باركنسون", "رنين",
     ],
     "Decision analytics and intelligent systems": [
       "decision", "analytics", "forecast", "stock", "telecom", "agile",
@@ -191,17 +191,18 @@
   }
 
   function welcome() {
+    const ar = document.documentElement.lang === "ar";
     const box = addTextMessage(
-      "Ask about the 37 verified works, six research themes, methodologies, timeline, APA references, or DOI links. I answer only from the curated portfolio.",
+      ar
+        ? "اسأل عن الأعمال الموثقة الـ37، أو الموضوعات البحثية الستة، أو المنهجيات، أو المسار الزمني، أو مراجع APA، أو روابط DOI. أجيب من المحفظة الموثقة فقط."
+        : "Ask about the 37 verified works, six research themes, methodologies, timeline, APA references, or DOI links. I answer only from the curated portfolio.",
     );
     const quick = document.createElement("div");
     quick.className = "assistant-quick";
-    [
-      "Research themes",
-      "Studies using SHAP",
-      "Healthcare AI works",
-      "2026 publications",
-    ].forEach((label) => {
+    const prompts = ar
+      ? ["الموضوعات البحثية", "دراسات تستخدم SHAP", "أبحاث الذكاء الاصطناعي الصحي", "منشورات 2026"]
+      : ["Research themes", "Studies using SHAP", "Healthcare AI works", "2026 publications"];
+    prompts.forEach((label) => {
       const button = document.createElement("button");
       button.type = "button";
       button.textContent = label;
@@ -216,7 +217,7 @@
       "which", "what", "show", "give", "tell", "studies", "study", "works",
       "work", "papers", "paper", "publications", "publication", "using", "uses",
       "use", "about", "the", "and", "for", "with", "are", "there", "me",
-      "ما", "هي", "التي", "تستخدم", "اعرض", "اظهر", "ابحاث", "دراسات", "حول",
+      "ما", "هي", "التي", "تستخدم", "اعرض", "اظهر", "ابحاث", "دراسات", "حول", "منشورات", "اعمال",
     ]);
     const terms = normalizedQuery
       .split(" ")

@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
 
+# /sat/ and /isp/ carry <meta name="robots" content="noindex"> and are deliberately left crawlable so that tag is honoured.
 Sitemap: https://dromaia.github.io/sitemap.xml
