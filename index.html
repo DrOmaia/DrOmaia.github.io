@@ -1548,8 +1548,6 @@
         border-radius: 18px;
         background: color-mix(in srgb, var(--surface) 84%, transparent);
       }
-      .metrics-note { margin: 10px 0 0; color: var(--muted); font-size: .76rem; }
-      .metrics-note a { color: var(--gold); text-decoration: none; }
       .latest-heading { margin: 22px 0 10px; font-size: 1.05rem; }
       .latest-works { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 8px; }
       .latest-works li { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; padding: 12px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); font-size: .9rem; }
@@ -1564,6 +1562,7 @@
       .lead-card ul { margin: 12px 0 0; padding-inline-start: 22px; color: var(--muted); }
       .lead-card li + li { margin-top: 6px; }
       #leadership .card a { color: var(--gold); }
+      #leadership .volunteer-highlight { color: var(--gold); font-size: clamp(1.7rem, 2.2vw, 2.2rem); font-weight: 800; line-height: 1.25; }
       .metric {
         display: block;
         padding: 18px 20px;
@@ -2039,11 +2038,10 @@
 </div><p class="availability-note" data-ar="متاح للتعاون البحثي والمحاضرات المدعوة.">Open to research collaboration and invited talks.</p>
 <div id="metricsBar" class="metrics-bar" role="group" aria-label="Academic profile highlights" data-ar-aria-label="أبرز مؤشرات الملف الأكاديمي">
   <div class="metric"><strong>18+</strong><span data-ar="عاماً من الخبرة">Years of experience</span></div>
-  <div class="metric"><strong data-metric="citations">174</strong><span data-ar="استشهاد · OpenAlex · يُحدَّث أسبوعياً">Citations · OpenAlex · updated weekly</span></div>
-  <div class="metric"><strong data-metric="hindex">6</strong><span data-ar="مؤشر h · OpenAlex">h-index · OpenAlex</span></div>
-  <a class="metric" href="publications.html"><strong data-metric="works">37</strong><span data-ar="عملاً موثقاً">Verified works</span></a>
+  <div class="metric"><strong>500+</strong><span data-ar="استشهاد">Citations</span></div>
+  <div class="metric"><strong>14</strong><span data-ar="مؤشر h">h-index</span></div>
+  <a class="metric" href="publications.html"><strong>37</strong><span data-ar="عملاً موثقاً">Verified works</span></a>
 </div>
-<p class="metrics-note"><span data-metric="updated" data-ar="آخر تحديث 26 سبتمبر 2026">Updated 26 Sep 2026</span> · <span data-ar="الأرقام من OpenAlex وCrossref للأعمال الموثقة الـ37.">Counts from OpenAlex and Crossref across the 37 verified works.</span> <a href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ" target="_blank" rel="noopener" data-ar="ملف Google Scholar ↗ (يحتسب مصادر إضافية)">Google Scholar profile ↗ (counts additional sources)</a></p>
 <ul aria-label="Recent" class="recent" data-ar-aria-label="المستجدات"><li><time datetime="2026">2026</time> — <span data-ar="رئيس قسم نظم المعلومات، جامعة الأمير سلطان">Chair, Information Systems Department, PSU</span></li><li><time datetime="2026">2026</time> — <span data-ar="مقالتان جديدتان: YOLOv8 قابل للتفسير للتطبيقات الدفاعية (ETASR) وكشف التصيد الاحتيالي (J. Multiscale Modelling)">Two new journal articles: explainable YOLOv8 for defense (ETASR) and phishing detection (J. Multiscale Modelling)</span></li><li><time datetime="2026">2026</time> — <span data-ar="عضو هيئة تحرير المجلة البابلية للشبكات">Editorial board member, Babylonian Journal of Networking</span></li></ul>
 </div>
 <div class="portrait">
@@ -2070,7 +2068,7 @@
 <div class="grid3">
 <article class="card"><span class="tag" data-ar="قيادة المؤتمرات">Conference leadership</span><h3 data-ar="معرض CCIS EXPO 2026 · مؤتمر ICEGOV 2026">CCIS EXPO 2026 · ICEGOV 2026</h3><p data-ar="رئيس معرض الكلية لعام 2026 ورئيس مسار في المؤتمر الدولي لنظرية وممارسة الحوكمة الإلكترونية.">Chair of the college's 2026 EXPO and track chair at the International Conference on Theory and Practice of Electronic Governance.</p></article>
 <article class="card"><span class="tag" data-ar="التحرير والتحكيم">Editorial &amp; reviewing</span><h3 data-ar="عضو هيئة تحرير المجلة البابلية للشبكات">Editorial Board, Babylonian Journal of Networking</h3><p><span data-ar="منذ 2026. محكّم في ">2026–present. Reviewer for </span><a data-ar="Frontiers in Education" href="https://www.frontiersin.org/journals/education/articles/10.3389/feduc.2025.1704820/full" target="_blank" rel="noopener">Frontiers in Education</a><span data-ar=" (إشادة علنية) و"> (public credit), </span><a data-ar="Frontiers in Oncology" href="https://www.frontiersin.org/journals/oncology" target="_blank" rel="noopener">Frontiers in Oncology</a><span data-ar=" و">, </span><a data-ar="Discover Artificial Intelligence" href="https://link.springer.com/journal/44163" target="_blank" rel="noopener">Discover Artificial Intelligence</a><span data-ar=" و"> and the </span><a data-ar="Journal of Pharmaceutical Research International" href="https://pr.sdiarticle5.com/review-history/136753" target="_blank" rel="noopener">Journal of Pharmaceutical Research International</a>.</p><a class="verified" data-ar="صفحة هيئة التحرير ↗" href="https://mesopotamian.press/journals/index.php/BJN/editorialteam" rel="noopener" target="_blank">Editorial team page ↗</a></article>
-<article class="card"><span class="tag" data-ar="المجتمع والجودة">Community &amp; quality</span><h3 data-ar="أكثر من 700 ساعة تطوعية">700+ volunteer hours</h3><p data-ar="747.5 ساعة معتمدة من المنصة الوطنية للعمل التطوعي (أغسطس 2026). سفير جودة ممارس وتكريم من مدير جامعة شقراء للمساهمة في اعتماد برنامج علوم الحاسب (2023).">747.5 hours certified by the National Volunteer Work Platform (Aug 2026). Practicing Quality Ambassador and Rector's recognition for the Computer Science program accreditation, Shaqra University (2023).</p></article>
+<article class="card"><span class="tag" data-ar="المجتمع والجودة">Community &amp; quality</span><h3 class="volunteer-highlight" data-ar="أكثر من 700 ساعة تطوعية">700+ volunteer hours</h3><p data-ar="747.5 ساعة معتمدة من المنصة الوطنية للعمل التطوعي (أغسطس 2026). سفير جودة ممارس وتكريم من مدير جامعة شقراء للمساهمة في اعتماد برنامج علوم الحاسب (2023).">747.5 hours certified by the National Volunteer Work Platform (Aug 2026). Practicing Quality Ambassador and Rector's recognition for the Computer Science program accreditation, Shaqra University (2023).</p></article>
 </div>
 <details class="compact-details"><summary data-ar="مزيد من اللجان والأدوار">More committees and roles</summary>
 <div class="society-grid">
@@ -2100,7 +2098,7 @@
 <li><time datetime="2025">2025</time> <span class="latest-title" lang="en" dir="ltr"><a href="https://doi.org/10.62754/joe.v3i8.5781" target="_blank" rel="noopener">Governance and Ethical Frameworks for AI Integration in Higher Education: Enhancing Personalized Learning and Legal Compliance</a></span> <span class="latest-new" data-ar="جديد على ORCID · بانتظار التحقق">New on ORCID · pending verification</span></li>
 <li><time datetime="2025">2025</time> <span class="latest-title" lang="en" dir="ltr"><a href="https://doi.org/10.1109/cdma61895.2025.00005" target="_blank" rel="noopener">8th International Conference on Data Science and Machine Learning Applications (CDMA2025)</a></span> <span class="latest-new" data-ar="جديد على ORCID · بانتظار التحقق">New on ORCID · pending verification</span></li>
 <!-- /metrics:latest --></ul>
-<p class="latest-note" data-ar="يُحدَّث أسبوعياً من Crossref وOpenAlex وORCID. الفهرس يعرض الأعمال الموثقة فقط.">Updated weekly from Crossref, OpenAlex and ORCID. The catalogue lists verified works only.</p>
+<p class="latest-note" data-ar="الفهرس يعرض الأعمال الموثقة فقط.">The catalog lists verified works only.</p>
 <div aria-label="Selected recent works" class="featured-works" data-ar-aria-label="أعمال مختارة حديثة" role="list">
 <article class="featured-work" role="listitem">
 <div class="featured-top"><span class="featured-label" data-ar="رؤية حاسوبية موثوقة">Trustworthy computer vision</span><time datetime="2026">2026</time></div>

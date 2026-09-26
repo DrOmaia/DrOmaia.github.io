@@ -1549,8 +1549,6 @@
         border-radius: 18px;
         background: color-mix(in srgb, var(--surface) 84%, transparent);
       }
-      .metrics-note { margin: 10px 0 0; color: var(--muted); font-size: .76rem; }
-      .metrics-note a { color: var(--gold); text-decoration: none; }
       .latest-heading { margin: 22px 0 10px; font-size: 1.05rem; }
       .latest-works { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 8px; }
       .latest-works li { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; padding: 12px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); font-size: .9rem; }
@@ -1565,6 +1563,7 @@
       .lead-card ul { margin: 12px 0 0; padding-inline-start: 22px; color: var(--muted); }
       .lead-card li + li { margin-top: 6px; }
       #leadership .card a { color: var(--gold); }
+      #leadership .volunteer-highlight { color: var(--gold); font-size: clamp(1.7rem, 2.2vw, 2.2rem); font-weight: 800; line-height: 1.25; }
       .metric {
         display: block;
         padding: 18px 20px;
@@ -2035,11 +2034,10 @@
 </div><p class="availability-note">متاح للتعاون البحثي والمحاضرات المدعوة.</p>
 <div id="metricsBar" class="metrics-bar" role="group" aria-label="أبرز مؤشرات الملف الأكاديمي">
   <div class="metric"><strong>18+</strong><span>عاماً من الخبرة</span></div>
-  <div class="metric"><strong data-metric="citations">174</strong><span>استشهاد · OpenAlex · يُحدَّث أسبوعياً</span></div>
-  <div class="metric"><strong data-metric="hindex">6</strong><span>مؤشر h · OpenAlex</span></div>
-  <a class="metric" href="publications.html"><strong data-metric="works">37</strong><span>عملاً موثقاً</span></a>
+  <div class="metric"><strong>500+</strong><span>استشهاد</span></div>
+  <div class="metric"><strong>14</strong><span>مؤشر h</span></div>
+  <a class="metric" href="publications.html"><strong>37</strong><span>عملاً موثقاً</span></a>
 </div>
-<p class="metrics-note"><span data-metric="updated">آخر تحديث 26 سبتمبر 2026</span> · <span>الأرقام من OpenAlex وCrossref للأعمال الموثقة الـ37.</span> <a href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ" target="_blank" rel="noopener">ملف Google Scholar ↗ (يحتسب مصادر إضافية)</a></p>
 <ul aria-label="المستجدات" class="recent"><li><time datetime="2026">2026</time> — <span>رئيس قسم نظم المعلومات، جامعة الأمير سلطان</span></li><li><time datetime="2026">2026</time> — <span>مقالتان جديدتان: YOLOv8 قابل للتفسير للتطبيقات الدفاعية (ETASR) وكشف التصيد الاحتيالي (J. Multiscale Modelling)</span></li><li><time datetime="2026">2026</time> — <span>عضو هيئة تحرير المجلة البابلية للشبكات</span></li></ul>
 </div>
 <div class="portrait">
@@ -2066,7 +2064,7 @@
 <div class="grid3">
 <article class="card"><span class="tag">قيادة المؤتمرات</span><h3>معرض CCIS EXPO 2026 · مؤتمر ICEGOV 2026</h3><p>رئيس معرض الكلية لعام 2026 ورئيس مسار في المؤتمر الدولي لنظرية وممارسة الحوكمة الإلكترونية.</p></article>
 <article class="card"><span class="tag">التحرير والتحكيم</span><h3>عضو هيئة تحرير المجلة البابلية للشبكات</h3><p><span>منذ 2026. محكّم في </span><a href="https://www.frontiersin.org/journals/education/articles/10.3389/feduc.2025.1704820/full" target="_blank" rel="noopener">Frontiers in Education</a><span> (إشادة علنية) و</span><a href="https://www.frontiersin.org/journals/oncology" target="_blank" rel="noopener">Frontiers in Oncology</a><span> و</span><a href="https://link.springer.com/journal/44163" target="_blank" rel="noopener">Discover Artificial Intelligence</a><span> و</span><a href="https://pr.sdiarticle5.com/review-history/136753" target="_blank" rel="noopener">Journal of Pharmaceutical Research International</a>.</p><a class="verified" href="https://mesopotamian.press/journals/index.php/BJN/editorialteam" rel="noopener" target="_blank">صفحة هيئة التحرير ↗</a></article>
-<article class="card"><span class="tag">المجتمع والجودة</span><h3>أكثر من 700 ساعة تطوعية</h3><p>747.5 ساعة معتمدة من المنصة الوطنية للعمل التطوعي (أغسطس 2026). سفير جودة ممارس وتكريم من مدير جامعة شقراء للمساهمة في اعتماد برنامج علوم الحاسب (2023).</p></article>
+<article class="card"><span class="tag">المجتمع والجودة</span><h3 class="volunteer-highlight">أكثر من 700 ساعة تطوعية</h3><p>747.5 ساعة معتمدة من المنصة الوطنية للعمل التطوعي (أغسطس 2026). سفير جودة ممارس وتكريم من مدير جامعة شقراء للمساهمة في اعتماد برنامج علوم الحاسب (2023).</p></article>
 </div>
 <details class="compact-details"><summary>مزيد من اللجان والأدوار</summary>
 <div class="society-grid">
@@ -2096,7 +2094,7 @@
 <li><time datetime="2025">2025</time> <span class="latest-title" lang="en" dir="ltr"><a href="https://doi.org/10.62754/joe.v3i8.5781" target="_blank" rel="noopener">Governance and Ethical Frameworks for AI Integration in Higher Education: Enhancing Personalized Learning and Legal Compliance</a></span> <span class="latest-new">جديد على ORCID · بانتظار التحقق</span></li>
 <li><time datetime="2025">2025</time> <span class="latest-title" lang="en" dir="ltr"><a href="https://doi.org/10.1109/cdma61895.2025.00005" target="_blank" rel="noopener">8th International Conference on Data Science and Machine Learning Applications (CDMA2025)</a></span> <span class="latest-new">جديد على ORCID · بانتظار التحقق</span></li>
 <!-- /metrics:latest --></ul>
-<p class="latest-note">يُحدَّث أسبوعياً من Crossref وOpenAlex وORCID. الفهرس يعرض الأعمال الموثقة فقط.</p>
+<p class="latest-note">الفهرس يعرض الأعمال الموثقة فقط.</p>
 <div aria-label="أعمال مختارة حديثة" class="featured-works" role="list">
 <article class="featured-work" role="listitem">
 <div class="featured-top"><span class="featured-label">رؤية حاسوبية موثوقة</span><time datetime="2026">2026</time></div>
