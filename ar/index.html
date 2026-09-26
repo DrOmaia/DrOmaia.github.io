@@ -1390,14 +1390,14 @@
       #teaching { --section-accent: #54cda8; }
       #education { --section-accent: #d8b45b; }
       #experience { --section-accent: #a78bfa; }
-      #service { --section-accent: #f08a78; }
+      #leadership { --section-accent: #f08a78; }
       #contact { --section-accent: #46bed3; }
       /* Light theme needs darker accents to keep small labels readable (WCAG AA) */
       [data-theme="light"] #research { --section-accent: #1a5fb4; }
       [data-theme="light"] #teaching { --section-accent: #0b7a5c; }
       [data-theme="light"] #education { --section-accent: #7a5405; }
       [data-theme="light"] #experience { --section-accent: #5b3fbf; }
-      [data-theme="light"] #service { --section-accent: #b0402a; }
+      [data-theme="light"] #leadership { --section-accent: #b0402a; }
       [data-theme="light"] #contact { --section-accent: #0b6f86; }
       [data-theme="light"] .btn.primary { color: #fff; }
       /* Numbers keep their left-to-right order on the Arabic page */
@@ -1550,6 +1550,21 @@
         background: color-mix(in srgb, var(--surface) 84%, transparent);
       }
       .metrics-note { margin: 10px 0 0; color: var(--muted); font-size: .76rem; }
+      .metrics-note a { color: var(--gold); text-decoration: none; }
+      .latest-heading { margin: 22px 0 10px; font-size: 1.05rem; }
+      .latest-works { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 8px; }
+      .latest-works li { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; padding: 12px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); font-size: .9rem; }
+      .latest-works time { color: var(--gold); font-weight: 800; font-size: .78rem; }
+      .latest-title a { color: var(--text); text-decoration: none; }
+      .latest-title a:hover { text-decoration: underline; text-underline-offset: 4px; }
+      .latest-venue { color: var(--muted); font-size: .78rem; }
+      .latest-new { margin-inline-start: auto; padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--gold) 18%, transparent); color: var(--gold); font-size: .68rem; font-weight: 800; }
+      .latest-note { margin: 0 0 18px; color: var(--muted); font-size: .76rem; }
+      html[dir="rtl"] .latest-title { direction: ltr; text-align: left; }
+      .lead-card { margin-bottom: 16px; }
+      .lead-card ul { margin: 12px 0 0; padding-inline-start: 22px; color: var(--muted); }
+      .lead-card li + li { margin-top: 6px; }
+      #leadership .card a { color: var(--gold); }
       .metric {
         display: block;
         padding: 18px 20px;
@@ -1904,8 +1919,7 @@
       .degree-row .degree-institution { font-size: .85rem; }
       .degree-row .ranking-link { font-size: .72rem; }
       .compact-details > .degree-detail { margin: 0 18px 18px; }
-      .review-summary, .recognition-summary { color: var(--muted); font-size: .9rem; margin: 22px 0; }
-      @media (max-width: 700px) { .degree-row, #service .grid2 { grid-template-columns: 1fr; } }
+      @media (max-width: 700px) { .degree-row { grid-template-columns: 1fr; } }
       @media (min-width: 981px) {
         .research-snapshot { grid-template-columns: minmax(0, 1fr) auto; gap: 28px; padding: 26px; }
         .research-snapshot .research-actions { flex-direction: column; }
@@ -1921,14 +1935,10 @@
       :root:not([data-theme="light"]) h1,
       :root:not([data-theme="light"]) h2,
       :root:not([data-theme="light"]) h3 { color: #f4f7fa; }
-      .section-head p, .featured-work p, .card p, .service-notes p,
+      .section-head p, .featured-work p, .card p,
       .timeline .role p, .case-study p { max-width: 68ch; }
-      .card, .featured-work, .degree-card, .flagship-course, .service-notes,
+      .card, .featured-work, .degree-card, .flagship-course,
       .compact-details, .timeline .role, .research-snapshot, .case-study { border-radius: 20px; }
-      .service-notes { border: 1px solid var(--line); background: var(--surface); padding: 18px 22px; margin: 16px 0; }
-      .service-notes p { color: var(--muted); margin: 0; font-size: .9rem; }
-      .service-notes p + p { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; }
-      .service-notes a { color: var(--gold); }
       .card .tag { color: var(--gold); font-size: .78rem; font-weight: 800; }
       .progress { position: fixed; top: 0; inset-inline-start: 0; width: 0; height: 2px; z-index: 100; background: var(--gold); pointer-events: none; }
       .reveal { opacity: 0; transform: translateY(12px); transition: opacity .45s ease, transform .45s ease; }
@@ -1957,7 +1967,7 @@
           ><b>د. أمية</b>
           <span>العمري</span></a
         >
-        <nav aria-label="التنقل الرئيسي" class="nav" id="nav"><a href="#research">البحث</a><a href="publications.html">المنشورات</a><a href="#service">الخدمة</a><a href="#teaching">التدريس</a><a href="#experience">الخبرة</a><a href="#contact">تواصل</a></nav>
+        <nav aria-label="التنقل الرئيسي" class="nav" id="nav"><a href="#leadership">القيادة</a><a href="#research">البحث</a><a href="publications.html">المنشورات</a><a href="#teaching">التدريس</a><a href="#experience">المسيرة</a><a href="#contact">تواصل</a></nav>
         <div class="controls">
           <a
             class="icon-btn lang-link"
@@ -2019,18 +2029,17 @@
 <span class="gradient">العمري</span>
 </h1>
 <h2>رئيس قسم نظم المعلومات · أستاذ مساعد في الذكاء الاصطناعي ونظم المعلومات</h2>
-<p class="lead">أبني أنظمة ذكاء اصطناعي قابلة للتفسير في الرعاية الصحية والأمن السيبراني والرؤية الحاسوبية، وأرأس قسم نظم المعلومات في جامعة الأمير سلطان بالرياض.</p>
+<p class="lead">أرأس قسم نظم المعلومات في جامعة الأمير سلطان بالرياض، وأبني أنظمة ذكاء اصطناعي قابلة للتفسير في الرعاية الصحية والأمن السيبراني والرؤية الحاسوبية.</p>
 <div class="actions">
-<a class="btn primary" href="#research">البحث</a><a class="btn secondary" href="publications.html">استعراض المنشورات</a><a class="btn textual" href="../Dr-Omaia-Al-Omari-Concise-Academic-CV.pdf" rel="noopener" target="_blank">عرض السيرة الأكاديمية · PDF · 3 صفحات ↗</a>
+<a class="btn primary" href="#leadership">القيادة</a><a class="btn secondary" href="publications.html">استعراض المنشورات</a><a class="btn textual" href="../Dr-Omaia-Al-Omari-Concise-Academic-CV.pdf" rel="noopener" target="_blank">عرض السيرة الأكاديمية · PDF · 3 صفحات ↗</a>
 </div><p class="availability-note">متاح للتعاون البحثي والمحاضرات المدعوة.</p>
-<!-- MANUAL: update the Google Scholar numbers (500+ and 12) by hand when they change. Everything else is automated. -->
 <div id="metricsBar" class="metrics-bar" role="group" aria-label="أبرز مؤشرات الملف الأكاديمي">
   <div class="metric"><strong>18+</strong><span>عاماً من الخبرة</span></div>
-  <a class="metric" href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ" target="_blank" rel="noopener"><strong>500+</strong><span>استشهاد · Google Scholar ↗</span></a>
-  <a class="metric" href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ" target="_blank" rel="noopener"><strong>12</strong><span>مؤشر h · Google Scholar ↗</span></a>
+  <div class="metric"><strong data-metric="citations">—</strong><span>استشهاد · OpenAlex · يُحدَّث أسبوعياً</span></div>
+  <div class="metric"><strong data-metric="hindex">—</strong><span>مؤشر h · OpenAlex</span></div>
   <a class="metric" href="publications.html"><strong data-metric="works">37</strong><span>عملاً موثقاً</span></a>
 </div>
-<p class="metrics-note"><span>قائمة أحدث المنشورات وأعداد الاستشهاد لكل بحث تُحدَّث تلقائياً كل أسبوع من Crossref وOpenAlex وORCID.</span> <span data-metric="updated"></span></p>
+<p class="metrics-note"><span data-metric="updated">—</span> · <span>الأرقام من OpenAlex وCrossref للأعمال الموثقة الـ37.</span> <a href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ" target="_blank" rel="noopener">ملف Google Scholar ↗ (يحتسب مصادر إضافية)</a></p>
 <ul aria-label="المستجدات" class="recent"><li><time datetime="2026">2026</time> — <span>رئيس قسم نظم المعلومات، جامعة الأمير سلطان</span></li><li><time datetime="2026">2026</time> — <span>مقالتان جديدتان: YOLOv8 قابل للتفسير للتطبيقات الدفاعية (ETASR) وكشف التصيد الاحتيالي (J. Multiscale Modelling)</span></li><li><time datetime="2026">2026</time> — <span>عضو هيئة تحرير المجلة البابلية للشبكات</span></li></ul>
 </div>
 <div class="portrait">
@@ -2044,7 +2053,32 @@
 <a href="https://facultyportal.psu.edu.sa/ViewProfile.aspx?instructorID=1345" rel="noopener" target="_blank">الملف في جامعة الأمير سلطان ↗</a>
 </div>
 </div>
-</section><section id="research">
+</section><section id="leadership"><span id="service"></span>
+<div class="wrap">
+<div class="section-head"><div><span class="kicker">القيادة</span><h2>كيف أقود.</h2></div>
+<p>أرأس قسم نظم المعلومات في جامعة الأمير سلطان، وأشارك في لجان المناهج والاختبارات بالكلية، وأرأس معرض CCIS EXPO 2026، وأتولى رئاسة مسار في مؤتمر ICEGOV 2026.</p></div>
+<article class="card lead-card"><span class="tag">رئيس قسم نظم المعلومات · 2026–الآن</span>
+<h3>قيادة القسم خلال العام الأكاديمي 2026–2027</h3>
+<ul><li>القيادة الأكاديمية للقسم في كلية علوم الحاسب والمعلومات</li>
+<li>مراجعة المناهج ومواءمة المقررات (لجنتا مناهج الكلية والقسم)</li>
+<li>تنسيق اختبارات 2026 وتحديث الكتب الدراسية للقسم</li>
+<li>الإرشاد الأكاديمي والخدمة المؤسسية إلى جانب التدريس والبحث</li></ul></article>
+<div class="grid3">
+<article class="card"><span class="tag">قيادة المؤتمرات</span><h3>معرض CCIS EXPO 2026 · مؤتمر ICEGOV 2026</h3><p>رئيس معرض الكلية لعام 2026 ورئيس مسار في المؤتمر الدولي لنظرية وممارسة الحوكمة الإلكترونية.</p></article>
+<article class="card"><span class="tag">التحرير والتحكيم</span><h3>عضو هيئة تحرير المجلة البابلية للشبكات</h3><p><span>منذ 2026. محكّم في </span><a href="https://www.frontiersin.org/journals/education/articles/10.3389/feduc.2025.1704820/full" target="_blank" rel="noopener">Frontiers in Education</a><span> (إشادة علنية) و</span><a href="https://www.frontiersin.org/journals/oncology" target="_blank" rel="noopener">Frontiers in Oncology</a><span> و</span><a href="https://link.springer.com/journal/44163" target="_blank" rel="noopener">Discover Artificial Intelligence</a><span> و</span><a href="https://pr.sdiarticle5.com/review-history/136753" target="_blank" rel="noopener">Journal of Pharmaceutical Research International</a>.</p><a class="verified" href="https://mesopotamian.press/journals/index.php/BJN/editorialteam" rel="noopener" target="_blank">صفحة هيئة التحرير ↗</a></article>
+<article class="card"><span class="tag">المجتمع والجودة</span><h3>أكثر من 700 ساعة تطوعية</h3><p>747.5 ساعة معتمدة من المنصة الوطنية للعمل التطوعي (أغسطس 2026). سفير جودة ممارس وتكريم من مدير جامعة شقراء للمساهمة في اعتماد برنامج علوم الحاسب (2023).</p></article>
+</div>
+<details class="compact-details"><summary>مزيد من اللجان والأدوار</summary>
+<div class="society-grid">
+<article class="society-item"><span class="society-org">PSU</span><span class="society-role">مسؤول موقع كلية علوم الحاسب والمعلومات</span></article>
+<article class="society-item"><span class="society-org">PSU</span><span class="society-role">اللجنة المشتركة بين الكليات</span></article>
+<article class="society-item"><span class="society-org">PSU</span><span class="society-role">لجنة تنسيق الاختبارات 2026</span></article>
+<article class="society-item"><span class="society-org">PSU</span><span class="society-role">تحديث الكتب الدراسية لنظم المعلومات</span></article>
+<article class="society-item"><span class="society-org">جامعة شقراء</span><span class="society-role">عضو لجنة ضمان الجودة</span></article>
+<article class="society-item"><span class="society-org">جامعة شقراء</span><span class="society-role">تنسيق الأنشطة الطلابية والمسابقات والخدمة المجتمعية</span></article>
+<article class="society-item"><span class="society-org">ICEGOV 2026</span><span class="society-role">رئيس مسار في المؤتمر الدولي لنظرية وممارسة الحوكمة الإلكترونية</span></article>
+<article class="society-item"><span class="society-org">PSU</span><span class="society-role">رئيس معرض كلية علوم الحاسب والمعلومات 2026</span></article>
+</div></details></div></section><section id="research">
 <div class="wrap">
 <div class="section-head">
 <div>
@@ -2053,31 +2087,27 @@
 </div>
 <p>تغطي أبحاثي ستة موضوعات و37 عملاً محكّماً، وأركز على نماذج يمكن للناس الوثوق بها وتفسيرها.</p>
 </div>
-<ul class="theme-strip"><li><a href="publications.html?theme=Cybersecurity%2C%20IoT%2C%20and%20cloud%20infrastructure">الأمن السيبراني وإنترنت الأشياء والسحابة · 9 أعمال</a></li><li><a href="publications.html?theme=NLP%2C%20education%2C%20and%20knowledge%20systems">معالجة اللغة والتعليم ونظم المعرفة · 8</a></li><li><a href="publications.html?theme=Healthcare%20and%20clinical%20decision%20support">الرعاية الصحية ودعم القرار السريري · 6</a></li><li><a href="publications.html?theme=Decision%20analytics%20and%20intelligent%20systems">تحليلات القرار والأنظمة الذكية · 6</a></li><li><a href="publications.html?theme=Computer%20vision%20and%20environmental%20intelligence">الرؤية الحاسوبية والذكاء البيئي · 5</a></li><li><a href="publications.html?theme=Responsible%20AI%2C%20governance%2C%20and%20society">الذكاء الاصطناعي المسؤول والحوكمة والمجتمع · 3</a></li></ul><div aria-label="أعمال مختارة حديثة" class="featured-works" role="list">
+<ul class="theme-strip"><li><a href="publications.html?theme=Cybersecurity%2C%20IoT%2C%20and%20cloud%20infrastructure">الأمن السيبراني وإنترنت الأشياء والسحابة · 9 أعمال</a></li><li><a href="publications.html?theme=NLP%2C%20education%2C%20and%20knowledge%20systems">معالجة اللغة والتعليم ونظم المعرفة · 8</a></li><li><a href="publications.html?theme=Healthcare%20and%20clinical%20decision%20support">الرعاية الصحية ودعم القرار السريري · 6</a></li><li><a href="publications.html?theme=Decision%20analytics%20and%20intelligent%20systems">تحليلات القرار والأنظمة الذكية · 6</a></li><li><a href="publications.html?theme=Computer%20vision%20and%20environmental%20intelligence">الرؤية الحاسوبية والذكاء البيئي · 5</a></li><li><a href="publications.html?theme=Responsible%20AI%2C%20governance%2C%20and%20society">الذكاء الاصطناعي المسؤول والحوكمة والمجتمع · 3</a></li></ul>
+<h3 class="latest-heading">أحدث المنشورات</h3>
+<ul class="latest-works" aria-label="أحدث المنشورات"><!-- metrics:latest -->
+
+<!-- /metrics:latest --></ul>
+<p class="latest-note">يُحدَّث أسبوعياً من Crossref وOpenAlex وORCID. الفهرس يعرض الأعمال الموثقة فقط.</p>
+<div aria-label="أعمال مختارة حديثة" class="featured-works" role="list">
 <article class="featured-work" role="listitem">
 <div class="featured-top"><span class="featured-label">رؤية حاسوبية موثوقة</span><time datetime="2026">2026</time></div>
 <h3 dir="ltr" lang="en">Towards Trustworthy Defense AI: Real-Time Military Asset Detection with On-Demand Explainable YOLOv8</h3>
 <p>يكشف الأصول العسكرية في الفيديو المباشر ويفسّر الكشف فقط عندما يطلبه المشغّل، محافظاً على السرعة الآنية (35 إطاراً/ثانية) مع جعل القرارات عالية الخطورة قابلة للتدقيق.</p>
 <a class="featured-link" href="https://doi.org/10.48084/etasr.17259" rel="noopener" target="_blank">عرض البحث ↗</a>
 </article>
-<article class="featured-work" role="listitem">
-<div class="featured-top"><span class="featured-label">الرؤية الحاسوبية</span><time datetime="2025">2025</time></div>
-<h3 dir="ltr" lang="en">Object Detection in Real-Time Video Surveillance Using Attention-Based Transformer-YOLOv8 Model</h3>
-<p>يحسّن قدرة كاميرات المراقبة على رصد الأجسام في المشاهد المزدحمة آنياً بإضافة آليات الانتباه وسياق المحوّلات إلى YOLOv8 (دقة 96.8%).</p>
-<a class="featured-link" href="https://doi.org/10.1016/j.aej.2025.01.032" rel="noopener" target="_blank">عرض البحث ↗</a>
-</article>
+
 <article class="featured-work" role="listitem">
 <div class="featured-top"><span class="featured-label">الذكاء الاصطناعي الصحي · المؤلف الأول</span><time datetime="2025">2025</time></div>
 <h3 dir="ltr" lang="en">CNN-Based Automated Detection of Metastatic Cancer in Histopathology Images</h3>
 <p>يرصد السرطان النقيلي في شرائح الأنسجة المرضية للثدي ويُبرز المناطق التي بُني عليها القرار، ليتمكن أخصائيو علم الأمراض من مراجعة منطق النموذج (دقة اختبار 92.3%).</p>
 <a class="featured-link" href="https://doi.org/10.48084/etasr.10888" rel="noopener" target="_blank">عرض البحث ↗</a>
 </article>
-<article class="featured-work" role="listitem">
-<div class="featured-top"><span class="featured-label">الذكاء الاصطناعي المسؤول · المؤلف الأول</span><time datetime="2025">2025</time></div>
-<h3 dir="ltr" lang="en">Governance and Ethical Frameworks for AI Integration in Higher Education</h3>
-<p>إطار حوكمة للجامعات التي تتبنى الذكاء الاصطناعي: كيف تُخصّص التعلم مع حماية الخصوصية وضبط التحيز والالتزام القانوني.</p>
-<a class="featured-link" href="https://doi.org/10.62754/joe.v4i2.5781" rel="noopener" target="_blank">عرض البحث ↗</a>
-</article>
+
 </div>
 <div class="research-snapshot">
 <div>
@@ -2089,44 +2119,6 @@
 <a class="btn secondary" download="" href="../Dr-Omaia-Al-Omari-Verified-Research-Portfolio-2011-2026.pdf">تنزيل ملف الأعمال البحثية · PDF</a>
 </div>
 </div>
-</div>
-</section><section id="service">
-<div class="wrap">
-<div class="section-head">
-<div>
-<span class="kicker">القيادة والخدمة</span>
-<h2>القيادة والخدمة.</h2>
-</div>
-<p>أقود قسمي، وأسهم في العمل التحريري والتحكيم، وأخدم مجتمعي.</p>
-</div>
-
-<div class="grid3">
-<article class="card">
-<span class="tag latest">خدمة تحريرية</span>
-<h3>عضو هيئة التحرير</h3>
-<p><b>المجلة البابلية للشبكات (BJN)</b> · 2026–<span>حتى الآن</span></p>
-<p>المساهمة في التحكيم العلمي ودعم جودة الأبحاث ومعايير النشر الأكاديمي.</p>
-<a class="verified" href="https://mesopotamian.press/journals/index.php/BJN/editorialteam" rel="noopener" target="_blank">صفحة هيئة التحرير ↗</a>
-</article>
-<article class="card">
-<span class="tag">خدمة المناهج</span>
-<h3>لجنتا مناهج CCIS ونظم المعلومات</h3>
-<p>المساهمة في مراجعة المناهج ومواءمة المقررات والتحسين المستمر في الحوسبة ونظم المعلومات.</p>
-</article>
-<article class="card"><span class="tag">الخدمة المجتمعية</span><h3>أكثر من 700 ساعة تطوعية</h3><p>عمل تطوعي موثق منذ 2010 في مبادرات تعليمية ومهنية وطلابية ومجتمعية — 747.5 ساعة معتمدة من المنصة الوطنية للعمل التطوعي (أغسطس 2026).</p></article></div>
-<div class="service-notes"><p class="review-summary"><span>محكّم في </span><a href="https://www.frontiersin.org/journals/education/articles/10.3389/feduc.2025.1704820/full" rel="noopener" target="_blank">Frontiers in Education</a><span> (إشادة علنية) و</span><a href="https://www.frontiersin.org/journals/oncology" rel="noopener" target="_blank">Frontiers in Oncology</a><span> و</span><a href="https://link.springer.com/journal/44163" rel="noopener" target="_blank">Discover Artificial Intelligence</a><span> و</span><a href="https://pr.sdiarticle5.com/review-history/136753" rel="noopener" target="_blank">Journal of Pharmaceutical Research International</a>.</p><p class="recognition-summary">2023 · سفير جودة ممارس، وتكريم من مدير جامعة شقراء للمساهمة في اعتماد برنامج علوم الحاسب.</p></div>
-
-<details class="compact-details">
-<summary>عرض مزيد من الخدمة الأكاديمية</summary>
-<div class="society-grid">
-<article class="society-item"><span class="society-org">PSU</span><span class="society-role">مسؤول موقع كلية علوم الحاسب والمعلومات</span></article>
-<article class="society-item"><span class="society-org">PSU</span><span class="society-role">اللجنة المشتركة بين الكليات</span></article>
-<article class="society-item"><span class="society-org">PSU</span><span class="society-role">لجنة تنسيق الاختبارات 2026</span></article>
-<article class="society-item"><span class="society-org">PSU</span><span class="society-role">تحديث الكتب الدراسية لنظم المعلومات</span></article>
-<article class="society-item"><span class="society-org">جامعة شقراء</span><span class="society-role">عضو لجنة ضمان الجودة</span></article>
-<article class="society-item"><span class="society-org">جامعة شقراء</span><span class="society-role">تنسيق الأنشطة الطلابية والمسابقات والخدمة المجتمعية</span></article>
-<article class="society-item"><span class="society-org">ICEGOV 2026</span><span class="society-role">رئيس مسار في المؤتمر الدولي لنظرية وممارسة الحوكمة الإلكترونية</span></article><article class="society-item"><span class="society-org">PSU</span><span class="society-role">رئيس معرض كلية علوم الحاسب والمعلومات 2026</span></article></div>
-</details>
 </div>
 </section><section id="teaching">
 <div class="wrap">

@@ -790,3 +790,6 @@ html[lang="ar"] .trajectory time {
 .progress { position: fixed; top: 0; inset-inline-start: 0; width: 0; height: 2px; z-index: 100; background: var(--accent); pointer-events: none; }
 .publication-card, .summary-card, .trajectory li { border-radius: 20px; }
 @media (prefers-reduced-motion: reduce) { .progress { display: none; } }
+
+.pub-cites { display: block; margin-top: 4px; color: var(--muted); font-size: .72rem; }
+.pub-cites:empty { display: none; }
