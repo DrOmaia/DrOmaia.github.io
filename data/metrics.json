@@ -1,1 +1,421 @@
-{"checked": null, "works_verified": 37, "openalex": {"cited_by_total": null, "h_index": null, "matched": 0}, "crossref": {"cited_by_total": null, "h_index": null, "matched": 0}, "latest": [], "orcid_new": [], "per_work": []}
+{
+ "checked": "2026-09-26T09:16:54Z",
+ "works_verified": 37,
+ "openalex": {
+  "cited_by_total": 174,
+  "h_index": 6,
+  "matched": 33
+ },
+ "crossref": {
+  "cited_by_total": 168,
+  "h_index": 6,
+  "matched": 33
+ },
+ "latest": [
+  {
+   "id": "P36",
+   "title": "Towards Trustworthy Defense AI: Real-Time Military Asset Detection with On-Demand Explainable YOLOv8",
+   "year": 2026,
+   "doi": "10.48084/etasr.17259",
+   "venue": "Engineering, Technology &amp; Applied Science Research"
+  },
+  {
+   "id": "P37",
+   "title": "Phishing Detection Using CNN-RNN with Sparrow Search Optimization Algorithm",
+   "year": 2026,
+   "doi": "10.1142/s1756973726400214",
+   "venue": "Journal of Multiscale Modelling"
+  },
+  {
+   "id": "P35",
+   "title": "XAI-Driven Decision Aid for Chronic Disease Progression",
+   "year": 2025,
+   "doi": "10.1109/dasa68193.2025.11498906",
+   "venue": "2025 International Conference on Decision Aid Sciences and Applications (DASA)"
+  }
+ ],
+ "orcid_new": [
+  {
+   "title": "Governance and Ethical Frameworks for AI Integration in Higher Education: Enhancing Personalized Learning and Legal Compliance",
+   "year": "2025",
+   "doi": "10.62754/joe.v3i8.5781"
+  },
+  {
+   "title": "8th International Conference on Data Science and Machine Learning Applications (CDMA2025)",
+   "year": "2025",
+   "doi": "10.1109/cdma61895.2025.00005"
+  }
+ ],
+ "per_work": [
+  {
+   "id": "P01",
+   "title": "Evaluating the Effect of Stemming in Clustering of Arabic Documents",
+   "year": 2011,
+   "doi": null,
+   "crossref": null,
+   "openalex": null,
+   "date": null,
+   "venue": null
+  },
+  {
+   "id": "P02",
+   "title": "Arabic Part of Speech Tagging Using K-Nearest Neighbour and Naive Bayes Classifiers Combination",
+   "year": 2014,
+   "doi": "10.3844/jcssp.2014.1865.1873",
+   "crossref": 7,
+   "openalex": 7,
+   "date": "2014-09-01",
+   "venue": "Journal of Computer Science"
+  },
+  {
+   "id": "P03",
+   "title": "Ranking and Reputation Based Resource Allocation in P2P System",
+   "year": 2017,
+   "doi": null,
+   "crossref": null,
+   "openalex": null,
+   "date": null,
+   "venue": null
+  },
+  {
+   "id": "P04",
+   "title": "Learning Modal Adaptability to Improve Reading and Writing Skills of Students",
+   "year": 2018,
+   "doi": "10.17577/ijertv7is030016",
+   "crossref": 0,
+   "openalex": 0,
+   "date": "2018-03-10",
+   "venue": "International Journal of Engineering Research and"
+  },
+  {
+   "id": "P05",
+   "title": "Enhanced Document Classification Using Noun Verb (NV) Terms Extraction Approach",
+   "year": 2019,
+   "doi": null,
+   "crossref": null,
+   "openalex": null,
+   "date": null,
+   "venue": null
+  },
+  {
+   "id": "P06",
+   "title": "Prevention of Web-Form Spamming for Cloud-Based Applications: A Proposed Model",
+   "year": 2019,
+   "doi": "10.1109/aicai.2019.8701302",
+   "crossref": 4,
+   "openalex": 5,
+   "date": "2019-02-01",
+   "venue": "2019 Amity International Conference on Artificial Intelligence (AICAI)"
+  },
+  {
+   "id": "P07",
+   "title": "Intrusion Management to Avoid Web-Form Spamming in Cloud-Based Architectures",
+   "year": 2019,
+   "doi": "10.1109/iccike47802.2019.9004302",
+   "crossref": 3,
+   "openalex": 5,
+   "date": "2019-12-01",
+   "venue": "2019 International Conference on Computational Intelligence and Knowledge Economy (ICCIKE)"
+  },
+  {
+   "id": "P08",
+   "title": "Analytical Assessment of Noun Verb Term Extraction for Document Classification Using T-Test",
+   "year": 2020,
+   "doi": "10.26782/jmcms.2020.03.00021",
+   "crossref": 0,
+   "openalex": 0,
+   "date": "2020-03-29",
+   "venue": "JOURNAL OF MECHANICS OF CONTINUA AND MATHEMATICAL SCIENCES"
+  },
+  {
+   "id": "P09",
+   "title": "Internet of Things (IoT)-Based Educational Data Mining (EDM) System",
+   "year": 2020,
+   "doi": "10.26782/jmcms.2020.03.00022",
+   "crossref": 0,
+   "openalex": 0,
+   "date": "2020-03-29",
+   "venue": "JOURNAL OF MECHANICS OF CONTINUA AND MATHEMATICAL SCIENCES"
+  },
+  {
+   "id": "P10",
+   "title": "A Review Methodology for COVID-19 Using Enhanced Techniques",
+   "year": 2020,
+   "doi": "10.31838/jcr.07.18.264",
+   "crossref": null,
+   "openalex": null,
+   "date": null,
+   "venue": null
+  },
+  {
+   "id": "P11",
+   "title": "An Empirical Study on the Future of Publication Repositories and Its Adaptability in Public Universities",
+   "year": 2023,
+   "doi": "10.1007/978-981-19-7346-8_71",
+   "crossref": 5,
+   "openalex": 5,
+   "date": "2023-01-01",
+   "venue": "Lecture Notes in Electrical Engineering"
+  },
+  {
+   "id": "P12",
+   "title": "IoT and Machine Learning Models to Develop the Architecture for Assessment of Security Threats",
+   "year": 2023,
+   "doi": "10.1109/iccams60113.2023.10526005",
+   "crossref": 0,
+   "openalex": 0,
+   "date": "2023-10-27",
+   "venue": "2023 International Conference on New Frontiers in Communication, Automation, Management and Security (ICCAMS)"
+  },
+  {
+   "id": "P13",
+   "title": "MuSeRAN: Multimodal Sentiment Analysis with Recurrent Attention Networks",
+   "year": 2024,
+   "doi": "10.1109/dasa63652.2024.10836479",
+   "crossref": 7,
+   "openalex": 7,
+   "date": "2024-12-11",
+   "venue": "2024 International Conference on Decision Aid Sciences and Applications (DASA)"
+  },
+  {
+   "id": "P14",
+   "title": "Combination of Blockchain and Machine Learning for Secure Supply Chain Authentication Management",
+   "year": 2024,
+   "doi": "10.1109/dasa63652.2024.10836579",
+   "crossref": 17,
+   "openalex": 17,
+   "date": "2024-12-11",
+   "venue": "2024 International Conference on Decision Aid Sciences and Applications (DASA)"
+  },
+  {
+   "id": "P15",
+   "title": "Enhancing Feedback Mechanisms in English Language Assessments Through Deep Learning Model",
+   "year": 2024,
+   "doi": "10.1109/icaiqsa64000.2024.10882425",
+   "crossref": 0,
+   "openalex": 0,
+   "date": "2024-12-20",
+   "venue": "2024 International Conference on Artificial Intelligence and Quantum Computation-Based Sensor Application (ICAIQSA)"
+  },
+  {
+   "id": "P16",
+   "title": "Forecasting Stock Market Using Regression Models",
+   "year": 2024,
+   "doi": "10.1145/3716097.3716124",
+   "crossref": 0,
+   "openalex": 1,
+   "date": "2024-12-20",
+   "venue": "Proceedings of the 10th International Conference on Industrial and Business Engineering"
+  },
+  {
+   "id": "P17",
+   "title": "Smart Cloud Data Management Based on Deep Reinforcement Learning with Spider Swarm Optimization",
+   "year": 2024,
+   "doi": "10.1201/9781003490210-3",
+   "crossref": 0,
+   "openalex": 1,
+   "date": "2024-05-28",
+   "venue": "Advancing Sustainable Science and Technology for a Resilient Future"
+  },
+  {
+   "id": "P18",
+   "title": "Enhancement of Cyber Security in IoT Based on Ant Colony Optimized Artificial Neural Adaptive TensorFlow",
+   "year": 2024,
+   "doi": "10.1080/0954898x.2024.2336058",
+   "crossref": 1,
+   "openalex": 1,
+   "date": "2024-07-15",
+   "venue": "Network: Computation in Neural Systems"
+  },
+  {
+   "id": "P19",
+   "title": "AI-Powered Climate Change Analytics Approach",
+   "year": 2025,
+   "doi": "10.1109/icamac67779.2025.11398634",
+   "crossref": 2,
+   "openalex": 2,
+   "date": "2025-10-17",
+   "venue": "2025 2nd International Conference on Artificial Intelligence, Metaverse, and Cybersecurity (ICAMAC)"
+  },
+  {
+   "id": "P20",
+   "title": "Deep Learning-Based Automated Segmentation of the Parcellated Corpus Callosum in Brain MRI",
+   "year": 2025,
+   "doi": "10.48084/etasr.11783",
+   "crossref": 1,
+   "openalex": 1,
+   "date": "2025-10-06",
+   "venue": "Engineering, Technology &amp; Applied Science Research"
+  },
+  {
+   "id": "P21",
+   "title": "CNN-Based Automated Detection of Metastatic Cancer in Histopathology Images",
+   "year": 2025,
+   "doi": "10.48084/etasr.10888",
+   "crossref": 4,
+   "openalex": 4,
+   "date": "2025-08-02",
+   "venue": "Engineering, Technology &amp; Applied Science Research"
+  },
+  {
+   "id": "P22",
+   "title": "Investigating Brain-Inspired Computing Architectures to Enhance Energy Efficiency in AI Models",
+   "year": 2025,
+   "doi": "10.1109/isac364032.2025.11156604",
+   "crossref": 1,
+   "openalex": 1,
+   "date": "2025-07-25",
+   "venue": "2025 International Conference on Innovations in Intelligent Systems: Advancements in Computing, Communication, and Cybersecurity (ISAC3)"
+  },
+  {
+   "id": "P23",
+   "title": "Artificial Intelligence and Posthumanism: A Philosophical Inquiry into Consciousness, Ethics, and Human Identity",
+   "year": 2025,
+   "doi": "10.63332/joph.v5i2.432",
+   "crossref": 6,
+   "openalex": 6,
+   "date": "2025-04-04",
+   "venue": "Journal of Posthumanism"
+  },
+  {
+   "id": "P24",
+   "title": "Object Detection in Real-Time Video Surveillance Using Attention-Based Transformer-YOLOv8 Model",
+   "year": 2025,
+   "doi": "10.1016/j.aej.2025.01.032",
+   "crossref": 65,
+   "openalex": 64,
+   "date": "2025-01-24",
+   "venue": "Alexandria Engineering Journal"
+  },
+  {
+   "id": "P25",
+   "title": "Governance and Ethical Frameworks for AI Integration in Higher Education",
+   "year": 2025,
+   "doi": "10.62754/joe.v4i2.5781",
+   "crossref": 23,
+   "openalex": 23,
+   "date": "2025-01-10",
+   "venue": "Journal of Ecohumanism"
+  },
+  {
+   "id": "P26",
+   "title": "Artificial Intelligence in Healthcare: Bridging Innovation and Regulation",
+   "year": 2025,
+   "doi": "10.62754/joe.v3i8.5673",
+   "crossref": 3,
+   "openalex": 3,
+   "date": "2025-01-02",
+   "venue": "Journal of Ecohumanism"
+  },
+  {
+   "id": "P27",
+   "title": "A Deep Learning Approach for Proactive Detection and Mitigation of Zero-Day Attacks in IoT Environment",
+   "year": 2025,
+   "doi": "10.1007/978-981-96-6429-0_5",
+   "crossref": 0,
+   "openalex": 0,
+   "date": "2025-01-01",
+   "venue": "Lecture Notes in Networks and Systems"
+  },
+  {
+   "id": "P28",
+   "title": "A Machine Learning Approach to Analyze the Shift from In-Person to Virtual Care for Mental Health Services",
+   "year": 2025,
+   "doi": "10.1109/meco66322.2025.11049284",
+   "crossref": 1,
+   "openalex": 1,
+   "date": "2025-06-10",
+   "venue": "2025 14th Mediterranean Conference on Embedded Computing (MECO)"
+  },
+  {
+   "id": "P29",
+   "title": "A Predictive Analytics Approach to Improve Telecom's Customer Retention",
+   "year": 2025,
+   "doi": "10.3389/frai.2025.1600357",
+   "crossref": 4,
+   "openalex": 4,
+   "date": "2025-08-29",
+   "venue": "Frontiers in Artificial Intelligence"
+  },
+  {
+   "id": "P30",
+   "title": "Applying Artificial Intelligence Techniques on Cyber Attacks Dataset",
+   "year": 2025,
+   "doi": "10.1007/978-3-031-87778-0_7",
+   "crossref": 0,
+   "openalex": 1,
+   "date": "2025-01-01",
+   "venue": "Lecture Notes on Data Engineering and Communications Technologies"
+  },
+  {
+   "id": "P31",
+   "title": "Challenges and Solutions in Agile Software Development: A Managerial Perspective",
+   "year": 2025,
+   "doi": "10.14569/ijacsa.2025.0160374",
+   "crossref": 10,
+   "openalex": 11,
+   "date": "2025-01-01",
+   "venue": "International Journal of Advanced Computer Science and Applications"
+  },
+  {
+   "id": "P32",
+   "title": "LSTM Networks for Improved Environmental Monitoring and Biodiversity Conservation",
+   "year": 2025,
+   "doi": "10.1109/esci63694.2025.10988428",
+   "crossref": 2,
+   "openalex": 2,
+   "date": "2025-03-05",
+   "venue": "2025 International Conference on Emerging Smart Computing and Informatics (ESCI)"
+  },
+  {
+   "id": "P33",
+   "title": "LiDAR-Based Climate Change Imaging in Geoscience Using Spatio Extreme Fuzzy Gradient Model",
+   "year": 2025,
+   "doi": "10.1007/s41976-025-00197-5",
+   "crossref": 2,
+   "openalex": 2,
+   "date": "2025-01-20",
+   "venue": "Remote Sensing in Earth Systems Sciences"
+  },
+  {
+   "id": "P34",
+   "title": "KAN-ALSTM: A Clinical Decision Aid for Predicting Parkinson's Disease Progression",
+   "year": 2025,
+   "doi": "10.1109/dasa68193.2025.11498856",
+   "crossref": 0,
+   "openalex": 0,
+   "date": "2025-12-01",
+   "venue": "2025 International Conference on Decision Aid Sciences and Applications (DASA)"
+  },
+  {
+   "id": "P35",
+   "title": "XAI-Driven Decision Aid for Chronic Disease Progression",
+   "year": 2025,
+   "doi": "10.1109/dasa68193.2025.11498906",
+   "crossref": 0,
+   "openalex": 0,
+   "date": "2025-12-01",
+   "venue": "2025 International Conference on Decision Aid Sciences and Applications (DASA)"
+  },
+  {
+   "id": "P36",
+   "title": "Towards Trustworthy Defense AI: Real-Time Military Asset Detection with On-Demand Explainable YOLOv8",
+   "year": 2026,
+   "doi": "10.48084/etasr.17259",
+   "crossref": 0,
+   "openalex": 0,
+   "date": "2026-04-04",
+   "venue": "Engineering, Technology &amp; Applied Science Research"
+  },
+  {
+   "id": "P37",
+   "title": "Phishing Detection Using CNN-RNN with Sparrow Search Optimization Algorithm",
+   "year": 2026,
+   "doi": "10.1142/s1756973726400214",
+   "crossref": 0,
+   "openalex": 0,
+   "date": "2026-01-14",
+   "venue": "Journal of Multiscale Modelling"
+  }
+ ]
+}
