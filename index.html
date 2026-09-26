@@ -1548,6 +1548,7 @@
         border-radius: 18px;
         background: color-mix(in srgb, var(--surface) 84%, transparent);
       }
+      .metrics-note { margin: 10px 0 0; color: var(--muted); font-size: .76rem; }
       .metric {
         display: block;
         padding: 18px 20px;
@@ -2026,21 +2027,15 @@
 <div class="actions">
 <a class="btn primary" data-ar="البحث" href="#research">Research</a><a class="btn secondary" data-ar="استعراض المنشورات" href="publications.html">Explore Publications</a><a class="btn textual" data-ar="عرض السيرة الأكاديمية · PDF · 3 صفحات ↗" href="Dr-Omaia-Al-Omari-Concise-Academic-CV.pdf" rel="noopener" target="_blank">View Academic CV · PDF · 3 pages ↗</a>
 </div><p class="availability-note" data-ar="متاح للتعاون البحثي والمحاضرات المدعوة.">Open to research collaboration and invited talks.</p>
-<div aria-label="Academic profile highlights" class="metrics-bar" data-ar-aria-label="أبرز مؤشرات الملف الأكاديمي" id="metricsBar" role="group">
-<div class="metric"><strong>18+</strong><span data-ar="عاماً من الخبرة">Years of experience</span></div>
-<a class="metric" href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ" rel="noopener" target="_blank">
-<strong>450+</strong>
-<span data-ar="استشهاد · Google Scholar ↗">Citations · Google Scholar ↗</span>
-</a>
-<a class="metric" href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ" rel="noopener" target="_blank">
-<strong>12</strong>
-<span data-ar="مؤشر h · Google Scholar ↗">h-index · Google Scholar ↗</span>
-</a>
-<a class="metric" href="publications.html">
-<strong>37</strong>
-<span data-ar="عملاً موثقاً">Verified works</span>
-</a>
-</div><ul aria-label="Recent" class="recent" data-ar-aria-label="المستجدات"><li><time datetime="2026">2026</time> — <span data-ar="رئيس قسم نظم المعلومات، جامعة الأمير سلطان">Chair, Information Systems Department, PSU</span></li><li><time datetime="2026">2026</time> — <span data-ar="مقالتان جديدتان: YOLOv8 قابل للتفسير للتطبيقات الدفاعية (ETASR) وكشف التصيد الاحتيالي (J. Multiscale Modelling)">Two new journal articles: explainable YOLOv8 for defense (ETASR) and phishing detection (J. Multiscale Modelling)</span></li><li><time datetime="2026">2026</time> — <span data-ar="عضو هيئة تحرير المجلة البابلية للشبكات">Editorial board member, Babylonian Journal of Networking</span></li></ul>
+<!-- MANUAL: update the Google Scholar numbers (500+ and 12) by hand when they change. Everything else is automated. -->
+<div id="metricsBar" class="metrics-bar" role="group" aria-label="Academic profile highlights" data-ar-aria-label="أبرز مؤشرات الملف الأكاديمي">
+  <div class="metric"><strong>18+</strong><span data-ar="عاماً من الخبرة">Years of experience</span></div>
+  <a class="metric" href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ" target="_blank" rel="noopener"><strong>500+</strong><span data-ar="استشهاد · Google Scholar ↗">Citations · Google Scholar ↗</span></a>
+  <a class="metric" href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ" target="_blank" rel="noopener"><strong>12</strong><span data-ar="مؤشر h · Google Scholar ↗">h-index · Google Scholar ↗</span></a>
+  <a class="metric" href="publications.html"><strong data-metric="works">37</strong><span data-ar="عملاً موثقاً">Verified works</span></a>
+</div>
+<p class="metrics-note"><span data-ar="قائمة أحدث المنشورات وأعداد الاستشهاد لكل بحث تُحدَّث تلقائياً كل أسبوع من Crossref وOpenAlex وORCID.">The latest-publications list and per-paper citation counts update automatically every week from Crossref, OpenAlex and ORCID.</span> <span data-metric="updated" data-ar="">—</span></p>
+<ul aria-label="Recent" class="recent" data-ar-aria-label="المستجدات"><li><time datetime="2026">2026</time> — <span data-ar="رئيس قسم نظم المعلومات، جامعة الأمير سلطان">Chair, Information Systems Department, PSU</span></li><li><time datetime="2026">2026</time> — <span data-ar="مقالتان جديدتان: YOLOv8 قابل للتفسير للتطبيقات الدفاعية (ETASR) وكشف التصيد الاحتيالي (J. Multiscale Modelling)">Two new journal articles: explainable YOLOv8 for defense (ETASR) and phishing detection (J. Multiscale Modelling)</span></li><li><time datetime="2026">2026</time> — <span data-ar="عضو هيئة تحرير المجلة البابلية للشبكات">Editorial board member, Babylonian Journal of Networking</span></li></ul>
 </div>
 <div class="portrait">
 <img alt="Professional portrait of Dr. Omaia Al-Omari" data-ar-alt="صورة مهنية للدكتور أمية العمري" fetchpriority="high" height="1396" id="portraitImage" src="PhotoDrOmaia.webp" width="1127"/>

@@ -1549,6 +1549,7 @@
         border-radius: 18px;
         background: color-mix(in srgb, var(--surface) 84%, transparent);
       }
+      .metrics-note { margin: 10px 0 0; color: var(--muted); font-size: .76rem; }
       .metric {
         display: block;
         padding: 18px 20px;
@@ -2022,21 +2023,15 @@
 <div class="actions">
 <a class="btn primary" href="#research">البحث</a><a class="btn secondary" href="publications.html">استعراض المنشورات</a><a class="btn textual" href="../Dr-Omaia-Al-Omari-Concise-Academic-CV.pdf" rel="noopener" target="_blank">عرض السيرة الأكاديمية · PDF · 3 صفحات ↗</a>
 </div><p class="availability-note">متاح للتعاون البحثي والمحاضرات المدعوة.</p>
-<div aria-label="أبرز مؤشرات الملف الأكاديمي" class="metrics-bar" id="metricsBar" role="group">
-<div class="metric"><strong>18+</strong><span>عاماً من الخبرة</span></div>
-<a class="metric" href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ" rel="noopener" target="_blank">
-<strong>450+</strong>
-<span>استشهاد · Google Scholar ↗</span>
-</a>
-<a class="metric" href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ" rel="noopener" target="_blank">
-<strong>12</strong>
-<span>مؤشر h · Google Scholar ↗</span>
-</a>
-<a class="metric" href="publications.html">
-<strong>37</strong>
-<span>عملاً موثقاً</span>
-</a>
-</div><ul aria-label="المستجدات" class="recent"><li><time datetime="2026">2026</time> — <span>رئيس قسم نظم المعلومات، جامعة الأمير سلطان</span></li><li><time datetime="2026">2026</time> — <span>مقالتان جديدتان: YOLOv8 قابل للتفسير للتطبيقات الدفاعية (ETASR) وكشف التصيد الاحتيالي (J. Multiscale Modelling)</span></li><li><time datetime="2026">2026</time> — <span>عضو هيئة تحرير المجلة البابلية للشبكات</span></li></ul>
+<!-- MANUAL: update the Google Scholar numbers (500+ and 12) by hand when they change. Everything else is automated. -->
+<div id="metricsBar" class="metrics-bar" role="group" aria-label="أبرز مؤشرات الملف الأكاديمي">
+  <div class="metric"><strong>18+</strong><span>عاماً من الخبرة</span></div>
+  <a class="metric" href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ" target="_blank" rel="noopener"><strong>500+</strong><span>استشهاد · Google Scholar ↗</span></a>
+  <a class="metric" href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ" target="_blank" rel="noopener"><strong>12</strong><span>مؤشر h · Google Scholar ↗</span></a>
+  <a class="metric" href="publications.html"><strong data-metric="works">37</strong><span>عملاً موثقاً</span></a>
+</div>
+<p class="metrics-note"><span>قائمة أحدث المنشورات وأعداد الاستشهاد لكل بحث تُحدَّث تلقائياً كل أسبوع من Crossref وOpenAlex وORCID.</span> <span data-metric="updated"></span></p>
+<ul aria-label="المستجدات" class="recent"><li><time datetime="2026">2026</time> — <span>رئيس قسم نظم المعلومات، جامعة الأمير سلطان</span></li><li><time datetime="2026">2026</time> — <span>مقالتان جديدتان: YOLOv8 قابل للتفسير للتطبيقات الدفاعية (ETASR) وكشف التصيد الاحتيالي (J. Multiscale Modelling)</span></li><li><time datetime="2026">2026</time> — <span>عضو هيئة تحرير المجلة البابلية للشبكات</span></li></ul>
 </div>
 <div class="portrait">
 <img alt="صورة مهنية للدكتور أمية العمري" fetchpriority="high" height="1396" id="portraitImage" src="../PhotoDrOmaia.webp" width="1127"/>
