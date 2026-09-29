@@ -793,3 +793,21 @@ html[lang="ar"] .trajectory time {
 
 .pub-cites { display: block; margin-top: 4px; color: var(--muted); font-size: .72rem; }
 .pub-cites:empty { display: none; }
+
+/* GitHub star invitation in the footer */
+footer a.gh-star {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-weight: 600;
+}
+footer a.gh-star:hover,
+footer a.gh-star:focus-visible {
+  border-color: currentColor;
+}
+footer a.gh-star svg {
+  color: #e3b341;
+}
