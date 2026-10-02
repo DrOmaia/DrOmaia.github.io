@@ -7,27 +7,127 @@
   <title>Page not found · الصفحة غير موجودة</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Noto+Naskh+Arabic:wght@400;700&display=swap">
   <style>
-    :root { color-scheme: dark light; --bg:#07111d; --surface:#0d1a28; --text:#e9eef4; --muted:#9cafc1; --line:rgba(255,255,255,.1); --gold:#d8b45b; }
-    @media (prefers-color-scheme: light) { :root { --bg:#f4f7fa; --surface:#fff; --text:#0b1b2a; --muted:#53687b; --line:rgba(10,31,49,.12); --gold:#835d05; } }
+    :root { color-scheme: dark light; --bg:#07111d; --bg2:#0b1a2b; --surface:#0d1a28; --card:#101f31; --text:#e9eef4; --muted:#9cafc1; --line:rgba(255,255,255,.1); --gold:#d8b45b; --gold-soft:rgba(216,180,91,.12); --shadow:0 18px 50px rgba(0,0,0,.35); }
+    @media (prefers-color-scheme: light) { :root { --bg:#f4f7fa; --bg2:#e9eff5; --surface:#fff; --card:#fff; --text:#0b1b2a; --muted:#53687b; --line:rgba(10,31,49,.12); --gold:#835d05; --gold-soft:rgba(131,93,5,.09); --shadow:0 18px 44px rgba(10,31,49,.10); } }
     * { box-sizing:border-box; }
-    body { min-height:100vh; margin:0; display:grid; place-items:center; padding:24px; background:var(--bg); color:var(--text); font-family:Manrope,Arial,sans-serif; text-align:center; line-height:1.65; }
-    main { width:min(600px,100%); padding:clamp(28px,6vw,60px); border:1px solid var(--line); border-radius:20px; background:var(--surface); }
-    h1,h2 { margin:0 0 6px; line-height:1.2; }
-    h1 { font-size:clamp(2rem,5vw,3.2rem); }
-    h2 { font-size:clamp(1.6rem,4vw,2.4rem); }
+    body { min-height:100vh; margin:0; padding:clamp(18px,4vw,48px) 18px; background:radial-gradient(1100px 520px at 50% -10%, var(--bg2), var(--bg)); color:var(--text); font-family:Manrope,Arial,sans-serif; line-height:1.6; display:flex; justify-content:center; }
+    .wrap { width:min(920px,100%); }
+    header { text-align:center; padding:clamp(8px,3vw,28px) 0 clamp(18px,3vw,30px); }
+    .code { display:inline-block; font-weight:800; letter-spacing:.14em; font-size:.85rem; color:var(--gold); background:var(--gold-soft); border:1px solid var(--line); padding:4px 14px; border-radius:999px; }
+    h1 { margin:14px 0 4px; font-size:clamp(2rem,5.5vw,3.3rem); line-height:1.15; }
+    .ar { font-family:"Noto Naskh Arabic",Tahoma,Arial,sans-serif; }
+    h1.ar { font-size:clamp(1.6rem,4.2vw,2.5rem); margin:0 0 10px; color:var(--muted); font-weight:700; }
     p { margin:0; color:var(--muted); }
-    section + section { margin-top:26px; padding-top:26px; border-top:1px solid var(--line); }
-    section[lang="ar"] { font-family:"Noto Naskh Arabic",Tahoma,Arial,sans-serif; }
-    nav { display:flex; flex-wrap:wrap; justify-content:center; gap:12px 22px; margin-top:28px; }
+    .typed { margin-top:12px; font-size:.92rem; }
+    .typed code { color:var(--text); background:var(--card); border:1px solid var(--line); padding:2px 9px; border-radius:8px; word-break:break-all; }
+    .suggest { display:none; margin:22px auto 0; max-width:560px; padding:16px 20px; border:1px solid var(--gold); border-radius:16px; background:var(--gold-soft); text-align:center; }
+    .suggest.show { display:block; }
+    .suggest b { color:var(--text); }
+    .suggest a { display:inline-block; margin-top:6px; font-size:1.15rem; }
+    h2.sec { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:34px 2px 14px; font-size:1.05rem; letter-spacing:.02em; }
+    h2.sec span { font-size:.95rem; color:var(--muted); font-weight:700; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; }
+    .card { position:relative; display:flex; flex-direction:column; gap:6px; padding:20px 20px 18px; background:var(--card); border:1px solid var(--line); border-radius:18px; text-decoration:none; color:var(--text); box-shadow:var(--shadow); transition:transform .18s ease, border-color .18s ease; }
+    .card:hover { transform:translateY(-3px); border-color:var(--gold); }
+    .card:focus-visible, a:focus-visible { outline:3px solid var(--gold); outline-offset:3px; }
+    .tag { font-size:.72rem; font-weight:800; letter-spacing:.12em; color:var(--gold); text-transform:uppercase; }
+    .card h3 { margin:0; font-size:1.25rem; line-height:1.25; }
+    .card .ar-line { font-family:"Noto Naskh Arabic",Tahoma,Arial,sans-serif; direction:rtl; text-align:right; color:var(--muted); font-size:.95rem; }
+    .card p { font-size:.93rem; flex:1; }
+    .go { margin-top:8px; font-weight:800; color:var(--gold); font-size:.9rem; }
+    .card::before { content:""; position:absolute; inset:0 0 auto 0; height:4px; border-radius:18px 18px 0 0; background:linear-gradient(90deg,var(--gold),transparent); opacity:.9; }
+    .links { display:flex; flex-wrap:wrap; justify-content:center; gap:10px 14px; }
+    .pill { text-decoration:none; color:var(--text); border:1px solid var(--line); background:var(--card); padding:9px 18px; border-radius:999px; font-weight:700; font-size:.92rem; }
+    .pill:hover { border-color:var(--gold); color:var(--gold); }
     a { color:var(--gold); font-weight:800; text-underline-offset:4px; }
-    a:focus-visible { outline:3px solid var(--gold); outline-offset:4px; }
+    footer { margin-top:36px; text-align:center; font-size:.85rem; color:var(--muted); }
+    @media (prefers-reduced-motion: reduce) { .card { transition:none; } .card:hover { transform:none; } }
   </style>
 </head>
 <body>
-<main>
-  <section lang="en"><h1>Page not found</h1><p>The page you asked for does not exist or has moved.</p></section>
-  <section lang="ar" dir="rtl"><h2>الصفحة غير موجودة</h2><p>الصفحة التي طلبتها غير موجودة أو تم نقلها.</p></section>
-  <nav aria-label="Navigation"><a href="/">Home / الرئيسية</a><a href="/publications.html">Publications / المنشورات</a><a href="/ar/" lang="ar">العربية</a></nav>
-</main>
+<div class="wrap">
+  <header>
+    <span class="code">404</span>
+    <h1>Page not found</h1>
+    <h1 class="ar" lang="ar" dir="rtl">الصفحة غير موجودة</h1>
+    <p>The page you asked for does not exist or has moved. Pick where you want to go. <span class="ar" lang="ar">اختر وجهتك من الأسفل.</span></p>
+    <p class="typed" id="typed" hidden>You typed: <code id="typedPath"></code></p>
+    <div class="suggest" id="suggest" role="status" aria-live="polite">
+      <b>Did you mean</b> <span class="ar" lang="ar">هل تقصد</span>
+      <br><a id="suggestLink" href="/"></a>
+    </div>
+  </header>
+
+  <h2 class="sec">Free courses <span class="ar" lang="ar">الدورات المجانية</span></h2>
+  <div class="grid">
+    <a class="card" href="/AI12/">
+      <span class="tag">12 days · Faculty</span>
+      <h3>AI12</h3>
+      <div class="ar-line" lang="ar">الذكاء الاصطناعي في التدريس الجامعي</div>
+      <p>AI for university teaching: prompts, assessment, skills, agents, and your own personal teaching assistant.</p>
+      <span class="go">Open course →</span>
+    </a>
+    <a class="card" href="/PYthon/">
+      <span class="tag">30 days · Python</span>
+      <h3>Py30</h3>
+      <div class="ar-line" lang="ar">تعلّم بايثون في 30 يومًا</div>
+      <p>Learn Python in 30 days. Everything runs in your browser, nothing to install.</p>
+      <span class="go">Open course →</span>
+    </a>
+    <a class="card" href="/ENG30/">
+      <span class="tag">30 days · A2–B1</span>
+      <h3>English in 30 Days</h3>
+      <div class="ar-line" lang="ar">الإنجليزية الأكاديمية لمتحدثي العربية</div>
+      <p>A free academic English course for Arabic speakers. Works offline, no account.</p>
+      <span class="go">Open course →</span>
+    </a>
+  </div>
+
+  <h2 class="sec">Dr. Omaia's site <span class="ar" lang="ar">الموقع الشخصي</span></h2>
+  <nav class="links" aria-label="Main site">
+    <a class="pill" href="/">Home / الرئيسية</a>
+    <a class="pill" href="/publications.html">Publications / المنشورات</a>
+    <a class="pill ar" lang="ar" href="/ar/">العربية</a>
+  </nav>
+
+  <footer>dromaia.github.io</footer>
+</div>
+
+<script>
+(function () {
+  var KNOWN = [
+    { slug: "AI12", href: "/AI12/", label: "AI12 — AI for university teaching" },
+    { slug: "PYthon", href: "/PYthon/", label: "Py30 — Learn Python in 30 days", alias: ["py30", "python"] },
+    { slug: "ENG30", href: "/ENG30/", label: "English in 30 Days", alias: ["eng", "english"] },
+    { slug: "publications", href: "/publications.html", label: "Publications / المنشورات", alias: ["publication", "papers"] },
+    { slug: "ar", href: "/ar/", label: "العربية" }
+  ];
+  function lev(a, b) {
+    var m = [], i, j;
+    for (i = 0; i <= a.length; i++) m[i] = [i];
+    for (j = 1; j <= b.length; j++) m[0][j] = j;
+    for (i = 1; i <= a.length; i++) for (j = 1; j <= b.length; j++)
+      m[i][j] = Math.min(m[i-1][j] + 1, m[i][j-1] + 1, m[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+    return m[a.length][b.length];
+  }
+  var path = decodeURIComponent(location.pathname).replace(/\.html$/, "");
+  var first = path.split("/").filter(Boolean)[0];
+  if (!first) return;
+  document.getElementById("typed").hidden = false;
+  document.getElementById("typedPath").textContent = location.pathname;
+  var q = first.toLowerCase().replace(/l/g, "i"), best = null, bestD = 99;
+  KNOWN.forEach(function (k) {
+    [k.slug].concat(k.alias || []).forEach(function (n) {
+      var d = lev(q, n.toLowerCase().replace(/l/g, "i"));
+      if (d < bestD) { bestD = d; best = k; }
+    });
+  });
+  if (best && bestD <= 2 && first.length >= 2) {
+    var a = document.getElementById("suggestLink");
+    a.href = best.href; a.textContent = best.label + " →";
+    document.getElementById("suggest").classList.add("show");
+  }
+})();
+</script>
 </body>
 </html>
