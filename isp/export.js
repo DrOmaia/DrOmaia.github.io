@@ -50,7 +50,7 @@
     ws.getCell(1, 1).alignment = { vertical: 'middle' };
     ws.getRow(1).height = 26;
     ws.mergeCells(2, 3, 2, LAST); ws.getRow(2).height = 30; ws.getCell(2, 3).alignment = { wrapText: true, vertical: 'middle' };
-    ws.getCell(2, 3).value = NOTICE + '   |   To move a section, choose it from the list in a cell (only sections not yet placed at that hour are listed) and clear its old cell; loads, counts, the check table, Is Reg names and the summary update by themselves.   |   Red: duplicated section, section outside its hour, or sections different from required   |   Orange italic dashed: proposed time (needs registration approval)';
+    ws.getCell(2, 3).value = NOTICE + '   |   To move a section, choose it from the list in a cell (only sections not yet placed at that hour are listed) and clear its old cell; loads, counts, the check table, Is Reg names and the summary update by themselves.   |   Red: duplicated section, section outside its hour, or sections different from required   |   Orange italic dashed: proposed time (needs registration approval)   |   MSc / PhD in the No time column: evening, counts as one section; hours in the MSc / PhD column';
     ws.getCell(2, 3).font = { name: FONT, size: 9, italic: true, color: { argb: 'FF7F7F7F' } };
     ws.mergeCells(3, 3, 3, NOTIME); ws.getCell(3, 3).value = 'Timeslots';
     ws.getCell(3, 3).fill = fill('0000FF'); ws.getCell(3, 3).font = { name: FONT, size: 14, bold: true, color: { argb: 'FFFFFFFF' } }; ws.getCell(3, 3).alignment = center;
@@ -86,7 +86,12 @@
       return { pairs, nt };
     };
     const realMembers = ctx.members.filter((m) => !m.pseudo);
-    realMembers.forEach((m) => blocks.push({ m, ...layout(sectionsOf(m.id)) }));
+    realMembers.forEach((m) => {
+      const L = layout(sectionsOf(m.id));
+      (ctx.msc || []).filter((x) => x.member === m.id).forEach((x) => L.nt.push({ grad: x.program === 'PhD' ? 'PhD' : 'MSc' }));
+      while (L.pairs.length * 2 < L.nt.length) L.pairs.push({});
+      blocks.push({ m, ...L });
+    });
     const pt = ctx.members.find((m) => m.id === 'PT');
     if (pt && sectionsOf('PT').length) blocks.push({ m: pt, ...layout(sectionsOf('PT')) });
     const hold = ctx.members.find((m) => m.id === 'HOLD');
@@ -97,9 +102,7 @@
     const courseList = [...new Set(Object.values(secs).map((s) => s.course))];
     const used = courseList.filter((c) => Object.keys(assign).some((k) => secs[k] && secs[k].course === c));
     const keyStart = LG + 2, keyEnd = keyStart + Math.max(1, Math.ceil(used.length / 11));
-    const msc = ctx.msc || [];
-    const mscFirst = keyEnd + 4, mscRows = msc.length + 4, mscLast = mscFirst + mscRows - 1;
-    const SUMN = 9, sumFirst = mscLast + 4, sumLast = sumFirst + SUMN - 1;
+    const SUMN = 9, sumFirst = keyEnd + 4, sumLast = sumFirst + SUMN - 1;
     const chkFirst = sumLast + 4, chkLast = chkFirst + ctx.off.lectures.length - 1;
     const chkRow = {}; ctx.off.lectures.forEach((k, i) => { chkRow[k] = chkFirst + i; });
     const SH = `'${title.slice(0, 31).replace(/'/g, "''")}'`;
@@ -143,11 +146,13 @@
           cT.font = Object.assign({}, cT.font, { size: 10 });
         });
         // No time column: two editable cells
-        const nt = pi === 0 ? b.nt : [];
-        if (nt[0]) ws.getCell(r, NOTIME).value = secs[nt[0]].noTime ? nt[0] : lLabel(nt[0]);
-        if (nt[1]) ws.getCell(r + 1, NOTIME).value = nt.slice(1).map((k) => (secs[k].noTime ? k : lLabel(k))).join(', ');
+        const nt = b.nt.slice(pi * 2, pi * 2 + 2);
+        const ntText = (k) => (typeof k === 'object' ? k.grad : secs[k].noTime ? k : lLabel(k));
+        if (nt[0]) ws.getCell(r, NOTIME).value = ntText(nt[0]);
+        if (nt[1]) ws.getCell(r + 1, NOTIME).value = ntText(nt[1]);
+        nt.forEach((k, j) => { if (typeof k === 'object') { const c = ws.getCell(r + j, NOTIME); c.font = { name: FONT, size: 11, bold: true, color: { argb: 'FF5B2C83' } }; c.fill = fill('EDE3F6'); } });
         ws.getCell(r, NOTIME).dataValidation = dvFor('nt'); ws.getCell(r + 1, NOTIME).dataValidation = dvFor('nt');
-        nt.forEach((k) => { placed[k] = { row: r, col: NOTIME }; });
+        nt.forEach((k, j) => { if (typeof k !== 'object') placed[k] = { row: r + j, col: NOTIME }; });
         // course load per row
         const loadRow = (row) => {
           let v = 0;
@@ -177,7 +182,7 @@
       if (!isPseudo) {
         const senior = Number(b.m.senior) || 0, coop = Number(b.m.coop) || 0, mscH = (per[b.m.id] && per[b.m.id].mscHours) || 0;
         ws.getCell(first, PCOL).value = senior; ws.getCell(first, QCOL).value = coop;
-        ws.getCell(first, RCOL).value = { formula: `SUMIF($A$${mscFirst}:$A$${mscLast},$A$${first},$F$${mscFirst}:$F$${mscLast})`, result: mscH };
+        ws.getCell(first, RCOL).value = mscH;
         [PCOL, QCOL].forEach((c) => {
           ws.getCell(first, c).font = { name: FONT, size: 11, bold: true, color: { argb: 'FF1F4E79' } };
           ws.getCell(first, c).dataValidation = c === QCOL ? { type: 'list', allowBlank: true, formulae: ['"0,1,2,3"'], showErrorMessage: true, errorTitle: 'Whole hours', error: 'Choose 0, 1, 2 or 3.' } : { type: 'whole', operator: 'greaterThanOrEqual', formulae: [0], allowBlank: true, showErrorMessage: true, errorTitle: 'Whole hours', error: 'Type a whole number of hours, e.g. 0, 1, 2 or 3.' };
@@ -233,7 +238,7 @@
     const gridAbs = `$C$5:$${colL(NOTIME)}$${lastGrid}`;
     const keyOf = 'LEFT(C5,FIND(" ",C5&" ")-1)';
     ws.addConditionalFormatting({ ref: `C5:${colL(NOTIME)}${lastGrid}`, rules: [
-      { type: 'expression', priority: 1, formulae: [`AND(${isL('C5')},COUNTIF(${gridAbs},C5)>1)`], style: { fill: fill('FF0000'), font: { color: { argb: 'FFFFFFFF' }, bold: true } } },
+      { type: 'expression', priority: 1, formulae: [`AND(${isL('C5')},LEFT(C5,3)<>"MSc",LEFT(C5,3)<>"PhD",COUNTIF(${gridAbs},C5)>1)`], style: { fill: fill('FF0000'), font: { color: { argb: 'FFFFFFFF' }, bold: true } } },
       { type: 'expression', priority: 2, formulae: [`AND(${isL('C5')},COUNTIFS($A$${chkFirst}:$A$${chkLast},${keyOf},$G$${chkFirst}:$G$${chkLast},"Outside its time")>0)`], style: { fill: fill('FF0000'), font: { color: { argb: 'FFFFFFFF' }, bold: true } } },
     ] });
     ws.addConditionalFormatting({ ref: `C5:${colL(NOTIME)}${lastGrid}`, rules: courseList.map((c, i) => ({ type: 'expression', priority: 3 + i, formulae: [`LEFT(C5,${c.length + 1})="${c}-"`], style: { fill: fill(D.colourFor(c)) } })) });
@@ -255,29 +260,7 @@
     const headRow = (row, headers) => headers.forEach((h, i) => { if (h == null) return; const c = ws.getCell(row, 1 + i); c.value = h; c.font = { name: FONT, size: 10, bold: true }; c.fill = fill('D9E1F2'); c.alignment = center; c.border = { left: thin, right: thin, top: thin, bottom: thin }; });
     const cellStyle = (c, left) => { c.font = { name: FONT, size: 10 }; c.alignment = { vertical: 'middle', wrapText: true, horizontal: left ? 'left' : 'center' }; c.border = { left: thin, right: thin, top: thin, bottom: thin }; };
 
-    // ---------- MSc / PhD (editable: rows added here count in the member's load) ----------
-    titleRow(mscFirst - 2, 'MSc / PhD teaching — type or choose here; the hours are added to the member’s load and a clash with the timetable is shown');
-    headRow(mscFirst - 1, ['Member', 'Course', 'Program', 'Days', 'Hour', 'Hours', 'Impact on timetable']);
     const memberNames = realMembers.map((m) => m.name);
-    for (let i = 0; i < mscRows; i++) {
-      const row = mscFirst + i, x = msc[i];
-      for (let c = 1; c <= 7; c++) cellStyle(ws.getCell(row, c), c === 1 || c === 7);
-      if (x) {
-        ws.getCell(row, 1).value = memberName[x.member] || null; ws.getCell(row, 2).value = x.course || null; ws.getCell(row, 3).value = x.program || null;
-        ws.getCell(row, 4).value = (x.days || []).map((d) => E.DAY_NAMES[d]).join(' ') || null;
-        ws.getCell(row, 5).value = x.hour ? (x.hour > 12 ? x.hour - 12 : x.hour) : null; ws.getCell(row, 6).value = Number(x.hours) || 0;
-      }
-      ws.getCell(row, 5).numFmt = '0":00"';
-      ws.getCell(row, 1).dataValidation = { type: 'list', allowBlank: true, formulae: ['Members'], showErrorMessage: true, errorStyle: 'warning', errorTitle: 'Member', error: 'Choose a member from the list.' };
-      ws.getCell(row, 3).dataValidation = { type: 'list', allowBlank: true, formulae: ['"MSc,PhD"'] };
-      ws.getCell(row, 5).dataValidation = { type: 'list', allowBlank: true, formulae: ['"8,9,10,11,1,2,3,4,5,6"'] };
-      ws.getCell(row, 6).dataValidation = { type: 'decimal', operator: 'greaterThanOrEqual', formulae: [0], allowBlank: true, showErrorMessage: true, errorTitle: 'Hours', error: 'Type the number of hours.' };
-      const at = `INDEX($C$5:$L$${lastGrid},MATCH($A${row},$A$5:$A$${lastGrid},0),MATCH($E${row},$C$4:$L$4,0))`;
-      let res = '';
-      if (x && x.member && x.hour) { const hit = Object.keys(assign).find((k) => assign[k] === x.member && secs[k].hour === x.hour); res = hit ? `Clash with ${hit} (L)` : 'No clash'; }
-      ws.getCell(row, 7).value = { formula: `IF(OR($A${row}="",$E${row}=""),"",IFERROR(IF(${at}<>"","Clash with "&${at},"No clash"),"Check the member and the hour"))`, result: res };
-    }
-    ws.addConditionalFormatting({ ref: `G${mscFirst}:G${mscLast}`, rules: [{ type: 'expression', priority: 1, formulae: [`LEFT(G${mscFirst},5)="Clash"`], style: { font: { color: { argb: 'FFC00000' }, bold: true } } }] });
 
     // ---------- the check table (live): where every section is now ----------
     const status = statusMap(ctx);

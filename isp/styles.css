@@ -470,3 +470,8 @@ table.mtable { min-width: 820px; table-layout: auto; }
   .mtable th.idx, .mtable td.idx { display: none; }
   .mtable th, .mtable td { padding-left: 6px; padding-right: 6px; }
 }
+
+.cell.grad { background: #ede3f6; border: 1.5px solid #b79bd6; }
+.cell.grad b { color: #5b2c83; }
+table.plain.msc { max-width: 720px; }
+table.plain.msc select.num { width: 80px; }

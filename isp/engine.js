@@ -567,6 +567,10 @@
     const first = m.first || 8, last = m.last || 18;
     return hour >= first && hour <= last;
   }
+  /** MSc / PhD courses of a member: no time (evening), so they never clash. */
+  function mscOf(msc, memberId) { return (msc || []).filter((x) => x.member === memberId); }
+  const mscCounted = (msc, memberId) => mscOf(msc, memberId).filter((x) => x.counts !== false).length;
+  const mscHoursOf = (msc, memberId) => mscOf(msc, memberId).reduce((a, x) => a + (x.hours === '' || x.hours == null ? 3 : Number(x.hours) || 0), 0);
   function mscSlots(msc, memberId) {
     const out = [];
     (msc || []).forEach((x) => { if (x.member === memberId && x.hour) (x.days || []).forEach((d) => out.push(d * 100 + x.hour)); });
@@ -582,7 +586,7 @@
 
   function memberCost(m, keys, secs, ctx) {
     let cost = 0;
-    const counted = keys.filter((k) => secs[k].counts).length;
+    const counted = keys.filter((k) => secs[k].counts).length + ((ctx.mscCount && ctx.mscCount[m.id]) || 0);
     if (m.required != null && m.required !== '') cost += W.countDiff * Math.abs(counted - Number(m.required));
     const courses = keys.map((k) => secs[k].course);
     const base = (m.keepCurrent !== false && ctx.current[m.id]) || null;
@@ -645,7 +649,8 @@
     const keys = assignable.map((s) => s.key);
     const pins = opts.pins || {}, bans = opts.bans || {}, locked = opts.locked || {};
     const ctx = { current: opts.current || {}, forbidden: opts.forbidden || {}, autoTime: {}, start: opts.start || null, stability: opts.stability || 0 };
-    const msc = {}; members.forEach((m) => { msc[m.id] = new Set(mscSlots(opts.msc, m.id)); });
+    const msc = {}; members.forEach((m) => { msc[m.id] = new Set(); });
+    ctx.mscCount = {}; members.forEach((m) => { ctx.mscCount[m.id] = mscCounted(opts.msc, m.id); });
 
     // sections that need a time: candidate hours (any teaching hour)
     const autoTimed = keys.filter((k) => baseSecs[k].needsTime && !baseSecs[k].proposed);
@@ -772,7 +777,6 @@
       const p = per[m.id];
       if (m.pseudo) { p.keys.forEach((k) => { p.load += secs[k].load + secs[k].compLoad; }); return; }
       const occ = new Map();
-      mscSlots(msc, m.id).forEach((sl) => occ.set(sl, 'MSc/PhD'));
       p.keys.forEach((k) => {
         const s = secs[k];
         p.load += s.load + s.compLoad;
@@ -786,8 +790,10 @@
         if (!inWindow(m, s.hour)) p.issues.push({ type: 'window', a: k });
         if (s.needsTime && s.hour == null) p.issues.push({ type: 'notime', a: k });
       });
+      p.mscCount = mscCounted(msc, m.id);
+      p.counted += p.mscCount;
       if (m.required !== '' && m.required != null && p.counted !== Number(m.required)) p.issues.push({ type: 'count', have: p.counted, need: Number(m.required) });
-      p.mscHours = (msc || []).filter((x) => x.member === m.id).reduce((a, x) => a + (Number(x.hours) || 0), 0);
+      p.mscHours = mscHoursOf(msc, m.id);
       p.total = p.load + (Number(m.senior) || 0) + (Number(m.coop) || 0) + p.mscHours;
       p.issues.forEach((i) => issues.push(Object.assign({ member: m.id }, i)));
     });
@@ -892,7 +898,7 @@
     cellValue, txt, sheetsFromExcelJS, loadWorkbook, parseHour, headerHour, parseDays, normCourse,
     looksOfficial, parseOfficial, parseCurrent, parsePrefs, parseFaculty, readGridRaw, courseIn,
     nameTokens, nameScore, matchNames,
-    buildModel, memberAllows, inWindow, memberCost, propose, evaluate, officialNotes, freeRooms, describeMeetings,
+    buildModel, memberAllows, mscOf, inWindow, memberCost, propose, evaluate, officialNotes, freeRooms, describeMeetings,
     WEIGHTS: W,
   };
 });

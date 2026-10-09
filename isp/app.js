@@ -563,17 +563,13 @@
       }).join('')}</tbody></table>`;
   }
   function viewMsc() {
-    const days = L().days5;
     return `<p class="sub">${esc(t('mscText'))}</p>
-    ${S.msc.length ? `<table class="plain"><thead><tr><th>${esc(t('member'))}</th><th>${esc(t('course'))}</th><th>${esc(t('program'))}</th><th>${esc(t('days'))}</th><th>${esc(t('hour'))}</th><th>${esc(t('hours'))}</th><th></th></tr></thead><tbody>
+    ${S.msc.length ? `<table class="plain msc"><thead><tr><th>${esc(t('member'))}</th><th>${esc(t('program'))}</th><th>${esc(t('hours'))}</th><th></th></tr></thead><tbody>
     ${S.msc.map((x) => `<tr>
-      <td><select class="input" data-chg="msc" data-id="${x.id}" data-field="member"><option value=""></option>${S.members.map((m) => `<option value="${m.id}" ${m.id === x.member ? 'selected' : ''}>${esc(m.name)}</option>`).join('')}</select></td>
-      <td><input class="input" dir="ltr" style="width:110px" value="${esc(x.course)}" data-chg="msc" data-id="${x.id}" data-field="course" placeholder="IS6xx"></td>
-      <td><select class="input" data-chg="msc" data-id="${x.id}" data-field="program">${['MSc', 'PhD'].map((p) => `<option ${p === x.program ? 'selected' : ''}>${p}</option>`).join('')}</select></td>
-      <td><div class="days-pick">${[1, 2, 3, 4, 5].map((d) => `<label><input type="checkbox" ${(x.days || []).includes(d) ? 'checked' : ''} data-chg="mscDay" data-id="${x.id}" data-day="${d}">${days[d - 1]}</label>`).join('')}</div></td>
-      <td><select class="input" style="width:auto" data-chg="msc" data-id="${x.id}" data-field="hour"><option value=""></option>${E.HOURS.map((h) => `<option value="${h}" ${+x.hour === h ? 'selected' : ''}>${hl(h)}</option>`).join('')}</select></td>
-      <td><input class="input num" type="number" min="0" step="0.5" value="${esc(x.hours)}" data-chg="msc" data-id="${x.id}" data-field="hours"></td>
-      <td><button class="icon-btn danger" type="button" data-act="mscDel" data-id="${x.id}">🗑</button></td></tr>`).join('')}</tbody></table>` : `<p class="muted">${esc(t('noMsc'))}</p>`}
+      <td><select class="input" data-chg="msc" data-id="${x.id}" data-field="member"><option value="">—</option>${S.members.map((m) => `<option value="${m.id}" ${m.id === x.member ? 'selected' : ''}>${esc(m.name)}</option>`).join('')}</select></td>
+      <td><select class="input" data-chg="msc" data-id="${x.id}" data-field="program">${['MSc', 'PhD'].map((p) => `<option value="${p}" ${p === x.program ? 'selected' : ''}>${p}</option>`).join('')}</select></td>
+      <td><select class="input num" data-chg="msc" data-id="${x.id}" data-field="hours">${[1, 2, 3, 4, 5, 6].map((h) => `<option value="${h}" ${Number(x.hours === '' || x.hours == null ? 3 : x.hours) === h ? 'selected' : ''}>${h}</option>`).join('')}</select></td>
+      <td><button class="btn small danger" type="button" data-act="mscDel" data-id="${x.id}">${esc(t('remove'))}</button></td></tr>`).join('')}</tbody></table>` : `<p class="muted">${esc(t('noMsc'))}</p>`}
     <div class="row" style="margin-top:12px"><button class="btn" type="button" data-act="mscAdd">+ ${esc(t('addMsc'))}</button></div>`;
   }
   function viewSettings() {
@@ -622,7 +618,7 @@
       const tr = `<tr class="mem ${pseudo ? 'pseudo' : ''} ${m.id === 'HOLD' ? 'hold' : ''} ${dec}">
         <td class="name" dir="ltr"><span class="nmtxt">${esc(m.name)}</span>${pseudo ? '' : `<div class="dec no-print" dir="${S.lang === 'ar' ? 'rtl' : 'ltr'}">${['final', 'reject', 'review'].map((d) => `<button type="button" class="${d} ${dec === d ? 'on' : ''}" data-act="dec" data-id="${m.id}" data-dec="${d}">${esc(t(d))}</button>`).join('')}</div>`}</td>
         ${E.HOURS.slice(0, 4).map(slot).join('')}<td class="brk"></td>${E.HOURS.slice(4).map(slot).join('')}
-        <td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="nt">${nt.map((k) => cellHtml(secs[k], { bad: bad.has(k) })).join('')}</td>
+        <td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="nt">${nt.map((k) => cellHtml(secs[k], { bad: bad.has(k) })).join('')}${pseudo ? '' : S.msc.filter((x) => x.member === m.id).map((x) => `<div class="cell grad"><b>${esc(x.program || 'MSc')}</b><span>${esc(t('gradHours', Number(x.hours === '' || x.hours == null ? 3 : x.hours)))}</span></div>`).join('')}</td>
         <td class="num">${pseudo ? p.load : p.total}${!pseudo && p.total !== p.load ? `<small>${p.load} + ${(p.total - p.load)}</small>` : ''}</td>
         <td class="num ${cntBad ? 'bad' : ''}">${pseudo ? keys.length : `${p.counted} / ${m.required === '' ? '–' : req}`}</td></tr>`;
       let alt = '';
@@ -855,7 +851,7 @@
       case 'mDel': { const m = memberById(d.id); if (m && confirm(t('confirmDel', m.name))) { S.members = S.members.filter((x) => x.id !== d.id); Object.keys(S.assign).forEach((k) => { if (S.assign[k] === d.id) delete S.assign[k]; }); Object.keys(S.pins).forEach((k) => { if (S.pins[k] === d.id) delete S.pins[k]; }); Object.keys(S.currentMap).forEach((k) => { if (S.currentMap[k] === d.id) S.currentMap[k] = ''; }); Object.keys(S.prefsMap).forEach((k) => { if (S.prefsMap[k] === d.id) S.prefsMap[k] = ''; }); delete S.decisions[d.id]; persist(); render(); } break; }
       case 'mAdd': { const nm = newMember(t('newMemberName')); nm.required = 4; S.members.push(nm); persist(); render(); setTimeout(() => { const ins = main.querySelectorAll('.fac-nm'); const last = ins[ins.length - 1]; if (last) { last.focus(); last.select(); } }, 0); break; }
       case 'chipRm': { const m = memberById(d.id); m[d.field] = (m[d.field] || []).filter((v) => v !== d.val); persist(); render(); break; }
-      case 'mscAdd': S.msc.push({ id: uid(), member: '', course: '', program: 'MSc', days: [], hour: '', hours: 3 }); persist(); render(); break;
+      case 'mscAdd': S.msc.push({ id: uid(), member: '', program: 'MSc', hours: 3 }); persist(); render(); break;
       case 'mscDel': S.msc = S.msc.filter((x) => x.id !== d.id); persist(); render(); break;
       case 'rebuild': build(true); break;
       case 'print': window.print(); break;
@@ -918,7 +914,7 @@
       case 'chipAdd': { const m = memberById(d.id); if (el.value) m[d.field] = (m[d.field] || []).concat([el.value]); break; }
       case 'ccat': S.courses[d.code] = Object.assign({}, S.courses[d.code], { cat: el.value }); S.courseTouched[d.code] = true; Object.keys(S.secCat).forEach((k) => { if (k.startsWith(d.code + '-')) delete S.secCat[k]; }); break;
       case 'ccount': S.courses[d.code] = Object.assign({}, S.courses[d.code], { counts: el.checked }); S.courseTouched[d.code] = true; break;
-      case 'msc': { const x = S.msc.find((y) => y.id === d.id); if (x) x[d.field] = d.field === 'hour' ? (el.value ? +el.value : '') : d.field === 'hours' ? Number(el.value) : el.value; break; }
+      case 'msc': { const x = S.msc.find((y) => y.id === d.id); if (x) x[d.field] = d.field === 'hours' ? Number(el.value) : el.value; break; }
       case 'mscDay': { const x = S.msc.find((y) => y.id === d.id); const day = +d.day; x.days = el.checked ? [...new Set((x.days || []).concat(day))].sort() : (x.days || []).filter((y) => y !== day); break; }
       case 'assignTo': if (el.value) putSection(d.key, el.value); break;
       case 'fmtSheet': fmtUseSheet(el.value); render(); return;
