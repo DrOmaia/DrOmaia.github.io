@@ -633,3 +633,12 @@ body.dragging, body.dragging * { cursor: grabbing !important; -webkit-user-selec
 @keyframes isp-fall { to { transform: translate(var(--dx), 105vh) rotate(var(--rot)); opacity: .9; } }
 @media (prefers-reduced-motion: reduce) { .drag-ghost { transform: none; } .hbar i { transition: none; } .stat.health .delta { animation: none; } }
 @media print { .bench, .drag-hint, .drag-tip, .drag-ghost, .confetti { display: none !important; } .cell.moved { box-shadow: none; } }
+/* game instructions */
+.howto { margin-top: 10px; padding: 10px 14px; border-radius: var(--r-md); background: var(--blue-wash); font-size: 13.5px; color: var(--ink); }
+.howto-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.howto-head b { color: var(--psu-navy); font-size: 14.5px; }
+.howto ol { margin: 6px 0 4px; padding-inline-start: 22px; display: grid; gap: 3px; }
+.howto p { margin: 0; }
+.howto-show { margin: 8px 0 0; font-size: 13.5px; }
+@media print { .howto, .howto-show { display: none !important; } }
+@media (min-width: 900px) { .howto ol { grid-template-columns: 1fr 1fr; column-gap: 28px; grid-auto-flow: row; } }

@@ -718,7 +718,7 @@
       <div class="stat"><b>${finals} / ${S.members.length}</b>${esc(t('sFinal'))}</div>
     </div>
     <p class="legend small muted"><span><i class="lg prop"></i>${esc(t('lgProp'))}</span><span><i class="lg bad"></i>${esc(t('lgBad'))}</span><span><i class="lg pin">•</i>${esc(t('lgPin'))}</span>${hasCur ? `<span><i class="lg new"></i>${esc(t('lgNew'))}</span>` : ''}${anyWishes ? `<span><i class="lg star">★</i>${esc(t('lgWish'))}</span>` : ''}${S.ref ? `<span><i class="lg moved"></i>${esc(t('lgMoved'))}</span>` : ''}<span>${esc(t('lgClick'))}</span><span>${esc(t('lgCard'))}</span></p>
-    <p class="drag-hint no-print"><b>✋ ${esc(t('lgDragT'))}</b> ${esc(t('lgDrag'))}</p>
+    ${howTo()}
     ${benchHtml(secs, assign)}
     ${courseBar(secs, assign)}
     <div class="gridwrap"><table class="tt ${ui.focusCourse ? 'focusing' : ''}"><thead>${head}</thead><tbody>${ui.building && !S.built ? `<tr><td colspan="16" style="padding:30px;text-align:center">${esc(t('building'))}</td></tr>` : body}</tbody></table></div>
@@ -728,6 +728,13 @@
     </div>`;
   }
 
+  /** Short game instructions; can be hidden and shown again (remembered in this browser). */
+  function howTo() {
+    let hidden = false; try { hidden = localStorage.getItem('isp-howto') === 'hide'; } catch (e) { /* storage blocked */ }
+    if (hidden) return `<p class="howto-show no-print"><button type="button" class="link" data-act="howto" data-v="show">? ${esc(t('howTitle'))}</button></p>`;
+    return `<div class="howto no-print"><div class="howto-head"><b>✋ ${esc(t('howTitle'))}</b><button type="button" class="link" data-act="howto" data-v="hide">${esc(t('howHide'))}</button></div>
+      <ol>${L().howSteps.map((x) => `<li>${esc(x)}</li>`).join('')}</ol><p class="small muted">${esc(t('howTouch'))}</p></div>`;
+  }
   /** One number for how sound the timetable is: sections placed, no conflicts, counts met, wishes met. */
   function health(secs, assign, ev) {
     const reqN = Object.values(secs).filter((s) => s.cat === 'required').length;
@@ -866,14 +873,16 @@
       for (const kk of mine) { if (secs[kk].slots.some((sl) => x.slots.includes(sl))) return { why: t('whyClash', m.name, kk) }; }
       const before = (ev.per[mid] || {}).counted || 0;
       const now = before + (x.counts ? 1 : 0) - (outKey && secs[outKey].counts ? 1 : 0);
-      if (m.required !== '' && m.required != null && now > Number(m.required) && now > before) return { why: t('whyCount', m.name, now, Number(m.required)) };
-      if (x.hour != null && ((m.prefTime === 'am' && x.hour >= 13) || (m.prefTime === 'pm' && x.hour < 13))) return { warn: t('warnTime', m.name) };
-      return null;
+      const warns = [];
+      // more sections than required is allowed for now (e.g. give one, then take one back); it shows in orange and red until fixed
+      if (m.required !== '' && m.required != null && now > Number(m.required) && now > before) warns.push(t('warnCount', m.name, now, Number(m.required)));
+      if (x.hour != null && ((m.prefTime === 'am' && x.hour >= 13) || (m.prefTime === 'pm' && x.hour < 13))) warns.push(t('warnTime', m.name));
+      return warns.length ? { warn: warns.join(' — '), over: now > Number(m.required || 99) } : null;
     };
     const a = checkMember(to, k, swap), b = j ? checkMember(from, swap, k) : null;
     if (a && a.why) return { ok: false, why: a.why };
     if (b && b.why) return { ok: false, why: b.why };
-    return { ok: true, warn: (a && a.warn) || (b && b.warn) || '' };
+    return { ok: true, warn: [a && a.warn, b && b.warn].filter(Boolean).join(' — '), over: !!((a && a.over) || (b && b.over)) };
   }
   let pend = null, drag = null;
   const dragTip = () => { let el = document.getElementById('dragTip'); if (!el) { el = document.createElement('div'); el.id = 'dragTip'; el.className = 'drag-tip'; el.hidden = true; document.body.appendChild(el); } return el; };
@@ -896,7 +905,7 @@
       const res = dropCheck(drag.key, drag.from, to, null);
       drag.res['m|' + to] = res; td.classList.add(res.ok ? (res.warn ? 'dz-warn' : 'dz-ok') : 'dz-no');
       const m = memberById(to);
-      if (res.ok && m) { // how good a home this member is for the section
+      if (res.ok && !res.over && m) { // how good a home this member is for the section
         const why = [];
         if ((m.prefs || []).filter(Boolean).map(E.normCourse).includes(sec.course)) why.push(t('bestWish'));
         if (Object.keys(as0).some((kk) => as0[kk] === to && sx0[kk].course === sec.course)) why.push(t('bestSame'));
@@ -1222,6 +1231,7 @@
       case 'rebuild': remember('uRebuild'); build(true); break;
       case 'print': window.print(); break;
       case 'undo': undo(); break;
+      case 'howto': try { localStorage.setItem('isp-howto', d.v); } catch (e) { /* storage blocked */ } render(); break;
       case 'refBack': { remember('uRef', d.key); restoreRef(d.key); closePop(); persist(); render(); toast(t('refDone', d.key)); break; }
       case 'refAll': { const { secs, assign } = snapshot(); const ks = refChanged(secs, assign); if (!ks.length) break; remember('uRefAll'); ks.forEach(restoreRef); persist(); render(); toast(t('refAllDone', ks.length)); break; }
       case 'focusCourse': ui.focusCourse = d.code && ui.focusCourse !== d.code ? d.code : null; render(); break;
