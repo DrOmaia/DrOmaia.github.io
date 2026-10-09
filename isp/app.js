@@ -11,7 +11,7 @@
     app: 'isp-timetable', v: 1, side: null, term: '', lang: (S0() || {}).lang || 'ar', step: 1,
     files: {}, members: [], courses: {}, courseTouched: {}, secCat: {}, msc: [],
     currentMap: {}, prefsMap: {}, mapManual: {}, hoursSource: '', assign: {}, proposed: {}, autoTime: {}, pins: {}, bans: {},
-    decisions: {}, forbidden: {}, built: false, baseline: null, savedAt: null,
+    decisions: {}, forbidden: {}, built: false, baseline: null, savedAt: null, ref: null,
   });
   function S0() { try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch (e) { return null; } }
   let S = blank();
@@ -205,7 +205,9 @@
       if (fresh) Object.keys(S.autoTime).forEach((k) => { if (!S.pins[k]) { delete S.proposed[k]; delete S.autoTime[k]; } });
       const res = runPropose();
       applyResult(res);
-      S.built = true; ui.building = false; ui.alts = {}; persist(); render();
+      S.built = true; ui.building = false; ui.alts = {};
+      if (!S.ref && R.off) setRef();
+      persist(); render();
     }, 30);
   }
   function alternatives(mid) {
@@ -616,10 +618,11 @@
     if (S.pins[s.key]) cls.push('pinned');
     if (info && info.isNew) cls.push('new');
     if (info && info.wish) cls.push('wish');
+    if (info && info.moved) cls.push('moved');
     if (ui.focusCourse) cls.push(ui.focusCourse === s.course ? 'hit' : 'dim');
-    const tips = [info && info.wish ? t('lgWish') : '', info && info.isNew ? t('lgNew') : ''].filter(Boolean).join(' — ');
+    const tips = [info && info.wish ? t('lgWish') : '', info && info.isNew ? t('lgNew') : '', info && info.moved ? t('lgMoved') : ''].filter(Boolean).join(' — ');
     const comp = s.comp ? `${s.comp.split('-')[1]} ${s.compAct === 'Lab' ? 'Lab' : 'T'}` : '';
-    return `<div class="${cls.join(' ')}" data-key="${esc(s.key)}" data-course="${esc(s.course)}" style="background:${colour(s.course)}"${tips ? ` title="${esc(tips)}"` : ''}>${info && info.wish ? '<i class="star" aria-hidden="true">★</i>' : ''}<b>${esc(s.key)}</b>${comp ? `<span>${esc(comp)}</span>` : ''}</div>`;
+    return `<div class="${cls.join(' ')}" data-key="${esc(s.key)}" data-course="${esc(s.course)}" style="background:${colour(s.course)}"${tips ? ` title="${esc(tips)}"` : ''}>${info && info.wish ? '<i class="star" aria-hidden="true">★</i>' : ''}<b>${esc(s.key)}</b>${comp ? `<span>${esc(comp)}</span>` : ''}${info && info.bench ? `<span class="bh">${esc(s.hour == null ? t('noTime') : hl(s.hour))}</span>` : ''}</div>`;
   }
   function viewProposal() {
     if (!R.off) return `<p>${esc(t('needOfficial'))}</p>`;
@@ -644,6 +647,13 @@
     const wishesOf = (m) => [...new Set((m.prefs || []).filter(Boolean).map(E.normCourse))];
     const isWish = (mid, s) => { const m = memberById(mid); return !!m && wishesOf(m).includes(s.course); };
     const anyWishes = S.members.some((m) => wishesOf(m).length);
+    const moved = new Set(refChanged(secs, assign));
+    const hh = health(secs, assign, ev);
+    const delta = ui.lastScore != null && S.built && !ui.building ? hh.score - ui.lastScore : 0;
+    if (S.built && !ui.building) {
+      if (ui.wasHealthy === false && hh.healthy) setTimeout(celebrate, 250);
+      ui.wasHealthy = hh.healthy; ui.lastScore = hh.score;
+    }
     const head = `<tr><th style="text-align:left;padding-left:12px">${S.lang === 'ar' ? 'العضو' : 'Member'}</th>${E.HOURS.slice(0, 4).map((h) => `<th class="hr">${hl(h)}</th>`).join('')}<th class="brk" title="${esc(t('breakCol'))}"></th>${E.HOURS.slice(4).map((h) => `<th class="hr">${hl(h)}</th>`).join('')}<th>${esc(t('noTime'))}</th><th>${esc(t('load'))}</th><th>${esc(t('sections'))}</th><th title="${esc(t('prepsTip'))}">${esc(t('preps'))}</th></tr>`;
     const body = rows.map(({ m, pseudo }) => {
       const keys = byMember[m.id] || [];
@@ -651,7 +661,7 @@
       const dec = S.decisions[m.id] || '';
       const slot = (h) => {
         const ks = keys.filter((k) => secs[k].hour === h);
-        return `<td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="${h}">${ks.map((k) => cellHtml(secs[k], { bad: bad.has(k), isNew: isNew(m.id, secs[k]), wish: isWish(m.id, secs[k]) })).join('')}</td>`;
+        return `<td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="${h}">${ks.map((k) => cellHtml(secs[k], { bad: bad.has(k), isNew: isNew(m.id, secs[k]), wish: isWish(m.id, secs[k]), moved: moved.has(k) })).join('')}</td>`;
       };
       const nt = keys.filter((k) => secs[k].hour == null);
       const req = Number(m.required);
@@ -664,7 +674,7 @@
           return `<small class="wishes ${got ? 'got' : ''}" dir="${S.lang === 'ar' ? 'rtl' : 'ltr'}" title="${esc(t('wishTip'))}">${esc(t('wishes', got, w.length))}</small>`;
         })()}${pseudo ? '' : `<div class="dec no-print" dir="${S.lang === 'ar' ? 'rtl' : 'ltr'}">${['final', 'reject', 'review'].map((d) => `<button type="button" class="${d} ${dec === d ? 'on' : ''}" data-act="dec" data-id="${m.id}" data-dec="${d}">${esc(t(d))}</button>`).join('')}</div>`}</td>
         ${E.HOURS.slice(0, 4).map(slot).join('')}<td class="brk"></td>${E.HOURS.slice(4).map(slot).join('')}
-        <td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="nt">${nt.map((k) => cellHtml(secs[k], { bad: bad.has(k), isNew: isNew(m.id, secs[k]), wish: isWish(m.id, secs[k]) })).join('')}${pseudo ? '' : S.msc.filter((x) => x.member === m.id).map((x) => `<div class="cell grad"><b>${esc(x.program || 'MSc')}</b><span>${esc(t('gradHours', Number(x.hours === '' || x.hours == null ? 3 : x.hours)))}</span></div>`).join('')}</td>
+        <td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="nt">${nt.map((k) => cellHtml(secs[k], { bad: bad.has(k), isNew: isNew(m.id, secs[k]), wish: isWish(m.id, secs[k]), moved: moved.has(k) })).join('')}${pseudo ? '' : S.msc.filter((x) => x.member === m.id).map((x) => `<div class="cell grad"><b>${esc(x.program || 'MSc')}</b><span>${esc(t('gradHours', Number(x.hours === '' || x.hours == null ? 3 : x.hours)))}</span></div>`).join('')}</td>
         <td class="num">${pseudo ? p.load : p.total}${!pseudo && p.total !== p.load ? `<small>${p.load} + ${(p.total - p.load)}</small>` : ''}</td>
         <td class="num cnt ${cntBad ? 'bad' : ''}">${pseudo ? keys.length : `${p.counted} / ${m.required === '' ? '–' : req}`}</td>
         <td class="num preps" title="${esc(t('prepsTip'))}">${pseudo ? '' : p.preps || 0}</td></tr>`;
@@ -698,15 +708,18 @@
       return `<li><span><b>${esc(s.key)}</b> → ${hl(s.hour)} <span class="muted">(${s.officialHour != null ? hl(s.officialHour) : t('noTime')})</span> · ${esc(nameOf(assign[s.key]))}<br><span class="small muted">${esc(t('freeRooms'))}: ${fr.map((g) => `${g.days.map((d) => E.DAY_NAMES[d]).join(' ')}: ${g.rooms.length ? g.rooms.map(E.shortRoom).join(' / ') : t('noFree')}`).join(' | ')}</span></span></li>`;
     });
     return `<div class="page-head"><div><h1>${esc(t('propTitle'))}</h1><p>${esc(t('rebuildHint'))}</p></div>
-      <div class="row"><button class="btn" type="button" data-act="undo" ${ui.undo.length ? `title="${esc(t('undoTip', t(ui.undo[ui.undo.length - 1].key, ...ui.undo[ui.undo.length - 1].args)))}"` : 'disabled'}>↶ ${esc(t('undo'))}</button><button class="btn" type="button" data-act="print">${esc(t('printBtn'))}</button><button class="btn primary" type="button" data-act="rebuild" ${ui.building ? 'disabled' : ''}>${esc(ui.building ? t('building') : t('rebuild'))}</button></div></div>
+      <div class="row"><button class="btn" type="button" data-act="undo" ${ui.undo.length ? `title="${esc(t('undoTip', t(ui.undo[ui.undo.length - 1].key, ...ui.undo[ui.undo.length - 1].args)))}"` : 'disabled'}>↶ ${esc(t('undo'))}</button>${moved.size ? `<button class="btn" type="button" data-act="refAll" title="${esc(t('refAllTip'))}">↺ ${esc(t('refAll', moved.size))}</button>` : ''}<button class="btn" type="button" data-act="print">${esc(t('printBtn'))}</button><button class="btn primary" type="button" data-act="rebuild" ${ui.building ? 'disabled' : ''}>${esc(ui.building ? t('building') : t('rebuild'))}</button></div></div>
     <div class="stats">
+      ${S.built ? healthCard(hh, delta) : ''}
       <div class="stat ${counted !== reqTotal ? 'warn' : 'good'}"><b>${counted} / ${reqTotal}</b>${esc(t('sAssigned'))}</div>
       <div class="stat ${unassigned ? 'bad' : 'good'}"><b>${unassigned}</b>${esc(t('sUnassigned'))}</div>
       <div class="stat ${conflicts ? 'bad' : 'good'}"><b>${conflicts}</b>${esc(t('sConflicts'))}</div>
       <div class="stat ${requests ? 'warn' : ''}"><b>${requests}</b>${esc(t('sRequests'))}</div>
       <div class="stat"><b>${finals} / ${S.members.length}</b>${esc(t('sFinal'))}</div>
     </div>
-    <p class="legend small muted"><span><i class="lg prop"></i>${esc(t('lgProp'))}</span><span><i class="lg bad"></i>${esc(t('lgBad'))}</span><span><i class="lg pin">•</i>${esc(t('lgPin'))}</span>${hasCur ? `<span><i class="lg new"></i>${esc(t('lgNew'))}</span>` : ''}${anyWishes ? `<span><i class="lg star">★</i>${esc(t('lgWish'))}</span>` : ''}<span>${esc(t('lgClick'))}</span><span>${esc(t('lgCard'))}</span></p>
+    <p class="legend small muted"><span><i class="lg prop"></i>${esc(t('lgProp'))}</span><span><i class="lg bad"></i>${esc(t('lgBad'))}</span><span><i class="lg pin">•</i>${esc(t('lgPin'))}</span>${hasCur ? `<span><i class="lg new"></i>${esc(t('lgNew'))}</span>` : ''}${anyWishes ? `<span><i class="lg star">★</i>${esc(t('lgWish'))}</span>` : ''}${S.ref ? `<span><i class="lg moved"></i>${esc(t('lgMoved'))}</span>` : ''}<span>${esc(t('lgClick'))}</span><span>${esc(t('lgCard'))}</span></p>
+    <p class="drag-hint no-print"><b>✋ ${esc(t('lgDragT'))}</b> ${esc(t('lgDrag'))}</p>
+    ${benchHtml(secs, assign)}
     ${courseBar(secs, assign)}
     <div class="gridwrap"><table class="tt ${ui.focusCourse ? 'focusing' : ''}"><thead>${head}</thead><tbody>${ui.building && !S.built ? `<tr><td colspan="16" style="padding:30px;text-align:center">${esc(t('building'))}</td></tr>` : body}</tbody></table></div>
     <div class="attn">
@@ -715,6 +728,51 @@
     </div>`;
   }
 
+  /** One number for how sound the timetable is: sections placed, no conflicts, counts met, wishes met. */
+  function health(secs, assign, ev) {
+    const reqN = Object.values(secs).filter((s) => s.cat === 'required').length;
+    const una = ev.issues.filter((i) => i.type === 'unassigned').length;
+    const conf = ev.issues.filter((i) => ['clash', 'window', 'notime'].includes(i.type)).length;
+    const withReq = S.members.filter((m) => m.required !== '' && m.required != null);
+    const countOk = withReq.filter((m) => ((ev.per[m.id] || {}).counted || 0) === Number(m.required)).length;
+    let wTot = 0, wGot = 0;
+    S.members.forEach((m) => {
+      const w = [...new Set((m.prefs || []).filter(Boolean).map(E.normCourse))];
+      const mine = new Set(Object.keys(assign).filter((k) => assign[k] === m.id).map((k) => secs[k].course));
+      wTot += w.length; wGot += w.filter((c) => mine.has(c)).length;
+    });
+    const cover = reqN ? 1 - una / reqN : 1, counts = withReq.length ? countOk / withReq.length : 1, wishes = wTot ? wGot / wTot : 1;
+    const score = Math.max(0, Math.round(40 * cover + 25 * Math.max(0, 1 - conf / 4) + 25 * counts + 10 * wishes));
+    return { score, healthy: una === 0 && conf === 0 && countOk === withReq.length, una, conf, countOk, withReq: withReq.length, wGot, wTot };
+  }
+  function healthCard(h, delta) {
+    const tone = h.healthy ? 'good' : h.score >= 75 ? 'warn' : 'bad';
+    return `<div class="stat health ${tone}" title="${esc(t('healthTip'))}">
+      <div class="hrow"><span>${esc(t('health'))}</span><b>${h.score}%</b>${delta ? `<em class="delta ${delta > 0 ? 'up' : 'down'}" dir="ltr">${delta > 0 ? '+' : ''}${delta}</em>` : ''}</div>
+      <div class="hbar"><i style="width:${h.score}%"></i></div>
+      <div class="hparts">${esc(t('hParts', h.una, h.conf, h.countOk, h.withReq, h.wGot, h.wTot))}</div></div>`;
+  }
+  function celebrate() {
+    toast(t('healthyMsg'));
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const box = document.createElement('div'); box.className = 'confetti'; box.setAttribute('aria-hidden', 'true');
+    const cols = ['#10426e', '#0090ba', '#ffa81f', '#84c4c7', '#2e9b5f'];
+    for (let i = 0; i < 70; i++) {
+      const p = document.createElement('i');
+      p.style.left = (Math.random() * 100) + 'vw'; p.style.background = cols[i % cols.length];
+      p.style.animationDelay = (Math.random() * 0.35) + 's'; p.style.animationDuration = (1.4 + Math.random() * 0.9) + 's';
+      p.style.setProperty('--dx', ((Math.random() - 0.5) * 160) + 'px'); p.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+      box.appendChild(p);
+    }
+    document.body.appendChild(box); setTimeout(() => box.remove(), 2600);
+  }
+  /** Sections still waiting for a member, as pieces to drag into the timetable. */
+  function benchHtml(secs, assign) {
+    if (!S.built) return '';
+    const wait = Object.values(secs).filter((s) => s.cat === 'required' && !assign[s.key]).sort((a, b) => (a.hour == null ? 99 : a.hour) - (b.hour == null ? 99 : b.hour) || a.key.localeCompare(b.key));
+    return `<div class="bench no-print" data-bench="1"><div class="bench-head"><b>${esc(t('bench'))}</b><span>${esc(wait.length ? t('benchHint') : t('benchEmpty'))}</span></div>
+      <div class="bench-items" dir="ltr">${wait.map((s) => cellHtml(s, { bench: true })).join('')}</div></div>`;
+  }
   /** Row of course chips: clicking one highlights all its sections and lists who teaches them. */
   function courseBar(secs, assign) {
     const codes = [...new Set(Object.values(secs).filter((s) => assign[s.key] || s.cat === 'required').map((s) => s.course))].sort();
@@ -773,6 +831,189 @@
     c.style.left = left + 'px'; c.style.top = top + 'px';
   }
   function hideCard() { const c = document.getElementById('mcard'); if (c) { c.hidden = true; c.dataset.mid = ''; } }
+  // ---------------- saved places: where each section was at the last save / open of the project ----------------
+  function setRef() {
+    const { secs, assign } = snapshot();
+    S.ref = {}; Object.keys(secs).forEach((k) => { S.ref[k] = [assign[k] || '', S.proposed[k] != null ? S.proposed[k] : null]; });
+  }
+  function refChanged(secs, assign) {
+    if (!S.ref) return [];
+    return Object.keys(secs).filter((k) => S.ref[k] && ((assign[k] || '') !== S.ref[k][0] || (S.proposed[k] != null ? S.proposed[k] : null) !== S.ref[k][1]));
+  }
+  function refMoved(k) { const { secs, assign } = snapshot(); return refChanged({ [k]: secs[k] }, assign).length > 0; }
+  function restoreRef(k) {
+    const r = S.ref && S.ref[k]; if (!r) return;
+    const [mid, hour] = r;
+    if (hour == null) { delete S.proposed[k]; delete S.autoTime[k]; } else if (S.proposed[k] !== hour) { S.proposed[k] = hour; delete S.autoTime[k]; }
+    if (mid) putSection(k, mid);
+    else { delete S.assign[k]; delete S.pins[k]; if (S.secCat[k] === 'parttime' || S.secCat[k] === 'onhold') delete S.secCat[k]; }
+  }
+
+  // ---------------- drag and drop: change the instructor at the same hour ----------------
+  /** Can section k move from `from` to `to` (swapping with section `swap` of `to`, if given)? → {ok, warn, why} */
+  function dropCheck(k, from, to, swap) {
+    const { secs, assign, ev } = snapshot();
+    const s = secs[k]; if (!s || from === to) return { ok: false, why: '' };
+    const j = swap ? secs[swap] : null;
+    const after = Object.assign({}, assign); after[k] = to; if (j) after[swap] = from;
+    const checkMember = (mid, inKey, outKey) => {
+      const m = memberById(mid); if (!m) return null; // part-timers / ON-Hold: no member rules
+      const x = secs[inKey];
+      if (!E.inWindow(m, x.hour)) return { why: t('whyWindow', m.name) };
+      const never = (m.never || []).map(E.normCourse).filter(Boolean);
+      if (x.noTime ? never.some((c) => c === x.course || c === x.prefix) : !E.memberAllows(m, x)) return { why: t('whyCourse', m.name, x.course) };
+      const mine = Object.keys(after).filter((kk) => after[kk] === mid && kk !== inKey);
+      for (const kk of mine) { if (secs[kk].slots.some((sl) => x.slots.includes(sl))) return { why: t('whyClash', m.name, kk) }; }
+      const before = (ev.per[mid] || {}).counted || 0;
+      const now = before + (x.counts ? 1 : 0) - (outKey && secs[outKey].counts ? 1 : 0);
+      if (m.required !== '' && m.required != null && now > Number(m.required) && now > before) return { why: t('whyCount', m.name, now, Number(m.required)) };
+      if (x.hour != null && ((m.prefTime === 'am' && x.hour >= 13) || (m.prefTime === 'pm' && x.hour < 13))) return { warn: t('warnTime', m.name) };
+      return null;
+    };
+    const a = checkMember(to, k, swap), b = j ? checkMember(from, swap, k) : null;
+    if (a && a.why) return { ok: false, why: a.why };
+    if (b && b.why) return { ok: false, why: b.why };
+    return { ok: true, warn: (a && a.warn) || (b && b.warn) || '' };
+  }
+  let pend = null, drag = null;
+  const dragTip = () => { let el = document.getElementById('dragTip'); if (!el) { el = document.createElement('div'); el.id = 'dragTip'; el.className = 'drag-tip'; el.hidden = true; document.body.appendChild(el); } return el; };
+  function startDrag(x, y) {
+    if (!pend) return;
+    closePop(); hideCard();
+    drag = Object.assign({}, pend, { over: null, res: {} });
+    if (pend.timer) clearTimeout(pend.timer);
+    pend = null;
+    const src = drag.cell; const r = src.getBoundingClientRect();
+    const g = src.cloneNode(true); g.classList.add('drag-ghost'); g.classList.remove('flash', 'hit', 'dim'); g.style.width = r.width + 'px';
+    document.body.appendChild(g); drag.ghost = g; drag.dx = x - r.left; drag.dy = y - r.top;
+    src.classList.add('drag-src'); document.body.classList.add('dragging');
+    const table = main.querySelector('table.tt'); table.classList.add('dragging');
+    // mark every possible target in the same hour column
+    const { secs: sx0, assign: as0 } = snapshot(); const sec = sx0[drag.key];
+    let best = null, bestScore = 0;
+    table.querySelectorAll(`td.slot[data-h="${drag.h}"]`).forEach((td) => {
+      const to = td.dataset.mid; if (to === drag.from) return;
+      const res = dropCheck(drag.key, drag.from, to, null);
+      drag.res['m|' + to] = res; td.classList.add(res.ok ? (res.warn ? 'dz-warn' : 'dz-ok') : 'dz-no');
+      const m = memberById(to);
+      if (res.ok && m) { // how good a home this member is for the section
+        const why = [];
+        if ((m.prefs || []).filter(Boolean).map(E.normCourse).includes(sec.course)) why.push(t('bestWish'));
+        if (Object.keys(as0).some((kk) => as0[kk] === to && sx0[kk].course === sec.course)) why.push(t('bestSame'));
+        if (sec.hour != null && ((m.prefTime === 'am' && sec.hour < 12) || (m.prefTime === 'pm' && sec.hour > 12))) why.push(t('bestTime'));
+        const sc = why.length * 2 - (res.warn ? 1 : 0);
+        if (sc > bestScore) { bestScore = sc; best = { td, why }; }
+      }
+      td.querySelectorAll('.cell[data-key]').forEach((c) => {
+        const rs = dropCheck(drag.key, drag.from, to, c.dataset.key);
+        drag.res['s|' + c.dataset.key] = Object.assign({ to }, rs); c.classList.add(rs.ok ? 'sw-ok' : 'sw-no');
+      });
+    });
+    if (best) { best.td.classList.add('dz-best'); drag.res['m|' + best.td.dataset.mid].best = best.why; }
+    const bench = main.querySelector('.bench'); if (bench && drag.from) bench.classList.add('dz-ok');
+    moveDrag(x, y); autoScroll();
+  }
+  function dropTarget(x, y) {
+    const el = document.elementFromPoint(x, y); if (!el || !el.closest) return null;
+    const bench = el.closest('.bench');
+    if (bench) return drag.from ? { el: bench, bench: true, to: '', res: { ok: true } } : null;
+    const td = el.closest('table.tt td.slot'); if (!td) return null;
+    if (td.dataset.h !== drag.h) return { none: true, why: t('whyHour') };
+    if (td.dataset.mid === drag.from) return null;
+    const c = el.closest('.cell[data-key]');
+    if (c && c.dataset.key !== drag.key) return { el: c, td, swap: c.dataset.key, to: td.dataset.mid, res: drag.res['s|' + c.dataset.key] };
+    return { el: td, td, to: td.dataset.mid, res: drag.res['m|' + td.dataset.mid] };
+  }
+  function moveDrag(x, y) {
+    drag.x = x; drag.y = y;
+    drag.ghost.style.left = (x - drag.dx) + 'px'; drag.ghost.style.top = (y - drag.dy) + 'px';
+    const tg = dropTarget(x, y);
+    if (drag.over && (!tg || tg.el !== drag.over)) drag.over.classList.remove('dz-over');
+    drag.over = tg && tg.el ? tg.el : null; if (drag.over) drag.over.classList.add('dz-over');
+    const tip = dragTip();
+    let text = '', cls = '';
+    if (tg && tg.none) { text = tg.why; cls = 'no'; }
+    else if (tg && tg.res) {
+      if (!tg.res.ok) { text = tg.res.why || t('whyHour'); cls = 'no'; }
+      else {
+        const fromName = drag.from ? nameOf(drag.from) : t('bench');
+        text = tg.bench ? t('dropBench', drag.key) : tg.swap ? t('dropSwap', drag.key, tg.swap, fromName, nameOf(tg.to)) : t('dropMove', drag.key, nameOf(tg.to));
+        if (tg.res.warn) { text += ' — ' + tg.res.warn; cls = 'warn'; } else cls = 'ok';
+        if (tg.res.best && tg.res.best.length) { text = '★ ' + text + ' — ' + t('bestIs', tg.res.best.join(t('sep'))); cls += ' best'; }
+      }
+    }
+    tip.hidden = !text; tip.textContent = text; tip.className = 'drag-tip ' + cls; tip.dir = S.lang === 'ar' ? 'rtl' : 'ltr';
+    const tw = tip.offsetWidth || 200;
+    tip.style.left = Math.max(8, Math.min(x + 16, window.innerWidth - tw - 8)) + 'px'; tip.style.top = Math.min(y + 18, window.innerHeight - 50) + 'px';
+  }
+  function autoScroll() {
+    if (!drag) return;
+    const edge = 70, y = drag.y;
+    let dy = 0; if (y < edge) dy = -Math.ceil((edge - y) / 5); else if (y > window.innerHeight - edge) dy = Math.ceil((y - (window.innerHeight - edge)) / 5);
+    if (dy) { window.scrollBy(0, dy); moveDrag(drag.x, drag.y); }
+    requestAnimationFrame(autoScroll);
+  }
+  function endDrag(x, y) {
+    const d = drag; const tg = d ? dropTarget(x, y) : null;
+    cleanDrag();
+    if (!d || !tg || !tg.res || !tg.res.ok) { if (tg && tg.res && !tg.res.ok && tg.res.why) toast(tg.res.why); return; }
+    if (tg.bench) {
+      remember('uBench', d.key);
+      toBench(d.key, d.from);
+      toast(t('benchDone', d.key));
+    } else if (tg.swap) {
+      remember('uSwap', d.key, tg.swap);
+      putSection(d.key, tg.to);
+      if (d.from) putSection(tg.swap, d.from); else toBench(tg.swap, tg.to);
+      toast(t('swapDone', d.key, tg.swap));
+    } else {
+      remember('uDrag', d.key, nameOf(tg.to));
+      putSection(d.key, tg.to);
+      toast(t('dropDone', d.key, nameOf(tg.to)));
+    }
+    persist(); render();
+    const keys = [d.key].concat(tg.swap ? [tg.swap] : []);
+    keys.forEach((k) => main.querySelectorAll(`.cell[data-key="${CSS.escape(k)}"]`).forEach((e) => e.classList.add('flash')));
+    setTimeout(() => main.querySelectorAll('.flash').forEach((e) => e.classList.remove('flash')), 2600);
+  }
+  /** Take a section off its member (or part-timers / ON-Hold) and leave it waiting on the bench. */
+  function toBench(k, from) {
+    delete S.assign[k]; delete S.pins[k]; S.secCat[k] = 'required';
+    if (from && memberById(from)) S.bans[`${k}|${from}`] = 1;
+  }
+  function cleanDrag() {
+    if (!drag) return;
+    if (drag.ghost) drag.ghost.remove();
+    if (drag.cell) drag.cell.classList.remove('drag-src');
+    document.body.classList.remove('dragging');
+    main.querySelectorAll('.dz-ok, .dz-warn, .dz-no, .dz-over, .dz-best, .sw-ok, .sw-no, table.tt.dragging').forEach((e) => e.classList.remove('dz-ok', 'dz-warn', 'dz-no', 'dz-over', 'dz-best', 'sw-ok', 'sw-no', 'dragging'));
+    dragTip().hidden = true;
+    drag = null;
+    ui.noClick = true; setTimeout(() => { ui.noClick = false; }, 60);
+  }
+  main.addEventListener('pointerdown', (ev) => {
+    if (S.step !== 4 || ui.view || ev.button > 0 || drag) return;
+    const cell = ev.target.closest('.cell[data-key]'); if (!cell) return;
+    const td = cell.closest('table.tt td.slot'), bench = cell.closest('.bench');
+    if (!td && !bench) return;
+    let h = td ? td.dataset.h : null;
+    if (bench) { const sx = snapshot().secs[cell.dataset.key]; if (!sx) return; h = sx.hour == null ? 'nt' : String(sx.hour); }
+    pend = { key: cell.dataset.key, from: td ? td.dataset.mid : '', h, x: ev.clientX, y: ev.clientY, type: ev.pointerType, cell };
+    if (ev.pointerType === 'touch') { const px = ev.clientX, py = ev.clientY; pend.timer = setTimeout(() => startDrag(px, py), 350); }
+  });
+  document.addEventListener('pointermove', (ev) => {
+    if (pend && !drag) {
+      const dist = Math.hypot(ev.clientX - pend.x, ev.clientY - pend.y);
+      if (pend.type === 'touch') { if (dist > 10) { clearTimeout(pend.timer); pend = null; } }
+      else if (dist > 6) startDrag(ev.clientX, ev.clientY);
+    }
+    if (drag) { ev.preventDefault(); moveDrag(ev.clientX, ev.clientY); }
+  });
+  document.addEventListener('pointerup', (ev) => { if (pend && pend.timer) clearTimeout(pend.timer); pend = null; if (drag) endDrag(ev.clientX, ev.clientY); });
+  document.addEventListener('pointercancel', () => { if (pend && pend.timer) clearTimeout(pend.timer); pend = null; cleanDrag(); });
+  document.addEventListener('touchmove', (ev) => { if (drag) ev.preventDefault(); }, { passive: false });
+  document.addEventListener('contextmenu', (ev) => { if (drag || (pend && pend.type === 'touch')) ev.preventDefault(); });
+
   /** Scroll to a member's cells (or the member's row) and make them flash. */
   function goTo(mid, keys) {
     const row = main.querySelector(`tr.mem[data-mid="${CSS.escape(mid || '')}"]`);
@@ -810,6 +1051,7 @@
         ${!isPseudo ? `<button class="opt" type="button" data-act="rmSec" data-key="${k}" data-mid="${mid}">✕ ${esc(t('removeFrom', nameOf(mid)))}</button>` : `<button class="opt" type="button" data-act="toMembers" data-key="${k}">↩ ${esc(t('toMembers'))}</button>`}
         ${!s.noTime ? `<button class="opt" type="button" data-act="timePick" data-key="${k}">🕒 ${esc(t('proposeTime'))}</button>` : ''}
         ${s.proposed && !S.autoTime[k] && s.officialHour != null ? `<button class="opt" type="button" data-act="timeReset" data-key="${k}">↺ ${esc(t('restoreTime'))}</button>` : ''}
+        ${refMoved(k) ? `<button class="opt" type="button" data-act="refBack" data-key="${k}">↺ ${esc(t('refBack', S.ref[k][0] ? nameOf(S.ref[k][0]) : t('bench')))}</button>` : ''}
         ${mid !== 'HOLD' ? `<button class="opt" type="button" data-act="toHold" data-key="${k}">⏸ ${esc(t('toHold'))}</button>` : ''}
         ${mid !== 'PT' ? `<button class="opt" type="button" data-act="toPart" data-key="${k}">👥 ${esc(t('toPart'))}</button>` : ''}
         <div id="tp-${k}"></div></div>`;
@@ -894,8 +1136,10 @@
   }
   function projectData() { return Object.assign({}, S, { savedAt: new Date().toISOString() }); }
   function saveProject() {
+    if (S.built && R.off) setRef();
     const blob = new Blob([JSON.stringify(projectData())], { type: 'application/json' });
     download(blob, `${fileBase()} - timetable project.json`);
+    persist(); if (S.step === 4) render();
     toast(t('saved'));
   }
   async function openProject(file) {
@@ -906,6 +1150,7 @@
       S = Object.assign(blank(), obj); S.lang = obj.lang || lang; clearUndo();
       R = { wb: {}, sheets: {}, err: {}, fac: null, notes: {}, curScore: {}, prefScore: {} };
       await reparseAll();
+      if (S.built && R.off) setRef();
       persist(); render(); toast(t('loaded'));
     } catch (e) { toast(t('loadFail')); }
   }
@@ -948,6 +1193,7 @@
   }
 
   document.addEventListener('click', async (ev) => {
+    if (ui.noClick) { ui.noClick = false; return; }
     const el = ev.target.closest('[data-act]');
     const pop = $('#pop');
     if (!el) { if (!pop.hidden && !ev.target.closest('#pop')) closePop(); if (!ev.target.closest('#mcard')) hideCard(); return; }
@@ -976,6 +1222,8 @@
       case 'rebuild': remember('uRebuild'); build(true); break;
       case 'print': window.print(); break;
       case 'undo': undo(); break;
+      case 'refBack': { remember('uRef', d.key); restoreRef(d.key); closePop(); persist(); render(); toast(t('refDone', d.key)); break; }
+      case 'refAll': { const { secs, assign } = snapshot(); const ks = refChanged(secs, assign); if (!ks.length) break; remember('uRefAll'); ks.forEach(restoreRef); persist(); render(); toast(t('refAllDone', ks.length)); break; }
       case 'focusCourse': ui.focusCourse = d.code && ui.focusCourse !== d.code ? d.code : null; render(); break;
       case 'card': { const c = document.getElementById('mcard'); if (c && !c.hidden && c.dataset.mid === d.card) hideCard(); else showCard(el); break; }
       case 'goIssue': goTo(d.mid, (d.keys || '').split(',').filter(Boolean)); break;
@@ -1052,7 +1300,7 @@
   });
   document.addEventListener('input', (ev) => { if (ev.target.id === 'termIn') ui.termDraft = ev.target.value; });
   document.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Escape') { closePop(); hideCard(); if (ui.focusCourse && !ev.target.matches('input, select, textarea')) { ui.focusCourse = null; render(); } }
+    if (ev.key === 'Escape') { if (drag) { cleanDrag(); return; } closePop(); hideCard(); if (ui.focusCourse && !ev.target.matches('input, select, textarea')) { ui.focusCourse = null; render(); } }
     if ((ev.ctrlKey || ev.metaKey) && !ev.shiftKey && (ev.key === 'z' || ev.key === 'Z') && S.step === 4 && !ui.view && !ev.target.matches('input, select, textarea')) { ev.preventDefault(); undo(); }
     if (ev.key === 'Enter' && ev.target.id === 'termIn') startProject();
     if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches('td.slot')) { ev.preventDefault(); openPop(ev.target); }
