@@ -790,6 +790,8 @@
         if (!inWindow(m, s.hour)) p.issues.push({ type: 'window', a: k });
         if (s.needsTime && s.hour == null) p.issues.push({ type: 'notime', a: k });
       });
+      // preps: different courses that have class times (untimed courses and MSc/PhD are not preparations)
+      p.preps = new Set(p.keys.filter((k) => secs[k].hour != null).map((k) => secs[k].course)).size;
       p.mscCount = mscCounted(msc, m.id);
       p.counted += p.mscCount;
       if (m.required !== '' && m.required != null && p.counted !== Number(m.required)) p.issues.push({ type: 'count', have: p.counted, need: Number(m.required) });

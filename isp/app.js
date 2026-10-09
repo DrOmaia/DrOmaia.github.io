@@ -16,7 +16,7 @@
   function S0() { try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch (e) { return null; } }
   let S = blank();
   let R = { wb: {}, sheets: {}, err: {}, off: null, cur: null, prefs: null, fac: null, notes: {}, curScore: {}, prefScore: {} };
-  const ui = { tab: 'members', open: {}, alts: {}, altBusy: null, building: false, dirty: false };
+  const ui = { tab: 'members', open: {}, alts: {}, altBusy: null, building: false, dirty: false, undo: [] };
 
   // ---------------- helpers ----------------
   const L = () => TXT[S.lang] || TXT.ar;
@@ -166,6 +166,23 @@
     return { secs, assign, ev };
   }
   const sig = (keys) => keys.slice().sort().join('|');
+
+  // ---------------- undo (proposal edits, kept in memory for this visit) ----------------
+  const UNDO_KEYS = ['assign', 'pins', 'bans', 'proposed', 'autoTime', 'secCat', 'decisions', 'forbidden', 'built'];
+  // the label is kept as a text key + values so it follows the interface language
+  function remember(key, ...args) {
+    const snap = {}; UNDO_KEYS.forEach((k) => { snap[k] = S[k]; });
+    ui.undo.push({ s: JSON.stringify(snap), key, args });
+    if (ui.undo.length > 50) ui.undo.shift();
+  }
+  function undo() {
+    const u = ui.undo.pop();
+    if (!u) { toast(t('nothingUndo')); return; }
+    Object.assign(S, JSON.parse(u.s));
+    ui.alts = {}; ui.altBusy = null; closePop();
+    persist(); render(); toast(t('undone', t(u.key, ...u.args)));
+  }
+  const clearUndo = () => { ui.undo = []; };
 
   // ---------------- proposal ----------------
   function runPropose(extra) {
@@ -596,8 +613,9 @@
     if (s.proposed) cls.push('prop');
     if (info && info.bad) cls.push('bad');
     if (S.pins[s.key]) cls.push('pinned');
+    if (info && info.isNew) cls.push('new');
     const comp = s.comp ? `${s.comp.split('-')[1]} ${s.compAct === 'Lab' ? 'Lab' : 'T'}` : '';
-    return `<div class="${cls.join(' ')}" style="background:${colour(s.course)}"><b>${esc(s.key)}</b>${comp ? `<span>${esc(comp)}</span>` : ''}</div>`;
+    return `<div class="${cls.join(' ')}" data-key="${esc(s.key)}" style="background:${colour(s.course)}"${info && info.isNew ? ` title="${esc(t('lgNew'))}"` : ''}><b>${esc(s.key)}</b>${comp ? `<span>${esc(comp)}</span>` : ''}</div>`;
   }
   function viewProposal() {
     if (!R.off) return `<p>${esc(t('needOfficial'))}</p>`;
@@ -614,32 +632,37 @@
     const conflicts = ev.issues.filter((i) => ['clash', 'window', 'notime'].includes(i.type)).length;
     const requests = Object.values(secs).filter((s) => s.proposed && assign[s.key]).length;
     const finals = S.members.filter((m) => S.decisions[m.id] === 'final').length;
-    const head = `<tr><th style="text-align:left;padding-left:12px">${S.lang === 'ar' ? 'العضو' : 'Member'}</th>${E.HOURS.slice(0, 4).map((h) => `<th class="hr">${hl(h)}</th>`).join('')}<th class="brk" title="${esc(t('breakCol'))}"></th>${E.HOURS.slice(4).map((h) => `<th class="hr">${hl(h)}</th>`).join('')}<th>${esc(t('noTime'))}</th><th>${esc(t('load'))}</th><th>${esc(t('sections'))}</th></tr>`;
+    // courses each member taught in the current term (for the "new" mark)
+    const hasCur = !!(R.cur || S.baseline);
+    const taught = {}; Object.entries(currentFor()).forEach(([id, items]) => { taught[id] = new Set(items.map((x) => x.course)); });
+    const isNew = (mid, s) => hasCur && !!memberById(mid) && !(taught[mid] && taught[mid].has(s.course));
+    const head = `<tr><th style="text-align:left;padding-left:12px">${S.lang === 'ar' ? 'العضو' : 'Member'}</th>${E.HOURS.slice(0, 4).map((h) => `<th class="hr">${hl(h)}</th>`).join('')}<th class="brk" title="${esc(t('breakCol'))}"></th>${E.HOURS.slice(4).map((h) => `<th class="hr">${hl(h)}</th>`).join('')}<th>${esc(t('noTime'))}</th><th>${esc(t('load'))}</th><th>${esc(t('sections'))}</th><th title="${esc(t('prepsTip'))}">${esc(t('preps'))}</th></tr>`;
     const body = rows.map(({ m, pseudo }) => {
       const keys = byMember[m.id] || [];
       const p = ev.per[m.id] || { load: 0, counted: 0, total: 0 };
       const dec = S.decisions[m.id] || '';
       const slot = (h) => {
         const ks = keys.filter((k) => secs[k].hour === h);
-        return `<td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="${h}">${ks.map((k) => cellHtml(secs[k], { bad: bad.has(k) })).join('')}</td>`;
+        return `<td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="${h}">${ks.map((k) => cellHtml(secs[k], { bad: bad.has(k), isNew: isNew(m.id, secs[k]) })).join('')}</td>`;
       };
       const nt = keys.filter((k) => secs[k].hour == null);
       const req = Number(m.required);
       const cntBad = !pseudo && m.required !== '' && m.required != null && p.counted !== req;
-      const tr = `<tr class="mem ${pseudo ? 'pseudo' : ''} ${m.id === 'HOLD' ? 'hold' : ''} ${dec}">
+      const tr = `<tr data-mid="${m.id}" class="mem ${pseudo ? 'pseudo' : ''} ${m.id === 'HOLD' ? 'hold' : ''} ${dec}">
         <td class="name" dir="ltr"><span class="nmtxt">${esc(m.name)}</span>${pseudo ? '' : `<div class="dec no-print" dir="${S.lang === 'ar' ? 'rtl' : 'ltr'}">${['final', 'reject', 'review'].map((d) => `<button type="button" class="${d} ${dec === d ? 'on' : ''}" data-act="dec" data-id="${m.id}" data-dec="${d}">${esc(t(d))}</button>`).join('')}</div>`}</td>
         ${E.HOURS.slice(0, 4).map(slot).join('')}<td class="brk"></td>${E.HOURS.slice(4).map(slot).join('')}
-        <td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="nt">${nt.map((k) => cellHtml(secs[k], { bad: bad.has(k) })).join('')}${pseudo ? '' : S.msc.filter((x) => x.member === m.id).map((x) => `<div class="cell grad"><b>${esc(x.program || 'MSc')}</b><span>${esc(t('gradHours', Number(x.hours === '' || x.hours == null ? 3 : x.hours)))}</span></div>`).join('')}</td>
+        <td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="nt">${nt.map((k) => cellHtml(secs[k], { bad: bad.has(k), isNew: isNew(m.id, secs[k]) })).join('')}${pseudo ? '' : S.msc.filter((x) => x.member === m.id).map((x) => `<div class="cell grad"><b>${esc(x.program || 'MSc')}</b><span>${esc(t('gradHours', Number(x.hours === '' || x.hours == null ? 3 : x.hours)))}</span></div>`).join('')}</td>
         <td class="num">${pseudo ? p.load : p.total}${!pseudo && p.total !== p.load ? `<small>${p.load} + ${(p.total - p.load)}</small>` : ''}</td>
-        <td class="num ${cntBad ? 'bad' : ''}">${pseudo ? keys.length : `${p.counted} / ${m.required === '' ? '–' : req}`}</td></tr>`;
+        <td class="num cnt ${cntBad ? 'bad' : ''}">${pseudo ? keys.length : `${p.counted} / ${m.required === '' ? '–' : req}`}</td>
+        <td class="num preps" title="${esc(t('prepsTip'))}">${pseudo ? '' : p.preps || 0}</td></tr>`;
       let alt = '';
       if (!pseudo && dec === 'reject') {
         const dirA = S.lang === 'ar' ? 'rtl' : 'ltr';
-        if (ui.altBusy === m.id) alt = `<tr class="alt"><td colspan="15" dir="${dirA}">${esc(t('computing'))}</td></tr>`;
-        else if (!ui.alts[m.id]) alt = `<tr class="alt"><td colspan="15" dir="${dirA}"><button class="btn small" type="button" data-act="showAlt" data-id="${m.id}">${esc(t('altTitle', m.name))}</button></td></tr>`;
+        if (ui.altBusy === m.id) alt = `<tr class="alt"><td colspan="16" dir="${dirA}">${esc(t('computing'))}</td></tr>`;
+        else if (!ui.alts[m.id]) alt = `<tr class="alt"><td colspan="16" dir="${dirA}"><button class="btn small" type="button" data-act="showAlt" data-id="${m.id}">${esc(t('altTitle', m.name))}</button></td></tr>`;
         else if (ui.alts[m.id]) {
           const a = ui.alts[m.id];
-          alt = `<tr class="alt"><td colspan="15" dir="${dirA}"><b>${esc(t('altTitle', m.name))}</b>${a.opts.length ? `<div class="alts">${a.opts.map((o, i) => `<div class="alt-card"><b>${i + 1}</b><ul>${Object.entries(o.changes).map(([id, c]) => `<li><b>${esc(nameOf(id))}</b>: ${c.rem.map((k) => `<span class="minus">− ${esc(k)} ${hl(o.hours[k] != null ? o.hours[k] : secs[k] ? secs[k].hour : null)}</span>`).join(' ')} ${c.add.map((k) => `<span class="plus">+ ${esc(k)} ${hl(o.hours[k] != null ? o.hours[k] : secs[k] ? secs[k].hour : null)}</span>`).join(' ')}</li>`).join('')}</ul>${o.fresh && o.fresh.length ? `<p class="small" style="color:var(--red);margin:0" dir="ltr">⚠ ${o.fresh.map(issueText).map(esc).join(' | ')}</p>` : ''}<button class="btn small primary" type="button" data-act="useAlt" data-id="${m.id}" data-i="${i}">${esc(t('useAlt'))}</button></div>`).join('')}</div>` : `<p class="muted small">${esc(t('altNone'))}</p>`}
+          alt = `<tr class="alt"><td colspan="16" dir="${dirA}"><b>${esc(t('altTitle', m.name))}</b>${a.opts.length ? `<div class="alts">${a.opts.map((o, i) => `<div class="alt-card"><b>${i + 1}</b><ul>${Object.entries(o.changes).map(([id, c]) => `<li><b>${esc(nameOf(id))}</b>: ${c.rem.map((k) => `<span class="minus">− ${esc(k)} ${hl(o.hours[k] != null ? o.hours[k] : secs[k] ? secs[k].hour : null)}</span>`).join(' ')} ${c.add.map((k) => `<span class="plus">+ ${esc(k)} ${hl(o.hours[k] != null ? o.hours[k] : secs[k] ? secs[k].hour : null)}</span>`).join(' ')}</li>`).join('')}</ul>${o.fresh && o.fresh.length ? `<p class="small" style="color:var(--red);margin:0" dir="ltr">⚠ ${o.fresh.map(issueText).map(esc).join(' | ')}</p>` : ''}<button class="btn small primary" type="button" data-act="useAlt" data-id="${m.id}" data-i="${i}">${esc(t('useAlt'))}</button></div>`).join('')}</div>` : `<p class="muted small">${esc(t('altNone'))}</p>`}
             <div style="margin-top:10px"><button class="btn small" type="button" data-act="closeAlt" data-id="${m.id}">${esc(t('closeAlt'))}</button></div></td></tr>`;
         }
       }
@@ -652,17 +675,17 @@
         const s = secs[i.a];
         const opts = S.members.map((m) => `<option value="${m.id}">${esc(m.name)}</option>`).join('');
         items.push(`<li><span class="t">${esc(t('issue').unassigned(i.a))} ${s.hour != null ? hl(s.hour) : ''}</span><span class="row" style="gap:6px"><select class="input" data-chg="assignTo" data-key="${i.a}"><option value="">${esc(t('assignTo'))}</option>${opts}</select><button class="btn small" type="button" data-act="toHold" data-key="${i.a}">${esc(t('toHold'))}</button></span></li>`);
-      } else if (i.type === 'count') items.push(`<li class="info"><span>${esc(t('issue').count(nameOf(i.member), i.have, i.need))}</span></li>`);
-      else if (i.type === 'clash') items.push(`<li><span>${esc(t('issue').clash(nameOf(i.member), i.a, i.b, `${E.DAY_NAMES[i.day]} ${hl(i.hour)}`))}</span></li>`);
-      else if (i.type === 'window') items.push(`<li><span>${esc(t('issue').window(nameOf(i.member), i.a))}</span></li>`);
-      else if (i.type === 'notime') items.push(`<li><span>${esc(t('issue').notime(nameOf(i.member), i.a))}</span></li>`);
+      } else {
+        const keys = [i.a, i.b].filter(Boolean).join(',');
+        items.push(`<li class="${i.type === 'count' ? 'info' : ''}"><button type="button" class="go" data-act="goIssue" data-mid="${esc(i.member)}" data-keys="${esc(keys)}" title="${esc(t('goTip'))}"><span>${esc(issueText(i))}</span><i aria-hidden="true">⌖</i></button></li>`);
+      }
     });
     const reqs = Object.values(secs).filter((s) => s.proposed && assign[s.key]).map((s) => {
       const fr = E.freeRooms(R.off, s.key, s.hour).filter((g) => !g.online);
       return `<li><span><b>${esc(s.key)}</b> → ${hl(s.hour)} <span class="muted">(${s.officialHour != null ? hl(s.officialHour) : t('noTime')})</span> · ${esc(nameOf(assign[s.key]))}<br><span class="small muted">${esc(t('freeRooms'))}: ${fr.map((g) => `${g.days.map((d) => E.DAY_NAMES[d]).join(' ')}: ${g.rooms.length ? g.rooms.map(E.shortRoom).join(' / ') : t('noFree')}`).join(' | ')}</span></span></li>`;
     });
     return `<div class="page-head"><div><h1>${esc(t('propTitle'))}</h1><p>${esc(t('rebuildHint'))}</p></div>
-      <div class="row"><button class="btn" type="button" data-act="print">${esc(t('printBtn'))}</button><button class="btn primary" type="button" data-act="rebuild" ${ui.building ? 'disabled' : ''}>${esc(ui.building ? t('building') : t('rebuild'))}</button></div></div>
+      <div class="row"><button class="btn" type="button" data-act="undo" ${ui.undo.length ? `title="${esc(t('undoTip', t(ui.undo[ui.undo.length - 1].key, ...ui.undo[ui.undo.length - 1].args)))}"` : 'disabled'}>↶ ${esc(t('undo'))}</button><button class="btn" type="button" data-act="print">${esc(t('printBtn'))}</button><button class="btn primary" type="button" data-act="rebuild" ${ui.building ? 'disabled' : ''}>${esc(ui.building ? t('building') : t('rebuild'))}</button></div></div>
     <div class="stats">
       <div class="stat ${counted !== reqTotal ? 'warn' : 'good'}"><b>${counted} / ${reqTotal}</b>${esc(t('sAssigned'))}</div>
       <div class="stat ${unassigned ? 'bad' : 'good'}"><b>${unassigned}</b>${esc(t('sUnassigned'))}</div>
@@ -670,14 +693,26 @@
       <div class="stat ${requests ? 'warn' : ''}"><b>${requests}</b>${esc(t('sRequests'))}</div>
       <div class="stat"><b>${finals} / ${S.members.length}</b>${esc(t('sFinal'))}</div>
     </div>
-    <p class="legend small muted"><span><i class="lg prop"></i>${esc(t('lgProp'))}</span><span><i class="lg bad"></i>${esc(t('lgBad'))}</span><span><i class="lg pin">•</i>${esc(t('lgPin'))}</span><span>${esc(t('lgClick'))}</span></p>
-    <div class="gridwrap"><table class="tt"><thead>${head}</thead><tbody>${ui.building && !S.built ? `<tr><td colspan="15" style="padding:30px;text-align:center">${esc(t('building'))}</td></tr>` : body}</tbody></table></div>
+    <p class="legend small muted"><span><i class="lg prop"></i>${esc(t('lgProp'))}</span><span><i class="lg bad"></i>${esc(t('lgBad'))}</span><span><i class="lg pin">•</i>${esc(t('lgPin'))}</span>${hasCur ? `<span><i class="lg new"></i>${esc(t('lgNew'))}</span>` : ''}<span>${esc(t('lgClick'))}</span></p>
+    <div class="gridwrap"><table class="tt"><thead>${head}</thead><tbody>${ui.building && !S.built ? `<tr><td colspan="16" style="padding:30px;text-align:center">${esc(t('building'))}</td></tr>` : body}</tbody></table></div>
     <div class="attn">
-      <div class="panel"><h2>${esc(t('attention'))}</h2>${items.length ? `<ul>${items.join('')}</ul>` : `<p class="good">${esc(t('allGood'))}</p>`}</div>
+      <div class="panel"><h2>${esc(t('attention'))}</h2>${items.length ? `<p class="small muted" style="margin:-4px 0 10px">${esc(t('attnHint'))}</p><ul>${items.join('')}</ul>` : `<p class="good">${esc(t('allGood'))}</p>`}</div>
       <div class="panel"><h2>${esc(t('timeReqTitle'))}</h2>${reqs.length ? `<ul class="req-list">${reqs.join('')}</ul>` : `<p class="muted">—</p>`}</div>
     </div>`;
   }
 
+  /** Scroll to a member's cells (or the member's row) and make them flash. */
+  function goTo(mid, keys) {
+    const row = main.querySelector(`tr.mem[data-mid="${CSS.escape(mid || '')}"]`);
+    if (!row) return;
+    let els = [];
+    keys.forEach((k) => row.querySelectorAll(`.cell[data-key="${CSS.escape(k)}"]`).forEach((e) => els.push(e)));
+    if (!els.length) els = [row.querySelector('td.name'), row.querySelector('td.cnt')].filter(Boolean);
+    if (!els.length) return;
+    els[0].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    els.forEach((e) => { e.classList.remove('flash'); void e.offsetWidth; e.classList.add('flash'); });
+    clearTimeout(goTo.t); goTo.t = setTimeout(() => main.querySelectorAll('.flash').forEach((e) => e.classList.remove('flash')), 2700);
+  }
   function issueText(i) {
     if (i.type === 'unassigned') return t('issue').unassigned(i.a);
     if (i.type === 'count') return t('issue').count(nameOf(i.member), i.have, i.need);
@@ -757,6 +792,7 @@
     if (kind === 'prefs') S.prefsMap = {};
     if (kind === 'current' || kind === 'prefs') Object.keys(S.mapManual).forEach((k) => { if (k.startsWith(kind + '|')) delete S.mapManual[k]; });
     main.querySelectorAll('[data-drop]').forEach((d) => { if (d.dataset.drop === kind) d.textContent = t('reading'); });
+    clearUndo();
     await readFile(kind); parseAll();
     if (kind === 'faculty' && R.fac) { S.hoursSource = R.fac.hasCoop || R.fac.hasSenior ? 'file' : 'manual'; applyFaculty(); parseAll(); }
     S.built = false; persist(); render();
@@ -767,7 +803,7 @@
     if (!side) return;
     if (!term) { $('#termIn').focus(); toast(t('termLabel')); return; }
     if (S.side && S.side !== side) {
-      const keepLang = S.lang; S = blank(); S.lang = keepLang; R = { wb: {}, sheets: {}, err: {}, fac: null, notes: {}, curScore: {}, prefScore: {} };
+      const keepLang = S.lang; S = blank(); S.lang = keepLang; clearUndo(); R = { wb: {}, sheets: {}, err: {}, fac: null, notes: {}, curScore: {}, prefScore: {} };
     }
     S.side = side; S.term = term; S.step = 2; ui.termDraft = null;
     persist(); render(); window.scrollTo(0, 0);
@@ -795,7 +831,7 @@
       const obj = JSON.parse(await file.text());
       if (!obj || obj.app !== 'isp-timetable') throw new Error('x');
       const lang = S.lang;
-      S = Object.assign(blank(), obj); S.lang = obj.lang || lang;
+      S = Object.assign(blank(), obj); S.lang = obj.lang || lang; clearUndo();
       R = { wb: {}, sheets: {}, err: {}, fac: null, notes: {}, curScore: {}, prefScore: {} };
       await reparseAll();
       persist(); render(); toast(t('loaded'));
@@ -824,7 +860,7 @@
     const base = {};
     Object.entries(assign).forEach(([k, v]) => { if (memberById(v)) (base[v] = base[v] || []).push({ course: secs[k].course, hour: secs[k].hour }); });
     const keep = { side: S.side, lang: S.lang, members: S.members.map((m) => Object.assign({}, m, { prefs: ['', '', ''], comment: '', fromPrefs: false })), courses: S.courses, courseTouched: S.courseTouched };
-    S = Object.assign(blank(), keep, { baseline: base, step: 1 });
+    S = Object.assign(blank(), keep, { baseline: base, step: 1 }); clearUndo();
     ui.pickSide = S.side; ui.termDraft = '';
     R = { wb: {}, sheets: {}, err: {}, fac: null, notes: {}, curScore: {}, prefScore: {} };
     persist(); render(); window.scrollTo(0, 0);
@@ -854,8 +890,8 @@
       case 'pick': ui.pickSide = d.side; ui.termDraft = $('#termIn') ? $('#termIn').value : ui.termDraft; render(); break;
       case 'start': startProject(); break;
       case 'openProject': $('#projectInput').click(); break;
-      case 'resumeAuto': { const saved = S0(); if (saved) { S = Object.assign(blank(), saved); await reparseAll(); render(); } break; }
-      case 'rmFile': delete S.files[d.kind]; if (d.kind === 'current') S.currentMap = {}; if (d.kind === 'prefs') { S.prefsMap = {}; S.members.forEach((m) => { if (m.fromPrefs) { m.prefs = ['', '', '']; m.comment = ''; m.fromPrefs = false; } }); } await readFile(d.kind); parseAll(); S.built = false; persist(); render(); break;
+      case 'resumeAuto': { const saved = S0(); if (saved) { S = Object.assign(blank(), saved); clearUndo(); await reparseAll(); render(); } break; }
+      case 'rmFile': clearUndo(); delete S.files[d.kind]; if (d.kind === 'current') S.currentMap = {}; if (d.kind === 'prefs') { S.prefsMap = {}; S.members.forEach((m) => { if (m.fromPrefs) { m.prefs = ['', '', '']; m.comment = ''; m.fromPrefs = false; } }); } await readFile(d.kind); parseAll(); S.built = false; persist(); render(); break;
       case 'tab': ui.tab = d.tab; render(); break;
       case 'mOpen': ui.open[d.id] = !ui.open[d.id]; render(); break;
       case 'mUp': case 'mDown': { const i = S.members.findIndex((m) => m.id === d.id); const j = act === 'mUp' ? i - 1 : i + 1; if (j >= 0 && j < S.members.length) { [S.members[i], S.members[j]] = [S.members[j], S.members[i]]; persist(); render(); } break; }
@@ -864,23 +900,26 @@
       case 'chipRm': { const m = memberById(d.id); m[d.field] = (m[d.field] || []).filter((v) => v !== d.val); persist(); render(); break; }
       case 'mscAdd': S.msc.push({ id: uid(), member: '', program: 'MSc', hours: 3 }); persist(); render(); break;
       case 'mscDel': S.msc = S.msc.filter((x) => x.id !== d.id); persist(); render(); break;
-      case 'rebuild': build(true); break;
+      case 'rebuild': remember('uRebuild'); build(true); break;
       case 'print': window.print(); break;
+      case 'undo': undo(); break;
+      case 'goIssue': goTo(d.mid, (d.keys || '').split(',').filter(Boolean)); break;
       case 'cell': if (!pop.hidden && pop.dataset.mid === d.mid && pop.dataset.h === d.h) closePop(); else openPop(el); break;
-      case 'put': putSection(d.key, d.mid); closePop(); persist(); render(); break;
-      case 'rmSec': delete S.assign[d.key]; delete S.pins[d.key]; S.bans[`${d.key}|${d.mid}`] = 1; closePop(); persist(); render(); break;
-      case 'toHold': S.secCat[d.key] = 'onhold'; delete S.pins[d.key]; delete S.assign[d.key]; closePop(); persist(); render(); break;
-      case 'toPart': S.secCat[d.key] = 'parttime'; delete S.pins[d.key]; delete S.assign[d.key]; closePop(); persist(); render(); break;
-      case 'toMembers': S.secCat[d.key] = 'required'; closePop(); persist(); render(); break;
+      case 'put': remember('uPut', d.key, nameOf(d.mid)); putSection(d.key, d.mid); closePop(); persist(); render(); break;
+      case 'rmSec': remember('uRm', d.key, nameOf(d.mid)); delete S.assign[d.key]; delete S.pins[d.key]; S.bans[`${d.key}|${d.mid}`] = 1; closePop(); persist(); render(); break;
+      case 'toHold': remember('uMove', d.key, 'ON-Hold'); S.secCat[d.key] = 'onhold'; delete S.pins[d.key]; delete S.assign[d.key]; closePop(); persist(); render(); break;
+      case 'toPart': remember('uMove', d.key, 'Part-timers'); S.secCat[d.key] = 'parttime'; delete S.pins[d.key]; delete S.assign[d.key]; closePop(); persist(); render(); break;
+      case 'toMembers': remember('uToMembers', d.key); S.secCat[d.key] = 'required'; closePop(); persist(); render(); break;
       case 'timePick': {
         const box = document.getElementById('tp-' + d.key); if (!box) break;
         const { secs } = snapshot(); const s = secs[d.key];
         box.innerHTML = `<div class="hours" style="margin-top:6px">${E.HOURS.map((h) => `<button type="button" class="${s.hour === h ? 'on' : ''}" data-act="timeSet" data-key="${d.key}" data-h="${h}">${hl(h)}</button>`).join('')}</div>`;
         break;
       }
-      case 'timeSet': { const { secs } = snapshot(); const s = secs[d.key]; const h = +d.h; if (s.officialHour === h) delete S.proposed[d.key]; else S.proposed[d.key] = h; delete S.autoTime[d.key]; if (S.assign[d.key]) S.pins[d.key] = S.assign[d.key]; closePop(); persist(); render(); break; }
-      case 'timeReset': delete S.proposed[d.key]; delete S.autoTime[d.key]; closePop(); persist(); render(); break;
+      case 'timeSet': { remember('uTime', d.key); const { secs } = snapshot(); const s = secs[d.key]; const h = +d.h; if (s.officialHour === h) delete S.proposed[d.key]; else S.proposed[d.key] = h; delete S.autoTime[d.key]; if (S.assign[d.key]) S.pins[d.key] = S.assign[d.key]; closePop(); persist(); render(); break; }
+      case 'timeReset': remember('uTime', d.key); delete S.proposed[d.key]; delete S.autoTime[d.key]; closePop(); persist(); render(); break;
       case 'dec': {
+        remember('uDec', nameOf(d.id));
         const cur = S.decisions[d.id];
         S.decisions[d.id] = cur === d.dec ? '' : d.dec;
         if (S.decisions[d.id] === 'reject') alternatives(d.id); else { delete ui.alts[d.id]; }
@@ -888,13 +927,14 @@
       }
       case 'useAlt': {
         const a = ui.alts[d.id]; const o = a && a.opts[+d.i]; if (!o) break;
+        remember('uAlt', nameOf(d.id));
         Object.keys(S.pins).forEach((k) => { if (S.pins[k] === d.id) delete S.pins[k]; });
         applyResult(o.res);
         S.forbidden[d.id] = a.forb.filter((x) => x !== sig(Object.keys(o.res.assign).filter((k) => o.res.assign[k] === d.id)));
         S.decisions[d.id] = ''; delete ui.alts[d.id]; persist(); render(); break;
       }
       case 'showAlt': alternatives(d.id); break;
-      case 'closeAlt': S.decisions[d.id] = 'review'; delete ui.alts[d.id]; persist(); render(); break;
+      case 'closeAlt': remember('uDec', nameOf(d.id)); S.decisions[d.id] = 'review'; delete ui.alts[d.id]; persist(); render(); break;
       case 'excel': try { await exportExcel(); } catch (e) { console.error(e); toast('Excel: ' + e.message); } break;
       case 'saveProject': saveProject(); break;
       case 'facTemplate': downloadTemplate(); break;
@@ -927,7 +967,7 @@
       case 'ccount': S.courses[d.code] = Object.assign({}, S.courses[d.code], { counts: el.checked }); S.courseTouched[d.code] = true; break;
       case 'msc': { const x = S.msc.find((y) => y.id === d.id); if (x) x[d.field] = d.field === 'hours' ? Number(el.value) : el.value; break; }
       case 'mscDay': { const x = S.msc.find((y) => y.id === d.id); const day = +d.day; x.days = el.checked ? [...new Set((x.days || []).concat(day))].sort() : (x.days || []).filter((y) => y !== day); break; }
-      case 'assignTo': if (el.value) putSection(d.key, el.value); break;
+      case 'assignTo': if (el.value) { remember('uPut', d.key, nameOf(el.value)); putSection(d.key, el.value); } break;
       case 'hoursSrc': S.hoursSource = el.value; if (el.value === 'file') applyFaculty(); break;
       case 'fmtSheet': fmtUseSheet(el.value); render(); return;
       case 'fmtTitle': ui.fmt.title = el.value; render(); return;
@@ -938,6 +978,7 @@
   document.addEventListener('input', (ev) => { if (ev.target.id === 'termIn') ui.termDraft = ev.target.value; });
   document.addEventListener('keydown', (ev) => {
     if (ev.key === 'Escape') closePop();
+    if ((ev.ctrlKey || ev.metaKey) && !ev.shiftKey && (ev.key === 'z' || ev.key === 'Z') && S.step === 4 && !ui.view && !ev.target.matches('input, select, textarea')) { ev.preventDefault(); undo(); }
     if (ev.key === 'Enter' && ev.target.id === 'termIn') startProject();
     if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches('td.slot')) { ev.preventDefault(); openPop(ev.target); }
   });
@@ -947,7 +988,7 @@
   document.addEventListener('drop', async (ev) => { const z = ev.target.closest('[data-drop]'); if (!z) return; ev.preventDefault(); z.classList.remove('over'); if (z.dataset.drop === 'fmt') await openFormat(ev.dataTransfer.files[0]); else await addFile(z.dataset.drop, ev.dataTransfer.files[0]); });
   window.addEventListener('afterprint', () => document.body.classList.remove('print-fmt'));
   window.addEventListener('scroll', () => closePop(), { passive: true });
-  $('#langBtn').addEventListener('click', () => { S.lang = S.lang === 'ar' ? 'en' : 'ar'; persist(); render(); });
+  $('#langBtn').addEventListener('click', () => { S.lang = S.lang === 'ar' ? 'en' : 'ar'; $('#toast').classList.remove('on'); persist(); render(); });
   $('#saveBtn').addEventListener('click', saveProject);
 
   // expose for testing

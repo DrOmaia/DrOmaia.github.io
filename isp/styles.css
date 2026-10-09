@@ -519,3 +519,22 @@ table.plain.msc select.num { width: 80px; }
 .upl .num { background: #e6f5fa; color: var(--psu-navy); }
 .fmt-card { border-inline-start: 4px solid var(--psu-sky); }
 .strip { border-top: 3px solid var(--psu-sky); }
+
+/* ---- proposal helpers: new-course mark, jump-to flash, clickable attention items, preps ---- */
+.cell { position: relative; }
+.cell.new::before { content: ''; position: absolute; top: 0; right: 0; width: 0; height: 0; border-style: solid; border-width: 0 11px 11px 0; border-color: transparent var(--psu-navy) transparent transparent; border-top-right-radius: 6px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.lg.new { position: relative; border: 1px solid var(--line); overflow: hidden; }
+.lg.new::before { content: ''; position: absolute; top: 0; right: 0; border-style: solid; border-width: 0 9px 9px 0; border-color: transparent var(--psu-navy) transparent transparent; }
+@keyframes isp-flash { 0%, 100% { box-shadow: 0 0 0 0 rgba(0, 144, 186, 0); } 50% { box-shadow: 0 0 0 4px rgba(0, 144, 186, .9); } }
+.flash { animation: isp-flash .8s ease-in-out 3; position: relative; z-index: 3; }
+.attn li:has(> .go) { padding: 0; }
+.attn .go { all: unset; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 8px 12px; cursor: pointer; border-radius: var(--r-sm); }
+.attn .go span { text-align: start; }
+.attn .go i { font-style: normal; color: var(--psu-sky); font-size: 16px; line-height: 1; }
+.attn .go:hover { background: rgba(0, 0, 0, .04); }
+.attn .go:hover span { text-decoration: underline; text-underline-offset: 3px; }
+.attn .go:focus-visible { box-shadow: var(--focus); }
+.tt td.num.preps { color: var(--psu-navy); }
+.tt td.num { min-width: 50px; }
+.tt td.slot { min-width: 84px; width: 84px; }
+.tt td.name { min-width: 184px; }

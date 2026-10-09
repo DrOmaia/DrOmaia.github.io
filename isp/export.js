@@ -14,9 +14,9 @@
   const center = { horizontal: 'center', vertical: 'middle', wrapText: true };
   const colL = (n) => { let s = ''; while (n > 0) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; };
   const HCOL = {}; E.HOURS.forEach((h, i) => { HCOL[h] = 3 + i; }); // C..L
-  const NOTIME = 13, NCOL = 14, OCOL = 15, PCOL = 16, QCOL = 17, RCOL = 18, SCOL = 19, TCOL = 20; // M..T
-  const LAST = TCOL;
-  const UCOL = 21, VCOL = 22, WCOL = 23; // hidden helpers: block owner, row of a section in the grid, name in this draft
+  const NOTIME = 13, NCOL = 14, OCOL = 15, PCOL = 16, QCOL = 17, RCOL = 18, SCOL = 19, TCOL = 20, PRCOL = 21; // M..U
+  const LAST = PRCOL;
+  const UCOL = 22, VCOL = 23, WCOL = 24; // hidden helpers (V, W, X): block owner, row of a section in the grid, name in this draft
   const NOTICE = 'Unofficial simulation produced by a training tool. Not an official document; the data and results must not be relied on.';
   function noticeFooter(ws) { ws.headerFooter = { oddFooter: '&L&8&"Tahoma,Italic"' + NOTICE + '&R&8Page &P of &N', evenFooter: '&L&8&"Tahoma,Italic"' + NOTICE + '&R&8Page &P of &N' }; }
 
@@ -42,7 +42,7 @@
     // ---------- grid header ----------
     ws.getColumn(1).width = 30; ws.getColumn(2).width = 8;
     for (let c = 3; c <= NOTIME; c++) ws.getColumn(c).width = 17;
-    for (let c = NCOL; c <= TCOL; c++) ws.getColumn(c).width = 11;
+    for (let c = NCOL; c <= PRCOL; c++) ws.getColumn(c).width = 11;
     ws.mergeCells(1, 1, 1, LAST);
     const gen = ctx.generated || new Date();
     ws.getCell(1, 1).value = `IS Department – ${sideName} Teaching Timetable – Term ${ctx.term}   |   Unofficial simulation draft, generated ${gen.toISOString().slice(0, 10)}`;
@@ -57,6 +57,7 @@
     ws.mergeCells(3, NCOL, 3, SCOL); ws.getCell(3, NCOL).value = 'Teaching Load';
     ws.getCell(3, NCOL).font = { name: FONT, size: 14, bold: true }; ws.getCell(3, NCOL).alignment = center;
     for (let c = NCOL; c <= SCOL; c++) ws.getCell(3, c).fill = fill('EAD1DC');
+    ws.mergeCells(3, TCOL, 3, PRCOL);
     ws.getCell(3, TCOL).value = 'Sections'; ws.getCell(3, TCOL).font = { name: FONT, size: 11, bold: true }; ws.getCell(3, TCOL).alignment = center; ws.getCell(3, TCOL).fill = fill('DDEBF7');
     ws.getRow(3).height = 24;
     const head = ws.getRow(4);
@@ -64,9 +65,10 @@
     ws.getCell(4, 1).fill = fill('00FF00'); ws.getCell(4, 2).fill = fill('00FF00');
     ws.getCell(4, 2).value = 'Unit load';
     E.HOURS.forEach((h) => { const c = ws.getCell(4, HCOL[h]); c.value = h > 12 ? h - 12 : h; c.numFmt = '0":00"'; });
-    const heads = { [NOTIME]: 'No time', [NCOL]: 'Course load', [OCOL]: 'Classes load', [PCOL]: 'Senior Project\n(hrs)', [QCOL]: 'COOP\n(hrs)', [RCOL]: 'MSc / PhD\n(hrs)', [SCOL]: 'Total Load\n(hrs)', [TCOL]: 'Sections\nassigned' };
+    const heads = { [NOTIME]: 'No time', [NCOL]: 'Course load', [OCOL]: 'Classes load', [PCOL]: 'Senior Project\n(hrs)', [QCOL]: 'COOP\n(hrs)', [RCOL]: 'MSc / PhD\n(hrs)', [SCOL]: 'Total Load\n(hrs)', [TCOL]: 'Sections\nassigned', [PRCOL]: 'Preps\n(courses)' };
     Object.entries(heads).forEach(([c, v]) => { ws.getCell(4, +c).value = v; if (+c >= NCOL && +c <= SCOL) ws.getCell(4, +c).fill = fill('EAD1DC'); });
-    ws.getCell(4, TCOL).fill = fill('DDEBF7');
+    ws.getCell(4, TCOL).fill = fill('DDEBF7'); ws.getCell(4, PRCOL).fill = fill('DDEBF7');
+    ws.getCell(4, PRCOL).note = { texts: [{ font: { name: FONT, size: 9 }, text: 'Preps: number of different courses with class times in the member\'s row (No time column and MSc / PhD not counted). Updates when you move sections.' }] };
     for (let c = 2; c <= LAST; c++) { const cell = ws.getCell(4, c); cell.font = { name: FONT, size: 11, bold: true }; cell.alignment = center; cell.border = { top: thin, bottom: med, left: thin, right: thin }; }
 
     // ---------- rows of the grid ----------
@@ -173,7 +175,7 @@
       nameCell.font = { name: FONT, size: 12, bold: true };
       nameCell.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
       if (b.m.id === 'HOLD') nameCell.fill = fill('FFC000');
-      [OCOL, PCOL, QCOL, RCOL, SCOL, TCOL].forEach((c) => ws.mergeCells(first, c, last, c));
+      [OCOL, PCOL, QCOL, RCOL, SCOL, TCOL, PRCOL].forEach((c) => ws.mergeCells(first, c, last, c));
       // totals use the whole block
       const blockLoad = () => { let v = 0; for (let rr = first; rr <= last; rr++) { const cv = ws.getCell(rr, NCOL).value; v += cv && cv.result ? cv.result : 0; } return v; };
       const cls = blockLoad();
@@ -200,6 +202,13 @@
         const counted = sectionsOf(b.m.id).filter((k) => secs[k].counts).length;
         ws.getCell(first, TCOL).value = { formula: f, result: counted };
         ws.getCell(first, TCOL).font = { name: FONT, size: 12, bold: true };
+        // preps: distinct course codes in the timed cells of the block (T / Lab lines share the lecture's code)
+        const rg = `INDIRECT("R${first}C3:R${last}C12",FALSE)`;
+        const hasDash = `ISNUMBER(FIND("-",${rg}))`;
+        const prepsF = `SUMPRODUCT(${hasDash}/(COUNTIF(${rg},LEFT(${rg}&"-",FIND("-",${rg}&"-")-1)&"-*")+NOT(${hasDash})))`;
+        const prepsNow = new Set(sectionsOf(b.m.id).filter((k) => secs[k].hour != null).map((k) => secs[k].course)).size;
+        ws.getCell(first, PRCOL).value = { formula: prepsF, result: prepsNow };
+        ws.getCell(first, PRCOL).font = { name: FONT, size: 12, bold: true, color: { argb: 'FF10426E' } };
         const req = b.m.required === '' || b.m.required == null ? null : Number(b.m.required);
         if (req != null) {
           ws.addConditionalFormatting({ ref: `${colL(TCOL)}${first}`, rules: [{ type: 'expression', priority: 1, formulae: [`${colL(TCOL)}${first}<>${req}`], style: { fill: fill('FFC7CE'), font: { color: { argb: 'FF9C0006' }, bold: true } } }] });
