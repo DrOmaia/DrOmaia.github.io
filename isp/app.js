@@ -1,1798 +1,791 @@
-/* ISP — all uploaded data is processed locally in the browser. */
-const $ = (s, r = document) => r.querySelector(s);
-const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-const MAX_CAPACITY = 27;
-const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
-const TEACHING_DAYS = "Sunday/Monday/Tuesday/Wednesday";
-const DELIVERY_PATTERN = "Sun Campus · Mon Campus · Tue Online · Wed Campus";
-function addMinutes(time, minutes) {
-  const [h, m] = String(time).split(":").map(Number);
-  const total = h * 60 + m + minutes;
-  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
-}
-function canonicalSlot(s) {
-  const start = String(s.start || "").slice(0, 5);
-  return {
-    ...s,
-    slot_id: s.slot_id || `${s.campus || "Male"}-${start}`,
-    days: TEACHING_DAYS,
-    start,
-    end: addMinutes(start, 50),
-    delivery_pattern: DELIVERY_PATTERN,
-  };
-}
-function isValidSlot(s) {
-  const start = String(s.start || "").slice(0, 5);
-  return (
-    /^\d{2}:00$/.test(start) &&
-    start !== "12:00" &&
-    start <= "15:00" &&
-    String(s.days || "").toLowerCase() !== "thursday"
-  );
-}
-function slotKey(x) {
-  return x.time_key || `${x.days}|${x.start}|${x.end}`;
-}
-function instructorConflicts(sections) {
-  const counts = {};
-  sections
-    .filter((x) => x.instructor && x.instructor !== "TBA" && x.start)
-    .forEach((x) => {
-      const k = `${x.campus}|${x.instructor}|${slotKey(x)}`;
-      counts[k] = (counts[k] || 0) + 1;
-    });
-  return counts;
-}
-function refreshOption(o) {
-  const conflicts = instructorConflicts(o.sections);
-  o.sections.forEach((x) => {
-    x.timeConflict =
-      (conflicts[`${x.campus}|${x.instructor}|${slotKey(x)}`] || 0) > 1;
-    if (x.timeConflict) x.status = "Time Conflict";
-    else if (!x.slot_id || !x.room || x.room === "TBA")
-      x.status = "Needs Manual Room Assignment";
-    else if (x.expected < 10) x.status = "Chair review";
-    else if (x.manualOverride) x.status = "Manually adjusted";
-    else x.status = "Scheduled";
+/* IS Teaching Timetable — interface. Everything runs in the browser; nothing is uploaded. */
+(function () {
+  'use strict';
+  const E = window.ISPEngine, D = window.ISPDefaults, X = window.ISPExport, TXT = window.ISPText;
+  const LS_KEY = 'isp-timetable-v1';
+  const main = document.getElementById('main');
+  const $ = (sel, el) => (el || document).querySelector(sel);
+
+  // ---------------- state ----------------
+  const blank = () => ({
+    app: 'isp-timetable', v: 1, side: null, term: '', lang: (S0() || {}).lang || 'ar', step: 1,
+    files: {}, members: [], courses: {}, courseTouched: {}, secCat: {}, msc: [],
+    currentMap: {}, prefsMap: {}, assign: {}, proposed: {}, autoTime: {}, pins: {}, bans: {},
+    decisions: {}, forbidden: {}, built: false, baseline: null, savedAt: null,
   });
-  const manual = o.sections.filter(
-    (x) => !x.slot_id || !x.room || x.room === "TBA",
-  ).length;
-  o.manual = manual;
-  o.instructorConflictCount = o.sections.filter((x) => x.timeConflict).length;
-  o.issues = [
-    ...new Set(
-      o.sections
-        .flatMap((x) => [
-          x.timeConflict
-            ? `${x.instructor} has a time conflict at ${x.start}.`
-            : "",
-          x.status === "Needs Manual Room Assignment"
-            ? `${x.code} Section ${x.section} needs a safe room assignment.`
-            : "",
-          x.expected < 10
-            ? `${x.code} Section ${x.section} is below 10 students.`
-            : "",
-        ])
-        .filter(Boolean),
-    ),
-  ];
-}
+  function S0() { try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch (e) { return null; } }
+  let S = blank();
+  let R = { wb: {}, sheets: {}, err: {}, off: null, cur: null, prefs: null, notes: {}, curScore: {}, prefScore: {} };
+  const ui = { tab: 'members', open: {}, alts: {}, altBusy: null, building: false, dirty: false };
 
-const demo = {
-  courses: [
-    {
-      code: "IS201",
-      title: "Introduction to Information Systems",
-      campus: "Male",
-      base_demand: 43,
-      level: "Year 2",
-      meeting_pattern: "Sun/Tue",
-      needs_lab: "No",
-      required: "Yes",
-    },
-    {
-      code: "IS201",
-      title: "Introduction to Information Systems",
-      campus: "Female",
-      base_demand: 38,
-      level: "Year 2",
-      meeting_pattern: "Mon/Wed",
-      needs_lab: "No",
-      required: "Yes",
-    },
-    {
-      code: "IS205",
-      title: "Business Process Management",
-      campus: "Male",
-      base_demand: 31,
-      level: "Year 2",
-      meeting_pattern: "Sun/Tue",
-      needs_lab: "No",
-      required: "Yes",
-    },
-    {
-      code: "IS231",
-      title: "Systems Analysis and Design",
-      campus: "Male",
-      base_demand: 47,
-      level: "Year 2",
-      meeting_pattern: "Mon/Wed",
-      needs_lab: "No",
-      required: "Yes",
-    },
-    {
-      code: "IS241",
-      title: "Database Management and Applications",
-      campus: "Male",
-      base_demand: 35,
-      level: "Year 2",
-      meeting_pattern: "Sun/Tue",
-      needs_lab: "Yes",
-      required: "Yes",
-    },
-    {
-      code: "IS311",
-      title: "Web Development",
-      campus: "Male",
-      base_demand: 28,
-      level: "Year 3",
-      meeting_pattern: "Mon/Wed",
-      needs_lab: "Yes",
-      required: "Yes",
-    },
-    {
-      code: "IS321",
-      title: "Enterprise Architecture",
-      campus: "Male",
-      base_demand: 24,
-      level: "Year 3",
-      meeting_pattern: "Sun/Tue",
-      needs_lab: "No",
-      required: "Yes",
-    },
-    {
-      code: "IS361",
-      title: "Project Management",
-      campus: "Male",
-      base_demand: 36,
-      level: "Year 3",
-      meeting_pattern: "Mon/Wed",
-      needs_lab: "No",
-      required: "Yes",
-    },
-    {
-      code: "IS371",
-      title: "Quantitative Analysis",
-      campus: "Male",
-      base_demand: 33,
-      level: "Year 3",
-      meeting_pattern: "Sun/Tue",
-      needs_lab: "No",
-      required: "Yes",
-    },
-    {
-      code: "IS450",
-      title: "Digital Transformation Fundamentals",
-      campus: "Male",
-      base_demand: 18,
-      level: "DX Track",
-      meeting_pattern: "Mon/Wed",
-      needs_lab: "No",
-      required: "No",
-    },
-    {
-      code: "IS499",
-      title: "Senior Project",
-      campus: "Male",
-      base_demand: 19,
-      level: "Year 4",
-      meeting_pattern: "Thursday",
-      needs_lab: "No",
-      required: "Yes",
-    },
-    {
-      code: "CS330",
-      title: "Introduction to Operating Systems",
-      campus: "Male",
-      base_demand: 0,
-      level: "External",
-      meeting_pattern: "Sun/Tue",
-      needs_lab: "No",
-      required: "No",
-      external: "Yes",
-      fixed_slot: "ST-0900",
-    },
-  ],
-  faculty: [
-    {
-      instructor: "Dr. Faculty A",
-      campus: "Male",
-      qualified_courses: "IS201, IS205, IS361",
-      preferred_slots: "ST-0900,MW-1000",
-      unavailable_slots: "ST-1300",
-      max_sections: 8,
-    },
-    {
-      instructor: "Dr. Faculty B",
-      campus: "Male",
-      qualified_courses: "IS231, IS321, IS499",
-      preferred_slots: "MW-0900,TH-1000",
-      unavailable_slots: "ST-0800",
-      max_sections: 8,
-    },
-    {
-      instructor: "Dr. Faculty C",
-      campus: "Male",
-      qualified_courses: "IS241, IS311",
-      preferred_slots: "ST-1000,MW-1100",
-      unavailable_slots: "MW-0800",
-      max_sections: 8,
-    },
-    {
-      instructor: "Dr. Faculty D",
-      campus: "Male",
-      qualified_courses: "IS371, IS450",
-      preferred_slots: "ST-1100,MW-1300",
-      unavailable_slots: "MW-0900",
-      max_sections: 8,
-    },
-    {
-      instructor: "Dr. Faculty E",
-      campus: "Female",
-      qualified_courses: "IS201, IS205, IS231",
-      preferred_slots: "MW-0900,MW-1000",
-      unavailable_slots: "ST-0800",
-      max_sections: 8,
-    },
-  ],
-  students: [
-    {
-      student_id: "S001",
-      campus: "Male",
-      planned_courses: "IS201,IS205",
-      current_prerequisites: "",
-      repeat_courses: "",
-      preferred_slots: "ST-0900,MW-1000",
-      avoid_slots: "ST-0800",
-    },
-    {
-      student_id: "S002",
-      campus: "Male",
-      planned_courses: "IS231,IS241,CS330",
-      current_prerequisites: "IS201",
-      repeat_courses: "IS231",
-      preferred_slots: "MW-0900,ST-1000",
-      avoid_slots: "MW-1300",
-    },
-    {
-      student_id: "S003",
-      campus: "Male",
-      planned_courses: "IS311,IS361,IS371",
-      current_prerequisites: "IS241",
-      repeat_courses: "",
-      preferred_slots: "ST-1000,MW-1000",
-      avoid_slots: "ST-1400",
-    },
-    {
-      student_id: "S004",
-      campus: "Male",
-      planned_courses: "IS321,IS361,IS371",
-      current_prerequisites: "",
-      repeat_courses: "",
-      preferred_slots: "ST-1100,MW-0900",
-      avoid_slots: "MW-1400",
-    },
-    {
-      student_id: "S005",
-      campus: "Male",
-      planned_courses: "IS450,IS499",
-      current_prerequisites: "IS371",
-      repeat_courses: "",
-      preferred_slots: "MW-1100,TH-1000",
-      avoid_slots: "ST-0800",
-    },
-    {
-      student_id: "S006",
-      campus: "Female",
-      planned_courses: "IS201,IS205,IS231",
-      current_prerequisites: "",
-      repeat_courses: "IS201",
-      preferred_slots: "MW-0900,MW-1000",
-      avoid_slots: "MW-1400",
-    },
-  ],
-  slots: [
-    {
-      slot_id: "ST-0800",
-      days: "Sunday/Tuesday",
-      start: "08:00",
-      end: "09:15",
-      campus: "Male",
-      room: "2-A01",
-      room_type: "Classroom",
-      room_capacity: 30,
-    },
-    {
-      slot_id: "ST-0900",
-      days: "Sunday/Tuesday",
-      start: "09:30",
-      end: "10:45",
-      campus: "Male",
-      room: "2-A02",
-      room_type: "Classroom",
-      room_capacity: 30,
-    },
-    {
-      slot_id: "ST-1000",
-      days: "Sunday/Tuesday",
-      start: "11:00",
-      end: "12:15",
-      campus: "Male",
-      room: "Lab 1",
-      room_type: "Lab",
-      room_capacity: 27,
-    },
-    {
-      slot_id: "ST-1100",
-      days: "Sunday/Tuesday",
-      start: "11:00",
-      end: "12:15",
-      campus: "Male",
-      room: "2-A03",
-      room_type: "Classroom",
-      room_capacity: 30,
-    },
-    {
-      slot_id: "ST-1300",
-      days: "Sunday/Tuesday",
-      start: "13:00",
-      end: "14:15",
-      campus: "Male",
-      room: "Lab 2",
-      room_type: "Lab",
-      room_capacity: 27,
-    },
-    {
-      slot_id: "ST-1400",
-      days: "Sunday/Tuesday",
-      start: "14:30",
-      end: "15:45",
-      campus: "Male",
-      room: "2-A04",
-      room_type: "Classroom",
-      room_capacity: 30,
-    },
-    {
-      slot_id: "MW-0800",
-      days: "Monday/Wednesday",
-      start: "08:00",
-      end: "09:15",
-      campus: "Male",
-      room: "2-A01",
-      room_type: "Classroom",
-      room_capacity: 30,
-    },
-    {
-      slot_id: "MW-0900",
-      days: "Monday/Wednesday",
-      start: "09:30",
-      end: "10:45",
-      campus: "Male",
-      room: "2-A02",
-      room_type: "Classroom",
-      room_capacity: 30,
-    },
-    {
-      slot_id: "MW-1000",
-      days: "Monday/Wednesday",
-      start: "11:00",
-      end: "12:15",
-      campus: "Male",
-      room: "2-A03",
-      room_type: "Classroom",
-      room_capacity: 30,
-    },
-    {
-      slot_id: "MW-1100",
-      days: "Monday/Wednesday",
-      start: "11:00",
-      end: "12:15",
-      campus: "Male",
-      room: "Lab 1",
-      room_type: "Lab",
-      room_capacity: 27,
-    },
-    {
-      slot_id: "MW-1300",
-      days: "Monday/Wednesday",
-      start: "13:00",
-      end: "14:15",
-      campus: "Male",
-      room: "Lab 2",
-      room_type: "Lab",
-      room_capacity: 27,
-    },
-    {
-      slot_id: "TH-1000",
-      days: "Thursday",
-      start: "10:00",
-      end: "12:30",
-      campus: "Male",
-      room: "2-A05",
-      room_type: "Classroom",
-      room_capacity: 30,
-    },
-    {
-      slot_id: "F-MW-0900",
-      days: "Monday/Wednesday",
-      start: "09:30",
-      end: "10:45",
-      campus: "Female",
-      room: "W-301",
-      room_type: "Classroom",
-      room_capacity: 30,
-    },
-    {
-      slot_id: "F-MW-1000",
-      days: "Monday/Wednesday",
-      start: "11:00",
-      end: "12:15",
-      campus: "Female",
-      room: "W-302",
-      room_type: "Classroom",
-      room_capacity: 30,
-    },
-    {
-      slot_id: "F-ST-1100",
-      days: "Sunday/Tuesday",
-      start: "11:00",
-      end: "12:15",
-      campus: "Female",
-      room: "W-Lab1",
-      room_type: "Lab",
-      room_capacity: 27,
-    },
-  ],
-};
-demo.slots.push(
-  ...demo.slots
-    .filter((s) => s.campus === "Male")
-    .map((s, i) => ({
-      ...s,
-      room: /lab/i.test(s.room_type)
-        ? `Lab ${i + 5}`
-        : `2-B${String(i + 1).padStart(2, "0")}`,
-    })),
-);
-demo.slots.push(
-  {
-    slot_id: "ST-0900-L",
-    days: "Sunday/Tuesday",
-    start: "09:30",
-    end: "10:45",
-    campus: "Male",
-    room: "Lab 11",
-    room_type: "Lab",
-    room_capacity: 27,
-  },
-  {
-    slot_id: "MW-0900-L",
-    days: "Monday/Wednesday",
-    start: "09:30",
-    end: "10:45",
-    campus: "Male",
-    room: "Lab 12",
-    room_type: "Lab",
-    room_capacity: 27,
-  },
-);
-demo.courses = demo.courses
-  .filter((c) => c.code !== "IS499")
-  .map((c) => ({ ...c, meeting_pattern: DELIVERY_PATTERN }));
-demo.slots = demo.slots
-  .filter((s) => String(s.start).endsWith(":00") && s.start !== "12:00")
-  .map(canonicalSlot);
+  // ---------------- helpers ----------------
+  const L = () => TXT[S.lang] || TXT.ar;
+  const t = (k, ...a) => { const v = L()[k]; return typeof v === 'function' ? v(...a) : v == null ? k : v; };
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const uid = () => 'm' + Math.random().toString(36).slice(2, 9);
+  const hl = (h) => E.hourLabel(h);
+  const memberById = (id) => S.members.find((m) => m.id === id);
+  const pseudoName = (id) => (id === 'PT' ? 'Part-timers' : id === 'HOLD' ? 'ON-Hold' : '');
+  const nameOf = (id) => (memberById(id) || {}).name || pseudoName(id) || id;
+  const colour = (code) => '#' + D.colourFor(code);
+  function bufToB64(buf) { const b = new Uint8Array(buf); let s = ''; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(s); }
+  function b64ToBuf(b64) { const s = atob(b64); const b = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) b[i] = s.charCodeAt(i); return b.buffer; }
+  function toast(msg) { const el = $('#toast'); el.textContent = msg; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), 2600); }
+  function download(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
+  let saveTimer = null;
+  function persist() { clearTimeout(saveTimer); saveTimer = setTimeout(() => { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) { /* storage full or blocked */ } }, 300); }
+  const sideLabel = () => (S.side === 'female' ? t('female') : t('male'));
+  const fileBase = () => `${S.term || ''} ${S.side === 'female' ? 'female' : 'male'}`.trim();
 
-let state = {
-  version: 1,
-  step: 1,
-  term: "",
-  defaultCapacity: 20,
-  adjustment: 15,
-  inputs: { courses: [], faculty: [], students: [], slots: [] },
-  filenames: {},
-  capacities: {},
-  included: {},
-  approved: false,
-  options: [],
-  selectedOption: 0,
-  savedAt: null,
-};
-let modalMode = "save",
-  pendingProjectBytes = null;
-
-function normKey(k) {
-  return String(k || "")
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_|_$/g, "");
-}
-function normalizeRows(rows) {
-  return rows
-    .filter((r) => Object.values(r).some((v) => v !== "" && v != null))
-    .map((r) =>
-      Object.fromEntries(Object.entries(r).map(([k, v]) => [normKey(k), v])),
-    );
-}
-function list(v) {
-  return String(v || "")
-    .split(/[,;|]/)
-    .map((x) => x.trim())
-    .filter(Boolean);
-}
-function num(v, d = 0) {
-  const n = Number(v);
-  return Number.isFinite(n) ? n : d;
-}
-function esc(v) {
-  return String(v ?? "").replace(
-    /[&<>"']/g,
-    (c) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
-        c
-      ],
-  );
-}
-function courseKey(c) {
-  return `${String(c.code).trim()}|${c.campus || "Male"}`;
-}
-function isYes(v) {
-  return /^(yes|true|1|y)$/i.test(String(v || ""));
-}
-function download(blob, name) {
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = name;
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => {
-    URL.revokeObjectURL(a.href);
-    a.remove();
-  }, 800);
-}
-function toast(msg) {
-  const t = $("#toast");
-  t.textContent = msg;
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2600);
-}
-function autosave() {
-  try {
-    localStorage.setItem(
-      "isp_autosave",
-      JSON.stringify({ ...state, savedAt: new Date().toISOString() }),
-    );
-  } catch (e) {}
-}
-
-function validate(kind, rows) {
-  const required = {
-    courses: ["code", "title", "campus"],
-    faculty: ["instructor", "campus", "qualified_courses"],
-    students: ["campus", "planned_courses"],
-    slots: ["slot_id", "days", "start", "end", "campus", "room"],
-  }[kind];
-  if (!rows.length) return "The file has no data rows.";
-  const keys = new Set(Object.keys(rows[0]));
-  const missing = required.filter((k) => !keys.has(k));
-  return missing.length ? `Missing columns: ${missing.join(", ")}` : "";
-}
-async function readWorkbook(file, kind) {
-  if (!window.XLSX)
-    throw new Error("The Excel reader is still loading. Please try again.");
-  const data = await file.arrayBuffer();
-  const wb = XLSX.read(data, { type: "array" });
-  if (kind === "setup") {
-    const courseSheet = wb.Sheets.OfferedCourses || wb.Sheets.Courses,
-      slotSheet = wb.Sheets.TimeSlots;
-    if (!courseSheet || !slotSheet)
-      throw new Error(
-        "Semester Setup must contain OfferedCourses and TimeSlots sheets.",
-      );
-    const catalogSheet = wb.Sheets.CourseCatalog;
-    const catalogRows = catalogSheet
-      ? normalizeRows(XLSX.utils.sheet_to_json(catalogSheet, { defval: "" }))
-      : [];
-    const catalog = Object.fromEntries(
-      catalogRows.map((c) => [String(c.code || "").toUpperCase(), c.title]),
-    );
-    const courses = normalizeRows(
-      XLSX.utils.sheet_to_json(courseSheet, { defval: "" }),
-    ).map((c) => ({
-      ...c,
-      code: String(c.code || "").toUpperCase(),
-      title:
-        c.title ||
-        catalog[String(c.code || "").toUpperCase()] ||
-        "Title requires review",
-      offer_status: c.offer_status || c.offer || c.offered || "",
-      meeting_pattern: DELIVERY_PATTERN,
-    }));
-    let slots = normalizeRows(
-      XLSX.utils.sheet_to_json(slotSheet, { defval: "" }),
-    );
-    const courseError = validate("courses", courses),
-      slotError = validate("slots", slots);
-    if (courseError || slotError) throw new Error(courseError || slotError);
-    slots = slots.filter(isValidSlot).map(canonicalSlot);
-    if (!slots.length)
-      throw new Error(
-        "No valid hourly slots found. Classes must start on the hour; 12:00–13:00 is excluded.",
-      );
-    const facultySheet =
-        wb.Sheets.FacultyResponses || wb.Sheets.FacultyDirectory,
-      studentSheet = wb.Sheets.StudentResponses,
-      rulesSheet = wb.Sheets.Rules;
-    const faculty = facultySheet
-      ? normalizeRows(XLSX.utils.sheet_to_json(facultySheet, { defval: "" }))
-      : [];
-    const students = studentSheet
-      ? normalizeRows(XLSX.utils.sheet_to_json(studentSheet, { defval: "" }))
-      : [];
-    const rules = rulesSheet
-      ? normalizeRows(XLSX.utils.sheet_to_json(rulesSheet, { defval: "" }))
-      : [];
-    const settings = Object.fromEntries(
-      rules.map((r) => [normKey(r.setting || r.item), r.value]),
-    );
-    return { courses, slots, faculty, students, settings };
+  // ---------------- parsing ----------------
+  async function loadWb(b64) { const wb = new window.ExcelJS.Workbook(); await wb.xlsx.load(b64ToBuf(b64)); return wb; }
+  function guessSheet(kind, sheets) {
+    const names = sheets.map((s) => s.name);
+    if (kind === 'official') return names.find((n) => n.trim().toUpperCase() === 'IS') || (sheets.find((s) => E.looksOfficial(s)) || sheets[0]).name;
+    if (kind === 'current') {
+      const vis = sheets.filter((s) => !s.hidden);
+      const want = S.side === 'female' ? /female|نساء|طالبات/i : /^(?!.*female).*(male|رجال|طلاب)/i;
+      const hit = vis.find((s) => want.test(s.name));
+      return (hit || vis[0] || sheets[0]).name;
+    }
+    if (kind === 'prefs') return (sheets.find((s) => /response|form/i.test(s.name)) || sheets[0]).name;
+    return sheets[0].name;
   }
-  const preferred = {
-    faculty: "FacultyResponses",
-    students: "StudentResponses",
-  }[kind];
-  const ws = wb.Sheets[preferred] || wb.Sheets[wb.SheetNames[0]];
-  const rows = normalizeRows(XLSX.utils.sheet_to_json(ws, { defval: "" }));
-  const error = validate(kind, rows);
-  if (error) throw new Error(error);
-  return rows;
-}
-
-function getCollected(c) {
-  return state.inputs.students.filter(
-    (s) =>
-      String(s.campus || "").toLowerCase() ===
-        String(c.campus || "").toLowerCase() &&
-      [...list(s.planned_courses), ...list(s.repeat_courses)]
-        .map((x) => x.toUpperCase())
-        .includes(String(c.code).toUpperCase()),
-  ).length;
-}
-function project(c) {
-  const collected = getCollected(c);
-  const base = Math.max(num(c.base_demand), collected);
-  return Math.ceil(base * (1 + state.adjustment / 100));
-}
-function capacity(c) {
-  return Math.max(
-    10,
-    Math.min(
-      MAX_CAPACITY,
-      num(state.capacities[courseKey(c)], state.defaultCapacity),
-    ),
-  );
-}
-function sectionPlan(c) {
-  const demand = project(c),
-    cap = capacity(c);
-  let count = Math.max(1, Math.ceil(demand / cap));
-  let distribution = Array.from(
-    { length: count },
-    (_, i) => Math.floor(demand / count) + (i < demand % count ? 1 : 0),
-  );
-  return {
-    demand,
-    cap,
-    count,
-    distribution,
-    low: distribution.some((x) => x < 10),
-  };
-}
-function recommendedAdjustment() {
-  const students = state.inputs.students.length,
-    totalBase = state.inputs.courses
-      .filter((c) => !isYes(c.external))
-      .reduce((s, c) => s + num(c.base_demand), 0);
-  if (!students || !totalBase) return 20;
-  const coverage = Math.min(1, students / Math.max(1, totalBase / 4));
-  return coverage < 0.45 ? 20 : coverage < 0.7 ? 15 : 10;
-}
-
-function updateTop() {
-  const term = state.term || $("#termInput").value.trim();
-  $$(".term-inline").forEach((x) => (x.textContent = term || "—"));
-  $("#termLabel").textContent = term ? `Term ${term}` : "Not set";
-}
-function showStep(n) {
-  state.step = n;
-  $$(".view").forEach((v) =>
-    v.classList.toggle("active", Number(v.dataset.view) === n),
-  );
-  $$(".step").forEach((b) =>
-    b.classList.toggle("active", Number(b.dataset.step) === n),
-  );
-  updateTop();
-  window.scrollTo({ top: 0, behavior: "smooth" });
-  autosave();
-  if (n === 2) renderDemand();
-  if (n === 3) renderOffering();
-  if (n === 4) renderSchedules();
-  if (n === 5) renderExport();
-}
-function updateInputs() {
-  const setupReady = state.inputs.courses.length && state.inputs.slots.length;
-  $("#inputStatus").textContent = setupReady
-    ? "Required setup ready"
-    : "Setup file required";
-  $$(".upload").forEach((el) => {
-    const k = el.dataset.kind;
-    const isReady = k === "setup" ? setupReady : !!state.inputs[k].length;
-    el.classList.toggle("ready", isReady);
-    if (state.filenames[k])
-      el.querySelector("em").textContent = state.filenames[k];
-  });
-  const ok = setupReady && ($("#termInput").value.trim() || state.term);
-  $("#toDemandBtn").disabled = !ok;
-  const c = $("#dataCheck");
-  if (ok) {
-    c.className = "callout success";
-    c.innerHTML = `<span>✓</span><div><strong>Semester setup is ready</strong><p>${state.inputs.courses.length} course rows and ${state.inputs.slots.length} valid hourly slots loaded. ${state.inputs.students.length} student responses and ${state.inputs.faculty.length} faculty preference responses are available.</p></div>`;
-  }
-}
-
-function renderMetrics(target, items) {
-  $(target).innerHTML = items
-    .map(
-      (x) =>
-        `<div class="metric"><span>${esc(x.label)}</span><strong>${esc(x.value)}</strong><small>${esc(x.note || "")}</small></div>`,
-    )
-    .join("");
-}
-function renderDemand() {
-  const campus = $("#demandCampus")?.value || "Male";
-  const courses = state.inputs.courses.filter(
-    (c) => !isYes(c.external) && c.campus === campus,
-  );
-  const projected = courses.reduce((s, c) => s + project(c), 0);
-  const sections = courses.reduce((s, c) => s + sectionPlan(c).count, 0);
-  const lows = courses.filter((c) => sectionPlan(c).low).length;
-  renderMetrics("#demandMetrics", [
-    {
-      label: "Student responses",
-      value: state.inputs.students.length,
-      note: "Processed locally",
-    },
-    {
-      label: "Projected demand",
-      value: projected,
-      note: `Includes +${state.adjustment}%`,
-    },
-    {
-      label: "Proposed sections",
-      value: sections,
-      note: "Default capacity applied",
-    },
-    { label: "Chair alerts", value: lows, note: "Below 10 in a section" },
-  ]);
-  $("#adjustment").value = state.adjustment;
-  $("#adjustmentValue").textContent = `+${state.adjustment}%`;
-  const rec = recommendedAdjustment();
-  $("#recommendationText").innerHTML =
-    `<strong>Projection recommendation: +${rec}%.</strong> Based on response coverage and the available base-demand figures. Review this planning assumption before approving the offering.`;
-  $("#demandBody").innerHTML = courses
-    .map((c) => {
-      const p = sectionPlan(c),
-        status = p.low
-          ? '<span class="pill warn">Chair review</span>'
-          : '<span class="pill good">Within range</span>';
-      return `<tr><td><strong>${esc(c.code)}</strong><br><small>${esc(c.title)}</small></td><td>${esc(c.campus)}</td><td>${getCollected(c)}</td><td>${num(c.base_demand)}</td><td><strong>${p.demand}</strong></td><td><input class="cap-input" data-cap="${esc(courseKey(c))}" type="number" min="10" max="27" value="${p.cap}" aria-label="Capacity for ${esc(c.code)}"></td><td>${p.count}<br><small>${p.distribution.join(" / ")}</small></td><td>${status}</td></tr>`;
-    })
-    .join("");
-}
-function renderOffering() {
-  const campus = $("#offeringCampus")?.value || "Male";
-  const courses = state.inputs.courses.filter(
-    (c) => !isYes(c.external) && c.campus === campus,
-  );
-  $("#offeringBody").innerHTML = courses
-    .map((c) => {
-      const k = courseKey(c),
-        p = sectionPlan(c);
-      if (state.included[k] === undefined)
-        state.included[k] =
-          c.offer_status == null || c.offer_status === ""
-            ? true
-            : isYes(c.offer_status);
-      return `<tr><td><input class="check offer-check" data-course="${esc(k)}" type="checkbox" ${state.included[k] ? "checked" : ""}></td><td><strong>${esc(c.code)}</strong><br><small>${esc(c.title)}</small></td><td>${esc(c.campus)}</td><td>${p.demand}</td><td>${p.count}</td><td>${p.distribution.join(" / ")} <small>(max ${p.cap})</small></td><td>${p.low ? '<span class="pill warn">Below minimum</span>' : isYes(c.required) ? '<span class="pill good">Required</span>' : '<span class="pill">Elective</span>'}</td></tr>`;
-    })
-    .join("");
-  $("#approvalState").textContent = state.approved
-    ? "Offering approved"
-    : "Awaiting Chair approval";
-  $("#approvalState").classList.toggle("approved", state.approved);
-  $("#approveBtn").textContent = state.approved
-    ? "Unlock offering"
-    : "Approve course offering";
-  $("#generateBtn").disabled = !state.approved;
-  updateTop();
-}
-
-function buildConflictWeights() {
-  const map = {};
-  state.inputs.students.forEach((s) => {
-    const cs = list(s.planned_courses).map((x) => x.toUpperCase());
-    for (let i = 0; i < cs.length; i++)
-      for (let j = i + 1; j < cs.length; j++) {
-        const k = [cs[i], cs[j]].sort().join("|");
-        map[k] = (map[k] || 0) + 1;
-      }
-  });
-  return map;
-}
-function slotPreferenceScore(slot, course, mode) {
-  let score = 0;
-  const studentRows = state.inputs.students.filter(
-    (s) =>
-      String(s.campus).toLowerCase() === String(course.campus).toLowerCase() &&
-      list(s.planned_courses)
-        .map((x) => x.toUpperCase())
-        .includes(String(course.code).toUpperCase()),
-  );
-  studentRows.forEach((s) => {
-    if (list(s.preferred_slots).includes(slot.slot_id))
-      score += mode === "student" ? 6 : 3;
-    if (list(s.avoid_slots).includes(slot.slot_id)) score -= 8;
-    const planned = list(s.planned_courses).map((x) => x.toUpperCase());
-    const blocked = state.inputs.courses
-      .filter(
-        (x) =>
-          isYes(x.external) && planned.includes(String(x.code).toUpperCase()),
-      )
-      .map((x) => x.fixed_slot)
-      .filter(Boolean);
-    if (blocked.includes(slot.slot_id)) score -= mode === "student" ? 15 : 9;
-  });
-  return score;
-}
-function generateOne(mode, index) {
-  const weights = buildConflictWeights(),
-    occupiedRoom = new Set(),
-    occupiedFaculty = new Set(),
-    courseSlots = {},
-    sections = [],
-    issues = [];
-  const included = state.inputs.courses
-    .filter((c) => !isYes(c.external) && state.included[courseKey(c)] !== false)
-    .sort((a, b) =>
-      mode === "student"
-        ? project(b) - project(a)
-        : String(a.code).localeCompare(String(b.code)),
-    );
-  const facultyLoads = {};
-  included.forEach((c) => {
-    const p = sectionPlan(c);
-    p.distribution.forEach((expected, i) => {
-      const qualified = state.inputs.faculty.filter(
-        (f) =>
-          String(f.campus).toLowerCase() === String(c.campus).toLowerCase() &&
-          (!list(f.qualified_courses).length ||
-            list(f.qualified_courses)
-              .map((x) => x.toUpperCase())
-              .includes(String(c.code).toUpperCase())) &&
-          (facultyLoads[f.instructor] || 0) < num(f.max_sections, 99),
-      );
-      let candidates = [];
-      qualified.forEach((f) =>
-        state.inputs.slots
-          .filter((s) => {
-            const tk = `${s.days}|${s.start}|${s.end}`;
-            const pinned = String(c.fixed_slot || c.pinned_slot || "").trim();
-            return (
-              String(s.campus).toLowerCase() ===
-                String(c.campus).toLowerCase() &&
-              (!pinned || s.slot_id === pinned) &&
-              (!isYes(c.needs_lab) ||
-                /lab|computer/i.test(`${s.room_type} ${s.room}`)) &&
-              num(s.room_capacity, 0) >= expected &&
-              !occupiedRoom.has(`${tk}|${s.room}`) &&
-              !occupiedFaculty.has(`${tk}|${f.instructor}`) &&
-              !list(f.unavailable_slots).includes(s.slot_id)
-            );
-          })
-          .forEach((s) => {
-            let sc = slotPreferenceScore(s, c, mode);
-            if (list(f.preferred_slots).includes(s.slot_id))
-              sc += mode === "faculty" ? 8 : 4;
-            sc -= num(facultyLoads[f.instructor]);
-            const tk = `${s.days}|${s.start}|${s.end}`;
-            const assigned = Object.entries(courseSlots);
-            assigned.forEach(([other, slots]) => {
-              if (slots.includes(tk)) {
-                const w =
-                  weights[
-                    [String(c.code).toUpperCase(), other].sort().join("|")
-                  ] || 0;
-                sc -= w * (mode === "student" ? 9 : 5);
-              }
-            });
-            sc += ((index + String(c.code).charCodeAt(0) + i) % 5) / 10;
-            candidates.push({ f, s, sc });
-          }),
-      );
-      candidates.sort((a, b) => b.sc - a.sc);
-      const pick = candidates[0];
-      if (pick) {
-        const tk = `${pick.s.days}|${pick.s.start}|${pick.s.end}`;
-        occupiedRoom.add(`${tk}|${pick.s.room}`);
-        occupiedFaculty.add(`${tk}|${pick.f.instructor}`);
-        facultyLoads[pick.f.instructor] =
-          (facultyLoads[pick.f.instructor] || 0) + 1;
-        (courseSlots[String(c.code).toUpperCase()] ||= []).push(tk);
-        sections.push({
-          code: c.code,
-          title: c.title,
-          campus: c.campus,
-          section: i + 1,
-          expected,
-          capacity: p.cap,
-          slot_id: pick.s.slot_id,
-          time_key: tk,
-          days: pick.s.days,
-          start: pick.s.start,
-          end: pick.s.end,
-          instructor: pick.f.instructor,
-          room: pick.s.room,
-          status: expected < 10 ? "Chair review" : "Scheduled",
-        });
-      } else {
-        sections.push({
-          code: c.code,
-          title: c.title,
-          campus: c.campus,
-          section: i + 1,
-          expected,
-          capacity: p.cap,
-          slot_id: "",
-          days: "TBA",
-          start: "",
-          end: "",
-          instructor: qualified[0]?.instructor || "TBA",
-          room: "TBA",
-          status: "Needs Manual Room Assignment",
-        });
-        issues.push(`${c.code} Section ${i + 1} needs a safe room assignment.`);
-      }
-      if (expected < 10)
-        issues.push(
-          `${c.code} Section ${i + 1} has ${expected} expected students; Chair decision required.`,
-        );
-    });
-  });
-  let studentConflicts = 0;
-  state.inputs.students.forEach((st) => {
-    const wanted = list(st.planned_courses).map((x) => x.toUpperCase());
-    for (let i = 0; i < wanted.length; i++)
-      for (let j = i + 1; j < wanted.length; j++) {
-        const a = [
-            ...new Set(
-              sections
-                .filter(
-                  (x) =>
-                    String(x.code).toUpperCase() === wanted[i] && x.time_key,
-                )
-                .map((x) => x.time_key),
-            ),
-          ],
-          b = [
-            ...new Set(
-              sections
-                .filter(
-                  (x) =>
-                    String(x.code).toUpperCase() === wanted[j] && x.time_key,
-                )
-                .map((x) => x.time_key),
-            ),
-          ];
-        if (a.length && b.length && !a.some((x) => b.some((y) => x !== y)))
-          studentConflicts++;
-      }
-    const externalSlots = state.inputs.courses
-      .filter(
-        (x) =>
-          isYes(x.external) && wanted.includes(String(x.code).toUpperCase()),
-      )
-      .map((x) => x.fixed_slot)
-      .filter(Boolean);
-    wanted.forEach((code) => {
-      const available = sections
-        .filter((x) => String(x.code).toUpperCase() === code && x.slot_id)
-        .map((x) => x.slot_id);
-      if (available.length && available.every((x) => externalSlots.includes(x)))
-        studentConflicts++;
-    });
-  });
-  const facultyMatches = sections.filter((x) => {
-    const f = state.inputs.faculty.find((f) => f.instructor === x.instructor);
-    return f && list(f.preferred_slots).includes(x.slot_id);
-  }).length;
-  const pref = Math.round(
-    (100 * facultyMatches) /
-      Math.max(1, sections.filter((x) => x.slot_id).length),
-  );
-  const result = {
-    mode,
-    name:
-      mode === "student"
-        ? "Student priority"
-        : mode === "faculty"
-          ? "Faculty priority"
-          : "Balanced",
-    description:
-      mode === "student"
-        ? "Minimizes likely student course clashes."
-        : mode === "faculty"
-          ? "Gives stronger weight to faculty time preferences."
-          : "Balances student conflicts, faculty preferences, and resource use.",
-    sections,
-    issues,
-    studentConflicts,
-    facultyPreference: pref,
-    manual: sections.filter((x) => !x.slot_id).length,
-    score: Math.max(
-      0,
-      100 -
-        studentConflicts * 7 -
-        sections.filter((x) => !x.slot_id).length * 10 -
-        Math.max(0, 70 - pref) / 4,
-    ),
-  };
-  refreshOption(result);
-  return result;
-}
-function buildOptions() {
-  state.options = [
-    generateOne("student", 0),
-    generateOne("balanced", 1),
-    generateOne("faculty", 2),
-  ];
-  state.selectedOption = 0;
-  autosave();
-}
-function renderSchedules() {
-  if (!state.options.length) buildOptions();
-  const o = state.options[state.selectedOption];
-  refreshOption(o);
-  $("#optionTabs").innerHTML = state.options
-    .map(
-      (x, i) =>
-        `<button class="option-tab ${i === state.selectedOption ? "active" : ""}" data-option="${i}"><strong>${esc(x.name)}</strong><small>Score ${Math.round(x.score)} · ${x.manual} manual</small></button>`,
-    )
-    .join("");
-  $("#optionTitle").textContent = o.name;
-  $("#optionDesc").textContent = o.description;
-  renderMetrics("#scheduleMetrics", [
-    {
-      label: "Option score",
-      value: Math.round(o.score),
-      note: "Decision-support rating",
-    },
-    {
-      label: "Student conflicts",
-      value: o.studentConflicts,
-      note: "Likely overlaps",
-    },
-    {
-      label: "Instructor conflicts",
-      value: o.instructorConflictCount || 0,
-      note: "Live override check",
-    },
-    { label: "Manual rooms", value: o.manual, note: "Unresolved sections" },
-  ]);
-  renderCalendar(o);
-  renderInstructorOverview(o);
-  renderSections(o);
-  $("#issueList").innerHTML = o.issues.length
-    ? o.issues.map(
-        (x) =>
-          `<div class="issue"><strong>Review required</strong><small>${esc(x)}</small></div>`,
-      )
-    : '<div class="issue good"><strong>No open alerts</strong><small>Capacity, room type, and instructor time checks passed.</small></div>';
-}
-function renderCalendar(o) {
-  const campus = $("#campusFilter").value;
-  const sections = o.sections.filter((x) => x.campus === campus);
-  const times = [
-    ...new Set(
-      state.inputs.slots
-        .filter((s) => s.campus === campus)
-        .map((s) => s.start)
-        .filter(Boolean),
-    ),
-  ].sort();
-  let html =
-    '<div class="calendar-grid"><div class="cal-head">Time</div>' +
-    DAYS.map(
-      (d) =>
-        `<div class="cal-head">${d.slice(0, 3)}${d === "Tuesday" ? "<small>Online</small>" : d === "Thursday" ? "<small>No classes</small>" : "<small>Campus</small>"}</div>`,
-    ).join("");
-  times.forEach((t) => {
-    html += `<div class="cal-time">${t}<br><small>${addMinutes(t, 50)}</small></div>`;
-    DAYS.forEach((d) => {
-      const hits =
-        d === "Thursday"
-          ? []
-          : sections.filter((x) => x.start === t && String(x.days).includes(d));
-      html += `<div class="cal-cell ${d === "Thursday" ? "day-off" : ""}">${hits.map((x) => `<div class="class-card ${String(x.campus).toLowerCase()} ${x.timeConflict ? "conflict-card" : ""}"><strong>${esc(x.code)} · S${x.section}</strong>${esc(x.instructor)}<br>${d === "Tuesday" ? "Online" : esc(x.room)}</div>`).join("")}</div>`;
-    });
-  });
-  html += "</div>";
-  $("#calendar").innerHTML = html;
-}
-function renderInstructorOverview(o) {
-  const campus = $("#campusFilter").value,
-    groups = {};
-  o.sections
-    .filter((x) => x.campus === campus)
-    .forEach((x) => (groups[x.instructor] ||= []).push(x));
-  $("#instructorOverview").innerHTML =
-    Object.entries(groups)
-      .map(
-        ([name, ss]) =>
-          `<div class="instructor-card ${ss.some((x) => x.timeConflict) ? "has-conflict" : ""}"><div><strong>${esc(name)}</strong><small>${[...new Set(ss.map((x) => x.code))].join(", ")}</small></div><b>${ss.length} section${ss.length === 1 ? "" : "s"}</b><div class="time-badges">${ss.map((x) => `<span class="time-badge ${x.timeConflict ? "conflict" : ""}">${esc(x.start || "TBA")} · ${esc(x.code)} S${x.section}</span>`).join("")}</div>${ss.some((x) => x.timeConflict) ? '<span class="conflict-tag">Time Conflict</span>' : ""}</div>`,
-      )
-      .join("") || '<p class="empty-state">No sections for this campus.</p>';
-}
-function renderSections(o) {
-  const campus = $("#campusFilter").value;
-  $("#sectionBody").innerHTML = o.sections
-    .map((x, i) => ({ ...x, _i: i }))
-    .filter((x) => x.campus === campus)
-    .map((x) => {
-      const faculty = state.inputs.faculty.filter((f) => f.campus === campus);
-      const slots = state.inputs.slots.filter(
-        (s) =>
-          s.campus === campus &&
-          (!isYes(
-            state.inputs.courses.find(
-              (c) => c.code === x.code && c.campus === campus,
-            )?.needs_lab,
-          ) ||
-            /lab|computer/i.test(`${s.room_type} ${s.room}`)) &&
-          num(s.room_capacity, 0) >= x.expected,
-      );
-      return `<tr class="${x.timeConflict ? "conflict-row" : ""}"><td><strong>${esc(x.code)}</strong><br><small>${esc(x.title)}</small></td><td>${x.section}</td><td>${esc(x.campus)}</td><td>${x.expected} / ${x.capacity}</td><td><select class="assignment-select" data-edit="instructor" data-index="${x._i}">${[...new Set(["TBA", ...faculty.map((f) => f.instructor)])].map((v) => `<option ${v === x.instructor ? "selected" : ""}>${esc(v)}</option>`).join("")}</select></td><td><select class="assignment-select" data-edit="slot" data-index="${x._i}"><option value="">TBA — manual room</option>${slots.map((s) => `<option value="${esc(s.slot_id)}" ${s.slot_id === x.slot_id ? "selected" : ""}>${esc(s.start)}–${esc(s.end)} · ${esc(s.room)} (${num(s.room_capacity)})</option>`).join("")}</select></td><td><span class="pill ${x.status === "Scheduled" || x.status === "Manually adjusted" ? "good" : x.status === "Chair review" ? "warn" : "bad"}">${esc(x.status)}</span></td></tr>`;
-    })
-    .join("");
-}
-function renderExport() {
-  const o = state.options[state.selectedOption] || {
-    sections: [],
-    manual: 0,
-    studentConflicts: 0,
-  };
-  $("#exportSummary").innerHTML = [
-    ["Term", state.term],
-    ["Courses", new Set(o.sections.map((x) => x.code)).size],
-    ["Sections", o.sections.length],
-    ["Alerts", o.issues?.length || 0],
-  ]
-    .map(
-      (x) =>
-        `<div class="summary-item"><span>${x[0]}</span><strong>${x[1]}</strong></div>`,
-    )
-    .join("");
-}
-
-function workbookFromState() {
-  const o = state.options[state.selectedOption];
-  const wb = XLSX.utils.book_new();
-  const requests = o.sections.map((x) => ({
-    "Course Code": x.code,
-    "Course Title": x.title,
-    Campus: x.campus,
-    Section: x.section,
-    "Expected Students": x.expected,
-    "Requested Capacity": x.capacity,
-    Days: x.days,
-    Start: x.start,
-    End: x.end,
-    "Suggested Instructor": x.instructor,
-    Room: x.room,
-    Status: x.status,
-  }));
-  const faculty = {};
-  o.sections.forEach((x) => {
-    if (x.instructor === "TBA") return;
-    (faculty[x.instructor] ||= []).push(x);
-  });
-  const facRows = Object.entries(faculty).map(([name, ss]) => ({
-    Instructor: name,
-    Courses: [...new Set(ss.map((x) => x.code))].join(", "),
-    "Total Sections": ss.length,
-    "Scheduled Times": ss.map((x) => `${x.days} ${x.start}`).join("; "),
-  }));
-  const issues = (o.issues || []).map((x, i) => ({
-    "#": i + 1,
-    Issue: x,
-    Owner: "Chair review",
-    Status: "Open",
-  }));
-  const summary = [
-    { Metric: "Term", Value: state.term },
-    { Metric: "Selected option", Value: o.name },
-    { Metric: "Courses", Value: new Set(o.sections.map((x) => x.code)).size },
-    { Metric: "Sections", Value: o.sections.length },
-    { Metric: "Response gap adjustment", Value: `${state.adjustment}%` },
-    { Metric: "Default capacity", Value: state.defaultCapacity },
-    { Metric: "Maximum capacity", Value: MAX_CAPACITY },
-    { Metric: "Likely student conflicts", Value: o.studentConflicts },
-    { Metric: "Manual scheduling", Value: o.manual },
-  ];
-  [
-    ["Section Requests", requests],
-    ["Faculty Schedule", facRows],
-    [
-      "Conflict Report",
-      issues.length ? issues : [{ Issue: "No open alerts", Status: "Clear" }],
-    ],
-    ["Summary", summary],
-  ].forEach(([n, r]) => {
-    const ws = XLSX.utils.json_to_sheet(r);
-    XLSX.utils.book_append_sheet(wb, ws, n);
-  });
-  return wb;
-}
-
-function templateWorkbook() {
-  const wb = XLSX.utils.book_new();
-  const sheets = {
-    OfferedCourses: [
-      {
-        code: "IS231",
-        title: "",
-        campus: "Male",
-        offer_status: "Yes",
-        base_demand: 40,
-        level: "Year 2",
-        needs_lab: "No",
-        required: "Yes",
-        external: "No",
-        fixed_slot: "",
-        pinned_slot: "",
-      },
-    ],
-    TimeSlots: [
-      {
-        slot_id: "Male-09:00",
-        days: "Auto",
-        start: "09:00",
-        end: "Auto",
-        campus: "Male",
-        room: "2-A01",
-        room_type: "Classroom",
-        room_capacity: 27,
-      },
-    ],
-    FacultyDirectory: [
-      {
-        instructor: "Dr. Name",
-        campus: "Male",
-        qualified_courses: "IS231, IS361",
-        preferred_slots: "",
-        unavailable_slots: "",
-        max_sections: 3,
-      },
-    ],
-    CourseCatalog: [
-      { code: "IS231", title: "Systems Analysis and Design", department: "IS" },
-    ],
-    Rules: [
-      { setting: "Default Capacity", value: 20 },
-      { setting: "Minimum Enrollment", value: 10 },
-      { setting: "Maximum Capacity", value: 27 },
-      { setting: "Sunday", value: "On Campus" },
-      { setting: "Monday", value: "On Campus" },
-      { setting: "Tuesday", value: "Online" },
-      { setting: "Wednesday", value: "On Campus" },
-      { setting: "Thursday", value: "No Classes" },
-      { setting: "Lecture Duration", value: "50 minutes" },
-      { setting: "Daily Break", value: "12:00–13:00" },
-      { setting: "Hard cutoff", value: "15:00" },
-    ],
-    Instructions: [
-      {
-        item: "First upload",
-        value:
-          "Save this workbook as ISP_Current_Private_Setup.xlsx and upload it first.",
-      },
-      {
-        item: "Offer?",
-        value:
-          "Set offer_status to Yes only for courses proposed in this term.",
-      },
-      {
-        item: "Pinned slots",
-        value: "Use fixed_slot or pinned_slot with an exact TimeSlots slot_id.",
-      },
-      {
-        item: "Optional data",
-        value:
-          "StudentResponses and FacultyResponses may be included here or uploaded separately.",
-      },
-      {
-        item: "Privacy",
-        value:
-          "The browser processes this file locally; do not publish it to GitHub.",
-      },
-    ],
-  };
-  Object.entries(sheets).forEach(([n, r]) =>
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(r), n),
-  );
-  return wb;
-}
-function demoWorkbook() {
-  const wb = XLSX.utils.book_new();
-  const sheets = {
-    OfferedCourses: demo.courses,
-    TimeSlots: demo.slots,
-    FacultyDirectory: demo.faculty,
-    CourseCatalog: [
-      ...new Map(
-        demo.courses.map((c) => [
-          c.code,
-          {
-            code: c.code,
-            title: c.title,
-            department: c.code.replace(/\d/g, ""),
-          },
-        ]),
-      ).values(),
-    ],
-    Rules: [
-      { setting: "Default Capacity", value: 20 },
-      { setting: "Minimum Enrollment", value: 10 },
-      { setting: "Maximum Capacity", value: 27 },
-      { setting: "Sunday", value: "On Campus" },
-      { setting: "Monday", value: "On Campus" },
-      { setting: "Tuesday", value: "Online" },
-      { setting: "Wednesday", value: "On Campus" },
-      { setting: "Thursday", value: "No Classes" },
-      { setting: "Lecture Duration", value: "50 minutes" },
-      { setting: "Daily Break", value: "12:00–13:00" },
-    ],
-    StudentResponses: demo.students,
-    FacultyResponses: demo.faculty,
-  };
-  Object.entries(sheets).forEach(([n, r]) =>
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(r), n),
-  );
-  return wb;
-}
-
-async function deriveKey(password, salt) {
-  const enc = new TextEncoder();
-  const material = await crypto.subtle.importKey(
-    "raw",
-    enc.encode(password),
-    "PBKDF2",
-    false,
-    ["deriveKey"],
-  );
-  return crypto.subtle.deriveKey(
-    { name: "PBKDF2", salt, iterations: 150000, hash: "SHA-256" },
-    material,
-    { name: "AES-GCM", length: 256 },
-    false,
-    ["encrypt", "decrypt"],
-  );
-}
-async function encryptProject(password) {
-  const salt = crypto.getRandomValues(new Uint8Array(16)),
-    iv = crypto.getRandomValues(new Uint8Array(12)),
-    key = await deriveKey(password, salt),
-    plain = new TextEncoder().encode(
-      JSON.stringify({ ...state, savedAt: new Date().toISOString() }),
-    ),
-    cipher = new Uint8Array(
-      await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, plain),
-    );
-  return new Blob(
-    [
-      JSON.stringify({
-        format: "ISP1",
-        salt: Array.from(salt),
-        iv: Array.from(iv),
-        data: Array.from(cipher),
-      }),
-    ],
-    { type: "application/json" },
-  );
-}
-async function decryptProject(bytes, password) {
-  const obj = JSON.parse(new TextDecoder().decode(bytes));
-  if (obj.format !== "ISP1") throw new Error("Unsupported project file.");
-  const key = await deriveKey(password, new Uint8Array(obj.salt));
-  const plain = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv: new Uint8Array(obj.iv) },
-    key,
-    new Uint8Array(obj.data),
-  );
-  return JSON.parse(new TextDecoder().decode(plain));
-}
-function openModal(mode) {
-  modalMode = mode;
-  $("#passwordModal").hidden = false;
-  $("#projectPassword").value = "";
-  $("#modalError").textContent = "";
-  $("#modalTitle").textContent =
-    mode === "save" ? "Protect your project" : "Unlock your project";
-  $("#modalText").textContent =
-    mode === "save"
-      ? "Enter a password. You will need it to resume this project."
-      : "Enter the password used when this project was saved.";
-  $("#projectPassword").focus();
-}
-function closeModal() {
-  $("#passwordModal").hidden = true;
-  pendingProjectBytes = null;
-}
-
-$$(".upload input").forEach((inp) =>
-  inp.addEventListener("change", async (e) => {
-    const wrap = e.target.closest(".upload"),
-      kind = wrap.dataset.kind,
-      file = e.target.files[0];
-    if (!file) return;
+  async function readFile(kind) {
+    const f = S.files[kind];
+    R.err[kind] = null;
+    if (!f) { R.wb[kind] = null; R.sheets[kind] = null; return; }
     try {
-      const rows = await readWorkbook(file, kind);
-      if (kind === "setup") {
-        state.inputs.courses = rows.courses;
-        state.inputs.slots = rows.slots;
-        if (rows.faculty.length) state.inputs.faculty = rows.faculty;
-        if (rows.students.length) state.inputs.students = rows.students;
-        state.defaultCapacity = Math.max(
-          10,
-          Math.min(
-            MAX_CAPACITY,
-            num(rows.settings.default_capacity, state.defaultCapacity),
-          ),
-        );
-        $("#defaultCapacity").value = state.defaultCapacity;
-      } else state.inputs[kind] = rows;
-      state.filenames[kind] = file.name;
-      state.approved = false;
-      state.options = [];
-      updateInputs();
-      autosave();
-      toast(
-        `${kind === "setup" ? "Semester setup" : kind[0].toUpperCase() + kind.slice(1)} loaded successfully`,
-      );
-    } catch (err) {
-      toast(err.message);
-      e.target.value = "";
+      R.wb[kind] = await loadWb(f.b64);
+      R.sheets[kind] = E.sheetsFromExcelJS(R.wb[kind]);
+      if (!f.sheet || !R.sheets[kind].some((s) => s.name === f.sheet)) f.sheet = guessSheet(kind, R.sheets[kind]);
+    } catch (e) { R.err[kind] = 'badFile'; R.wb[kind] = null; R.sheets[kind] = null; }
+  }
+  function parseAll() {
+    // official
+    R.off = null; R.notes = {};
+    if (R.sheets.official && !R.err.official) {
+      try { R.off = E.parseOfficial(R.sheets.official, S.files.official.sheet); R.notes = E.officialNotes(R.off); }
+      catch (e) { R.err.official = 'notOfficial'; }
     }
-  }),
-);
-$("#termInput").addEventListener("input", (e) => {
-  state.term = e.target.value.trim();
-  updateTop();
-  updateInputs();
-  autosave();
-});
-$("#defaultCapacity").addEventListener("change", (e) => {
-  state.defaultCapacity = Math.max(
-    10,
-    Math.min(MAX_CAPACITY, num(e.target.value, 20)),
-  );
-  e.target.value = state.defaultCapacity;
-  state.approved = false;
-  state.options = [];
-  autosave();
-});
-$("#demoBtn").addEventListener("click", () => {
-  state.inputs = structuredClone(demo);
-  state.filenames = {
-    setup: "Demo Semester Setup.xlsx",
-    faculty: "Built-in IS faculty",
-    students: "Demo Student Responses.xlsx",
-  };
-  state.term = $("#termInput").value.trim() || "Demo";
-  $("#termInput").value = state.term;
-  state.included = {};
-  demo.courses
-    .filter((c) => !isYes(c.external))
-    .forEach((c) => (state.included[courseKey(c)] = true));
-  state.capacities = {};
-  state.approved = false;
-  state.options = [];
-  updateInputs();
-  updateTop();
-  autosave();
-  toast("Demo workspace loaded");
-});
-$("#templateBtn").addEventListener("click", () => {
-  if (!window.XLSX) return toast("Excel tools are still loading");
-  XLSX.writeFile(templateWorkbook(), "ISP_Semester_Setup_Template.xlsx");
-});
-$("#demoFileBtn").addEventListener("click", () => {
-  if (!window.XLSX) return toast("Excel tools are still loading");
-  XLSX.writeFile(demoWorkbook(), "ISP_Demo_Input.xlsx");
-});
-$("#toDemandBtn").addEventListener("click", () => {
-  state.term = $("#termInput").value.trim();
-  showStep(2);
-});
-$("#adjustment").addEventListener("input", (e) => {
-  state.adjustment = num(e.target.value);
-  state.approved = false;
-  state.options = [];
-  renderDemand();
-  autosave();
-});
-$("#demandCampus").addEventListener("change", renderDemand);
-$("#offeringCampus").addEventListener("change", renderOffering);
-$("#aiRecommendBtn").addEventListener("click", () => {
-  state.adjustment = recommendedAdjustment();
-  state.approved = false;
-  state.options = [];
-  renderDemand();
-  toast(`Recommended adjustment applied: +${state.adjustment}%`);
-});
-$("#demandBody").addEventListener("change", (e) => {
-  if (!e.target.matches("[data-cap]")) return;
-  const v = Math.max(
-    10,
-    Math.min(MAX_CAPACITY, num(e.target.value, state.defaultCapacity)),
-  );
-  state.capacities[e.target.dataset.cap] = v;
-  e.target.value = v;
-  state.approved = false;
-  state.options = [];
-  renderDemand();
-  autosave();
-});
-$("#offeringBody").addEventListener("change", (e) => {
-  if (e.target.matches(".offer-check")) {
-    state.included[e.target.dataset.course] = e.target.checked;
-    state.approved = false;
-    renderOffering();
-    autosave();
+    // current
+    R.cur = null; R.curScore = {};
+    if (R.sheets.current && !R.err.current) {
+      try {
+        R.cur = E.parseCurrent(R.sheets.current, S.files.current.sheet);
+        const names = R.cur.rows.filter((r) => r.kind === 'member').map((r) => r.name);
+        const auto = E.matchNames(names, S.members);
+        names.forEach((n) => { R.curScore[n] = auto[n] ? auto[n].score : 0; if (!(n in S.currentMap)) S.currentMap[n] = auto[n] ? auto[n].id : ''; });
+      } catch (e) { R.err.current = 'notCurrent'; }
+    }
+    // preferences
+    R.prefs = null; R.prefScore = {};
+    if (R.sheets.prefs && !R.err.prefs) {
+      try {
+        R.prefs = E.parsePrefs(R.sheets.prefs, S.files.prefs.sheet);
+        const list = R.prefs.list;
+        const auto = E.matchNames(list.map((p) => p.name), S.members, 0.55, (i) => list[i].email);
+        list.forEach((p) => { R.prefScore[p.name] = auto[p.name] ? auto[p.name].score : 0; if (!(p.name in S.prefsMap)) S.prefsMap[p.name] = auto[p.name] ? auto[p.name].id : ''; });
+        applyPrefs();
+      } catch (e) { R.err.prefs = 'notPrefs'; }
+    }
+    // course defaults for courses the user has not changed
+    if (R.off) {
+      const def = E.defaultCourseSettings(R.off, R.cur, D.COURSES[S.side] || {});
+      Object.entries(def).forEach(([code, v]) => { if (!S.courseTouched[code] || !S.courses[code]) S.courses[code] = Object.assign({}, S.courses[code] || {}, v); });
+    }
   }
-});
-$("#selectAllBtn").addEventListener("click", () => {
-  state.inputs.courses
-    .filter((c) => !isYes(c.external))
-    .forEach((c) => (state.included[courseKey(c)] = true));
-  state.approved = false;
-  renderOffering();
-  autosave();
-});
-$("#approveBtn").addEventListener("click", () => {
-  state.approved = !state.approved;
-  state.options = [];
-  renderOffering();
-  toast(
-    state.approved ? "Course offering approved" : "Course offering unlocked",
-  );
-});
-$("#generateBtn").addEventListener("click", () => {
-  buildOptions();
-  showStep(4);
-  toast("Three schedule options generated");
-});
-$("#rebuildBtn").addEventListener("click", () => {
-  buildOptions();
-  renderSchedules();
-  toast("Schedule options rebuilt");
-});
-$("#optionTabs").addEventListener("click", (e) => {
-  const b = e.target.closest("[data-option]");
-  if (b) {
-    state.selectedOption = num(b.dataset.option);
-    renderSchedules();
-    autosave();
+  function applyPrefs() {
+    if (!R.prefs) return;
+    S.members.forEach((m) => { if (m.fromPrefs) { m.prefs = ['', '', '']; m.comment = ''; if (!m.prefTimeTouched) m.prefTime = 'any'; m.fromPrefs = false; } });
+    R.prefs.list.forEach((p) => {
+      const m = memberById(S.prefsMap[p.name]); if (!m) return;
+      m.prefs = p.prefs.slice(); m.comment = [p.comment, p.supervise ? `Supervise: ${p.supervise}` : ''].filter(Boolean).join(' | ');
+      if (!m.prefTimeTouched) m.prefTime = p.time; m.fromPrefs = true;
+    });
   }
-});
-$("#campusFilter").addEventListener("change", renderSchedules);
-$("#sectionBody").addEventListener("change", (e) => {
-  const index = num(e.target.dataset.index, -1),
-    o = state.options[state.selectedOption],
-    section = o?.sections[index];
-  if (!section) return;
-  if (e.target.dataset.edit === "instructor")
-    section.instructor = e.target.value;
-  if (e.target.dataset.edit === "slot") {
-    const s = state.inputs.slots.find((x) => x.slot_id === e.target.value);
-    if (s)
-      Object.assign(section, {
-        slot_id: s.slot_id,
-        time_key: `${s.days}|${s.start}|${s.end}`,
-        days: s.days,
-        start: s.start,
-        end: s.end,
-        room: s.room,
-      });
-    else
-      Object.assign(section, {
-        slot_id: "",
-        time_key: "",
-        days: "TBA",
-        start: "",
-        end: "",
-        room: "TBA",
-      });
+  async function reparseAll() { for (const k of ['official', 'current', 'prefs']) await readFile(k); parseAll(); }
+  function currentFor() {
+    const out = {};
+    if (R.cur) R.cur.rows.forEach((r) => { if (r.kind === 'member' && S.currentMap[r.name]) out[S.currentMap[r.name]] = (out[S.currentMap[r.name]] || []).concat(r.items); });
+    else if (S.baseline) Object.entries(S.baseline).forEach(([id, items]) => { if (memberById(id)) out[id] = items; });
+    return out;
   }
-  section.manualOverride = true;
-  refreshOption(o);
-  autosave();
-  renderSchedules();
-  toast("Section updated and conflicts rechecked");
-});
-$("#addSectionBtn").addEventListener("click", () => {
-  const o = state.options[state.selectedOption],
-    campus = $("#campusFilter").value,
-    courses = state.inputs.courses.filter(
-      (c) =>
-        c.campus === campus &&
-        !isYes(c.external) &&
-        state.included[courseKey(c)] !== false,
-    );
-  if (!courses.length)
-    return toast("No approved courses are available for this campus.");
-  const code = prompt(
-    `Course code for the new ${campus} section:`,
-    courses[0].code,
-  );
-  if (!code) return;
-  const c = courses.find(
-    (x) => x.code.toUpperCase() === code.trim().toUpperCase(),
-  );
-  if (!c) return toast("Choose an approved course code.");
-  const expected = Math.max(
-    1,
-    Math.min(
-      MAX_CAPACITY,
-      num(prompt("Expected students (maximum 27):", "20"), 20),
-    ),
-  );
-  const next =
-    Math.max(
-      0,
-      ...o.sections
-        .filter((x) => x.code === c.code && x.campus === campus)
-        .map((x) => x.section),
-    ) + 1;
-  o.sections.push({
-    code: c.code,
-    title: c.title,
-    campus,
-    section: next,
-    expected,
-    capacity: capacity(c),
-    slot_id: "",
-    time_key: "",
-    days: "TBA",
-    start: "",
-    end: "",
-    instructor: "TBA",
-    room: "TBA",
-    status: "Needs Manual Room Assignment",
-    manualOverride: true,
-  });
-  refreshOption(o);
-  autosave();
-  renderSchedules();
-  toast("Manual section added. Assign its instructor and room.");
-});
-$("#exportExcelBtn").addEventListener("click", () => {
-  if (!window.XLSX) return toast("Excel tools are still loading");
-  XLSX.writeFile(
-    workbookFromState(),
-    `ISP_Term_${state.term || "Plan"}_Registration.xlsx`,
-  );
-  toast("Registration workbook exported");
-});
-$("#saveBtn").addEventListener("click", () => openModal("save"));
-$("#saveProjectBtn").addEventListener("click", () => openModal("save"));
-$("#resumeBtn").addEventListener("click", () => $("#projectFile").click());
-$("#projectFile").addEventListener("change", async (e) => {
-  const f = e.target.files[0];
-  if (!f) return;
-  pendingProjectBytes = new Uint8Array(await f.arrayBuffer());
-  openModal("load");
-  e.target.value = "";
-});
-$("#modalConfirm").addEventListener("click", async () => {
-  const pw = $("#projectPassword").value;
-  if (pw.length < 6) {
-    $("#modalError").textContent = "Use at least 6 characters.";
-    return;
+
+  // ---------------- model ----------------
+  function model() { return R.off ? E.buildModel(R.off, { courses: S.courses, secCat: S.secCat, proposed: S.proposed, members: S.members }) : {}; }
+  function effAssign(secs) {
+    const out = {}, ids = new Set(S.members.map((m) => m.id));
+    Object.values(secs).forEach((s) => {
+      const k = s.key, pin = S.pins[k];
+      if (pin && ids.has(pin)) { out[k] = pin; return; }
+      if (s.cat === 'parttime') { out[k] = 'PT'; return; }
+      if (s.cat === 'onhold') { out[k] = 'HOLD'; return; }
+      if (s.cat === 'none') return;
+      const a = S.assign[k]; if (a && ids.has(a)) out[k] = a;
+    });
+    return out;
   }
-  try {
-    if (modalMode === "save") {
-      const blob = await encryptProject(pw);
-      download(blob, `ISP_Term_${state.term || "Project"}.isp`);
-      closeModal();
-      toast("Encrypted project saved");
+  const allRows = () => S.members.concat([{ id: 'PT', name: 'Part-timers', pseudo: true }, { id: 'HOLD', name: 'ON-Hold', pseudo: true }]);
+  function snapshot() {
+    const secs = model();
+    const assign = effAssign(secs);
+    const ev = E.evaluate(secs, allRows(), assign, S.msc);
+    return { secs, assign, ev };
+  }
+  const sig = (keys) => keys.slice().sort().join('|');
+
+  // ---------------- proposal ----------------
+  function runPropose(extra) {
+    const secs = model();
+    const locked = {}; S.members.forEach((m) => { if (S.decisions[m.id] === 'final') locked[m.id] = true; });
+    const cur = effAssign(secs);
+    const start = {}; Object.entries(cur).forEach(([k, v]) => { if (memberById(v)) start[k] = v; });
+    const pins = {}; Object.entries(S.pins).forEach(([k, v]) => { if (memberById(v) && secs[k]) pins[k] = v; });
+    return E.propose(Object.assign({ members: S.members, secs, current: currentFor(), pins, bans: S.bans, locked, start, startHours: S.proposed, msc: S.msc, forbidden: S.forbidden, iterations: 40000, restarts: 4, seed: 262 }, extra || {}));
+  }
+  function applyResult(res) {
+    S.assign = Object.assign({}, res.assign);
+    Object.keys(S.autoTime).forEach((k) => { if (!res.hours[k] && !res.assign[k]) { delete S.proposed[k]; delete S.autoTime[k]; } });
+    Object.entries(res.hours).forEach(([k, h]) => { S.proposed[k] = h; S.autoTime[k] = true; });
+  }
+  function build(fresh) {
+    if (!R.off) return;
+    ui.building = true; render();
+    setTimeout(() => {
+      if (fresh) Object.keys(S.autoTime).forEach((k) => { if (!S.pins[k]) { delete S.proposed[k]; delete S.autoTime[k]; } });
+      const res = runPropose();
+      applyResult(res);
+      S.built = true; ui.building = false; ui.alts = {}; persist(); render();
+    }, 30);
+  }
+  function alternatives(mid) {
+    ui.altBusy = mid; render();
+    setTimeout(() => {
+      const secs = model(); const cur = effAssign(secs);
+      const mine = Object.keys(cur).filter((k) => cur[k] === mid);
+      const forb = JSON.parse(JSON.stringify(S.forbidden || {}));
+      forb[mid] = (forb[mid] || []).concat([sig(mine)]);
+      const pins = {}; Object.entries(S.pins).forEach(([k, v]) => { if (v !== mid && memberById(v)) pins[k] = v; });
+      const opts = [];
+      for (let i = 0; i < 2; i++) {
+        const res = runPropose({ forbidden: forb, pins, startAll: true, stability: 14, t0: 25, restarts: 2, iterations: 30000, seed: 1000 + i * 17 });
+        const theirs = Object.keys(res.assign).filter((k) => res.assign[k] === mid);
+        if (forb[mid].includes(sig(theirs))) break;
+        forb[mid].push(sig(theirs));
+        // changes vs current
+        const changes = {};
+        const before = {}; Object.entries(cur).forEach(([k, v]) => { if (memberById(v)) (before[v] = before[v] || []).push(k); });
+        const after = {}; Object.entries(res.assign).forEach(([k, v]) => { (after[v] = after[v] || []).push(k); });
+        S.members.forEach((m) => {
+          const b = before[m.id] || [], a = after[m.id] || [];
+          const add = a.filter((k) => !b.includes(k)), rem = b.filter((k) => !a.includes(k));
+          if (add.length || rem.length) changes[m.id] = { add, rem };
+        });
+        // problems this alternative would create
+        const secs2 = model(); Object.entries(res.hours).forEach(([k, h]) => { if (secs2[k]) { secs2[k].hour = h; secs2[k].proposed = true; } });
+        const ev2 = E.evaluate(secs2, S.members, res.assign, S.msc);
+        const evNow = E.evaluate(model(), S.members, Object.fromEntries(Object.entries(cur).filter(([, v]) => memberById(v))), S.msc);
+        const key = (i) => [i.type, i.member || '', i.a || '', i.b || ''].join('|');
+        const nowKeys = new Set(evNow.issues.map(key));
+        const fresh = ev2.issues.filter((i) => !nowKeys.has(key(i)));
+        opts.push({ res, changes, hours: res.hours, fresh });
+      }
+      ui.alts[mid] = { opts, forb: forb[mid] };
+      ui.altBusy = null; render();
+    }, 30);
+  }
+
+  // ---------------- rendering ----------------
+  function setLangAttrs() {
+    document.documentElement.lang = S.lang; document.documentElement.dir = S.lang === 'ar' ? 'rtl' : 'ltr';
+    $('#langBtn').textContent = t('lang');
+    document.querySelectorAll('[data-t]').forEach((el) => { el.textContent = t(el.dataset.t); });
+  }
+  function canReach(step) {
+    if (step <= 1) return true;
+    if (!S.side || !S.term) return false;
+    if (step === 2) return true;
+    if (!R.off || !(R.cur || S.baseline)) return false;
+    return true;
+  }
+  function render() {
+    setLangAttrs();
+    const chip = $('#projectChip');
+    chip.hidden = !S.side; chip.textContent = S.side ? `${sideLabel()} ${S.term}` : '';
+    $('#saveBtn').hidden = !S.side;
+    const st = $('#stepper');
+    st.hidden = !S.side;
+    if (S.side) {
+      st.innerHTML = L().steps.map((name, i) => {
+        const n = i + 1, cls = n === S.step ? 'on' : n < S.step && canReach(n) ? 'done' : '';
+        return `${i ? '<span class="sep"></span>' : ''}<button type="button" class="${cls}" data-act="go" data-step="${n}" ${canReach(n) ? '' : 'disabled'}><b>${n < S.step && canReach(n) ? '✓' : n}</b><span>${esc(name)}</span></button>`;
+      }).join('');
+    }
+    main.classList.toggle('wide', S.step === 4);
+    const views = { 1: viewStart, 2: viewFiles, 3: viewSettings, 4: viewProposal, 5: viewExport };
+    main.innerHTML = (views[S.step] || viewStart)() + footNav();
+  }
+  function footNav() {
+    if (S.step === 1) return '';
+    const nextOk = canReach(S.step + 1);
+    let msg = '';
+    if (S.step === 2 && !nextOk) msg = !R.off ? t('needOfficial') : t('needCurrent');
+    return `<div class="foot-nav"><button class="btn" type="button" data-act="go" data-step="${S.step - 1}">${S.lang === 'ar' ? '→' : '←'} ${esc(t('back'))}</button><span class="msg">${esc(msg)}</span>${S.step < 5 ? `<button class="btn primary" type="button" data-act="go" data-step="${S.step + 1}" ${nextOk ? '' : 'disabled'}>${esc(t('next'))} ${S.lang === 'ar' ? '←' : '→'}</button>` : '<span></span>'}</div>`;
+  }
+
+  // ---- step 1: start ----
+  function strip() {
+    const lanes = [
+      ['Dr. A', { 8: 'IS205', 9: 'IS205', 10: 'IS241', 11: 'IS241' }],
+      ['Dr. B', { 13: 'IS371', 14: 'IS371', 15: 'IS371' }],
+      ['Dr. C', { 10: 'IS201', 13: 'IS361', 14: 'IS361', 16: 'IS466' }],
+    ];
+    let d = 0;
+    const hrs = E.HOURS.slice(0, 4).map((h) => `<span>${hl(h)}</span>`).join('') + '<span></span>' + E.HOURS.slice(4).map((h) => `<span>${hl(h)}</span>`).join('');
+    return `<div class="strip" aria-hidden="true"><div class="hrs">${hrs}</div>${lanes.map(([who, map]) => `<p class="who">${who}</p><div class="lane">${[8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18].map((h) => {
+      if (h === 12) return '<span class="brk"></span>';
+      const c = map[h];
+      return c ? `<span class="fill" style="background:${colour(c)};animation-delay:${(d++) * 70}ms">${c}</span>` : '<span></span>';
+    }).join('')}</div>`).join('')}</div>`;
+  }
+  function mini(head, rows, cap) {
+    return `<figure class="mini" style="margin:0"><table><tr>${head.map((h) => `<th>${esc(h)}</th>`).join('')}</tr>${rows.map((r) => `<tr>${r.map((c) => `<td class="${/^[A-Z]{2,4}\d{3}/.test(c) ? 'c' : ''}">${esc(c)}</td>`).join('')}</tr>`).join('')}</table><figcaption>${esc(cap)}</figcaption></figure>`;
+  }
+  function viewStart() {
+    const saved = S0();
+    const hasAuto = saved && saved.side && saved.app === 'isp-timetable' && !S.side;
+    const pick = ui.pickSide || S.side;
+    return `
+    <section class="hero">
+      <div><h1>${esc(t('heroTitle'))}</h1><p>${esc(t('heroText'))}</p></div>
+      ${strip()}
+    </section>
+    <section class="start-grid">
+      <div class="panel">
+        <h2>${esc(t('newProject'))}</h2>
+        <p class="sub">${esc(t('chooseSide'))}</p>
+        <div class="side-pick">
+          <button type="button" data-act="pick" data-side="male" aria-pressed="${pick === 'male'}">${esc(TXT.ar.male)}<small>Male</small></button>
+          <button type="button" data-act="pick" data-side="female" aria-pressed="${pick === 'female'}">${esc(TXT.ar.female)}<small>Female</small></button>
+        </div>
+        <div class="row" style="align-items:flex-end">
+          <div class="field grow"><label for="termIn">${esc(t('termLabel'))}</label><input id="termIn" class="input" inputmode="numeric" placeholder="${esc(t('termPh'))}" value="${esc(ui.termDraft != null ? ui.termDraft : S.term)}"></div>
+          <button class="btn primary big" type="button" data-act="start" ${pick ? '' : 'disabled'}>${esc(t('startBtn'))}</button>
+        </div>
+      </div>
+      <div class="panel resume-box">
+        <h2>${esc(t('resumeTitle'))}</h2>
+        <p class="sub" style="margin:0">${esc(t('resumeText'))}</p>
+        <button class="btn" type="button" data-act="openProject">${esc(t('open'))}</button>
+        ${hasAuto ? `<div class="autosave"><span>${esc(t('resumeAuto'))}: <b>${esc((saved.side === 'female' ? t('female') : t('male')) + ' ' + (saved.term || ''))}</b></span><button class="btn small" type="button" data-act="resumeAuto">${esc(t('resumeAutoBtn'))}</button></div>` : ''}
+      </div>
+    </section>
+    <section class="need">
+      <h2>${esc(t('needTitle'))}</h2>
+      <p>${esc(t('needIntro'))}</p>
+      <div class="files3">
+        <article class="fcard"><h3>${esc(t('f1Title'))}<span class="tag">${esc(t('f1Req'))}</span></h3><p><strong>${esc(t('f1From'))}</strong></p><p>${esc(t('f1Has'))}</p>
+          ${mini(['SECTION', 'COURSE', 'ACTIVITY', 'START', 'DAYS', 'ROOMS'], [['498', 'IS201', 'Lecture', '10:00 AM', '1 2 4', 'G-A12'], ['499', 'IS201', 'Tutorial', '10:00 AM', '3', 'Online']], t('sampleRow') + ': IS sheet')}</article>
+        <article class="fcard"><h3>${esc(t('f2Title'))}<span class="tag">${esc(t('f2Req'))}</span></h3><p><strong>${esc(t('f2From'))}</strong></p><p>${esc(t('f2Has'))}</p>
+          ${mini(['', '8', '9', '10', '11', '1', '2'], [['Dr. A', '', 'IS205(L)', 'IS241(L)', '', '', ''], ['Dr. B', '', '', '', '', 'IS371(L)', 'IS371(L)']], t('sampleRow') + ': 261 timetable')}</article>
+        <article class="fcard"><h3>${esc(t('f3Title'))}<span class="tag opt">${esc(t('f3Req'))}</span></h3><p><strong>${esc(t('f3From'))}</strong></p><p>${esc(t('f3Has'))}</p>
+          ${mini(['Full name', 'First preferred', 'Second', 'Third', 'Class time'], [['Dr. A', 'IS241', 'IS205', 'IS231', 'Morning']], t('sampleRow') + ': Form Responses 1')}</article>
+      </div>
+    </section>
+    <section class="how">
+      <div class="panel"><h2>${esc(t('howTitle'))}</h2><ol style="margin-top:14px">${L().how.map(([a, b]) => `<li><div><strong>${esc(a)}</strong><span>${esc(b)}</span></div></li>`).join('')}</ol></div>
+      <div class="panel"><h2>${esc(t('rulesTitle'))}</h2><div class="rules">${L().rules.map((r) => `<span>${esc(r)}</span>`).join('')}</div><p class="privacy">${esc(t('privacy'))}</p></div>
+    </section>`;
+  }
+
+  // ---- step 2: files ----
+  function uploadBlock(kind, n, title, tag, hint) {
+    const f = S.files[kind];
+    const err = R.err[kind];
+    let body = '';
+    if (!f) {
+      body = `<label class="drop" data-drop="${kind}"><input type="file" accept=".xlsx,.xlsm" data-file="${kind}" hidden>${esc(t('drop'))}</label>`;
     } else {
-      state = await decryptProject(pendingProjectBytes, pw);
-      closeModal();
-      hydrate();
-      showStep(state.step || 1);
-      toast("Project resumed successfully");
+      const sheets = R.sheets[kind] || [];
+      let sum = '';
+      if (kind === 'official' && R.off) { const lec = R.off.lectures.length, c = Object.keys(R.off.courses).length, u = R.off.lectures.filter((k) => R.off.sections[k].hour == null).length; sum = t('offSummary', lec, c, u); }
+      if (kind === 'current' && R.cur) { const rows = R.cur.rows.filter((r) => r.kind === 'member'); sum = t('curSummary', rows.length, rows.filter((r) => S.currentMap[r.name]).length); }
+      if (kind === 'prefs' && R.prefs) sum = t('prefSummary', R.prefs.list.length, R.prefs.list.filter((p) => S.prefsMap[p.name]).length);
+      body = `<div class="loaded"><span class="fname">${esc(f.name)}</span>
+        ${sheets.length > 1 ? `<label class="small muted">${esc(t('sheet'))} <select class="input" data-chg="sheet" data-kind="${kind}">${sheets.map((s) => `<option ${s.name === f.sheet ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label>` : ''}
+        <span class="sum">${esc(sum)}</span><span class="grow"></span>
+        <label class="btn small"><input type="file" accept=".xlsx,.xlsm" data-file="${kind}" hidden>${esc(t('replace'))}</label>
+        <button class="btn small danger" type="button" data-act="rmFile" data-kind="${kind}">${esc(t('remove'))}</button></div>
+        ${err ? `<p class="err">${esc(t(err))}</p>` : ''}`;
+      if (kind === 'official' && R.off) {
+        const nk = Object.keys(R.notes); const total = nk.reduce((a, k) => a + R.notes[k].length, 0);
+        if (total) body += `<details class="notes"><summary>${esc(t('notesFound', total))}</summary><ul>${nk.map((k) => R.notes[k].map((x) => `<li><b>${esc(k)}</b>: ${esc(x.text)}</li>`).join('')).join('')}</ul></details>`;
+      }
+      if (kind === 'current' && R.cur) body += matchTable('current');
+      if (kind === 'prefs' && R.prefs) body += matchTable('prefs');
     }
-  } catch (e) {
-    $("#modalError").textContent =
-      "The password is incorrect or the file is invalid.";
+    if (kind === 'current' && !f && S.baseline) body += `<p class="ok-text small" style="margin-top:8px">${esc(t('baselineOn'))}</p>`;
+    const ok = (kind === 'official' && R.off) || (kind === 'current' && (R.cur || (!f && S.baseline))) || (kind === 'prefs' && R.prefs);
+    return `<div class="upl ${ok ? 'ok' : ''}"><span class="num">${ok ? '✓' : n}</span><div><h3>${esc(title)} <span class="tag ${kind === 'prefs' ? 'opt' : ''}">${esc(tag)}</span></h3><p class="hint">${esc(hint)}</p>${body}</div></div>`;
   }
-});
-$$(".modal-close,.modal-cancel").forEach((b) =>
-  b.addEventListener("click", closeModal),
-);
-$$("[data-back]").forEach((b) =>
-  b.addEventListener("click", () => showStep(num(b.dataset.back))),
-);
-$$("[data-next]").forEach((b) =>
-  b.addEventListener("click", () => showStep(num(b.dataset.next))),
-);
-$$(".step").forEach((b) =>
-  b.addEventListener("click", () => {
-    const n = num(b.dataset.step);
-    if (
-      n === 1 ||
-      (n <= 3 && state.inputs.courses.length) ||
-      (n === 4 && state.approved) ||
-      (n === 5 && state.options.length)
-    )
-      showStep(n);
-    else
-      toast(
-        n >= 4
-          ? "Approve the offering and build schedule options first."
-          : "Load the planning inputs first.",
-      );
-  }),
-);
-$("#newProjectBtn").addEventListener("click", () => {
-  if (
-    confirm(
-      "Start a new project? Download your current project first if you need it.",
-    )
-  ) {
-    localStorage.removeItem("isp_autosave");
-    location.reload();
+  function matchTable(kind) {
+    const rows = kind === 'current' ? R.cur.rows : R.prefs.list.map((p) => ({ name: p.name, kind: 'member' }));
+    const map = kind === 'current' ? S.currentMap : S.prefsMap, score = kind === 'current' ? R.curScore : R.prefScore;
+    const used = new Set(Object.values(map).filter(Boolean));
+    const missing = S.members.filter((m) => !used.has(m.id));
+    const opts = (sel) => `<option value="">${esc(t('notMember'))}</option>` + S.members.map((m) => `<option value="${m.id}" ${m.id === sel ? 'selected' : ''}>${esc(m.name)}</option>`).join('');
+    return `<details class="notes" ${rows.some((r) => r.kind === 'member' && (!map[r.name] || (score[r.name] || 0) < 0.9)) ? 'open' : ''}><summary>${esc(t('matchTitle'))}</summary><p class="small muted" style="margin-top:6px">${esc(t('matchText'))}</p>
+      <table class="match">${rows.map((r) => {
+        if (r.kind !== 'member') return `<tr><td>${esc(r.name)}</td><td class="muted">${esc(r.kind === 'parttime' ? t('partRow') : t('holdRow'))}</td></tr>`;
+        const sel = map[r.name] || '';
+        const unsure = !sel || (score[r.name] || 0) < 0.9;
+        return `<tr class="${unsure ? 'unsure' : ''}"><td>${esc(r.name)}</td><td><select class="input" data-chg="map" data-kind="${kind}" data-name="${esc(r.name)}">${opts(sel)}</select></td></tr>`;
+      }).join('')}</table>
+      ${missing.length ? `<p class="small muted" style="margin-top:8px">${S.lang === 'ar' ? 'أعضاء بلا صف في هذا الملف' : 'Members with no row in this file'}: <span dir="ltr">${missing.map((m) => esc(m.name)).join(', ')}</span></p>` : ''}</details>`;
   }
-});
-function hydrate() {
-  $("#termInput").value = state.term || "";
-  $("#defaultCapacity").value = state.defaultCapacity || 20;
-  updateInputs();
-  updateTop();
-}
-(function init() {
-  try {
-    const saved = JSON.parse(localStorage.getItem("isp_autosave"));
-    if (saved && saved.inputs?.courses?.length) {
-      state = saved;
-      hydrate();
-      toast(
-        "A local draft is available. Use Resume project for an encrypted backup.",
-      );
-    } else hydrate();
-  } catch (e) {
-    hydrate();
+  function viewFiles() {
+    return `<div class="page-head"><div><h1>${esc(t('filesTitle'))}</h1><p>${esc(t('filesText'))}</p></div></div>
+    <div class="panel">
+      ${uploadBlock('official', 1, t('f1Title'), t('f1Req'), t('f1From'))}
+      ${uploadBlock('current', 2, t('f2Title'), t('f2Req'), t('f2From'))}
+      ${uploadBlock('prefs', 3, t('f3Title'), t('f3Req'), t('f3From'))}
+    </div>`;
   }
+
+  // ---- step 3: settings ----
+  const hourOpts = (sel, anyLabel, anyVal) => `<option value="${anyVal}" ${sel === anyVal ? 'selected' : ''}>${esc(anyLabel)}</option>` + E.HOURS.map((h) => `<option value="${h}" ${+sel === h && sel !== anyVal ? 'selected' : ''}>${hl(h)}</option>`).join('');
+  function courseCodes() { return R.off ? Object.keys(R.off.courses) : []; }
+  function prefixes() { return [...new Set(courseCodes().map((c) => c.replace(/\d+$/, '')))]; }
+  function chipBox(m, field) {
+    const vals = m[field] || [];
+    const choices = prefixes().concat(courseCodes()).filter((c) => !vals.includes(c));
+    return `<div class="chipbox">${vals.map((v) => `<span class="chip" dir="ltr">${esc(v)}<button type="button" aria-label="remove" data-act="chipRm" data-id="${m.id}" data-field="${field}" data-val="${esc(v)}">×</button></span>`).join('')}
+      <select data-chg="chipAdd" data-id="${m.id}" data-field="${field}"><option value="">+ ${esc(t('add'))}</option>${choices.map((c) => `<option>${esc(c)}</option>`).join('')}</select></div>`;
+  }
+  function memberChips(m) {
+    const c = [];
+    if (m.first > 8) c.push(`${t('firstHour')} ${hl(m.first)}`);
+    if (m.last < 18) c.push(`${t('lastHour')} ${hl(m.last)}`);
+    if ((m.allowed || []).length) c.push(`${t('allowed')}: ${m.allowed.join(', ')}`);
+    if ((m.never || []).length) c.push(`${t('never')}: ${m.never.join(', ')}`);
+    if (m.prefTime === 'am') c.push(t('am')); if (m.prefTime === 'pm') c.push(t('pm'));
+    if (m.keepCurrent === false) c.push(S.lang === 'ar' ? 'لا يحتفظ بمقرراته' : 'Not keeping current courses');
+    return c.map((x) => `<span class="chip">${esc(x)}</span>`).join('');
+  }
+  function viewMembers() {
+    const cur = currentFor();
+    const secs = model();
+    const avail = Object.values(secs).filter((s) => (s.cat === 'required') && s.counts).length;
+    const asn = Object.values(secs).filter((s) => s.cat === 'asneeded').length;
+    const reqTotal = S.members.reduce((a, m) => a + (Number(m.required) || 0), 0);
+    const opts3 = (sel) => `<option value="">—</option>` + courseCodes().map((c) => `<option ${c === sel ? 'selected' : ''}>${esc(c)}</option>`).join('');
+    return `<div class="colhead"><span></span><span>${esc(t('colName'))}</span><span>${esc(t('colSections'))}</span><span>${esc(t('colCoop'))}</span><span>${esc(t('colSenior'))}</span><span class="c6">${esc(t('colMore'))}</span><span class="c7"></span></div>
+    <div class="mlist">${S.members.map((m, i) => `
+      <div class="mrow">
+        <div class="line">
+          <span class="idx">${i + 1}</span>
+          <input class="input nm" value="${esc(m.name)}" data-chg="mf" data-id="${m.id}" data-field="name" aria-label="${esc(t('colName'))}">
+          <input class="input num" type="number" min="0" max="12" value="${esc(m.required)}" data-chg="mf" data-id="${m.id}" data-field="required" aria-label="${esc(t('colSections'))}">
+          <input class="input num" type="number" min="0" step="0.5" value="${esc(m.coop)}" data-chg="mf" data-id="${m.id}" data-field="coop" aria-label="COOP">
+          <input class="input num" type="number" min="0" step="0.5" value="${esc(m.senior)}" data-chg="mf" data-id="${m.id}" data-field="senior" aria-label="Senior">
+          <span class="chips">${memberChips(m)}</span>
+          <span class="acts">
+            <button class="icon-btn" type="button" title="${esc(t('moveUp'))}" data-act="mUp" data-id="${m.id}" ${i ? '' : 'disabled'}>↑</button>
+            <button class="icon-btn" type="button" title="${esc(t('moveDown'))}" data-act="mDown" data-id="${m.id}" ${i < S.members.length - 1 ? '' : 'disabled'}>↓</button>
+            <button class="btn small" type="button" data-act="mOpen" data-id="${m.id}">${esc(ui.open[m.id] ? t('less') : t('more'))}</button>
+            <button class="icon-btn danger" type="button" title="${esc(t('delMember'))}" data-act="mDel" data-id="${m.id}">🗑</button>
+          </span>
+        </div>
+        ${ui.open[m.id] ? `<div class="more">
+          <label class="check wide"><input type="checkbox" ${m.keepCurrent !== false ? 'checked' : ''} data-chg="mf" data-id="${m.id}" data-field="keepCurrent">${esc(t('keepCurrent'))}${cur[m.id] && cur[m.id].length ? `<span class="muted small" dir="ltr">&nbsp;(${cur[m.id].map((x) => `${x.course} ${x.hour ? hl(x.hour) : ''}`).join(', ')})</span>` : ''}</label>
+          <div class="field"><span class="lbl">${esc(t('firstHour'))}</span><select class="input" data-chg="mf" data-id="${m.id}" data-field="first">${hourOpts(m.first || 8, t('any'), 8)}</select></div>
+          <div class="field"><span class="lbl">${esc(t('lastHour'))}</span><select class="input" data-chg="mf" data-id="${m.id}" data-field="last">${hourOpts(m.last || 18, t('any'), 18)}</select></div>
+          <div class="field"><span class="lbl">${esc(t('prefTime'))}</span><select class="input" data-chg="mf" data-id="${m.id}" data-field="prefTime">${['any', 'am', 'pm'].map((v) => `<option value="${v}" ${m.prefTime === v ? 'selected' : ''}>${esc(t(v === 'any' ? 'anyTime' : v))}</option>`).join('')}</select></div>
+          <div class="field"><span class="lbl">${esc(t('allowed'))}</span>${chipBox(m, 'allowed')}<span class="small muted">${esc(t('allowedHint'))}</span></div>
+          <div class="field"><span class="lbl">${esc(t('never'))}</span>${chipBox(m, 'never')}</div>
+          <div class="field"><span class="lbl">${esc(t('prefs'))}</span><div class="row" style="gap:6px">${[0, 1, 2].map((j) => `<select class="input" style="width:auto" data-chg="mpref" data-id="${m.id}" data-j="${j}">${opts3((m.prefs || [])[j])}</select>`).join('')}</div></div>
+          ${m.comment ? `<div class="field wide"><span class="lbl">${esc(t('comment'))}</span><p class="small" dir="ltr" style="text-align:start">${esc(m.comment)}</p></div>` : ''}
+        </div>` : ''}
+      </div>`).join('')}</div>
+    <div class="row" style="margin-top:12px"><button class="btn" type="button" data-act="mAdd">+ ${esc(t('addMember'))}</button></div>
+    <div class="sumbar ${reqTotal > avail + asn ? 'bad' : ''}"><span>${esc(t('totalReq', reqTotal, `${avail}${asn ? ` + ${asn} (${t('cats').asneeded})` : ''}`))}</span></div>`;
+  }
+  function viewCourses() {
+    if (!R.off) return `<p class="muted">${esc(t('needOfficial'))}</p>`;
+    const cats = L().cats;
+    return `<p class="sub">${esc(t('catHelp'))}</p><table class="plain"><thead><tr><th>${esc(t('colCourse'))}</th><th></th><th>${esc(t('colCount'))}</th><th>${esc(t('colWho'))}</th><th>${esc(t('colCounts'))}</th></tr></thead><tbody>
+      ${Object.values(R.off.courses).map((c) => {
+        const cs = S.courses[c.code] || {};
+        const noTime = c.timed === 0;
+        return `<tr><td class="code"><span class="sw" style="background:${colour(c.code)}"></span>${esc(c.code)}</td><td dir="ltr" style="text-align:start">${esc(c.name)}</td><td>${c.lectures.length}${c.untimed ? ` <span class="chip warn">${c.untimed} ${esc(t('noTimeCourse'))}</span>` : ''}</td>
+          <td><select class="input" data-chg="ccat" data-code="${c.code}">${Object.entries(cats).map(([k, v]) => `<option value="${k}" ${cs.cat === k ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select></td>
+          <td>${noTime ? `<label class="check"><input type="checkbox" ${cs.counts !== false ? 'checked' : ''} data-chg="ccount" data-code="${c.code}"></label>` : '<span class="muted">✓</span>'}</td></tr>`;
+      }).join('')}</tbody></table>`;
+  }
+  function viewMsc() {
+    const days = L().days5;
+    return `<p class="sub">${esc(t('mscText'))}</p>
+    ${S.msc.length ? `<table class="plain"><thead><tr><th>${esc(t('member'))}</th><th>${esc(t('course'))}</th><th>${esc(t('program'))}</th><th>${esc(t('days'))}</th><th>${esc(t('hour'))}</th><th>${esc(t('hours'))}</th><th></th></tr></thead><tbody>
+    ${S.msc.map((x) => `<tr>
+      <td><select class="input" data-chg="msc" data-id="${x.id}" data-field="member"><option value=""></option>${S.members.map((m) => `<option value="${m.id}" ${m.id === x.member ? 'selected' : ''}>${esc(m.name)}</option>`).join('')}</select></td>
+      <td><input class="input" dir="ltr" style="width:110px" value="${esc(x.course)}" data-chg="msc" data-id="${x.id}" data-field="course" placeholder="IS6xx"></td>
+      <td><select class="input" data-chg="msc" data-id="${x.id}" data-field="program">${['MSc', 'PhD'].map((p) => `<option ${p === x.program ? 'selected' : ''}>${p}</option>`).join('')}</select></td>
+      <td><div class="days-pick">${[1, 2, 3, 4, 5].map((d) => `<label><input type="checkbox" ${(x.days || []).includes(d) ? 'checked' : ''} data-chg="mscDay" data-id="${x.id}" data-day="${d}">${days[d - 1]}</label>`).join('')}</div></td>
+      <td><select class="input" style="width:auto" data-chg="msc" data-id="${x.id}" data-field="hour"><option value=""></option>${E.HOURS.map((h) => `<option value="${h}" ${+x.hour === h ? 'selected' : ''}>${hl(h)}</option>`).join('')}</select></td>
+      <td><input class="input num" type="number" min="0" step="0.5" value="${esc(x.hours)}" data-chg="msc" data-id="${x.id}" data-field="hours"></td>
+      <td><button class="icon-btn danger" type="button" data-act="mscDel" data-id="${x.id}">🗑</button></td></tr>`).join('')}</tbody></table>` : `<p class="muted">${esc(t('noMsc'))}</p>`}
+    <div class="row" style="margin-top:12px"><button class="btn" type="button" data-act="mscAdd">+ ${esc(t('addMsc'))}</button></div>`;
+  }
+  function viewSettings() {
+    const tabs = [['members', t('tabMembers')], ['courses', t('tabCourses')], ['msc', t('tabMsc')]];
+    return `<div class="page-head"><div><h1>${esc(t('setTitle'))}</h1></div></div>
+    <div class="panel"><div class="tabs" role="tablist">${tabs.map(([k, v]) => `<button type="button" role="tab" class="${ui.tab === k ? 'on' : ''}" data-act="tab" data-tab="${k}">${esc(v)}</button>`).join('')}</div>
+    ${ui.tab === 'courses' ? viewCourses() : ui.tab === 'msc' ? viewMsc() : viewMembers()}</div>`;
+  }
+
+  // ---- step 4: proposal ----
+  function cellHtml(s, info) {
+    const cls = ['cell'];
+    if (s.proposed) cls.push('prop');
+    if (info && info.bad) cls.push('bad');
+    if (S.pins[s.key]) cls.push('pinned');
+    const comp = s.comp ? `${s.comp.split('-')[1]} ${s.compAct === 'Lab' ? 'Lab' : 'T'}` : '';
+    return `<div class="${cls.join(' ')}" style="background:${colour(s.course)}"><b>${esc(s.key)}</b>${comp ? `<span>${esc(comp)}</span>` : ''}</div>`;
+  }
+  function viewProposal() {
+    if (!R.off) return `<p>${esc(t('needOfficial'))}</p>`;
+    if (!S.built && !ui.building) { setTimeout(() => build(true), 0); }
+    const { secs, assign, ev } = snapshot();
+    const bad = new Set();
+    ev.issues.forEach((i) => { if (i.type === 'clash' || i.type === 'window' || i.type === 'notime') { if (i.a) bad.add(i.a); if (i.b) bad.add(i.b); } });
+    const rows = S.members.map((m) => ({ m, pseudo: false })).concat(['PT', 'HOLD'].filter((id) => Object.values(assign).includes(id)).map((id) => ({ m: { id, name: pseudoName(id) }, pseudo: true })));
+    const byMember = {}; Object.entries(assign).forEach(([k, v]) => { (byMember[v] = byMember[v] || []).push(k); });
+    const realKeys = Object.keys(assign).filter((k) => memberById(assign[k]));
+    const reqTotal = S.members.reduce((a, m) => a + (Number(m.required) || 0), 0);
+    const counted = realKeys.filter((k) => secs[k].counts).length;
+    const unassigned = ev.issues.filter((i) => i.type === 'unassigned').length;
+    const conflicts = ev.issues.filter((i) => ['clash', 'window', 'notime'].includes(i.type)).length;
+    const requests = Object.values(secs).filter((s) => s.proposed && assign[s.key]).length;
+    const finals = S.members.filter((m) => S.decisions[m.id] === 'final').length;
+    const head = `<tr><th style="text-align:left;padding-left:12px">${S.lang === 'ar' ? 'العضو' : 'Member'}</th>${E.HOURS.slice(0, 4).map((h) => `<th class="hr">${hl(h)}</th>`).join('')}<th class="brk" title="${esc(t('breakCol'))}"></th>${E.HOURS.slice(4).map((h) => `<th class="hr">${hl(h)}</th>`).join('')}<th>${esc(t('noTime'))}</th><th>${esc(t('load'))}</th><th>${esc(t('sections'))}</th></tr>`;
+    const body = rows.map(({ m, pseudo }) => {
+      const keys = byMember[m.id] || [];
+      const p = ev.per[m.id] || { load: 0, counted: 0, total: 0 };
+      const dec = S.decisions[m.id] || '';
+      const slot = (h) => {
+        const ks = keys.filter((k) => secs[k].hour === h);
+        return `<td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="${h}">${ks.map((k) => cellHtml(secs[k], { bad: bad.has(k) })).join('')}</td>`;
+      };
+      const nt = keys.filter((k) => secs[k].hour == null);
+      const req = Number(m.required);
+      const cntBad = !pseudo && m.required !== '' && m.required != null && p.counted !== req;
+      const tr = `<tr class="mem ${pseudo ? 'pseudo' : ''} ${m.id === 'HOLD' ? 'hold' : ''} ${dec}">
+        <td class="name" dir="ltr"><span class="nmtxt">${esc(m.name)}</span>${pseudo ? '' : `<div class="dec no-print" dir="${S.lang === 'ar' ? 'rtl' : 'ltr'}">${['final', 'reject', 'review'].map((d) => `<button type="button" class="${d} ${dec === d ? 'on' : ''}" data-act="dec" data-id="${m.id}" data-dec="${d}">${esc(t(d))}</button>`).join('')}</div>`}</td>
+        ${E.HOURS.slice(0, 4).map(slot).join('')}<td class="brk"></td>${E.HOURS.slice(4).map(slot).join('')}
+        <td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="nt">${nt.map((k) => cellHtml(secs[k], { bad: bad.has(k) })).join('')}</td>
+        <td class="num">${pseudo ? p.load : p.total}${!pseudo && p.total !== p.load ? `<small>${p.load} + ${(p.total - p.load)}</small>` : ''}</td>
+        <td class="num ${cntBad ? 'bad' : ''}">${pseudo ? keys.length : `${p.counted} / ${m.required === '' ? '–' : req}`}</td></tr>`;
+      let alt = '';
+      if (!pseudo && dec === 'reject') {
+        const dirA = S.lang === 'ar' ? 'rtl' : 'ltr';
+        if (ui.altBusy === m.id) alt = `<tr class="alt"><td colspan="15" dir="${dirA}">${esc(t('computing'))}</td></tr>`;
+        else if (!ui.alts[m.id]) alt = `<tr class="alt"><td colspan="15" dir="${dirA}"><button class="btn small" type="button" data-act="showAlt" data-id="${m.id}">${esc(t('altTitle', m.name))}</button></td></tr>`;
+        else if (ui.alts[m.id]) {
+          const a = ui.alts[m.id];
+          alt = `<tr class="alt"><td colspan="15" dir="${dirA}"><b>${esc(t('altTitle', m.name))}</b>${a.opts.length ? `<div class="alts">${a.opts.map((o, i) => `<div class="alt-card"><b>${i + 1}</b><ul>${Object.entries(o.changes).map(([id, c]) => `<li><b>${esc(nameOf(id))}</b>: ${c.rem.map((k) => `<span class="minus">− ${esc(k)} ${hl(o.hours[k] != null ? o.hours[k] : secs[k] ? secs[k].hour : null)}</span>`).join(' ')} ${c.add.map((k) => `<span class="plus">+ ${esc(k)} ${hl(o.hours[k] != null ? o.hours[k] : secs[k] ? secs[k].hour : null)}</span>`).join(' ')}</li>`).join('')}</ul>${o.fresh && o.fresh.length ? `<p class="small" style="color:var(--red);margin:0" dir="ltr">⚠ ${o.fresh.map(issueText).map(esc).join(' | ')}</p>` : ''}<button class="btn small primary" type="button" data-act="useAlt" data-id="${m.id}" data-i="${i}">${esc(t('useAlt'))}</button></div>`).join('')}</div>` : `<p class="muted small">${esc(t('altNone'))}</p>`}
+            <div style="margin-top:10px"><button class="btn small" type="button" data-act="closeAlt" data-id="${m.id}">${esc(t('closeAlt'))}</button></div></td></tr>`;
+        }
+      }
+      return tr + alt;
+    }).join('');
+    // attention list
+    const items = [];
+    ev.issues.forEach((i) => {
+      if (i.type === 'unassigned') {
+        const s = secs[i.a];
+        const opts = S.members.map((m) => `<option value="${m.id}">${esc(m.name)}</option>`).join('');
+        items.push(`<li><span class="t">${esc(t('issue').unassigned(i.a))} ${s.hour != null ? hl(s.hour) : ''}</span><span class="row" style="gap:6px"><select class="input" data-chg="assignTo" data-key="${i.a}"><option value="">${esc(t('assignTo'))}</option>${opts}</select><button class="btn small" type="button" data-act="toHold" data-key="${i.a}">${esc(t('toHold'))}</button></span></li>`);
+      } else if (i.type === 'count') items.push(`<li class="info"><span>${esc(t('issue').count(nameOf(i.member), i.have, i.need))}</span></li>`);
+      else if (i.type === 'clash') items.push(`<li><span>${esc(t('issue').clash(nameOf(i.member), i.a, i.b, `${E.DAY_NAMES[i.day]} ${hl(i.hour)}`))}</span></li>`);
+      else if (i.type === 'window') items.push(`<li><span>${esc(t('issue').window(nameOf(i.member), i.a))}</span></li>`);
+      else if (i.type === 'notime') items.push(`<li><span>${esc(t('issue').notime(nameOf(i.member), i.a))}</span></li>`);
+    });
+    const reqs = Object.values(secs).filter((s) => s.proposed && assign[s.key]).map((s) => {
+      const fr = E.freeRooms(R.off, s.key, s.hour).filter((g) => !g.online);
+      return `<li><span><b>${esc(s.key)}</b> → ${hl(s.hour)} <span class="muted">(${s.officialHour != null ? hl(s.officialHour) : t('noTime')})</span> · ${esc(nameOf(assign[s.key]))}<br><span class="small muted">${esc(t('freeRooms'))}: ${fr.map((g) => `${g.days.map((d) => E.DAY_NAMES[d]).join(' ')}: ${g.rooms.length ? g.rooms.map(E.shortRoom).join(' / ') : t('noFree')}`).join(' | ')}</span></span></li>`;
+    });
+    return `<div class="page-head"><div><h1>${esc(t('propTitle'))}</h1><p>${esc(t('rebuildHint'))}</p></div>
+      <div class="row"><button class="btn" type="button" data-act="print">${esc(t('printBtn'))}</button><button class="btn primary" type="button" data-act="rebuild" ${ui.building ? 'disabled' : ''}>${esc(ui.building ? t('building') : t('rebuild'))}</button></div></div>
+    <div class="stats">
+      <div class="stat ${counted !== reqTotal ? 'warn' : 'good'}"><b>${counted} / ${reqTotal}</b>${esc(t('sAssigned'))}</div>
+      <div class="stat ${unassigned ? 'bad' : 'good'}"><b>${unassigned}</b>${esc(t('sUnassigned'))}</div>
+      <div class="stat ${conflicts ? 'bad' : 'good'}"><b>${conflicts}</b>${esc(t('sConflicts'))}</div>
+      <div class="stat ${requests ? 'warn' : ''}"><b>${requests}</b>${esc(t('sRequests'))}</div>
+      <div class="stat"><b>${finals} / ${S.members.length}</b>${esc(t('sFinal'))}</div>
+    </div>
+    <p class="legend small muted"><span><i class="lg prop"></i>${esc(t('lgProp'))}</span><span><i class="lg bad"></i>${esc(t('lgBad'))}</span><span><i class="lg pin">•</i>${esc(t('lgPin'))}</span><span>${esc(t('lgClick'))}</span></p>
+    <div class="gridwrap"><table class="tt"><thead>${head}</thead><tbody>${ui.building && !S.built ? `<tr><td colspan="15" style="padding:30px;text-align:center">${esc(t('building'))}</td></tr>` : body}</tbody></table></div>
+    <div class="attn">
+      <div class="panel"><h2>${esc(t('attention'))}</h2>${items.length ? `<ul>${items.join('')}</ul>` : `<p class="good">${esc(t('allGood'))}</p>`}</div>
+      <div class="panel"><h2>${esc(t('timeReqTitle'))}</h2>${reqs.length ? `<ul class="req-list">${reqs.join('')}</ul>` : `<p class="muted">—</p>`}</div>
+    </div>`;
+  }
+
+  function issueText(i) {
+    if (i.type === 'unassigned') return t('issue').unassigned(i.a);
+    if (i.type === 'count') return t('issue').count(nameOf(i.member), i.have, i.need);
+    if (i.type === 'clash') return t('issue').clash(nameOf(i.member), i.a, i.b, `${E.DAY_NAMES[i.day]} ${hl(i.hour)}`);
+    if (i.type === 'window') return t('issue').window(nameOf(i.member), i.a);
+    if (i.type === 'notime') return t('issue').notime(nameOf(i.member), i.a);
+    return i.type;
+  }
+  // popover for a grid cell
+  function openPop(td) {
+    const mid = td.dataset.mid, hRaw = td.dataset.h, h = hRaw === 'nt' ? null : +hRaw;
+    const { secs, assign } = snapshot();
+    const here = Object.keys(assign).filter((k) => assign[k] === mid && (hRaw === 'nt' ? secs[k].hour == null : secs[k].hour === h));
+    const isPseudo = mid === 'PT' || mid === 'HOLD';
+    const m = memberById(mid);
+    let html = `<h4>${esc(nameOf(mid))} · ${hRaw === 'nt' ? esc(t('noTime')) : hl(h)}</h4>`;
+    here.forEach((k) => {
+      const s = secs[k];
+      const notes = (R.notes[k] || []).map((n) => n.text);
+      html += `<div style="border-top:1px solid var(--line-2);padding-top:8px;margin-top:8px"><h4><span class="sw" style="background:${colour(s.course)}"></span>${esc(k)}${s.comp ? ` + ${esc(s.comp)}` : ''}</h4>
+        <div class="meta">${esc(s.name)}<br>${esc(E.describeMeetings(R.off, k))}${s.proposed ? `<br><b style="color:var(--orange)">${esc(t('proposedAt', hl(s.hour)))}</b> (${esc(t('official'))}: ${s.officialHour != null ? hl(s.officialHour) : t('noTime')})${S.autoTime[k] ? ` — ${esc(t('autoTime'))}` : ''}` : ''}</div>
+        ${notes.length ? `<div class="note">${notes.map(esc).join('<br>')}</div>` : ''}
+        ${!isPseudo ? `<button class="opt" type="button" data-act="rmSec" data-key="${k}" data-mid="${mid}">✕ ${esc(t('removeFrom', nameOf(mid)))}</button>` : `<button class="opt" type="button" data-act="toMembers" data-key="${k}">↩ ${esc(t('toMembers'))}</button>`}
+        ${!s.noTime ? `<button class="opt" type="button" data-act="timePick" data-key="${k}">🕒 ${esc(t('proposeTime'))}</button>` : ''}
+        ${s.proposed && !S.autoTime[k] && s.officialHour != null ? `<button class="opt" type="button" data-act="timeReset" data-key="${k}">↺ ${esc(t('restoreTime'))}</button>` : ''}
+        ${mid !== 'HOLD' ? `<button class="opt" type="button" data-act="toHold" data-key="${k}">⏸ ${esc(t('toHold'))}</button>` : ''}
+        ${mid !== 'PT' ? `<button class="opt" type="button" data-act="toPart" data-key="${k}">👥 ${esc(t('toPart'))}</button>` : ''}
+        <div id="tp-${k}"></div></div>`;
+    });
+    // what can go here
+    const cands = Object.values(secs).filter((s) => {
+      if (assign[s.key] === mid) return false;
+      if (hRaw === 'nt') return s.hour == null;
+      return s.hour === h;
+    });
+    const opt = (s) => {
+      const a = assign[s.key];
+      const note = a ? t('fromMember', nameOf(a)) : s.cat === 'none' || s.cat === 'asneeded' ? (s.cat === 'none' ? t('notOurs') : L().cats.asneeded) : '';
+      const allowed = isPseudo || !m || E.memberAllows(m, s) || s.noTime;
+      return `<button class="opt" type="button" data-act="put" data-key="${s.key}" data-mid="${mid}"><span class="sw" style="background:${colour(s.course)}"></span><span class="t">${esc(s.key)}</span><small>${esc(note)}${allowed ? '' : ' ⚠'}</small></button>`;
+    };
+    const okFor = (s) => (isPseudo || !m || E.memberAllows(m, s) ? 0 : 1);
+    cands.sort((a, b) => okFor(a) - okFor(b));
+    const free = cands.filter((s) => !assign[s.key]);
+    const taken = cands.filter((s) => assign[s.key]);
+    html += `<div class="grp">${esc(t('putHere'))}</div>${free.length || taken.length ? free.map(opt).join('') + taken.map(opt).join('') : `<p class="muted small">${esc(t('nothingHere'))}</p>`}`;
+    const pop = $('#pop');
+    pop.innerHTML = html; pop.hidden = false;
+    const r = td.getBoundingClientRect();
+    const w = 320, ph = Math.min(pop.scrollHeight, window.innerHeight * 0.7);
+    let left = Math.min(window.innerWidth - w - 10, Math.max(10, r.left));
+    let top = r.bottom + 6; if (top + ph > window.innerHeight - 10) top = Math.max(10, r.top - ph - 6);
+    pop.style.left = left + 'px'; pop.style.top = top + 'px';
+    pop.dataset.mid = mid; pop.dataset.h = hRaw;
+  }
+  function closePop() { const p = $('#pop'); p.hidden = true; p.innerHTML = ''; }
+
+  // ---- step 5: export ----
+  function viewExport() {
+    const { ev } = snapshot();
+    const n = ev.issues.length;
+    return `<div class="page-head"><div><h1>${esc(t('expTitle'))}</h1><p class="${n ? '' : 'ok-text'}">${esc(n ? t('remaining', n) : t('ready'))}</p></div></div>
+    <div class="exp">
+      <div class="panel"><h2>${esc(t('expExcel'))}</h2><p class="sub" style="margin:0">${esc(t('expExcelText'))}</p><ul>${L().expSheets.map((x) => `<li>${esc(x)}</li>`).join('')}</ul><p class="tip">${esc(t('howToPaste'))}</p><button class="btn primary big" type="button" data-act="excel">${esc(t('expExcelBtn'))}</button></div>
+      <div class="panel"><h2>${esc(t('expProj'))}</h2><p class="sub" style="margin:0">${esc(t('expProjText'))}</p><button class="btn big" type="button" data-act="saveProject">${esc(t('expProjBtn'))}</button>
+        <hr style="border:0;border-top:1px solid var(--line-2);width:100%;margin:8px 0">
+        <h2>${esc(t('nextTerm'))}</h2><p class="sub" style="margin:0">${esc(t('nextTermText'))}</p><button class="btn" type="button" data-act="nextTerm">${esc(t('nextTerm'))}</button></div>
+    </div>`;
+  }
+
+  // ---------------- actions ----------------
+  async function addFile(kind, file) {
+    if (!file) return;
+    const buf = await file.arrayBuffer();
+    S.files[kind] = { name: file.name, size: file.size, b64: bufToB64(buf), sheet: null };
+    if (kind === 'current') S.currentMap = {};
+    if (kind === 'prefs') S.prefsMap = {};
+    main.querySelectorAll('[data-drop]').forEach((d) => { if (d.dataset.drop === kind) d.textContent = t('reading'); });
+    await readFile(kind); parseAll(); S.built = false; persist(); render();
+  }
+  function startProject() {
+    const side = ui.pickSide || S.side;
+    const term = ($('#termIn') && $('#termIn').value.trim()) || '';
+    if (!side) return;
+    if (!term) { $('#termIn').focus(); toast(t('termLabel')); return; }
+    if (S.side && S.side !== side) {
+      const keepLang = S.lang; S = blank(); S.lang = keepLang; R = { wb: {}, sheets: {}, err: {}, notes: {}, curScore: {}, prefScore: {} };
+    }
+    if (!S.members.length || S.side !== side) S.members = D.MEMBERS[side].map((m) => Object.assign({ id: uid() }, JSON.parse(JSON.stringify(m))));
+    S.side = side; S.term = term; S.step = 2; ui.termDraft = null;
+    persist(); render(); window.scrollTo(0, 0);
+  }
+  function projectData() { return Object.assign({}, S, { savedAt: new Date().toISOString() }); }
+  function saveProject() {
+    const blob = new Blob([JSON.stringify(projectData())], { type: 'application/json' });
+    download(blob, `${fileBase()} - timetable project.json`);
+    toast(t('saved'));
+  }
+  async function openProject(file) {
+    try {
+      const obj = JSON.parse(await file.text());
+      if (!obj || obj.app !== 'isp-timetable') throw new Error('x');
+      const lang = S.lang;
+      S = Object.assign(blank(), obj); S.lang = obj.lang || lang;
+      R = { wb: {}, sheets: {}, err: {}, notes: {}, curScore: {}, prefScore: {} };
+      await reparseAll();
+      persist(); render(); toast(t('loaded'));
+    } catch (e) { toast(t('loadFail')); }
+  }
+  async function exportExcel() {
+    toast(t('exporting'));
+    const { secs, assign, ev } = snapshot();
+    const cur = currentFor();
+    const memberNotes = {};
+    S.members.forEach((m) => {
+      const lines = [];
+      if (cur[m.id] && cur[m.id].length) lines.push(`Current term: ${cur[m.id].map((x) => `${x.course}${x.hour ? ' ' + hl(x.hour) : ''}`).join(', ')}`);
+      const pr = (m.prefs || []).filter(Boolean); if (pr.length) lines.push(`Preferences: ${pr.join(', ')}`);
+      if (m.prefTime && m.prefTime !== 'any') lines.push(`Preferred time: ${m.prefTime === 'am' ? 'Morning' : 'Afternoon'}`);
+      if (m.comment) lines.push(`Comment: ${m.comment}`);
+      memberNotes[m.id] = lines;
+    });
+    const members = S.members.concat([{ id: 'PT', name: 'Part-timers', pseudo: true }, { id: 'HOLD', name: 'ON-Hold', pseudo: true }]);
+    const wb = await X.build(window.ExcelJS, { side: S.side, term: S.term, members, secs, assign, off: R.off, notes: R.notes, msc: S.msc, decisions: S.decisions, officialWorkbook: R.wb.official, issues: ev.issues, per: ev.per, memberNotes, generated: new Date() });
+    const buf = await wb.xlsx.writeBuffer();
+    download(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `${fileBase()} timetable.xlsx`);
+  }
+  function nextTerm() {
+    const { secs, assign } = snapshot();
+    const base = {};
+    Object.entries(assign).forEach(([k, v]) => { if (memberById(v)) (base[v] = base[v] || []).push({ course: secs[k].course, hour: secs[k].hour }); });
+    const keep = { side: S.side, lang: S.lang, members: S.members.map((m) => Object.assign({}, m, { prefs: ['', '', ''], comment: '', fromPrefs: false })), courses: S.courses, courseTouched: S.courseTouched };
+    S = Object.assign(blank(), keep, { baseline: base, step: 1 });
+    ui.pickSide = S.side; ui.termDraft = '';
+    R = { wb: {}, sheets: {}, err: {}, notes: {}, curScore: {}, prefScore: {} };
+    persist(); render(); window.scrollTo(0, 0);
+  }
+  function putSection(k, mid) {
+    const { secs } = snapshot();
+    const s = secs[k]; if (!s) return;
+    if (mid === 'PT') { S.secCat[k] = 'parttime'; delete S.pins[k]; delete S.assign[k]; return; }
+    if (mid === 'HOLD') { S.secCat[k] = 'onhold'; delete S.pins[k]; delete S.assign[k]; return; }
+    const cat = (S.courses[s.course] || {}).cat;
+    if (S.secCat[k] || (cat !== 'required' && cat !== 'asneeded')) S.secCat[k] = 'required';
+    S.assign[k] = mid; S.pins[k] = mid; delete S.bans[`${k}|${mid}`];
+  }
+
+  document.addEventListener('click', async (ev) => {
+    const el = ev.target.closest('[data-act]');
+    const pop = $('#pop');
+    if (!el) { if (!pop.hidden && !ev.target.closest('#pop')) closePop(); return; }
+    const act = el.dataset.act, d = el.dataset;
+    if (act !== 'cell' && act !== 'timePick' && !el.closest('#pop')) closePop();
+    switch (act) {
+      case 'home': ev.preventDefault(); if (S.side) { S.step = 1; render(); } break;
+      case 'go': { const n = +d.step; if (n >= 1 && n <= 5 && canReach(n)) { S.step = n; persist(); render(); window.scrollTo(0, 0); main.focus({ preventScroll: true }); } break; }
+      case 'pick': ui.pickSide = d.side; ui.termDraft = $('#termIn') ? $('#termIn').value : ui.termDraft; render(); break;
+      case 'start': startProject(); break;
+      case 'openProject': $('#projectInput').click(); break;
+      case 'resumeAuto': { const saved = S0(); if (saved) { S = Object.assign(blank(), saved); await reparseAll(); render(); } break; }
+      case 'rmFile': delete S.files[d.kind]; if (d.kind === 'current') S.currentMap = {}; if (d.kind === 'prefs') { S.prefsMap = {}; S.members.forEach((m) => { if (m.fromPrefs) { m.prefs = ['', '', '']; m.comment = ''; m.fromPrefs = false; } }); } await readFile(d.kind); parseAll(); S.built = false; persist(); render(); break;
+      case 'tab': ui.tab = d.tab; render(); break;
+      case 'mOpen': ui.open[d.id] = !ui.open[d.id]; render(); break;
+      case 'mUp': case 'mDown': { const i = S.members.findIndex((m) => m.id === d.id); const j = act === 'mUp' ? i - 1 : i + 1; if (j >= 0 && j < S.members.length) { [S.members[i], S.members[j]] = [S.members[j], S.members[i]]; persist(); render(); } break; }
+      case 'mDel': { const m = memberById(d.id); if (m && confirm(t('confirmDel', m.name))) { S.members = S.members.filter((x) => x.id !== d.id); Object.keys(S.assign).forEach((k) => { if (S.assign[k] === d.id) delete S.assign[k]; }); Object.keys(S.pins).forEach((k) => { if (S.pins[k] === d.id) delete S.pins[k]; }); Object.keys(S.currentMap).forEach((k) => { if (S.currentMap[k] === d.id) S.currentMap[k] = ''; }); Object.keys(S.prefsMap).forEach((k) => { if (S.prefsMap[k] === d.id) S.prefsMap[k] = ''; }); delete S.decisions[d.id]; persist(); render(); } break; }
+      case 'mAdd': { const id = uid(); S.members.push({ id, name: t('newMemberName'), required: 4, coop: 0, senior: 0, keepCurrent: true, first: 8, last: 18, allowed: [], never: [], prefTime: 'any', prefs: ['', '', ''] }); ui.open[id] = true; persist(); render(); setTimeout(() => { const ins = main.querySelectorAll('.nm'); const last = ins[ins.length - 1]; if (last) { last.focus(); last.select(); } }, 0); break; }
+      case 'chipRm': { const m = memberById(d.id); m[d.field] = (m[d.field] || []).filter((v) => v !== d.val); persist(); render(); break; }
+      case 'mscAdd': S.msc.push({ id: uid(), member: '', course: '', program: 'MSc', days: [], hour: '', hours: 3 }); persist(); render(); break;
+      case 'mscDel': S.msc = S.msc.filter((x) => x.id !== d.id); persist(); render(); break;
+      case 'rebuild': build(true); break;
+      case 'print': window.print(); break;
+      case 'cell': if (!pop.hidden && pop.dataset.mid === d.mid && pop.dataset.h === d.h) closePop(); else openPop(el); break;
+      case 'put': putSection(d.key, d.mid); closePop(); persist(); render(); break;
+      case 'rmSec': delete S.assign[d.key]; delete S.pins[d.key]; S.bans[`${d.key}|${d.mid}`] = 1; closePop(); persist(); render(); break;
+      case 'toHold': S.secCat[d.key] = 'onhold'; delete S.pins[d.key]; delete S.assign[d.key]; closePop(); persist(); render(); break;
+      case 'toPart': S.secCat[d.key] = 'parttime'; delete S.pins[d.key]; delete S.assign[d.key]; closePop(); persist(); render(); break;
+      case 'toMembers': S.secCat[d.key] = 'required'; closePop(); persist(); render(); break;
+      case 'timePick': {
+        const box = document.getElementById('tp-' + d.key); if (!box) break;
+        const { secs } = snapshot(); const s = secs[d.key];
+        box.innerHTML = `<div class="hours" style="margin-top:6px">${E.HOURS.map((h) => `<button type="button" class="${s.hour === h ? 'on' : ''}" data-act="timeSet" data-key="${d.key}" data-h="${h}">${hl(h)}</button>`).join('')}</div>`;
+        break;
+      }
+      case 'timeSet': { const { secs } = snapshot(); const s = secs[d.key]; const h = +d.h; if (s.officialHour === h) delete S.proposed[d.key]; else S.proposed[d.key] = h; delete S.autoTime[d.key]; if (S.assign[d.key]) S.pins[d.key] = S.assign[d.key]; closePop(); persist(); render(); break; }
+      case 'timeReset': delete S.proposed[d.key]; delete S.autoTime[d.key]; closePop(); persist(); render(); break;
+      case 'dec': {
+        const cur = S.decisions[d.id];
+        S.decisions[d.id] = cur === d.dec ? '' : d.dec;
+        if (S.decisions[d.id] === 'reject') alternatives(d.id); else { delete ui.alts[d.id]; }
+        persist(); render(); break;
+      }
+      case 'useAlt': {
+        const a = ui.alts[d.id]; const o = a && a.opts[+d.i]; if (!o) break;
+        Object.keys(S.pins).forEach((k) => { if (S.pins[k] === d.id) delete S.pins[k]; });
+        applyResult(o.res);
+        S.forbidden[d.id] = a.forb.filter((x) => x !== sig(Object.keys(o.res.assign).filter((k) => o.res.assign[k] === d.id)));
+        S.decisions[d.id] = ''; delete ui.alts[d.id]; persist(); render(); break;
+      }
+      case 'showAlt': alternatives(d.id); break;
+      case 'closeAlt': S.decisions[d.id] = 'review'; delete ui.alts[d.id]; persist(); render(); break;
+      case 'excel': try { await exportExcel(); } catch (e) { console.error(e); toast('Excel: ' + e.message); } break;
+      case 'saveProject': saveProject(); break;
+      case 'nextTerm': nextTerm(); break;
+      default: break;
+    }
+  });
+  document.addEventListener('change', async (ev) => {
+    const el = ev.target;
+    if (el.id === 'projectInput') { if (el.files[0]) await openProject(el.files[0]); el.value = ''; return; }
+    if (el.dataset.file) { await addFile(el.dataset.file, el.files[0]); return; }
+    const c = el.dataset.chg; if (!c) return;
+    const d = el.dataset;
+    switch (c) {
+      case 'sheet': S.files[d.kind].sheet = el.value; if (d.kind === 'current') S.currentMap = {}; if (d.kind === 'prefs') S.prefsMap = {}; R.err[d.kind] = null; parseAll(); S.built = false; break;
+      case 'map': (d.kind === 'current' ? S.currentMap : S.prefsMap)[d.name] = el.value; if (d.kind === 'prefs') applyPrefs(); if (d.kind === 'current') R.curScore[d.name] = 1; else R.prefScore[d.name] = 1; break;
+      case 'mf': {
+        const m = memberById(d.id); if (!m) break;
+        if (d.field === 'keepCurrent') m.keepCurrent = el.checked;
+        else if (['required', 'coop', 'senior'].includes(d.field)) m[d.field] = el.value === '' ? '' : Number(el.value);
+        else if (['first', 'last'].includes(d.field)) m[d.field] = Number(el.value);
+        else if (d.field === 'prefTime') { m.prefTime = el.value; m.prefTimeTouched = true; }
+        else m[d.field] = el.value.trim();
+        break;
+      }
+      case 'mpref': { const m = memberById(d.id); m.prefs = (m.prefs || ['', '', '']).slice(); m.prefs[+d.j] = el.value; break; }
+      case 'chipAdd': { const m = memberById(d.id); if (el.value) m[d.field] = (m[d.field] || []).concat([el.value]); break; }
+      case 'ccat': S.courses[d.code] = Object.assign({}, S.courses[d.code], { cat: el.value }); S.courseTouched[d.code] = true; Object.keys(S.secCat).forEach((k) => { if (k.startsWith(d.code + '-')) delete S.secCat[k]; }); break;
+      case 'ccount': S.courses[d.code] = Object.assign({}, S.courses[d.code], { counts: el.checked }); S.courseTouched[d.code] = true; break;
+      case 'msc': { const x = S.msc.find((y) => y.id === d.id); if (x) x[d.field] = d.field === 'hour' ? (el.value ? +el.value : '') : d.field === 'hours' ? Number(el.value) : el.value; break; }
+      case 'mscDay': { const x = S.msc.find((y) => y.id === d.id); const day = +d.day; x.days = el.checked ? [...new Set((x.days || []).concat(day))].sort() : (x.days || []).filter((y) => y !== day); break; }
+      case 'assignTo': if (el.value) putSection(d.key, el.value); break;
+      default: break;
+    }
+    persist(); render();
+  });
+  document.addEventListener('input', (ev) => { if (ev.target.id === 'termIn') ui.termDraft = ev.target.value; });
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape') closePop();
+    if (ev.key === 'Enter' && ev.target.id === 'termIn') startProject();
+    if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches('td.slot')) { ev.preventDefault(); openPop(ev.target); }
+  });
+  // drag & drop files
+  document.addEventListener('dragover', (ev) => { const z = ev.target.closest('[data-drop]'); if (z) { ev.preventDefault(); z.classList.add('over'); } });
+  document.addEventListener('dragleave', (ev) => { const z = ev.target.closest('[data-drop]'); if (z) z.classList.remove('over'); });
+  document.addEventListener('drop', async (ev) => { const z = ev.target.closest('[data-drop]'); if (!z) return; ev.preventDefault(); z.classList.remove('over'); await addFile(z.dataset.drop, ev.dataTransfer.files[0]); });
+  window.addEventListener('scroll', () => closePop(), { passive: true });
+  $('#langBtn').addEventListener('click', () => { S.lang = S.lang === 'ar' ? 'en' : 'ar'; persist(); render(); });
+  $('#saveBtn').addEventListener('click', saveProject);
+
+  // expose for testing
+  window.ISPApp = { get state() { return S; }, get runtime() { return R; }, snapshot, render };
+
+  // ---------------- boot ----------------
+  const saved = S0();
+  if (saved && saved.lang) S.lang = saved.lang;
+  render();
 })();
