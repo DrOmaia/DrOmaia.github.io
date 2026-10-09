@@ -808,7 +808,7 @@
     });
     const members = S.members.concat([{ id: 'PT', name: 'Part-timers', pseudo: true }, { id: 'HOLD', name: 'ON-Hold', pseudo: true }]);
     const wb = await X.build(window.ExcelJS, { side: S.side, term: S.term, members, secs, assign, off: R.off, notes: R.notes, msc: S.msc, decisions: S.decisions, officialWorkbook: R.wb.official, issues: ev.issues, per: ev.per, memberNotes, generated: new Date() });
-    const buf = await wb.xlsx.writeBuffer();
+    const buf = await X.toBuffer(wb, window.JSZip);
     download(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `${fileBase()} timetable.xlsx`);
   }
   function nextTerm() {

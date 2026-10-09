@@ -16,6 +16,7 @@
   const HCOL = {}; E.HOURS.forEach((h, i) => { HCOL[h] = 3 + i; }); // C..L
   const NOTIME = 13, NCOL = 14, OCOL = 15, PCOL = 16, QCOL = 17, RCOL = 18, SCOL = 19, TCOL = 20; // M..T
   const LAST = TCOL;
+  const UCOL = 21, VCOL = 22, WCOL = 23; // hidden helpers: block owner, row of a section in the grid, name in this draft
   const NOTICE = 'Unofficial simulation produced by a training tool. Not an official document; the data and results must not be relied on.';
   function noticeFooter(ws) { ws.headerFooter = { oddFooter: '&L&8&"Tahoma,Italic"' + NOTICE + '&R&8Page &P of &N', evenFooter: '&L&8&"Tahoma,Italic"' + NOTICE + '&R&8Page &P of &N' }; }
 
@@ -48,8 +49,8 @@
     ws.getCell(1, 1).font = { name: FONT, size: 14, bold: true, color: { argb: 'FF1F4E79' } };
     ws.getCell(1, 1).alignment = { vertical: 'middle' };
     ws.getRow(1).height = 26;
-    ws.mergeCells(2, 3, 2, LAST);
-    ws.getCell(2, 3).value = NOTICE + '   |   Red: conflict or section count different from required   |   Orange italic dashed: proposed time (needs registration approval)';
+    ws.mergeCells(2, 3, 2, LAST); ws.getRow(2).height = 30; ws.getCell(2, 3).alignment = { wrapText: true, vertical: 'middle' };
+    ws.getCell(2, 3).value = NOTICE + '   |   To move a section, choose it from the list in a cell (only sections not yet placed at that hour are listed) and clear its old cell; loads, counts, the check table, Is Reg names and the summary update by themselves.   |   Red: duplicated section, section outside its hour, or sections different from required   |   Orange italic dashed: proposed time (needs registration approval)';
     ws.getCell(2, 3).font = { name: FONT, size: 9, italic: true, color: { argb: 'FF7F7F7F' } };
     ws.mergeCells(3, 3, 3, NOTIME); ws.getCell(3, 3).value = 'Timeslots';
     ws.getCell(3, 3).fill = fill('0000FF'); ws.getCell(3, 3).font = { name: FONT, size: 14, bold: true, color: { argb: 'FFFFFFFF' } }; ws.getCell(3, 3).alignment = center;
@@ -91,11 +92,26 @@
     const hold = ctx.members.find((m) => m.id === 'HOLD');
     if (hold) { const L = layout(sectionsOf('HOLD')); while (L.pairs.length < 2) L.pairs.push({}); blocks.push({ m: hold, ...L }); }
 
+    // ---------- layout of everything below the grid (formulas need these rows) ----------
+    const LG = 4 + blocks.reduce((a, b) => a + b.pairs.length * 2, 0);
+    const courseList = [...new Set(Object.values(secs).map((s) => s.course))];
+    const used = courseList.filter((c) => Object.keys(assign).some((k) => secs[k] && secs[k].course === c));
+    const keyStart = LG + 2, keyEnd = keyStart + Math.max(1, Math.ceil(used.length / 11));
+    const msc = ctx.msc || [];
+    const mscFirst = keyEnd + 4, mscRows = msc.length + 4, mscLast = mscFirst + mscRows - 1;
+    const SUMN = 9, sumFirst = mscLast + 4, sumLast = sumFirst + SUMN - 1;
+    const chkFirst = sumLast + 4, chkLast = chkFirst + ctx.off.lectures.length - 1;
+    const chkRow = {}; ctx.off.lectures.forEach((k, i) => { chkRow[k] = chkFirst + i; });
+    const SH = `'${title.slice(0, 31).replace(/'/g, "''")}'`;
+    const GRID = 'Grid';
+    const extraNames = [{ name: 'Grid', formula: `${SH}!$C$5:$${colL(NOTIME)}$${LG}` }];
+    const tagOf = (h) => (h === 'nt' ? 'NT' : String(h).padStart(2, '0'));
+
     const tFormula = 'IF(INDIRECT("R[-1]C",FALSE)="","",IFERROR(INDEX(SecComp,MATCH(INDIRECT("R[-1]C",FALSE),SecKey,0)),"?"))';
     const courseLoadF = 'SUMPRODUCT(SUMIF(SecKey,INDIRECT("RC3:RC12",FALSE),SecLoad))';
     let r = 5;
     const rowsOfMember = {};
-    const dvFor = (h) => ({ type: 'list', allowBlank: true, formulae: [h === 'nt' ? 'NoTime' : `Lec_${String(h).padStart(2, '0')}`], showErrorMessage: true, errorStyle: 'warning', errorTitle: 'Check the section', error: 'This section is not at this hour, or it is already assigned.' });
+    const dvFor = (h) => ({ type: 'list', allowBlank: true, formulae: [`Lec_${tagOf(h)}`], showErrorMessage: true, errorStyle: 'warning', errorTitle: 'Check the section', error: 'This section is not at this hour, or it is already assigned. The list shows only sections not yet placed at this hour.' });
     blocks.forEach((b) => {
       const first = r;
       const isPseudo = !!b.m.pseudo;
@@ -111,6 +127,7 @@
           }
         }
         ws.getCell(r, 2).value = unitL; ws.getCell(r + 1, 2).value = 0.5;
+        ws.getCell(r, UCOL).value = { formula: `$A$${first}`, result: b.m.name }; ws.getCell(r + 1, UCOL).value = { formula: `$A$${first}`, result: b.m.name };
         ws.getCell(r, 2).font = ws.getCell(r + 1, 2).font = { name: FONT, size: 10, color: { argb: 'FF404040' } };
         E.HOURS.forEach((h) => {
           const k = p[h];
@@ -159,11 +176,13 @@
       ws.getCell(first, OCOL).font = { name: FONT, size: 11, bold: true };
       if (!isPseudo) {
         const senior = Number(b.m.senior) || 0, coop = Number(b.m.coop) || 0, mscH = (per[b.m.id] && per[b.m.id].mscHours) || 0;
-        ws.getCell(first, PCOL).value = senior; ws.getCell(first, QCOL).value = coop; ws.getCell(first, RCOL).value = mscH;
-        [PCOL, QCOL, RCOL].forEach((c) => {
+        ws.getCell(first, PCOL).value = senior; ws.getCell(first, QCOL).value = coop;
+        ws.getCell(first, RCOL).value = { formula: `SUMIF($A$${mscFirst}:$A$${mscLast},$A$${first},$F$${mscFirst}:$F$${mscLast})`, result: mscH };
+        [PCOL, QCOL].forEach((c) => {
           ws.getCell(first, c).font = { name: FONT, size: 11, bold: true, color: { argb: 'FF1F4E79' } };
           ws.getCell(first, c).dataValidation = c === QCOL ? { type: 'list', allowBlank: true, formulae: ['"0,1,2,3"'], showErrorMessage: true, errorTitle: 'Whole hours', error: 'Choose 0, 1, 2 or 3.' } : { type: 'whole', operator: 'greaterThanOrEqual', formulae: [0], allowBlank: true, showErrorMessage: true, errorTitle: 'Whole hours', error: 'Type a whole number of hours, e.g. 0, 1, 2 or 3.' };
         });
+        ws.getCell(first, RCOL).font = { name: FONT, size: 11, bold: true, color: { argb: 'FF1F4E79' } };
         ws.getCell(first, SCOL).value = { formula: `${colL(OCOL)}${first}+SUM(${colL(PCOL)}${first}:${colL(RCOL)}${last})`, result: cls + senior + coop + mscH };
         ws.getCell(first, SCOL).font = { name: FONT, size: 12, bold: true };
         // sections assigned: timed L cells + No time cells − sections that do not count (e.g. Senior Project)
@@ -199,7 +218,9 @@
       for (let c = 1; c <= LAST; c++) { const cell = ws.getCell(last, c); cell.border = Object.assign({}, cell.border, { bottom: med }); }
     });
     const lastGrid = r - 1;
-    // member issues → red text on the name cell
+    if (lastGrid !== LG) throw new Error('layout mismatch');
+    ws.getColumn(UCOL).hidden = true; ws.getColumn(VCOL).hidden = true; ws.getColumn(WCOL).hidden = true;
+    // problems found by the site (clash, outside the member's hours) → red border on the cells
     (ctx.issues || []).forEach((i) => {
       if (!i.member || !rowsOfMember[i.member]) return;
       if (i.type === 'clash' || i.type === 'window') {
@@ -207,99 +228,135 @@
       }
     });
 
-    // conditional formatting: duplicates (red) first, then course colours
-    const gridRef = `C5:${colL(NOTIME)}${lastGrid}`;
-    const rules = [{ type: 'expression', priority: 1, formulae: [`AND(C5<>"",ISERROR(SEARCH("(T)",C5)),ISERROR(SEARCH("(Lab)",C5)),COUNTIF($C$5:$${colL(NOTIME)}$${lastGrid},C5)>1)`], style: { fill: fill('FF0000'), font: { color: { argb: 'FFFFFFFF' }, bold: true } } }];
-    const courseList = [...new Set(Object.values(secs).map((s) => s.course))];
-    courseList.forEach((c, i) => {
-      rules.push({ type: 'expression', priority: 2 + i, formulae: [`LEFT(C5,${c.length + 1})="${c}-"`], style: { fill: fill(D.colourFor(c)) } });
-    });
-    ws.addConditionalFormatting({ ref: gridRef, rules });
+    // ---------- conditional formatting (live) ----------
+    const isL = (a) => `AND(${a}<>"",ISERROR(SEARCH("(T)",${a})),ISERROR(SEARCH("(Lab)",${a})))`;
+    const gridAbs = `$C$5:$${colL(NOTIME)}$${lastGrid}`;
+    const keyOf = 'LEFT(C5,FIND(" ",C5&" ")-1)';
+    ws.addConditionalFormatting({ ref: `C5:${colL(NOTIME)}${lastGrid}`, rules: [
+      { type: 'expression', priority: 1, formulae: [`AND(${isL('C5')},COUNTIF(${gridAbs},C5)>1)`], style: { fill: fill('FF0000'), font: { color: { argb: 'FFFFFFFF' }, bold: true } } },
+      { type: 'expression', priority: 2, formulae: [`AND(${isL('C5')},COUNTIFS($A$${chkFirst}:$A$${chkLast},${keyOf},$G$${chkFirst}:$G$${chkLast},"Outside its time")>0)`], style: { fill: fill('FF0000'), font: { color: { argb: 'FFFFFFFF' }, bold: true } } },
+    ] });
+    ws.addConditionalFormatting({ ref: `C5:${colL(NOTIME)}${lastGrid}`, rules: courseList.map((c, i) => ({ type: 'expression', priority: 3 + i, formulae: [`LEFT(C5,${c.length + 1})="${c}-"`], style: { fill: fill(D.colourFor(c)) } })) });
 
     // ---------- colour key ----------
-    r = lastGrid + 2;
+    r = keyStart;
     ws.mergeCells(r, 1, r + 1, 2);
     ws.getCell(r, 1).value = 'Course colours'; ws.getCell(r, 1).font = { name: FONT, size: 11, bold: true }; ws.getCell(r, 1).alignment = center;
-    const used = courseList.filter((c) => Object.keys(assign).some((k) => secs[k] && secs[k].course === c));
     used.forEach((c, i) => {
-      const row = r + Math.floor(i / 11), col = 3 + (i % 11);
-      const cell = ws.getCell(row, col);
+      const cell = ws.getCell(r + Math.floor(i / 11), 3 + (i % 11));
       cell.value = c; cell.fill = fill(D.colourFor(c)); cell.font = { name: FONT, size: 10, bold: true }; cell.alignment = center; cell.border = { left: thin, right: thin, top: thin, bottom: thin };
     });
-    const keyEnd = r + Math.max(1, Math.ceil(used.length / 11));
-    ws.pageSetup = { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0, paperSize: 9, margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 } };
+    ws.pageSetup = { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0, paperSize: 9, margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.5, header: 0.2, footer: 0.25 } };
     ws.pageSetup.printArea = `A1:${colL(LAST)}${keyEnd}`;
     ws.pageSetup.printTitlesRow = '3:4';
     noticeFooter(ws);
 
-    // ---------- MSc / PhD block ----------
-    r = keyEnd + 2;
-    const sec = (titleText, headers) => {
-      ws.mergeCells(r, 1, r, 8); ws.getCell(r, 1).value = titleText; ws.getCell(r, 1).font = { name: FONT, size: 12, bold: true, color: { argb: 'FF1F4E79' } };
-      r++;
-      headers.forEach((h, i) => { const c = ws.getCell(r, 1 + i); c.value = h; c.font = { name: FONT, size: 10, bold: true }; c.fill = fill('D9E1F2'); c.alignment = center; c.border = { left: thin, right: thin, top: thin, bottom: thin }; });
-      r++;
-    };
-    const putRow = (vals, opts) => {
-      vals.forEach((v, i) => { const c = ws.getCell(r, 1 + i); if (v !== undefined) c.value = v; c.font = Object.assign({ name: FONT, size: 10 }, (opts && opts.font) || {}); c.alignment = { vertical: 'middle', wrapText: true, horizontal: i === 0 ? 'left' : 'center' }; c.border = { left: thin, right: thin, top: thin, bottom: thin }; });
-      r++;
-    };
-    sec('MSc / PhD teaching', ['Member', 'Course', 'Program', 'Days', 'Hour', 'Hours', 'Impact on timetable']);
-    const msc = ctx.msc || [];
-    if (!msc.length) putRow(['No MSc / PhD teaching entered (TBC)', '', '', '', '', '', '']);
-    msc.forEach((x) => {
-      const clash = (ctx.issues || []).some((i) => i.member === x.member && i.type === 'clash' && (i.a === 'MSc/PhD' || i.b === 'MSc/PhD'));
-      putRow([memberName[x.member] || '', x.course || '', x.program || '', (x.days || []).map((d) => E.DAY_NAMES[d]).join(' '), E.hourLabel(x.hour), Number(x.hours) || 0, clash ? 'Clash with an undergraduate section' : 'No clash']);
-    });
+    const titleRow = (row, text, width) => { ws.mergeCells(row, 1, row, width || 9); ws.getCell(row, 1).value = text; ws.getCell(row, 1).font = { name: FONT, size: 12, bold: true, color: { argb: 'FF1F4E79' } }; };
+    const headRow = (row, headers) => headers.forEach((h, i) => { if (h == null) return; const c = ws.getCell(row, 1 + i); c.value = h; c.font = { name: FONT, size: 10, bold: true }; c.fill = fill('D9E1F2'); c.alignment = center; c.border = { left: thin, right: thin, top: thin, bottom: thin }; });
+    const cellStyle = (c, left) => { c.font = { name: FONT, size: 10 }; c.alignment = { vertical: 'middle', wrapText: true, horizontal: left ? 'left' : 'center' }; c.border = { left: thin, right: thin, top: thin, bottom: thin }; };
 
-    // ---------- summary ----------
-    r++;
+    // ---------- MSc / PhD (editable: rows added here count in the member's load) ----------
+    titleRow(mscFirst - 2, 'MSc / PhD teaching — type or choose here; the hours are added to the member’s load and a clash with the timetable is shown');
+    headRow(mscFirst - 1, ['Member', 'Course', 'Program', 'Days', 'Hour', 'Hours', 'Impact on timetable']);
+    const memberNames = realMembers.map((m) => m.name);
+    for (let i = 0; i < mscRows; i++) {
+      const row = mscFirst + i, x = msc[i];
+      for (let c = 1; c <= 7; c++) cellStyle(ws.getCell(row, c), c === 1 || c === 7);
+      if (x) {
+        ws.getCell(row, 1).value = memberName[x.member] || null; ws.getCell(row, 2).value = x.course || null; ws.getCell(row, 3).value = x.program || null;
+        ws.getCell(row, 4).value = (x.days || []).map((d) => E.DAY_NAMES[d]).join(' ') || null;
+        ws.getCell(row, 5).value = x.hour ? (x.hour > 12 ? x.hour - 12 : x.hour) : null; ws.getCell(row, 6).value = Number(x.hours) || 0;
+      }
+      ws.getCell(row, 5).numFmt = '0":00"';
+      ws.getCell(row, 1).dataValidation = { type: 'list', allowBlank: true, formulae: ['Members'], showErrorMessage: true, errorStyle: 'warning', errorTitle: 'Member', error: 'Choose a member from the list.' };
+      ws.getCell(row, 3).dataValidation = { type: 'list', allowBlank: true, formulae: ['"MSc,PhD"'] };
+      ws.getCell(row, 5).dataValidation = { type: 'list', allowBlank: true, formulae: ['"8,9,10,11,1,2,3,4,5,6"'] };
+      ws.getCell(row, 6).dataValidation = { type: 'decimal', operator: 'greaterThanOrEqual', formulae: [0], allowBlank: true, showErrorMessage: true, errorTitle: 'Hours', error: 'Type the number of hours.' };
+      const at = `INDEX($C$5:$L$${lastGrid},MATCH($A${row},$A$5:$A$${lastGrid},0),MATCH($E${row},$C$4:$L$4,0))`;
+      let res = '';
+      if (x && x.member && x.hour) { const hit = Object.keys(assign).find((k) => assign[k] === x.member && secs[k].hour === x.hour); res = hit ? `Clash with ${hit} (L)` : 'No clash'; }
+      ws.getCell(row, 7).value = { formula: `IF(OR($A${row}="",$E${row}=""),"",IFERROR(IF(${at}<>"","Clash with "&${at},"No clash"),"Check the member and the hour"))`, result: res };
+    }
+    ws.addConditionalFormatting({ ref: `G${mscFirst}:G${mscLast}`, rules: [{ type: 'expression', priority: 1, formulae: [`LEFT(G${mscFirst},5)="Clash"`], style: { font: { color: { argb: 'FFC00000' }, bold: true } } }] });
+
+    // ---------- the check table (live): where every section is now ----------
     const status = statusMap(ctx);
     const lecs = Object.values(secs);
-    const cnt = (f) => lecs.filter(f).length;
-    sec('Summary against the official file', ['Item', '', '', '', '', 'Count']);
-    const sumRows = [
-      [`Sections in the ${ctx.off.sheetName} sheet (lectures)`, lecs.length],
-      ['Assigned to members', cnt((s) => status[s.key].st.startsWith('Assigned'))],
-      ['Part-timers', cnt((s) => status[s.key].st === 'Part-timer')],
-      ['ON-Hold', cnt((s) => status[s.key].st === 'ON-Hold')],
-      ['Not assigned to the department (shared or not ours)', cnt((s) => status[s.key].st === 'Not assigned to IS')],
-      ['Unassigned (must be assigned)', cnt((s) => status[s.key].st === 'Unassigned')],
-      ['Sections with a proposed time (need registration approval)', cnt((s) => s.proposed)],
-      ['Sections assigned / required (members)', `${realMembers.reduce((a, m) => a + sectionsOf(m.id).filter((k) => secs[k].counts).length, 0)} / ${realMembers.reduce((a, m) => a + (Number(m.required) || 0), 0)}`],
-    ];
-    sumRows.forEach(([a, b]) => { ws.mergeCells(r, 1, r, 5); putRow([a, undefined, undefined, undefined, undefined, b]); });
-
-    // ---------- check table ----------
-    r++;
-    ws.mergeCells(r, 1, r, 10);
-    ws.getCell(r, 1).value = `Every section in the official ${ctx.off.sheetName} sheet: status, assigned to, and notes`;
-    ws.getCell(r, 1).font = { name: FONT, size: 12, bold: true, color: { argb: 'FF1F4E79' } };
-    r++;
-    const ch = ['Section', 'Type', 'Time', 'Days & rooms', 'Course name', 'T/Lab', 'Status', 'Assigned to', 'Official-file note', 'Is Reg rows'];
-    ch.forEach((h, i) => { const c = ws.getCell(r, 1 + i); c.value = h; c.font = { name: FONT, size: 10, bold: true }; c.fill = fill('D9E1F2'); c.alignment = center; c.border = { left: thin, right: thin, top: thin, bottom: thin }; });
-    r++;
+    const GS = `$G$${chkFirst}:$G$${chkLast}`, IS_ = `$I$${chkFirst}:$I$${chkLast}`;
+    titleRow(chkFirst - 2, `Every section in the official ${ctx.off.sheetName} sheet: status and instructor update when you move a section in the timetable above`, 11);
+    headRow(chkFirst - 1, ['Section', 'Type', 'Time', 'Days & rooms', 'Course name', 'T/Lab', 'Status', 'Assigned to', 'Change vs this draft', 'Official-file note', 'Is Reg rows']);
     ctx.off.lectures.forEach((k) => {
-      const s = secs[k];
-      const st = status[k];
+      const row = chkRow[k], s = secs[k];
+      const L1 = `${k} (L)`, L2 = k;
+      const cnt = `(COUNTIF(${GRID},"${L1}")+COUNTIF(${GRID},"${L2}"))`;
+      const where = `((${GRID}="${L1}")+(${GRID}="${L2}"))`;
+      const expCol = s.noTime ? NOTIME : s.hour != null ? HCOL[s.hour] : 0;
+      const una = s.cat === 'none' || s.cat === 'asneeded' ? 'Not assigned to IS' : 'Unassigned';
+      const asg = s.counts ? 'Assigned' : 'Assigned (counted as hours)';
+      const a = assign[k];
+      const realA = a && memberName[a] && a !== 'PT' && a !== 'HOLD';
+      const cachedSt = realA ? asg : a === 'PT' ? 'Part-timer' : a === 'HOLD' ? 'ON-Hold' : una;
+      const cachedName = realA ? memberName[a] : '';
       const time = s.proposed ? `${E.hourLabel(s.hour)} proposed${s.officialHour != null ? ` (official ${E.hourLabel(s.officialHour)})` : ' (no official time)'}` : s.hour != null ? E.hourLabel(s.hour) : 'No time';
-      const rowsTxt = rowSpan(ctx.off, k);
-      putRow([k, s.prefix, time, E.describeMeetings(ctx.off, k), s.name, s.comp || '', st.st, st.name || '', (ctx.notes[k] || []).map((n) => n.text).join('; '), rowsTxt], { font: st.red ? { color: { argb: 'FFC00000' }, bold: true } : null });
-      if (s.proposed) ws.getCell(r - 1, 3).font = { name: FONT, size: 10, italic: true, color: { argb: 'FFC65911' } };
+      const vals = [k, s.prefix, time, E.describeMeetings(ctx.off, k), s.name, s.comp || ''];
+      vals.forEach((v, i) => { const c = ws.getCell(row, 1 + i); c.value = v; cellStyle(c, i === 0 || i === 3 || i === 4); });
+      if (s.proposed) ws.getCell(row, 3).font = { name: FONT, size: 10, italic: true, color: { argb: 'FFC65911' } };
+      ws.getCell(row, VCOL).value = { formula: `IF(${cnt}=1,SUMPRODUCT(${where}*ROW(${GRID})),0)`, result: placed[k] ? placed[k].row : 0 };
+      ws.getCell(row, WCOL).value = cachedName;
+      const own = `INDEX($${colL(UCOL)}:$${colL(UCOL)},$${colL(VCOL)}${row})`;
+      ws.getCell(row, 7).value = { formula: `IF(${cnt}=0,"${una}",IF(${cnt}>1,"Duplicate",IF(${own}="ON-Hold","ON-Hold",IF(${own}="Part-timers","Part-timer",IF(AND(${expCol}>0,SUMPRODUCT(${where}*COLUMN(${GRID}))<>${expCol}),"Outside its time","${asg}")))))`, result: cachedSt };
+      ws.getCell(row, 8).value = { formula: `IF(LEFT(G${row},8)="Assigned",${own},"")`, result: cachedName };
+      ws.getCell(row, 9).value = { formula: `IF(H${row}=$${colL(WCOL)}${row},"","Changed: was "&IF($${colL(WCOL)}${row}="","(none)",$${colL(WCOL)}${row})&", now "&IF(H${row}="","(none)",H${row}))`, result: '' };
+      ws.getCell(row, 10).value = (ctx.notes[k] || []).map((n) => n.text).join('; ') || null;
+      ws.getCell(row, 11).value = rowSpan(ctx.off, k);
+      [7, 8, 9, 10, 11].forEach((c) => cellStyle(ws.getCell(row, c), c === 8 || c === 9 || c === 10));
+      ws.getCell(row, 7).font = { name: FONT, size: 10, bold: true };
     });
+    ws.addConditionalFormatting({ ref: `G${chkFirst}:G${chkLast}`, rules: [
+      { type: 'expression', priority: 1, formulae: [`OR(G${chkFirst}="Unassigned",G${chkFirst}="Duplicate",G${chkFirst}="Outside its time")`], style: { fill: fill('FFC7CE'), font: { color: { argb: 'FF9C0006' }, bold: true } } },
+      { type: 'expression', priority: 2, formulae: [`LEFT(G${chkFirst},8)="Assigned"`], style: { font: { color: { argb: 'FF2E7D32' }, bold: true } } },
+    ] });
+    ws.addConditionalFormatting({ ref: `I${chkFirst}:I${chkLast}`, rules: [{ type: 'expression', priority: 1, formulae: [`I${chkFirst}<>""`], style: { fill: fill('FFF2CC'), font: { color: { argb: 'FFC65911' }, bold: true } } }] });
+
+    // ---------- summary (live) ----------
+    titleRow(sumFirst - 2, 'Summary — updates when you change the timetable above');
+    headRow(sumFirst - 1, ['Item', null, null, null, null, 'Count']);
+    const reqTotal = realMembers.reduce((a, m) => a + (Number(m.required) || 0), 0);
+    const memberTotalCells = realMembers.map((m) => `${colL(TCOL)}${rowsOfMember[m.id].first}`);
+    const cnt0 = (f) => lecs.filter(f).length;
+    const assignedNow = realMembers.reduce((a, m) => a + sectionsOf(m.id).filter((k) => secs[k].counts).length, 0);
+    const cachedSt = (s) => { const a = assign[s.key]; return a && memberName[a] && a !== 'PT' && a !== 'HOLD' ? 'A' : a === 'PT' ? 'P' : a === 'HOLD' ? 'H' : (s.cat === 'none' || s.cat === 'asneeded') ? 'N' : 'U'; };
+    const sums = [
+      [`Sections in the ${ctx.off.sheetName} sheet (lectures)`, lecs.length],
+      ['Assigned to members', { formula: `COUNTIF(${GS},"Assigned*")`, result: cnt0((s) => cachedSt(s) === 'A') }],
+      ['Part-timers', { formula: `COUNTIF(${GS},"Part-timer")`, result: cnt0((s) => cachedSt(s) === 'P') }],
+      ['ON-Hold', { formula: `COUNTIF(${GS},"ON-Hold")`, result: cnt0((s) => cachedSt(s) === 'H') }],
+      ['Not assigned to the department (shared or not ours)', { formula: `COUNTIF(${GS},"Not assigned to IS")`, result: cnt0((s) => cachedSt(s) === 'N') }],
+      ['Unassigned (must be assigned)', { formula: `COUNTIF(${GS},"Unassigned")`, result: cnt0((s) => cachedSt(s) === 'U') }],
+      ['Duplicated or outside their time', { formula: `COUNTIF(${GS},"Duplicate")+COUNTIF(${GS},"Outside its time")`, result: 0 }],
+      ['Sections changed in this file (vs this draft)', { formula: `COUNTIF(${IS_},"Changed*")`, result: 0 }],
+      ['Sections assigned / required (members)', { formula: `(${memberTotalCells.join('+') || 0})&" / ${reqTotal}"`, result: `${assignedNow} / ${reqTotal}` }],
+    ];
+    sums.forEach(([label, v], i) => {
+      const row = sumFirst + i;
+      ws.mergeCells(row, 1, row, 5);
+      const a = ws.getCell(row, 1); a.value = label; cellStyle(a, true);
+      const c = ws.getCell(row, 6); c.value = v; cellStyle(c); c.font = { name: FONT, size: 10, bold: true };
+    });
+    ws.addConditionalFormatting({ ref: `F${sumFirst + 5}:F${sumFirst + 6}`, rules: [{ type: 'expression', priority: 1, formulae: [`F${sumFirst + 5}>0`], style: { fill: fill('FFC7CE'), font: { color: { argb: 'FF9C0006' }, bold: true } } }] });
 
     // ---------- Is Reg ----------
-    await buildIsReg(wb, ctx, status);
+    await buildIsReg(wb, ctx, status, { SH, chkRow });
     noticeFooter(wb.getWorksheet('Is Reg'));
     // ---------- Time requests ----------
-    buildTimeRequests(wb, ctx, status);
+    buildTimeRequests(wb, ctx, status, { SH, chkFirst, chkLast });
     noticeFooter(wb.getWorksheet('Time requests'));
     // ---------- Official notes ----------
     buildNotes(wb, ctx);
     noticeFooter(wb.getWorksheet('Official file notes'));
     // ---------- Lists (hidden, last sheet) ----------
     const lists = wb.addWorksheet('Lists', { state: 'hidden' });
-    lists.getRow(1).values = ['SecKey', 'SecLoad', 'SecComp', '', ...E.HOURS.map((h) => `Lec_${String(h).padStart(2, '0')}`), 'NoTime'];
+    lists.getRow(1).values = ['SecKey', 'SecLoad', 'SecComp', 'Members'];
     let lr = 2;
     Object.values(secs).forEach((s) => {
       if (s.noTime) { lists.getRow(lr++).values = [s.key, s.load, '']; return; }
@@ -310,17 +367,27 @@
     wb.definedNames.add(`Lists!$A$2:$A$${lastList}`, 'SecKey');
     wb.definedNames.add(`Lists!$B$2:$B$${lastList}`, 'SecLoad');
     wb.definedNames.add(`Lists!$C$2:$C$${lastList}`, 'SecComp');
-    E.HOURS.forEach((h, i) => {
-      const col = 5 + i;
-      const keys = Object.values(secs).filter((s) => s.hour === h && !s.noTime).map((s) => lLabel(s.key));
-      keys.forEach((k, j) => { lists.getCell(2 + j, col).value = k; });
-      wb.definedNames.add(`Lists!$${colL(col)}$2:$${colL(col)}$${Math.max(2, 1 + keys.length)}`, `Lec_${String(h).padStart(2, '0')}`);
+    memberNames.forEach((n, i) => { lists.getCell(2 + i, 4).value = n; });
+    wb.definedNames.add(`Lists!$D$2:$D$${Math.max(2, 1 + memberNames.length)}`, 'Members');
+    // per hour: all candidates (Cand_xx), rank of the ones not placed yet, and the compact list the dropdown shows (Lec_xx)
+    [...E.HOURS, 'nt'].forEach((h, i) => {
+      const tag = tagOf(h);
+      const cC = 6 + i * 3, rC = cC + 1, kC = cC + 2;
+      const cand = Object.values(secs).filter((s) => (h === 'nt' ? (s.noTime || (s.needsTime && s.hour == null)) : (s.hour === h && !s.noTime))).map((s) => (s.noTime ? s.key : lLabel(s.key)));
+      const n = Math.max(1, cand.length), lastR = 1 + n;
+      lists.getCell(1, cC).value = `Cand_${tag}`; lists.getCell(1, rC).value = `Rank_${tag}`; lists.getCell(1, kC).value = `Lec_${tag}`;
+      const free = cand.filter((k) => !Object.keys(placed).some((pk) => (secs[pk].noTime ? pk : lLabel(pk)) === k));
+      for (let j = 0; j < n; j++) {
+        const row = 2 + j;
+        lists.getCell(row, cC).value = cand[j] || null;
+        const rankRes = cand[j] && free.includes(cand[j]) ? free.indexOf(cand[j]) + 1 : '';
+        lists.getCell(row, rC).value = { formula: `IF(${colL(cC)}${row}="","",IF(COUNTIF(Grid,${colL(cC)}${row})=0,MAX($${colL(rC)}$1:${colL(rC)}${row - 1})+1,""))`, result: rankRes };
+        lists.getCell(row, kC).value = { formula: `IFERROR(INDEX($${colL(cC)}$2:$${colL(cC)}$${lastR},MATCH(ROW()-1,$${colL(rC)}$2:$${colL(rC)}$${lastR},0)),"")`, result: free[j] || '' };
+      }
+      extraNames.push({ name: `Cand_${tag}`, formula: `Lists!$${colL(cC)}$2:$${colL(cC)}$${lastR}` });
+      extraNames.push({ name: `Lec_${tag}`, formula: `OFFSET(Lists!$${colL(kC)}$2,0,0,MAX(1,COUNTIF(Lists!$${colL(kC)}$2:$${colL(kC)}$${lastR},"?*")),1)` });
     });
-    const ntCol = 5 + E.HOURS.length;
-    const ntKeys = Object.values(secs).filter((s) => s.noTime || (s.needsTime && s.hour == null)).map((s) => (s.noTime ? s.key : lLabel(s.key)));
-    ntKeys.forEach((k, j) => { lists.getCell(2 + j, ntCol).value = k; });
-    wb.definedNames.add(`Lists!$${colL(ntCol)}$2:$${colL(ntCol)}$${Math.max(2, 1 + ntKeys.length)}`, 'NoTime');
-
+    wb.__extraNames = extraNames;
     return wb;
   }
 
@@ -351,7 +418,7 @@
     return out;
   }
 
-  async function buildIsReg(wb, ctx, status) {
+  async function buildIsReg(wb, ctx, status, link) {
     const off = ctx.off;
     const ws = wb.addWorksheet('Is Reg', { views: [{ state: 'frozen', ySplit: off.headerRow }] });
     const src = ctx.officialWorkbook && ctx.officialWorkbook.getWorksheet(off.sheetName);
@@ -384,18 +451,29 @@
       const st = status[lk] || { st: 'Not in timetable', name: '', red: true };
       const s = ctx.secs[lk];
       const nameCell = ws.getCell(row.excelRow, instrCol);
-      nameCell.value = st.st.startsWith('Assigned') && !st.red ? st.name : null;
-      if (!nameCell.value) nameCell.fill = fill('F2F2F2');
+      const cr = link && link.chkRow[lk];
+      const nm = st.st.startsWith('Assigned') && !st.red ? st.name : '';
       const sc = ws.getCell(row.excelRow, lastSrcCol + 1);
-      sc.value = st.st; sc.font = { name: FONT, size: 10, bold: true, color: { argb: st.red ? 'FFC00000' : st.st.startsWith('Assigned') ? 'FF2E7D32' : 'FF7F7F7F' } };
+      if (cr) {
+        nameCell.value = { formula: `IF(LEFT(${link.SH}!$G$${cr},8)="Assigned",${link.SH}!$H$${cr},"")`, result: nm };
+        sc.value = { formula: `${link.SH}!$G$${cr}`, result: st.st.replace(' – conflict', '') };
+      } else { nameCell.value = nm || null; sc.value = st.st; }
+      sc.font = { name: FONT, size: 10, bold: true };
       const notes = (ctx.notes[lk] || []).map((n) => n.text);
       if (s && s.proposed) notes.unshift(`Proposed time ${E.hourLabel(s.hour)}${s.officialHour != null ? ` instead of ${E.hourLabel(s.officialHour)}` : ''} (needs registration approval)`);
       const nc = ws.getCell(row.excelRow, lastSrcCol + 2);
       nc.value = notes.join('; ') || null; nc.font = { name: FONT, size: 9, color: { argb: 'FF595959' } }; nc.alignment = { wrapText: false, vertical: 'middle' };
     });
+    const first = off.headerRow + 1, last = Math.max(first, ...off.rows.map((x) => x.excelRow));
+    const L = colL(instrCol), M = colL(lastSrcCol + 1);
+    ws.addConditionalFormatting({ ref: `${L}${first}:${L}${last}`, rules: [{ type: 'expression', priority: 1, formulae: [`${L}${first}=""`], style: { fill: fill('F2F2F2') } }] });
+    ws.addConditionalFormatting({ ref: `${M}${first}:${M}${last}`, rules: [
+      { type: 'expression', priority: 1, formulae: [`OR(${M}${first}="Unassigned",${M}${first}="Duplicate",${M}${first}="Outside its time")`], style: { font: { color: { argb: 'FFC00000' }, bold: true } } },
+      { type: 'expression', priority: 2, formulae: [`LEFT(${M}${first},8)="Assigned"`], style: { font: { color: { argb: 'FF2E7D32' }, bold: true } } },
+    ] });
   }
 
-  function buildTimeRequests(wb, ctx, status) {
+  function buildTimeRequests(wb, ctx, status, link) {
     const ws = wb.addWorksheet('Time requests');
     const heads = ['Section', 'T / Lab', 'Course', 'Instructor', 'Official time', 'Proposed time', 'Days', 'Suggested free rooms', 'Note'];
     const widths = [16, 14, 34, 28, 14, 14, 18, 46, 46];
@@ -408,6 +486,7 @@
       const days = fr.map((g) => `${g.days.map((d) => E.DAY_NAMES[d]).join(' ')}${g.online ? ' (Online)' : ''}`).join(' | ');
       const rooms = fr.filter((g) => !g.online).map((g) => `${g.days.map((d) => E.DAY_NAMES[d]).join(' ')}: ${g.rooms.length ? g.rooms.map(E.shortRoom).join(' or ') : 'no free room found'}`).join(' | ');
       ws.getRow(r).values = [s.key, s.comp || '', s.name, (status[s.key] && status[s.key].name) || '', s.officialHour != null ? E.hourLabel(s.officialHour) : 'No time', E.hourLabel(s.hour), days, rooms, (ctx.notes[s.key] || []).map((n) => n.text).join('; ')];
+      if (link) ws.getCell(r, 4).value = { formula: `IFERROR(INDEX(${link.SH}!$H$${link.chkFirst}:$H$${link.chkLast},MATCH($A${r},${link.SH}!$A$${link.chkFirst}:$A$${link.chkLast},0)),"")`, result: (status[s.key] && status[s.key].name) || '' };
       ws.getRow(r).eachCell((c) => { c.font = { name: FONT, size: 10 }; c.alignment = { vertical: 'middle', wrapText: true }; });
       r++;
     });
@@ -504,5 +583,20 @@
     return wb;
   }
 
-  return { build, statusMap, buildFormatted, NOTICE };
+  /** Save the workbook and add the defined names ExcelJS cannot write (OFFSET lists, the grid range). */
+  async function toBuffer(wb, JSZip) {
+    const buf = await wb.xlsx.writeBuffer();
+    const names = wb.__extraNames || [];
+    if (!names.length) return buf;
+    const zip = await JSZip.loadAsync(buf);
+    let xml = await zip.file('xl/workbook.xml').async('string');
+    const escX = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const add = names.map((n) => `<definedName name="${n.name}">${escX(n.formula)}</definedName>`).join('');
+    if (xml.includes('</definedNames>')) xml = xml.replace('</definedNames>', add + '</definedNames>');
+    else xml = xml.replace('</sheets>', '</sheets><definedNames>' + add + '</definedNames>');
+    zip.file('xl/workbook.xml', xml);
+    return zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
+  }
+
+  return { build, statusMap, buildFormatted, toBuffer, NOTICE };
 });
