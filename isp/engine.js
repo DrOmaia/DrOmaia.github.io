@@ -443,7 +443,7 @@
       });
     }
     if (!list.length) throw new Error('not-faculty');
-    return { sheetName, list, partTime };
+    return { sheetName, list, partTime, hasCoop: col.coop != null, hasSenior: col.senior != null };
   }
 
   // ---------- name matching ----------

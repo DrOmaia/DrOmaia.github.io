@@ -10,7 +10,7 @@
   const blank = () => ({
     app: 'isp-timetable', v: 1, side: null, term: '', lang: (S0() || {}).lang || 'ar', step: 1,
     files: {}, members: [], courses: {}, courseTouched: {}, secCat: {}, msc: [],
-    currentMap: {}, prefsMap: {}, mapManual: {}, assign: {}, proposed: {}, autoTime: {}, pins: {}, bans: {},
+    currentMap: {}, prefsMap: {}, mapManual: {}, hoursSource: '', assign: {}, proposed: {}, autoTime: {}, pins: {}, bans: {},
     decisions: {}, forbidden: {}, built: false, baseline: null, savedAt: null,
   });
   function S0() { try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch (e) { return null; } }
@@ -125,8 +125,10 @@
       const m = hit ? Object.assign({}, hit) : newMember(x.name);
       m.name = x.name;
       if (x.required !== '' && x.required != null) m.required = x.required;
-      if (x.coop != null) m.coop = Math.max(0, Math.round(x.coop));
-      if (x.senior != null) m.senior = Math.max(0, Math.round(x.senior));
+      if (S.hoursSource === 'file') {
+        if (x.coop != null) m.coop = Math.max(0, Math.round(x.coop));
+        if (x.senior != null) m.senior = Math.max(0, Math.round(x.senior));
+      }
       return m;
     });
     const ids = new Set(S.members.map((m) => m.id));
@@ -423,6 +425,15 @@
         if (total) body += `<details class="notes"><summary>${esc(t('notesFound', total))}</summary><ul>${nk.map((k) => R.notes[k].map((x) => `<li><b>${esc(k)}</b>: ${esc(x.text)}</li>`).join('')).join('')}</ul></details>`;
       }
       if (kind === 'faculty' && R.fac && R.fac.partTime != null) body += `<p class="small muted" style="margin-top:6px">${esc(t('partNote', R.fac.partTime))}</p>`;
+      if (kind === 'faculty' && R.fac) {
+        const has = R.fac.hasCoop || R.fac.hasSenior;
+        const found = [R.fac.hasCoop ? 'COOP' : '', R.fac.hasSenior ? 'Senior' : ''].filter(Boolean).join(S.lang === 'ar' ? ' و ' : ' and ');
+        const src = S.hoursSource || (has ? 'file' : 'manual');
+        body += `<fieldset class="src-pick"><legend>${esc(t('hoursSrc'))}</legend>
+          <label class="${has ? '' : 'off'}"><input type="radio" name="hsrc" value="file" data-chg="hoursSrc" ${src === 'file' ? 'checked' : ''} ${has ? '' : 'disabled'}><span><b>${esc(t('srcFile'))}</b><small>${esc(has ? t('srcFound', found) : t('srcNoCol'))}</small></span></label>
+          <label><input type="radio" name="hsrc" value="manual" data-chg="hoursSrc" ${src === 'manual' ? 'checked' : ''}><span><b>${esc(t('srcManual'))}</b><small>${esc(t('srcManualSub'))}</small></span></label>
+        </fieldset>`;
+      }
       if (kind === 'current' && R.cur) body += matchTable('current');
       if (kind === 'prefs' && R.prefs) body += matchTable('prefs');
     }
@@ -546,7 +557,7 @@
     return `<p class="sub">${esc(t('membersIntro'))}</p>
     <div class="sumbar ${reqTotal > avail + asn ? 'bad' : ''}" style="margin:0 0 14px"><span>${esc(t('totalReq', reqTotal, `${avail}${asn ? ` + ${asn} (${t('cats').asneeded})` : ''}`))}</span></div>
     <div class="mtable-wrap"><table class="mtable">
-      <thead><tr>${th('#', '', 'idx')}${th(t('hName'), t('hNameSub'))}${th(t('hSections'), t('hSectionsSub'), 'c')}${th(t('hCoop'), t('hHours'), 'c')}${th(t('hSenior'), t('hHours'), 'c')}${th(t('prefTime'), t('hPrefSub'), 'c')}${th(t('hLimits'), t('hLimitsSub'))}${th('', '')}</tr></thead>
+      <thead><tr>${th('#', '', 'idx')}${th(t('hName'), t('hNameSub'))}${th(t('hSections'), t('hSectionsSub'), 'c')}${th(t('hCoop'), S.hoursSource === 'file' ? t('hHoursFile') : t('hHours'), 'c')}${th(t('hSenior'), S.hoursSource === 'file' ? t('hHoursFile') : t('hHours'), 'c')}${th(t('prefTime'), t('hPrefSub'), 'c')}${th(t('hLimits'), t('hLimitsSub'))}${th('', '')}</tr></thead>
       <tbody>${rows}</tbody></table></div>
     <p class="small muted" style="margin-top:12px">${esc(t('editNamesHint'))} <button class="link" type="button" data-act="go" data-step="2">${esc(t('toFiles'))}</button></p>`;
   }
@@ -747,7 +758,7 @@
     if (kind === 'current' || kind === 'prefs') Object.keys(S.mapManual).forEach((k) => { if (k.startsWith(kind + '|')) delete S.mapManual[k]; });
     main.querySelectorAll('[data-drop]').forEach((d) => { if (d.dataset.drop === kind) d.textContent = t('reading'); });
     await readFile(kind); parseAll();
-    if (kind === 'faculty' && R.fac) { applyFaculty(); parseAll(); }
+    if (kind === 'faculty' && R.fac) { S.hoursSource = R.fac.hasCoop || R.fac.hasSenior ? 'file' : 'manual'; applyFaculty(); parseAll(); }
     S.built = false; persist(); render();
   }
   function startProject() {
@@ -917,6 +928,7 @@
       case 'msc': { const x = S.msc.find((y) => y.id === d.id); if (x) x[d.field] = d.field === 'hours' ? Number(el.value) : el.value; break; }
       case 'mscDay': { const x = S.msc.find((y) => y.id === d.id); const day = +d.day; x.days = el.checked ? [...new Set((x.days || []).concat(day))].sort() : (x.days || []).filter((y) => y !== day); break; }
       case 'assignTo': if (el.value) putSection(d.key, el.value); break;
+      case 'hoursSrc': S.hoursSource = el.value; if (el.value === 'file') applyFaculty(); break;
       case 'fmtSheet': fmtUseSheet(el.value); render(); return;
       case 'fmtTitle': ui.fmt.title = el.value; render(); return;
       default: break;
