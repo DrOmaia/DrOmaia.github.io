@@ -83,6 +83,8 @@
         const names = R.cur.rows.filter((r) => r.kind === 'member').map((r) => r.name);
         const auto = E.matchNames(names, S.members);
         names.forEach((n) => { R.curScore[n] = auto[n] ? auto[n].score : 0; if (!S.mapManual['current|' + n] || !(n in S.currentMap)) S.currentMap[n] = auto[n] ? auto[n].id : ''; });
+        // part-timer and ON-Hold rows: used as such unless the user chose otherwise
+        R.cur.rows.filter((r) => r.kind !== 'member').forEach((r) => { if (!S.mapManual['current|' + r.name] || !(r.name in S.currentMap)) S.currentMap[r.name] = r.kind === 'parttime' ? 'PT' : 'HOLD'; });
       } catch (e) { R.err.current = 'notCurrent'; }
     }
     // preferences
@@ -98,7 +100,8 @@
     }
     // course defaults for courses the user has not changed
     if (R.off) {
-      const def = E.defaultCourseSettings(R.off, R.cur, {});
+      const curRoles = R.cur ? { rows: R.cur.rows.map((r) => Object.assign({}, r, { kind: S.currentMap[r.name] === 'PT' ? 'parttime' : 'other' })) } : null;
+      const def = E.defaultCourseSettings(R.off, curRoles, {});
       Object.entries(def).forEach(([code, v]) => { if (!S.courseTouched[code] || !S.courses[code]) S.courses[code] = Object.assign({}, S.courses[code] || {}, v); });
     }
   }
@@ -122,8 +125,8 @@
       const m = hit ? Object.assign({}, hit) : newMember(x.name);
       m.name = x.name;
       if (x.required !== '' && x.required != null) m.required = x.required;
-      if (x.coop != null) m.coop = x.coop;
-      if (x.senior != null) m.senior = x.senior;
+      if (x.coop != null) m.coop = Math.max(0, Math.round(x.coop));
+      if (x.senior != null) m.senior = Math.max(0, Math.round(x.senior));
       return m;
     });
     const ids = new Set(S.members.map((m) => m.id));
@@ -134,7 +137,7 @@
   }
   function currentFor() {
     const out = {};
-    if (R.cur) R.cur.rows.forEach((r) => { if (r.kind === 'member' && S.currentMap[r.name]) out[S.currentMap[r.name]] = (out[S.currentMap[r.name]] || []).concat(r.items); });
+    if (R.cur) R.cur.rows.forEach((r) => { const id = S.currentMap[r.name]; if (id && memberById(id)) out[id] = (out[id] || []).concat(r.items); });
     else if (S.baseline) Object.entries(S.baseline).forEach(([id, items]) => { if (memberById(id)) out[id] = items; });
     return out;
   }
@@ -353,31 +356,40 @@
         const nk = Object.keys(R.notes); const total = nk.reduce((a, k) => a + R.notes[k].length, 0);
         if (total) body += `<details class="notes"><summary>${esc(t('notesFound', total))}</summary><ul>${nk.map((k) => R.notes[k].map((x) => `<li><b>${esc(k)}</b>: ${esc(x.text)}</li>`).join('')).join('')}</ul></details>`;
       }
-      if (kind === 'faculty' && R.fac) {
-        body += `<details class="notes"><summary>${esc(t('facShow'))}</summary><ol class="names" dir="ltr">${S.members.map((m) => `<li>${esc(m.name)} <span class="muted">(${esc(m.required === '' ? '–' : m.required)})</span></li>`).join('')}</ol></details>`;
-        if (R.fac.partTime != null) body += `<p class="small muted" style="margin-top:6px">${esc(t('partNote', R.fac.partTime))}</p>`;
-      }
+      if (kind === 'faculty' && R.fac && R.fac.partTime != null) body += `<p class="small muted" style="margin-top:6px">${esc(t('partNote', R.fac.partTime))}</p>`;
       if (kind === 'current' && R.cur) body += matchTable('current');
       if (kind === 'prefs' && R.prefs) body += matchTable('prefs');
     }
     if (kind === 'current' && !f && S.baseline) body += `<p class="ok-text small" style="margin-top:8px">${esc(t('baselineOn'))}</p>`;
     if (kind === 'faculty' && !f && S.members.length) body += `<p class="ok-text small" style="margin-top:8px">${esc(t('membersKept', S.members.length))}</p>`;
     if (kind === 'faculty' && !f) body += `<p style="margin-top:8px"><button class="link" type="button" data-act="facTemplate">${esc(t('facTemplate'))}</button></p>`;
+    if (kind === 'faculty') body += memberEditor();
     const ok = (kind === 'faculty' && S.members.length && !err) || (kind === 'official' && R.off) || (kind === 'current' && (R.cur || (!f && S.baseline))) || (kind === 'prefs' && R.prefs);
     return `<div class="upl ${ok ? 'ok' : ''}"><span class="num">${ok ? '✓' : n}</span><div><h3>${esc(title)} <span class="tag ${kind === 'prefs' ? 'opt' : ''}">${esc(tag)}</span></h3><p class="hint">${esc(hint)}</p>${body}</div></div>`;
+  }
+  /** Files step: the member list itself — names, order, add and delete — before any matching. */
+  function memberEditor() {
+    if (!S.members.length && !S.files.faculty) return `<p class="small muted" style="margin-top:10px">${esc(t('orByHand'))} <button class="link" type="button" data-act="mAdd">+ ${esc(t('addMember'))}</button></p>`;
+    return `<div class="fac-list"><div class="fac-head"><b>${esc(t('facListTitle', S.members.length))}</b><span class="muted small">${esc(t('facListHint'))}</span></div>
+      <table class="fac"><tbody>${S.members.map((m, i) => `<tr>
+        <td class="idx">${i + 1}</td>
+        <td><input class="input fac-nm" dir="ltr" value="${esc(m.name)}" data-chg="mf" data-id="${m.id}" data-field="name" aria-label="${esc(t('hName'))}"></td>
+        <td class="acts"><span class="updown"><button class="btn small quiet" type="button" data-act="mUp" data-id="${m.id}" ${i ? '' : 'disabled'} title="${esc(t('upHint'))}">↑ ${esc(t('up'))}</button><button class="btn small quiet" type="button" data-act="mDown" data-id="${m.id}" ${i < S.members.length - 1 ? '' : 'disabled'} title="${esc(t('downHint'))}">↓ ${esc(t('down'))}</button></span>
+          <button class="btn small danger" type="button" data-act="mDel" data-id="${m.id}">${esc(t('delMember'))}</button></td></tr>`).join('')}</tbody></table>
+      <div class="row" style="margin-top:10px"><button class="btn small" type="button" data-act="mAdd">+ ${esc(t('addMember'))}</button><span class="muted small">${esc(t('addHint'))}</span></div></div>`;
   }
   function matchTable(kind) {
     const rows = kind === 'current' ? R.cur.rows : R.prefs.list.map((p) => ({ name: p.name, kind: 'member' }));
     const map = kind === 'current' ? S.currentMap : S.prefsMap, score = kind === 'current' ? R.curScore : R.prefScore;
     const used = new Set(Object.values(map).filter(Boolean));
     const missing = S.members.filter((m) => !used.has(m.id));
-    const opts = (sel) => `<option value="">${esc(t('notMember'))}</option>` + S.members.map((m) => `<option value="${m.id}" ${m.id === sel ? 'selected' : ''}>${esc(m.name)}</option>`).join('');
-    return `<details class="notes" ${rows.some((r) => r.kind === 'member' && (!map[r.name] || (!S.mapManual[kind + '|' + r.name] && (score[r.name] || 0) < 0.9))) ? 'open' : ''}><summary>${esc(t('matchTitle'))}</summary><p class="small muted" style="margin-top:6px">${esc(t('matchText'))}</p>
+    const isUnsure = (r) => r.kind === 'member' && (!map[r.name] || (!S.mapManual[kind + '|' + r.name] && (score[r.name] || 0) < 0.9));
+    const opts = (sel) => `<optgroup label="${esc(t('optMembers'))}">${S.members.map((m) => `<option value="${m.id}" ${m.id === sel ? 'selected' : ''}>${esc(m.name)}</option>`).join('')}</optgroup>`
+      + `<optgroup label="${esc(t('optOther'))}">${kind === 'current' ? `<option value="PT" ${sel === 'PT' ? 'selected' : ''}>${esc(t('optPart'))}</option><option value="HOLD" ${sel === 'HOLD' ? 'selected' : ''}>${esc(t('optHold'))}</option>` : ''}<option value="" ${!sel ? 'selected' : ''}>${esc(t('optIgnore'))}</option></optgroup>`;
+    return `<details class="notes" ${rows.some(isUnsure) ? 'open' : ''}><summary>${esc(t('matchTitle'))}</summary><p class="small muted" style="margin-top:6px">${esc(t(kind === 'current' ? 'matchTextCur' : 'matchText'))}</p>
       <table class="match">${rows.map((r) => {
-        if (r.kind !== 'member') return `<tr><td>${esc(r.name)}</td><td class="muted">${esc(r.kind === 'parttime' ? t('partRow') : t('holdRow'))}</td></tr>`;
         const sel = map[r.name] || '';
-        const unsure = !sel || (!S.mapManual[kind + '|' + r.name] && (score[r.name] || 0) < 0.9);
-        return `<tr class="${unsure ? 'unsure' : ''}"><td>${esc(r.name)}</td><td><select class="input" data-chg="map" data-kind="${kind}" data-name="${esc(r.name)}">${opts(sel)}</select></td></tr>`;
+        return `<tr class="${isUnsure(r) ? 'unsure' : ''}"><td>${esc(r.name)}${r.items && r.items.length ? `<small class="muted" style="display:block;font-weight:500">${esc([...new Set(r.items.map((i) => i.course))].join(', '))}</small>` : ''}</td><td><select class="input" data-chg="map" data-kind="${kind}" data-name="${esc(r.name)}">${opts(sel)}</select></td></tr>`;
       }).join('')}</table>
       ${missing.length ? `<p class="small muted" style="margin-top:8px">${esc(t('noRow'))}: <span dir="ltr">${missing.map((m) => esc(m.name)).join(', ')}</span></p>` : ''}</details>`;
   }
@@ -403,13 +415,25 @@
   }
   function memberChips(m) {
     const c = [];
-    if (m.first > 8) c.push(`${t('firstHour')} ${hl(m.first)}`);
-    if (m.last < 18) c.push(`${t('lastHour')} ${hl(m.last)}`);
-    if ((m.allowed || []).length) c.push(`${t('allowed')}: ${m.allowed.join(', ')}`);
-    if ((m.never || []).length) c.push(`${t('never')}: ${m.never.join(', ')}`);
-    if (m.prefTime === 'am') c.push(t('am')); if (m.prefTime === 'pm') c.push(t('pm'));
-    if (m.keepCurrent === false) c.push(S.lang === 'ar' ? 'لا يحتفظ بمقرراته' : 'Not keeping current courses');
+    if (m.first > 8) c.push(t('lcFirst', hl(m.first)));
+    if (m.last < 18) c.push(t('lcLast', hl(m.last)));
+    if ((m.allowed || []).length) c.push(t('lcOnly', m.allowed.join(', ')));
+    if ((m.never || []).length) c.push(t('lcNever', m.never.join(', ')));
+    const pr = (m.prefs || []).filter(Boolean); if (pr.length) c.push(t('lcPrefs', pr.join(' › ')));
+    if (m.keepCurrent === false) c.push(t('lcNoKeep'));
+    if (!c.length) return `<span class="muted small">${esc(t('noLimits'))}</span>`;
     return c.map((x) => `<span class="chip">${esc(x)}</span>`).join('');
+  }
+  /** Whole hours chosen from a list (0, 1, 2, …), never typed. */
+  function hoursSelect(m, field, max, label) {
+    const v = Number(m[field]) || 0;
+    const top = Math.max(max, Math.ceil(v));
+    let o = '';
+    for (let h = 0; h <= top; h++) o += `<option value="${h}" ${Math.round(v) === h ? 'selected' : ''}>${h}</option>`;
+    return `<select class="input num" data-chg="mf" data-id="${m.id}" data-field="${field}" aria-label="${esc(label)}">${o}</select>`;
+  }
+  function hintField(label, hint, control, wide) {
+    return `<div class="field${wide ? ' wide' : ''}"><span class="lbl">${esc(label)}</span>${control}${hint ? `<span class="hint2">${esc(hint)}</span>` : ''}</div>`;
   }
   function viewMembers() {
     const cur = currentFor();
@@ -418,37 +442,46 @@
     const asn = Object.values(secs).filter((s) => s.cat === 'asneeded').length;
     const reqTotal = S.members.reduce((a, m) => a + (Number(m.required) || 0), 0);
     const opts3 = (sel) => `<option value="">—</option>` + courseCodes().map((c) => `<option ${c === sel ? 'selected' : ''}>${esc(c)}</option>`).join('');
-    if (!S.members.length) return `<p class="muted">${esc(t('noMembers'))}</p><div class="row" style="margin-top:12px"><button class="btn" type="button" data-act="mAdd">+ ${esc(t('addMember'))}</button></div>`;
-    return `<div class="colhead"><span></span><span>${esc(t('colName'))}</span><span>${esc(t('colSections'))}</span><span>${esc(t('colCoop'))}</span><span>${esc(t('colSenior'))}</span><span class="c6">${esc(t('colMore'))}</span><span class="c7"></span></div>
-    <div class="mlist">${S.members.map((m, i) => `
-      <div class="mrow">
-        <div class="line">
-          <span class="idx">${i + 1}</span>
-          <input class="input nm" value="${esc(m.name)}" data-chg="mf" data-id="${m.id}" data-field="name" aria-label="${esc(t('colName'))}">
-          <input class="input num" type="number" min="0" max="12" value="${esc(m.required)}" data-chg="mf" data-id="${m.id}" data-field="required" aria-label="${esc(t('colSections'))}">
-          <input class="input num" type="number" min="0" step="0.5" value="${esc(m.coop)}" data-chg="mf" data-id="${m.id}" data-field="coop" aria-label="COOP">
-          <input class="input num" type="number" min="0" step="0.5" value="${esc(m.senior)}" data-chg="mf" data-id="${m.id}" data-field="senior" aria-label="Senior">
-          <span class="chips">${memberChips(m)}</span>
-          <span class="acts">
-            <button class="icon-btn" type="button" title="${esc(t('moveUp'))}" data-act="mUp" data-id="${m.id}" ${i ? '' : 'disabled'}>↑</button>
-            <button class="icon-btn" type="button" title="${esc(t('moveDown'))}" data-act="mDown" data-id="${m.id}" ${i < S.members.length - 1 ? '' : 'disabled'}>↓</button>
-            <button class="btn small" type="button" data-act="mOpen" data-id="${m.id}">${esc(ui.open[m.id] ? t('less') : t('more'))}</button>
-            <button class="icon-btn danger" type="button" title="${esc(t('delMember'))}" data-act="mDel" data-id="${m.id}">🗑</button>
-          </span>
-        </div>
-        ${ui.open[m.id] ? `<div class="more">
-          <label class="check wide"><input type="checkbox" ${m.keepCurrent !== false ? 'checked' : ''} data-chg="mf" data-id="${m.id}" data-field="keepCurrent">${esc(t('keepCurrent'))}${cur[m.id] && cur[m.id].length ? `<span class="muted small" dir="ltr">&nbsp;(${cur[m.id].map((x) => `${x.course} ${x.hour ? hl(x.hour) : ''}`).join(', ')})</span>` : ''}</label>
-          <div class="field"><span class="lbl">${esc(t('firstHour'))}</span><select class="input" data-chg="mf" data-id="${m.id}" data-field="first">${hourOpts(m.first || 8, t('any'), 8)}</select></div>
-          <div class="field"><span class="lbl">${esc(t('lastHour'))}</span><select class="input" data-chg="mf" data-id="${m.id}" data-field="last">${hourOpts(m.last || 18, t('any'), 18)}</select></div>
-          <div class="field"><span class="lbl">${esc(t('prefTime'))}</span><select class="input" data-chg="mf" data-id="${m.id}" data-field="prefTime">${['any', 'am', 'pm'].map((v) => `<option value="${v}" ${m.prefTime === v ? 'selected' : ''}>${esc(t(v === 'any' ? 'anyTime' : v))}</option>`).join('')}</select></div>
-          <div class="field"><span class="lbl">${esc(t('allowed'))}</span>${chipBox(m, 'allowed')}<span class="small muted">${esc(t('allowedHint'))}</span></div>
-          <div class="field"><span class="lbl">${esc(t('never'))}</span>${chipBox(m, 'never')}</div>
-          <div class="field"><span class="lbl">${esc(t('prefs'))}</span><div class="row" style="gap:6px">${[0, 1, 2].map((j) => `<select class="input" style="width:auto" data-chg="mpref" data-id="${m.id}" data-j="${j}">${opts3((m.prefs || [])[j])}</select>`).join('')}</div></div>
-          ${m.comment ? `<div class="field wide"><span class="lbl">${esc(t('comment'))}</span><p class="small" dir="ltr" style="text-align:start">${esc(m.comment)}</p></div>` : ''}
-        </div>` : ''}
-      </div>`).join('')}</div>
-    <div class="row" style="margin-top:12px"><button class="btn" type="button" data-act="mAdd">+ ${esc(t('addMember'))}</button></div>
-    <div class="sumbar ${reqTotal > avail + asn ? 'bad' : ''}"><span>${esc(t('totalReq', reqTotal, `${avail}${asn ? ` + ${asn} (${t('cats').asneeded})` : ''}`))}</span></div>`;
+    if (!S.members.length) return `<p class="muted">${esc(t('noMembers'))} <button class="link" type="button" data-act="go" data-step="2">${esc(t('toFiles'))}</button></p>`;
+    const th = (a, b, cls) => `<th class="${cls || ''}">${esc(a)}${b ? `<small>${esc(b)}</small>` : ''}</th>`;
+    const rows = S.members.map((m, i) => {
+      const open = !!ui.open[m.id];
+      const curTxt = cur[m.id] && cur[m.id].length ? cur[m.id].map((x) => `${x.course}${x.hour ? ' ' + hl(x.hour) : ''}`).join(', ') : '';
+      const main = `<tr class="${open ? 'is-open' : ''}">
+        <td class="idx">${i + 1}</td>
+        <td class="nmcell" dir="ltr">${esc(m.name)}</td>
+        <td class="c"><input class="input num ${m.required === '' ? 'empty' : ''}" type="number" min="0" max="12" step="1" inputmode="numeric" value="${esc(m.required)}" data-chg="mf" data-id="${m.id}" data-field="required" aria-label="${esc(t('hSections'))}"></td>
+        <td class="c">${hoursSelect(m, 'coop', 3, t('hCoop'))}</td>
+        <td class="c">${hoursSelect(m, 'senior', 6, t('hSenior'))}</td>
+        <td class="c"><select class="input pt ${m.prefTime && m.prefTime !== 'any' ? 'set' : ''}" data-chg="mf" data-id="${m.id}" data-field="prefTime" aria-label="${esc(t('prefTime'))}">${['any', 'am', 'pm'].map((v) => `<option value="${v}" ${(m.prefTime || 'any') === v ? 'selected' : ''}>${esc(t(v === 'any' ? 'anyTime' : v))}</option>`).join('')}</select></td>
+        <td class="chips">${memberChips(m)}</td>
+        <td class="acts">
+          <button class="btn small ${open ? 'primary' : ''}" type="button" data-act="mOpen" data-id="${m.id}" aria-expanded="${open}">${esc(open ? t('closeLimits') : t('editLimits'))}</button>
+        </td></tr>`;
+      if (!open) return main;
+      return main + `<tr class="more-row"><td></td><td colspan="7"><div class="more2">
+        <section><h4>${esc(t('gTime'))}</h4>
+          ${hintField(t('firstHour'), t('hintFirst'), `<select class="input" data-chg="mf" data-id="${m.id}" data-field="first">${hourOpts(m.first || 8, t('any'), 8)}</select>`)}
+          ${hintField(t('lastHour'), t('hintLast'), `<select class="input" data-chg="mf" data-id="${m.id}" data-field="last">${hourOpts(m.last || 18, t('any'), 18)}</select>`)}
+        </section>
+        <section><h4>${esc(t('gCourses'))}</h4>
+          ${hintField(t('allowed'), t('allowedHint'), chipBox(m, 'allowed'))}
+          ${hintField(t('never'), t('hintNever'), chipBox(m, 'never'))}
+          <label class="check"><input type="checkbox" ${m.keepCurrent !== false ? 'checked' : ''} data-chg="mf" data-id="${m.id}" data-field="keepCurrent">${esc(t('keepCurrent'))}</label>
+          <span class="hint2">${esc(t('currentCourses'))}: <span dir="ltr">${esc(curTxt || t('noCurrent'))}</span></span>
+        </section>
+        <section><h4>${esc(t('gSurvey'))}</h4>
+          ${hintField(t('prefs'), t('hintPrefs'), `<div class="row" style="gap:6px">${[0, 1, 2].map((j) => `<label class="pref-pick"><small>${j + 1}</small><select class="input" data-chg="mpref" data-id="${m.id}" data-j="${j}">${opts3((m.prefs || [])[j])}</select></label>`).join('')}</div>`)}
+          ${hintField(t('comment'), '', `<p class="small comment" dir="ltr">${esc(m.comment || t('noComment'))}</p>`)}
+        </section>
+      </div></td></tr>`;
+    }).join('');
+    return `<p class="sub">${esc(t('membersIntro'))}</p>
+    <div class="sumbar ${reqTotal > avail + asn ? 'bad' : ''}" style="margin:0 0 14px"><span>${esc(t('totalReq', reqTotal, `${avail}${asn ? ` + ${asn} (${t('cats').asneeded})` : ''}`))}</span></div>
+    <div class="mtable-wrap"><table class="mtable">
+      <thead><tr>${th('#', '', 'idx')}${th(t('hName'), t('hNameSub'))}${th(t('hSections'), t('hSectionsSub'), 'c')}${th(t('hCoop'), t('hHours'), 'c')}${th(t('hSenior'), t('hHours'), 'c')}${th(t('prefTime'), t('hPrefSub'), 'c')}${th(t('hLimits'), t('hLimitsSub'))}${th('', '')}</tr></thead>
+      <tbody>${rows}</tbody></table></div>
+    <p class="small muted" style="margin-top:12px">${esc(t('editNamesHint'))} <button class="link" type="button" data-act="go" data-step="2">${esc(t('toFiles'))}</button></p>`;
   }
   function viewCourses() {
     if (!R.off) return `<p class="muted">${esc(t('needOfficial'))}</p>`;
@@ -750,7 +783,7 @@
       case 'mOpen': ui.open[d.id] = !ui.open[d.id]; render(); break;
       case 'mUp': case 'mDown': { const i = S.members.findIndex((m) => m.id === d.id); const j = act === 'mUp' ? i - 1 : i + 1; if (j >= 0 && j < S.members.length) { [S.members[i], S.members[j]] = [S.members[j], S.members[i]]; persist(); render(); } break; }
       case 'mDel': { const m = memberById(d.id); if (m && confirm(t('confirmDel', m.name))) { S.members = S.members.filter((x) => x.id !== d.id); Object.keys(S.assign).forEach((k) => { if (S.assign[k] === d.id) delete S.assign[k]; }); Object.keys(S.pins).forEach((k) => { if (S.pins[k] === d.id) delete S.pins[k]; }); Object.keys(S.currentMap).forEach((k) => { if (S.currentMap[k] === d.id) S.currentMap[k] = ''; }); Object.keys(S.prefsMap).forEach((k) => { if (S.prefsMap[k] === d.id) S.prefsMap[k] = ''; }); delete S.decisions[d.id]; persist(); render(); } break; }
-      case 'mAdd': { const nm = newMember(t('newMemberName')); nm.required = 4; const id = nm.id; S.members.push(nm); ui.open[id] = true; persist(); render(); setTimeout(() => { const ins = main.querySelectorAll('.nm'); const last = ins[ins.length - 1]; if (last) { last.focus(); last.select(); } }, 0); break; }
+      case 'mAdd': { const nm = newMember(t('newMemberName')); nm.required = 4; S.members.push(nm); persist(); render(); setTimeout(() => { const ins = main.querySelectorAll('.fac-nm'); const last = ins[ins.length - 1]; if (last) { last.focus(); last.select(); } }, 0); break; }
       case 'chipRm': { const m = memberById(d.id); m[d.field] = (m[d.field] || []).filter((v) => v !== d.val); persist(); render(); break; }
       case 'mscAdd': S.msc.push({ id: uid(), member: '', course: '', program: 'MSc', days: [], hour: '', hours: 3 }); persist(); render(); break;
       case 'mscDel': S.msc = S.msc.filter((x) => x.id !== d.id); persist(); render(); break;
@@ -800,11 +833,11 @@
     const d = el.dataset;
     switch (c) {
       case 'sheet': S.files[d.kind].sheet = el.value; if (d.kind === 'current') S.currentMap = {}; if (d.kind === 'prefs') S.prefsMap = {}; R.err[d.kind] = null; parseAll(); if (d.kind === 'faculty' && R.fac) { applyFaculty(); parseAll(); } S.built = false; break;
-      case 'map': (d.kind === 'current' ? S.currentMap : S.prefsMap)[d.name] = el.value; S.mapManual[d.kind + '|' + d.name] = true; if (d.kind === 'prefs') applyPrefs(); if (d.kind === 'current') R.curScore[d.name] = 1; else R.prefScore[d.name] = 1; break;
+      case 'map': (d.kind === 'current' ? S.currentMap : S.prefsMap)[d.name] = el.value; S.mapManual[d.kind + '|' + d.name] = true; if (d.kind === 'current') parseAll(); if (d.kind === 'prefs') applyPrefs(); if (d.kind === 'current') R.curScore[d.name] = 1; else R.prefScore[d.name] = 1; break;
       case 'mf': {
         const m = memberById(d.id); if (!m) break;
         if (d.field === 'keepCurrent') m.keepCurrent = el.checked;
-        else if (['required', 'coop', 'senior'].includes(d.field)) m[d.field] = el.value === '' ? '' : Number(el.value);
+        else if (['required', 'coop', 'senior'].includes(d.field)) m[d.field] = el.value === '' ? '' : Math.max(0, Math.round(Number(el.value)) || 0);
         else if (['first', 'last'].includes(d.field)) m[d.field] = Number(el.value);
         else if (d.field === 'prefTime') { m.prefTime = el.value; m.prefTimeTouched = true; }
         else m[d.field] = el.value.trim();

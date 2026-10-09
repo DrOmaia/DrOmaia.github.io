@@ -160,7 +160,7 @@
         ws.getCell(first, PCOL).value = senior; ws.getCell(first, QCOL).value = coop; ws.getCell(first, RCOL).value = mscH;
         [PCOL, QCOL, RCOL].forEach((c) => {
           ws.getCell(first, c).font = { name: FONT, size: 11, bold: true, color: { argb: 'FF1F4E79' } };
-          ws.getCell(first, c).dataValidation = { type: 'decimal', operator: 'greaterThanOrEqual', formulae: [0], allowBlank: true, showErrorMessage: true, errorTitle: 'Numbers only', error: 'Type the number of hours, e.g. 1 or 3.' };
+          ws.getCell(first, c).dataValidation = c === QCOL ? { type: 'list', allowBlank: true, formulae: ['"0,1,2,3"'], showErrorMessage: true, errorTitle: 'Whole hours', error: 'Choose 0, 1, 2 or 3.' } : { type: 'whole', operator: 'greaterThanOrEqual', formulae: [0], allowBlank: true, showErrorMessage: true, errorTitle: 'Whole hours', error: 'Type a whole number of hours, e.g. 0, 1, 2 or 3.' };
         });
         ws.getCell(first, SCOL).value = { formula: `${colL(OCOL)}${first}+SUM(${colL(PCOL)}${first}:${colL(RCOL)}${last})`, result: cls + senior + coop + mscH };
         ws.getCell(first, SCOL).font = { name: FONT, size: 12, bold: true };

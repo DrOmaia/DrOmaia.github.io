@@ -362,3 +362,47 @@ tr.alt td { background: #fbfaf6; padding: 14px 16px; height: auto; }
   .tt td.name { position: static; }
   .cell { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+/* members table */
+.mtable-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-md); }
+table.mtable { width: 100%; border-collapse: collapse; min-width: 980px; }
+.mtable th { text-align: start; vertical-align: bottom; padding: 10px 10px 8px; background: #f6f8f7; border-bottom: 1px solid var(--line); font-size: 14px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.mtable th small { display: block; font-size: 12px; font-weight: 500; color: var(--muted); margin-top: 1px; }
+.mtable th.c, .mtable td.c { text-align: center; }
+.mtable th.idx, .mtable td.idx { width: 38px; text-align: center; color: var(--faint); font-weight: 700; }
+.mtable td { padding: 10px; border-bottom: 1px solid var(--line-2); vertical-align: middle; }
+.mtable tbody tr:hover > td { background: #fafcfb; }
+.mtable tr.is-open > td { background: var(--blue-wash); border-bottom-color: transparent; }
+.mtable td .nm { min-width: 230px; }
+.mtable td.c { width: 96px; }
+.mtable .num { width: 72px; font-weight: 700; text-align: center; text-align-last: center; }
+.mtable .num.empty { border-color: var(--red); background: var(--red-wash); }
+.mtable td.chips { display: table-cell; min-width: 200px; }
+.mtable td.chips .chip { margin: 2px 4px 2px 0; white-space: normal; }
+.mtable td.acts { white-space: nowrap; }
+.mtable td.acts .btn { margin-inline-end: 4px; }
+.updown { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r-sm); margin-inline-end: 4px; vertical-align: middle; }
+.updown .btn { border: 0; margin: 0 !important; }
+.updown .btn + .btn { border-inline-start: 1px solid var(--line); border-radius: 0; }
+.mtable tr.more-row > td { background: var(--blue-wash); padding: 0 10px 16px; }
+.more2 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.more2 section { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 14px; display: grid; gap: 12px; align-content: start; }
+.more2 h4 { margin: 0; font-size: 15px; color: var(--blue-ink); }
+.hint2 { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+.pref-pick { display: inline-flex; align-items: center; gap: 4px; }
+.pref-pick small { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--line-2); font-weight: 700; font-size: 11px; }
+.pref-pick select { width: auto; min-width: 92px; }
+.comment { margin: 0; padding: 8px 10px; background: #fafbfb; border: 1px solid var(--line-2); border-radius: var(--r-sm); text-align: start; }
+@media (max-width: 980px) { .more2 { grid-template-columns: 1fr; } }
+
+/* member list in the files step */
+.fac-list { margin-top: 14px; border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px 14px; background: #fbfcfc; }
+.fac-head { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; margin-bottom: 8px; }
+table.fac { width: 100%; border-collapse: collapse; }
+table.fac td { padding: 4px 6px; border-bottom: 1px solid var(--line-2); }
+table.fac td.idx { width: 34px; text-align: center; color: var(--faint); font-weight: 700; }
+table.fac td.acts { width: 1%; white-space: nowrap; }
+table.fac .fac-nm { font-weight: 600; min-height: 36px; }
+.mtable td.nmcell { font-weight: 700; font-size: 15px; white-space: nowrap; }
+.mtable select.pt { width: 132px; }
+.mtable select.pt.set { border-color: var(--blue); color: var(--blue-ink); font-weight: 600; }
