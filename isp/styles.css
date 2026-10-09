@@ -439,3 +439,34 @@ table.fmt th.brk, table.fmt td.brk { width: 8px; padding: 0; background: repeati
   body.print-fmt table.fmt { font-size: 9.5px; }
   body.print-fmt table.fmt td { height: auto; padding: 2px 3px; }
 }
+
+/* members table: fit the page, no cut-off columns */
+table.mtable { min-width: 820px; table-layout: auto; }
+.mtable td.nmcell { white-space: normal; min-width: 170px; line-height: 1.35; }
+.mtable td.chips { min-width: 190px; }
+.mtable td.chips .chip { display: block; width: fit-content; max-width: 100%; border-radius: 6px; line-height: 1.4; padding: 2px 8px; margin: 3px 0; white-space: normal; }
+.mtable td.acts { width: 1%; white-space: nowrap; }
+.mtable td.acts .btn { margin: 0; }
+.mtable-wrap { scrollbar-width: thin; }
+
+/* limits panel: rules (white, blue) vs wishes (warm, from the survey) */
+.more2 section { position: relative; }
+.more2 section .kind { font-size: 12px; font-weight: 600; margin-top: -8px; }
+.more2 section.rule { border-top: 3px solid var(--blue); }
+.more2 section.rule .kind { color: var(--blue-ink); }
+.more2 section.wish { background: #fff8e6; border-color: #f0d28a; border-top: 3px solid #d9a21b; }
+.more2 section.wish h4 { color: #7a5200; }
+.more2 section.wish .kind { color: #8a6100; }
+.prefs3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.prefs3 label { display: grid; gap: 3px; font-size: 12.5px; font-weight: 600; color: #7a5200; }
+.prefs3 select { width: 100%; min-width: 0; padding: 0 6px; background: #fff; }
+.more2 blockquote.comment { margin: 0; padding: 8px 10px; background: #fff; border: 1px solid #f0d28a; border-radius: var(--r-sm); font-size: 13px; color: var(--ink); text-align: start; }
+@media (max-width: 1100px) {
+  .mtable td.nmcell { min-width: 140px; }
+  .mtable td.chips { min-width: 150px; }
+  .mtable .num { width: 62px; }
+  .mtable select.pt { width: 104px; }
+  .mtable td.c { width: 72px; }
+  .mtable th.idx, .mtable td.idx { display: none; }
+  .mtable th, .mtable td { padding-left: 6px; padding-right: 6px; }
+}

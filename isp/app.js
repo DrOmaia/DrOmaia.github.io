@@ -258,7 +258,7 @@
       main.innerHTML = viewFormat() + noticeBar();
       return;
     }
-    main.classList.toggle('wide', S.step === 4);
+    main.classList.toggle('wide', S.step === 3 || S.step === 4);
     const views = { 1: viewStart, 2: viewFiles, 3: viewSettings, 4: viewProposal, 5: viewExport };
     main.innerHTML = (views[S.step] || viewStart)() + noticeBar() + footNav();
   }
@@ -526,19 +526,20 @@
         </td></tr>`;
       if (!open) return main;
       return main + `<tr class="more-row"><td></td><td colspan="7"><div class="more2">
-        <section><h4>${esc(t('gTime'))}</h4>
+        <section class="rule"><h4>${esc(t('gTime'))}</h4><span class="kind">${esc(t('kindRule'))}</span>
           ${hintField(t('firstHour'), t('hintFirst'), `<select class="input" data-chg="mf" data-id="${m.id}" data-field="first">${hourOpts(m.first || 8, t('any'), 8)}</select>`)}
           ${hintField(t('lastHour'), t('hintLast'), `<select class="input" data-chg="mf" data-id="${m.id}" data-field="last">${hourOpts(m.last || 18, t('any'), 18)}</select>`)}
         </section>
-        <section><h4>${esc(t('gCourses'))}</h4>
+        <section class="rule"><h4>${esc(t('gCourses'))}</h4><span class="kind">${esc(t('kindRule'))}</span>
           ${hintField(t('allowed'), t('allowedHint'), chipBox(m, 'allowed'))}
           ${hintField(t('never'), t('hintNever'), chipBox(m, 'never'))}
           <label class="check"><input type="checkbox" ${m.keepCurrent !== false ? 'checked' : ''} data-chg="mf" data-id="${m.id}" data-field="keepCurrent">${esc(t('keepCurrent'))}</label>
           <span class="hint2">${esc(t('currentCourses'))}: <span dir="ltr">${esc(curTxt || t('noCurrent'))}</span></span>
         </section>
-        <section><h4>${esc(t('gSurvey'))}</h4>
-          ${hintField(t('prefs'), t('hintPrefs'), `<div class="row" style="gap:6px">${[0, 1, 2].map((j) => `<label class="pref-pick"><small>${j + 1}</small><select class="input" data-chg="mpref" data-id="${m.id}" data-j="${j}">${opts3((m.prefs || [])[j])}</select></label>`).join('')}</div>`)}
-          ${hintField(t('comment'), '', `<p class="small comment" dir="ltr">${esc(m.comment || t('noComment'))}</p>`)}
+        <section class="wish"><h4>${esc(t('gSurvey'))}</h4><span class="kind">${esc(t('kindWish'))}</span>
+          <div class="prefs3">${[0, 1, 2].map((j) => `<label><span>${esc(L().ord[j])}</span><select class="input" data-chg="mpref" data-id="${m.id}" data-j="${j}">${opts3((m.prefs || [])[j])}</select></label>`).join('')}</div>
+          <span class="hint2">${esc(t('hintPrefs'))}</span>
+          ${m.comment ? `<blockquote class="comment" dir="ltr">${esc(m.comment)}</blockquote>` : ''}
         </section>
       </div></td></tr>`;
     }).join('');
