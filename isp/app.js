@@ -259,6 +259,7 @@
     return true;
   }
   function render() {
+    hideCard();
     setLangAttrs();
     const chip = $('#projectChip');
     chip.hidden = !S.side; chip.textContent = S.side ? `${sideLabel()} ${S.term}` : '';
@@ -614,8 +615,11 @@
     if (info && info.bad) cls.push('bad');
     if (S.pins[s.key]) cls.push('pinned');
     if (info && info.isNew) cls.push('new');
+    if (info && info.wish) cls.push('wish');
+    if (ui.focusCourse) cls.push(ui.focusCourse === s.course ? 'hit' : 'dim');
+    const tips = [info && info.wish ? t('lgWish') : '', info && info.isNew ? t('lgNew') : ''].filter(Boolean).join(' — ');
     const comp = s.comp ? `${s.comp.split('-')[1]} ${s.compAct === 'Lab' ? 'Lab' : 'T'}` : '';
-    return `<div class="${cls.join(' ')}" data-key="${esc(s.key)}" style="background:${colour(s.course)}"${info && info.isNew ? ` title="${esc(t('lgNew'))}"` : ''}><b>${esc(s.key)}</b>${comp ? `<span>${esc(comp)}</span>` : ''}</div>`;
+    return `<div class="${cls.join(' ')}" data-key="${esc(s.key)}" data-course="${esc(s.course)}" style="background:${colour(s.course)}"${tips ? ` title="${esc(tips)}"` : ''}>${info && info.wish ? '<i class="star" aria-hidden="true">★</i>' : ''}<b>${esc(s.key)}</b>${comp ? `<span>${esc(comp)}</span>` : ''}</div>`;
   }
   function viewProposal() {
     if (!R.off) return `<p>${esc(t('needOfficial'))}</p>`;
@@ -636,6 +640,10 @@
     const hasCur = !!(R.cur || S.baseline);
     const taught = {}; Object.entries(currentFor()).forEach(([id, items]) => { taught[id] = new Set(items.map((x) => x.course)); });
     const isNew = (mid, s) => hasCur && !!memberById(mid) && !(taught[mid] && taught[mid].has(s.course));
+    // survey preferences: star on matching sections, "wishes met" under the name
+    const wishesOf = (m) => [...new Set((m.prefs || []).filter(Boolean).map(E.normCourse))];
+    const isWish = (mid, s) => { const m = memberById(mid); return !!m && wishesOf(m).includes(s.course); };
+    const anyWishes = S.members.some((m) => wishesOf(m).length);
     const head = `<tr><th style="text-align:left;padding-left:12px">${S.lang === 'ar' ? 'العضو' : 'Member'}</th>${E.HOURS.slice(0, 4).map((h) => `<th class="hr">${hl(h)}</th>`).join('')}<th class="brk" title="${esc(t('breakCol'))}"></th>${E.HOURS.slice(4).map((h) => `<th class="hr">${hl(h)}</th>`).join('')}<th>${esc(t('noTime'))}</th><th>${esc(t('load'))}</th><th>${esc(t('sections'))}</th><th title="${esc(t('prepsTip'))}">${esc(t('preps'))}</th></tr>`;
     const body = rows.map(({ m, pseudo }) => {
       const keys = byMember[m.id] || [];
@@ -643,15 +651,20 @@
       const dec = S.decisions[m.id] || '';
       const slot = (h) => {
         const ks = keys.filter((k) => secs[k].hour === h);
-        return `<td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="${h}">${ks.map((k) => cellHtml(secs[k], { bad: bad.has(k), isNew: isNew(m.id, secs[k]) })).join('')}</td>`;
+        return `<td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="${h}">${ks.map((k) => cellHtml(secs[k], { bad: bad.has(k), isNew: isNew(m.id, secs[k]), wish: isWish(m.id, secs[k]) })).join('')}</td>`;
       };
       const nt = keys.filter((k) => secs[k].hour == null);
       const req = Number(m.required);
       const cntBad = !pseudo && m.required !== '' && m.required != null && p.counted !== req;
       const tr = `<tr data-mid="${m.id}" class="mem ${pseudo ? 'pseudo' : ''} ${m.id === 'HOLD' ? 'hold' : ''} ${dec}">
-        <td class="name" dir="ltr"><span class="nmtxt">${esc(m.name)}</span>${pseudo ? '' : `<div class="dec no-print" dir="${S.lang === 'ar' ? 'rtl' : 'ltr'}">${['final', 'reject', 'review'].map((d) => `<button type="button" class="${d} ${dec === d ? 'on' : ''}" data-act="dec" data-id="${m.id}" data-dec="${d}">${esc(t(d))}</button>`).join('')}</div>`}</td>
+        <td class="name" dir="ltr"><span class="nmtxt" ${pseudo ? '' : `data-card="${m.id}" data-act="card" tabindex="0"`}>${esc(m.name)}</span>${(() => {
+          if (pseudo) return '';
+          const w = wishesOf(m); if (!w.length) return '';
+          const mine = new Set(keys.map((k) => secs[k].course)); const got = w.filter((c) => mine.has(c)).length;
+          return `<small class="wishes ${got ? 'got' : ''}" dir="${S.lang === 'ar' ? 'rtl' : 'ltr'}" title="${esc(t('wishTip'))}">${esc(t('wishes', got, w.length))}</small>`;
+        })()}${pseudo ? '' : `<div class="dec no-print" dir="${S.lang === 'ar' ? 'rtl' : 'ltr'}">${['final', 'reject', 'review'].map((d) => `<button type="button" class="${d} ${dec === d ? 'on' : ''}" data-act="dec" data-id="${m.id}" data-dec="${d}">${esc(t(d))}</button>`).join('')}</div>`}</td>
         ${E.HOURS.slice(0, 4).map(slot).join('')}<td class="brk"></td>${E.HOURS.slice(4).map(slot).join('')}
-        <td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="nt">${nt.map((k) => cellHtml(secs[k], { bad: bad.has(k), isNew: isNew(m.id, secs[k]) })).join('')}${pseudo ? '' : S.msc.filter((x) => x.member === m.id).map((x) => `<div class="cell grad"><b>${esc(x.program || 'MSc')}</b><span>${esc(t('gradHours', Number(x.hours === '' || x.hours == null ? 3 : x.hours)))}</span></div>`).join('')}</td>
+        <td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="nt">${nt.map((k) => cellHtml(secs[k], { bad: bad.has(k), isNew: isNew(m.id, secs[k]), wish: isWish(m.id, secs[k]) })).join('')}${pseudo ? '' : S.msc.filter((x) => x.member === m.id).map((x) => `<div class="cell grad"><b>${esc(x.program || 'MSc')}</b><span>${esc(t('gradHours', Number(x.hours === '' || x.hours == null ? 3 : x.hours)))}</span></div>`).join('')}</td>
         <td class="num">${pseudo ? p.load : p.total}${!pseudo && p.total !== p.load ? `<small>${p.load} + ${(p.total - p.load)}</small>` : ''}</td>
         <td class="num cnt ${cntBad ? 'bad' : ''}">${pseudo ? keys.length : `${p.counted} / ${m.required === '' ? '–' : req}`}</td>
         <td class="num preps" title="${esc(t('prepsTip'))}">${pseudo ? '' : p.preps || 0}</td></tr>`;
@@ -693,14 +706,73 @@
       <div class="stat ${requests ? 'warn' : ''}"><b>${requests}</b>${esc(t('sRequests'))}</div>
       <div class="stat"><b>${finals} / ${S.members.length}</b>${esc(t('sFinal'))}</div>
     </div>
-    <p class="legend small muted"><span><i class="lg prop"></i>${esc(t('lgProp'))}</span><span><i class="lg bad"></i>${esc(t('lgBad'))}</span><span><i class="lg pin">•</i>${esc(t('lgPin'))}</span>${hasCur ? `<span><i class="lg new"></i>${esc(t('lgNew'))}</span>` : ''}<span>${esc(t('lgClick'))}</span></p>
-    <div class="gridwrap"><table class="tt"><thead>${head}</thead><tbody>${ui.building && !S.built ? `<tr><td colspan="16" style="padding:30px;text-align:center">${esc(t('building'))}</td></tr>` : body}</tbody></table></div>
+    <p class="legend small muted"><span><i class="lg prop"></i>${esc(t('lgProp'))}</span><span><i class="lg bad"></i>${esc(t('lgBad'))}</span><span><i class="lg pin">•</i>${esc(t('lgPin'))}</span>${hasCur ? `<span><i class="lg new"></i>${esc(t('lgNew'))}</span>` : ''}${anyWishes ? `<span><i class="lg star">★</i>${esc(t('lgWish'))}</span>` : ''}<span>${esc(t('lgClick'))}</span><span>${esc(t('lgCard'))}</span></p>
+    ${courseBar(secs, assign)}
+    <div class="gridwrap"><table class="tt ${ui.focusCourse ? 'focusing' : ''}"><thead>${head}</thead><tbody>${ui.building && !S.built ? `<tr><td colspan="16" style="padding:30px;text-align:center">${esc(t('building'))}</td></tr>` : body}</tbody></table></div>
     <div class="attn">
       <div class="panel"><h2>${esc(t('attention'))}</h2>${items.length ? `<p class="small muted" style="margin:-4px 0 10px">${esc(t('attnHint'))}</p><ul>${items.join('')}</ul>` : `<p class="good">${esc(t('allGood'))}</p>`}</div>
       <div class="panel"><h2>${esc(t('timeReqTitle'))}</h2>${reqs.length ? `<ul class="req-list">${reqs.join('')}</ul>` : `<p class="muted">—</p>`}</div>
     </div>`;
   }
 
+  /** Row of course chips: clicking one highlights all its sections and lists who teaches them. */
+  function courseBar(secs, assign) {
+    const codes = [...new Set(Object.values(secs).filter((s) => assign[s.key] || s.cat === 'required').map((s) => s.course))].sort();
+    if (!codes.length) return '';
+    const f = ui.focusCourse && codes.includes(ui.focusCourse) ? ui.focusCourse : null;
+    if (!f) ui.focusCourse = null;
+    const chips = codes.map((c) => `<button type="button" class="cchip ${f === c ? 'on' : ''}" data-act="focusCourse" data-code="${esc(c)}" aria-pressed="${f === c}"><span class="sw" style="background:${colour(c)}"></span>${esc(c)}</button>`).join('');
+    let sum = '';
+    if (f) {
+      const mine = Object.values(secs).filter((s) => s.course === f && (assign[s.key] || s.cat === 'required'));
+      const by = {}; let un = 0;
+      mine.forEach((s) => { const a = assign[s.key]; if (!a) { un++; return; } (by[a] = by[a] || []).push(s.hour == null ? t('noTime') : hl(s.hour)); });
+      const order = S.members.map((m) => m.id).concat(['PT', 'HOLD']).filter((id) => by[id]);
+      sum = `<p class="csum"><b>${esc(t('focusSum', f, mine.length))}</b>${order.map((id) => `<span dir="ltr"><b>${esc(nameOf(id))}</b> ${esc(by[id].join(', '))}</span>`).join('')}${un ? `<span class="un">${esc(t('focusUn', un))}</span>` : ''}<button type="button" class="link" data-act="focusCourse" data-code="">${esc(t('focusClear'))}</button></p>`;
+    }
+    return `<div class="cbar no-print"><span class="lbl">${esc(t('focusLbl'))}</span><div class="cchips" dir="ltr">${chips}</div>${sum}</div>`;
+  }
+  /** Small card with what the site knows about a member (shown on the name). */
+  function cardHtml(mid) {
+    const m = memberById(mid); if (!m) return '';
+    const { secs, assign, ev } = snapshot();
+    const p = ev.per[mid] || {};
+    const keys = Object.keys(assign).filter((k) => assign[k] === mid);
+    const mine = new Set(keys.map((k) => secs[k].course));
+    const cur = currentFor()[mid] || [];
+    const row = (label, html) => `<div class="cr"><span class="cl">${esc(label)}</span><span class="cv">${html}</span></div>`;
+    const prefs = (m.prefs || []).map((c) => (c ? E.normCourse(c) : ''));
+    const prefsHtml = prefs.some(Boolean) ? `<span dir="ltr">${prefs.map((c, i) => c ? `${i + 1}. ${esc(c)}${mine.has(c) ? ' <b class="ok">✓</b>' : ''}` : '').filter(Boolean).join('&nbsp;&nbsp; ')}</span>` : '—';
+    const lim = [];
+    if (m.first > 8) lim.push(t('lcFirst', hl(m.first)));
+    if (m.last < 18) lim.push(t('lcLast', hl(m.last)));
+    if ((m.allowed || []).length) lim.push(t('lcOnly', m.allowed.join(', ')));
+    if ((m.never || []).length) lim.push(t('lcNever', m.never.join(', ')));
+    if (m.keepCurrent === false) lim.push(t('lcNoKeep'));
+    const grad = S.msc.filter((x) => x.member === mid).map((x) => `${x.program || 'MSc'} · ${t('gradHours', Number(x.hours === '' || x.hours == null ? 3 : x.hours))}`);
+    const req = m.required === '' || m.required == null ? '–' : m.required;
+    return `<h4 dir="ltr">${esc(m.name)}</h4>
+      <p class="cnow">${esc(t('cardNow', p.counted || 0, req, p.preps || 0, p.total || 0))}</p>
+      ${row(t('cardCur'), cur.length ? `<span dir="ltr">${esc(cur.map((x) => `${x.course}${x.hour ? ' ' + hl(x.hour) : ''}`).join(', '))}</span>` : '—')}
+      ${row(t('prefs'), prefsHtml)}
+      ${row(t('prefTime'), esc(t(!m.prefTime || m.prefTime === 'any' ? 'anyTime' : m.prefTime)))}
+      ${row(t('comment'), m.comment ? `<span dir="auto">${esc(m.comment)}</span>` : esc(t('noComment')))}
+      ${row(t('cardLimits'), lim.length ? esc(lim.join(' · ')) : esc(t('noLimits')))}
+      ${(Number(m.coop) || Number(m.senior)) ? row(t('cardHours'), esc(`COOP ${Number(m.coop) || 0} · Senior ${Number(m.senior) || 0}`)) : ''}
+      ${grad.length ? row('MSc / PhD', esc(grad.join(' · '))) : ''}`;
+  }
+  function cardEl() { let c = document.getElementById('mcard'); if (!c) { c = document.createElement('div'); c.id = 'mcard'; c.className = 'mcard'; c.hidden = true; c.setAttribute('role', 'tooltip'); document.body.appendChild(c); } return c; }
+  function showCard(el) {
+    const c = cardEl(); const mid = el.dataset.card;
+    if (!c.hidden && c.dataset.mid === mid) return;
+    c.innerHTML = cardHtml(mid); c.dataset.mid = mid; c.dir = S.lang === 'ar' ? 'rtl' : 'ltr'; c.hidden = false;
+    const r = el.getBoundingClientRect(); const w = c.offsetWidth, h = c.offsetHeight;
+    let left = r.right + 12, top = r.top - 6;
+    if (left + w > window.innerWidth - 10) { left = Math.max(10, Math.min(r.left, window.innerWidth - w - 10)); top = r.bottom + 8; }
+    top = Math.max(10, Math.min(top, window.innerHeight - h - 10));
+    c.style.left = left + 'px'; c.style.top = top + 'px';
+  }
+  function hideCard() { const c = document.getElementById('mcard'); if (c) { c.hidden = true; c.dataset.mid = ''; } }
   /** Scroll to a member's cells (or the member's row) and make them flash. */
   function goTo(mid, keys) {
     const row = main.querySelector(`tr.mem[data-mid="${CSS.escape(mid || '')}"]`);
@@ -878,9 +950,10 @@
   document.addEventListener('click', async (ev) => {
     const el = ev.target.closest('[data-act]');
     const pop = $('#pop');
-    if (!el) { if (!pop.hidden && !ev.target.closest('#pop')) closePop(); return; }
+    if (!el) { if (!pop.hidden && !ev.target.closest('#pop')) closePop(); if (!ev.target.closest('#mcard')) hideCard(); return; }
     const act = el.dataset.act, d = el.dataset;
     if (act !== 'cell' && act !== 'timePick' && !el.closest('#pop')) closePop();
+    if (act !== 'card') hideCard();
     switch (act) {
       case 'home': ev.preventDefault(); ui.view = null; S.step = 1; render(); window.scrollTo(0, 0); break;
       case 'fmtClose': ui.view = null; render(); window.scrollTo(0, 0); break;
@@ -903,6 +976,8 @@
       case 'rebuild': remember('uRebuild'); build(true); break;
       case 'print': window.print(); break;
       case 'undo': undo(); break;
+      case 'focusCourse': ui.focusCourse = d.code && ui.focusCourse !== d.code ? d.code : null; render(); break;
+      case 'card': { const c = document.getElementById('mcard'); if (c && !c.hidden && c.dataset.mid === d.card) hideCard(); else showCard(el); break; }
       case 'goIssue': goTo(d.mid, (d.keys || '').split(',').filter(Boolean)); break;
       case 'cell': if (!pop.hidden && pop.dataset.mid === d.mid && pop.dataset.h === d.h) closePop(); else openPop(el); break;
       case 'put': remember('uPut', d.key, nameOf(d.mid)); putSection(d.key, d.mid); closePop(); persist(); render(); break;
@@ -977,7 +1052,7 @@
   });
   document.addEventListener('input', (ev) => { if (ev.target.id === 'termIn') ui.termDraft = ev.target.value; });
   document.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Escape') closePop();
+    if (ev.key === 'Escape') { closePop(); hideCard(); if (ui.focusCourse && !ev.target.matches('input, select, textarea')) { ui.focusCourse = null; render(); } }
     if ((ev.ctrlKey || ev.metaKey) && !ev.shiftKey && (ev.key === 'z' || ev.key === 'Z') && S.step === 4 && !ui.view && !ev.target.matches('input, select, textarea')) { ev.preventDefault(); undo(); }
     if (ev.key === 'Enter' && ev.target.id === 'termIn') startProject();
     if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches('td.slot')) { ev.preventDefault(); openPop(ev.target); }
@@ -987,7 +1062,12 @@
   document.addEventListener('dragleave', (ev) => { const z = ev.target.closest('[data-drop]'); if (z) z.classList.remove('over'); });
   document.addEventListener('drop', async (ev) => { const z = ev.target.closest('[data-drop]'); if (!z) return; ev.preventDefault(); z.classList.remove('over'); if (z.dataset.drop === 'fmt') await openFormat(ev.dataTransfer.files[0]); else await addFile(z.dataset.drop, ev.dataTransfer.files[0]); });
   window.addEventListener('afterprint', () => document.body.classList.remove('print-fmt'));
-  window.addEventListener('scroll', () => closePop(), { passive: true });
+  window.addEventListener('scroll', () => { closePop(); hideCard(); }, { passive: true });
+  // member card: hover or keyboard focus on a member's name
+  document.addEventListener('mouseover', (ev) => { const el = ev.target.closest && ev.target.closest('[data-card]'); if (el) showCard(el); });
+  document.addEventListener('mouseout', (ev) => { const el = ev.target.closest && ev.target.closest('[data-card]'); if (el && !(ev.relatedTarget && el.contains(ev.relatedTarget))) hideCard(); });
+  document.addEventListener('focusin', (ev) => { if (ev.target.matches && ev.target.matches('[data-card]')) showCard(ev.target); });
+  document.addEventListener('focusout', (ev) => { if (ev.target.matches && ev.target.matches('[data-card]')) hideCard(); });
   $('#langBtn').addEventListener('click', () => { S.lang = S.lang === 'ar' ? 'en' : 'ar'; $('#toast').classList.remove('on'); persist(); render(); });
   $('#saveBtn').addEventListener('click', saveProject);
 
