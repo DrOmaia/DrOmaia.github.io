@@ -150,7 +150,7 @@ main.wide { max-width: 1640px; }
 .need { margin-top: 36px; }
 .need > h2 { font-size: 24px; font-weight: 700; }
 .need > p { color: var(--muted); margin: 4px 0 18px; }
-.files3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.files3 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
 .fcard { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; display: flex; flex-direction: column; gap: 10px; }
 .fcard h3 { font-size: 18px; display: flex; align-items: center; gap: 10px; justify-content: space-between; }
 .tag { font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 99px; background: var(--blue-wash); color: var(--blue-ink); white-space: nowrap; }
@@ -196,6 +196,7 @@ main.wide { max-width: 1640px; }
 .ok-text { color: var(--green); font-weight: 600; }
 details.notes { margin-top: 10px; }
 details.notes summary { cursor: pointer; color: var(--blue); font-weight: 600; font-size: 14.5px; }
+details.notes ol.names { margin: 8px 0 0; padding-left: 26px; font-size: 14px; columns: 2; direction: ltr; text-align: left; }
 details.notes ul { margin: 8px 0 0; padding-inline-start: 20px; font-size: 14px; color: var(--muted); direction: ltr; text-align: left; }
 .match { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14.5px; }
 .match td { padding: 6px 8px; border-bottom: 1px solid var(--line-2); }

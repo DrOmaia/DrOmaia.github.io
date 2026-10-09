@@ -56,6 +56,22 @@
     return out;
   }
 
+  /** Load an .xlsx with ExcelJS; if its notes/comments links are written in a form ExcelJS cannot read
+      (e.g. files saved by some tools), repair the links with JSZip and try again. */
+  async function loadWorkbook(ExcelJS, JSZip, buf) {
+    const tryLoad = async (b) => { const wb = new ExcelJS.Workbook(); await wb.xlsx.load(b); return wb; };
+    try { return await tryLoad(buf); } catch (e) { if (!JSZip) throw e; }
+    const zip = await JSZip.loadAsync(buf);
+    const rels = Object.keys(zip.files).filter((n) => /^xl\/worksheets\/_rels\/.*\.rels$/.test(n));
+    for (const n of rels) { const x = await zip.file(n).async('string'); zip.file(n, x.replace(/Target="\/xl\//g, 'Target="../')); }
+    try { return await tryLoad(await zip.generateAsync({ type: 'arraybuffer' })); } catch (e) { /* drop notes entirely */ }
+    for (const n of rels) {
+      const x = await zip.file(n).async('string');
+      zip.file(n, x.replace(/<Relationship\b[^>]*relationships\/(comments|vmlDrawing)"[^>]*\/>/g, ''));
+    }
+    return tryLoad(await zip.generateAsync({ type: 'arraybuffer' }));
+  }
+
   // ---------- time parsing ----------
   function parseHour(v) {
     if (v == null || v === '') return null;
@@ -320,6 +336,49 @@
       });
     }
     return { sheetName, list };
+  }
+
+  // ---------- faculty list (e.g. Total Sections.xlsx, or the site's template) ----------
+  /** Returns {sheetName, list:[{name, required, coop, senior}], partTime: number|null} */
+  function parseFaculty(sheets, sheetName) {
+    const sheet = sheets.find((s) => s.name === sheetName);
+    if (!sheet) throw new Error('sheet-not-found');
+    const rows = sheet.rows;
+    const num = (v) => { const c = cellValue(v); if (typeof c === 'number') return c; const s = txt(c); return /^\d+(\.\d+)?$/.test(s) ? parseFloat(s) : null; };
+    let hr = -1; const col = {};
+    for (let r = 0; r < Math.min(rows.length, 10); r++) {
+      const found = {};
+      (rows[r] || []).forEach((v, c) => {
+        const s = txt(v).toLowerCase();
+        if (!s) return;
+        if (found.sections == null && /section|شعب/.test(s)) found.sections = c;
+        else if (found.coop == null && /co-?op|تدريب/.test(s)) found.coop = c;
+        else if (found.senior == null && /senior|مشروع/.test(s)) found.senior = c;
+        else if (found.name == null && /\bname\b|الاسم/.test(s)) found.name = c;
+      });
+      if (found.sections != null || found.name != null) { hr = r; Object.assign(col, found); break; }
+    }
+    const list = []; let partTime = null;
+    for (let r = hr + 1; r < rows.length; r++) {
+      const row = rows[r] || [];
+      let nameCol = col.name != null ? col.name : -1;
+      if (nameCol < 0) nameCol = row.findIndex((v) => { const s = txt(v); return s && /[A-Za-z؀-ۿ]/.test(s) && num(v) == null; });
+      if (nameCol < 0) continue;
+      const name = txt(row[nameCol]);
+      if (!name || /^(total|sum|المجموع|الإجمالي)/i.test(name)) continue;
+      let sections = col.sections != null ? num(row[col.sections]) : null;
+      if (col.sections == null) for (let c = nameCol + 1; c < row.length; c++) { const n = num(row[c]); if (n != null) { sections = n; break; } }
+      if (/part.?tim|need part|متعاون/i.test(name)) { partTime = sections; continue; }
+      if (!/[A-Za-z؀-ۿ]{2}/.test(name)) continue;
+      list.push({
+        name,
+        required: sections == null ? '' : sections,
+        coop: col.coop != null ? num(row[col.coop]) : null,
+        senior: col.senior != null ? num(row[col.senior]) : null,
+      });
+    }
+    if (!list.length) throw new Error('not-faculty');
+    return { sheetName, list, partTime };
   }
 
   // ---------- name matching ----------
@@ -765,8 +824,8 @@
 
   return {
     HOURS, DAY_NAMES, hourLabel, shortRoom, defaultCourseSettings,
-    cellValue, txt, sheetsFromExcelJS, parseHour, headerHour, parseDays, normCourse,
-    looksOfficial, parseOfficial, parseCurrent, parsePrefs,
+    cellValue, txt, sheetsFromExcelJS, loadWorkbook, parseHour, headerHour, parseDays, normCourse,
+    looksOfficial, parseOfficial, parseCurrent, parsePrefs, parseFaculty,
     nameTokens, nameScore, matchNames,
     buildModel, memberAllows, inWindow, memberCost, propose, evaluate, officialNotes, freeRooms, describeMeetings,
     WEIGHTS: W,
