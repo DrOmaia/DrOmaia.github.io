@@ -252,10 +252,17 @@
         return `${i ? '<span class="sep"></span>' : ''}<button type="button" class="${cls}" data-act="go" data-step="${n}" ${canReach(n) ? '' : 'disabled'}><b>${n < S.step && canReach(n) ? '✓' : n}</b><span>${esc(name)}</span></button>`;
       }).join('');
     }
+    if (ui.view === 'format') {
+      st.hidden = true;
+      main.classList.add('wide');
+      main.innerHTML = viewFormat() + noticeBar();
+      return;
+    }
     main.classList.toggle('wide', S.step === 4);
     const views = { 1: viewStart, 2: viewFiles, 3: viewSettings, 4: viewProposal, 5: viewExport };
-    main.innerHTML = (views[S.step] || viewStart)() + footNav();
+    main.innerHTML = (views[S.step] || viewStart)() + noticeBar() + footNav();
   }
+  function noticeBar() { return `<p class="notice-bar" role="note"><b>${esc(t('noticeTitle'))}</b> ${esc(t('noticeShort'))}</p>`; }
   function footNav() {
     if (S.step === 1) return '';
     const nextOk = canReach(S.step + 1);
@@ -288,7 +295,8 @@
     const pick = ui.pickSide || S.side;
     return `
     <section class="hero">
-      <div><h1>${esc(t('heroTitle'))}</h1><p>${esc(t('heroText'))}</p></div>
+      <div><h1>${esc(t('heroTitle'))}</h1><p>${esc(t('heroText'))}</p>
+        <div class="notice-box" role="note"><b>${esc(t('noticeTitle'))}</b><p>${esc(t('noticeLong'))}</p></div></div>
       ${strip()}
     </section>
     <section class="start-grid">
@@ -311,6 +319,10 @@
         ${hasAuto ? `<div class="autosave"><span>${esc(t('resumeAuto'))}: <b>${esc((saved.side === 'female' ? t('female') : t('male')) + ' ' + (saved.term || ''))}</b></span><button class="btn small" type="button" data-act="resumeAuto">${esc(t('resumeAutoBtn'))}</button></div>` : ''}
       </div>
     </section>
+    <section class="panel fmt-card">
+      <div><span class="tag opt">${esc(t('fmtTag'))}</span><h2 style="margin-top:6px">${esc(t('fmtCardTitle'))}</h2><p class="sub" style="margin:4px 0 0">${esc(t('fmtCardText'))}</p></div>
+      <label class="drop" data-drop="fmt"><input type="file" accept=".xlsx,.xlsm" data-file="fmt" hidden>${esc(t('fmtDrop'))}</label>
+    </section>
     <section class="need">
       <h2>${esc(t('needTitle'))}</h2>
       <p>${esc(t('needIntro'))}</p>
@@ -332,6 +344,60 @@
     </section>`;
   }
 
+  // ---- extra service: format any timetable for printing ----
+  function fmtGrid() {
+    const f = ui.fmt; if (!f || !f.grid) return '';
+    const g = f.grid;
+    const keep = g.extras.map((_, i) => g.blocks.some((b) => b.rows.some((r) => r.extras[i] !== ''))).map((v, i) => (v ? i : -1)).filter((i) => i >= 0);
+    const am = g.hours.filter((h) => h < 12), pm = g.hours.filter((h) => h > 12);
+    const head = `<tr><th class="nm">Member</th>${g.unitLabel ? `<th>${esc(g.unitLabel)}</th>` : ''}${am.map((h) => `<th>${hl(h)}</th>`).join('')}${am.length && pm.length ? '<th class="brk"></th>' : ''}${pm.map((h) => `<th>${hl(h)}</th>`).join('')}${g.hasNoTime ? '<th>No time</th>' : ''}${keep.map((i) => `<th class="ex">${esc(g.extras[i])}</th>`).join('')}</tr>`;
+    const cell = (v, i) => { if (v === '') return '<td></td>'; const code = E.courseIn(v); return `<td class="${i === 0 ? 'l' : 't'}" ${code ? `style="background:${colour(code)}"` : ''}>${esc(v)}</td>`; };
+    const body = g.blocks.map((b) => b.rows.map((r, i) => `<tr class="${i === 0 ? 'first' : ''} ${i === b.rows.length - 1 ? 'last' : ''}">${i === 0 ? `<td class="nm" rowspan="${b.rows.length}">${esc(b.name)}</td>` : ''}${g.unitLabel ? `<td class="u">${esc(r.unit)}</td>` : ''}${am.map((h) => cell(r.cells[h], i)).join('')}${am.length && pm.length ? '<td class="brk"></td>' : ''}${pm.map((h) => cell(r.cells[h], i)).join('')}${g.hasNoTime ? cell(r.nt, i) : ''}${keep.map((k) => `<td class="ex">${esc(r.extras[k])}</td>`).join('')}</tr>`).join('')).join('');
+    const dropped = g.extras.filter((_, i) => !keep.includes(i));
+    return `<div id="fmtSheet" class="fmt-sheet" dir="ltr"><h2 class="fmt-title">${esc(f.title || '')}</h2><table class="fmt"><thead>${head}</thead><tbody>${body}</tbody></table>
+      <p class="fmt-foot">${esc(X.NOTICE)}</p></div>${dropped.length ? `<p class="small muted no-print" style="margin-top:10px">${esc(t('fmtDropped', dropped.join(', ')))}</p>` : ''}`;
+  }
+  function viewFormat() {
+    const f = ui.fmt || {};
+    return `<div class="page-head no-print"><div><h1>${esc(t('fmtCardTitle'))}</h1><p>${esc(t('fmtText'))}</p></div>
+      <div class="row"><button class="btn" type="button" data-act="fmtClose">${esc(t('fmtClose'))}</button>${f.grid ? `<button class="btn" type="button" data-act="fmtExcel">${esc(t('fmtExcel'))}</button><button class="btn primary" type="button" data-act="fmtPrint">${esc(t('fmtPrint'))}</button>` : ''}</div></div>
+    <div class="panel no-print fmt-controls">
+      <div class="row" style="align-items:flex-end">
+        <div class="field"><span class="lbl">${esc(t('sheet'))}</span><select class="input" data-chg="fmtSheet">${(f.sheets || []).map((x) => `<option value="${esc(x.name)}" ${x.name === f.sheet ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>
+        <div class="field grow"><span class="lbl">${esc(t('fmtTitleLbl'))}</span><input class="input" dir="ltr" data-chg="fmtTitle" value="${esc(f.title || '')}"></div>
+        <label class="btn small"><input type="file" accept=".xlsx,.xlsm" data-file="fmt" hidden>${esc(t('replace'))}</label>
+      </div>
+      <p class="small muted" style="margin-top:8px"><span dir="ltr">${esc(f.name || '')}</span> — ${esc(t('fmtFormulaNote'))}</p>
+      ${f.err ? `<p class="err">${esc(t(f.err))}</p>` : ''}
+    </div>
+    ${f.grid ? `<div class="fmt-wrap">${fmtGrid()}</div>` : ''}`;
+  }
+  async function openFormat(file) {
+    if (!file) return;
+    const b64 = bufToB64(await file.arrayBuffer());
+    ui.fmt = { name: file.name, b64, sheets: [], sheet: null, title: '', grid: null, err: null };
+    ui.view = 'format'; render();
+    try {
+      ui.fmt.wb = await loadWb(b64);
+      ui.fmt.sheets = E.sheetsFromExcelJS(ui.fmt.wb);
+      const vis = ui.fmt.sheets.filter((x) => !x.hidden);
+      const hit = vis.find((x) => { try { return E.readGridRaw(ui.fmt.sheets, x.name).blocks.length; } catch (e) { return false; } });
+      fmtUseSheet((hit || vis[0] || ui.fmt.sheets[0]).name);
+    } catch (e) { ui.fmt.err = 'badFile'; }
+    render();
+  }
+  function fmtUseSheet(name) {
+    const f = ui.fmt; f.sheet = name; f.err = null; f.grid = null;
+    try { f.grid = E.readGridRaw(f.sheets, name); f.title = f.grid.title || f.name.replace(/\.xlsx?m?$/i, ''); }
+    catch (e) { f.err = 'notCurrent'; }
+  }
+  async function fmtExcel() {
+    const f = ui.fmt; if (!f || !f.grid) return;
+    const wb = await X.buildFormatted(window.ExcelJS, { title: f.title, grid: f.grid, sheetName: f.sheet });
+    const buf = await wb.xlsx.writeBuffer();
+    download(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `${f.name.replace(/\.xlsx?m?$/i, '')} - formatted.xlsx`);
+  }
+
   // ---- step 2: files ----
   function uploadBlock(kind, n, title, tag, hint) {
     const f = S.files[kind];
@@ -347,7 +413,7 @@
       if (kind === 'prefs' && R.prefs) sum = t('prefSummary', R.prefs.list.length, R.prefs.list.filter((p) => S.prefsMap[p.name]).length);
       if (kind === 'faculty' && R.fac) sum = t('facSummary', S.members.length, S.members.reduce((a, m) => a + (Number(m.required) || 0), 0));
       body = `<div class="loaded"><span class="fname">${esc(f.name)}</span>
-        ${sheets.length > 1 ? `<label class="small muted">${esc(t('sheet'))} <select class="input" data-chg="sheet" data-kind="${kind}">${sheets.map((s) => `<option ${s.name === f.sheet ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label>` : ''}
+        ${sheets.length > 1 ? `<label class="small muted">${esc(t('sheet'))} <select class="input" data-chg="sheet" data-kind="${kind}">${sheets.map((s) => `<option value="${esc(s.name)}" ${s.name === f.sheet ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label>` : ''}
         <span class="sum">${esc(sum)}</span><span class="grow"></span>
         <label class="btn small"><input type="file" accept=".xlsx,.xlsm" data-file="${kind}" hidden>${esc(t('replace'))}</label>
         <button class="btn small danger" type="button" data-act="rmFile" data-kind="${kind}">${esc(t('remove'))}</button></div>
@@ -772,7 +838,10 @@
     const act = el.dataset.act, d = el.dataset;
     if (act !== 'cell' && act !== 'timePick' && !el.closest('#pop')) closePop();
     switch (act) {
-      case 'home': ev.preventDefault(); if (S.side) { S.step = 1; render(); } break;
+      case 'home': ev.preventDefault(); ui.view = null; S.step = 1; render(); window.scrollTo(0, 0); break;
+      case 'fmtClose': ui.view = null; render(); window.scrollTo(0, 0); break;
+      case 'fmtPrint': document.body.classList.add('print-fmt'); window.print(); break;
+      case 'fmtExcel': try { await fmtExcel(); } catch (e) { console.error(e); toast('Excel: ' + e.message); } break;
       case 'go': { const n = +d.step; if (n >= 1 && n <= 5 && canReach(n)) { S.step = n; persist(); render(); window.scrollTo(0, 0); main.focus({ preventScroll: true }); } break; }
       case 'pick': ui.pickSide = d.side; ui.termDraft = $('#termIn') ? $('#termIn').value : ui.termDraft; render(); break;
       case 'start': startProject(); break;
@@ -828,6 +897,7 @@
   document.addEventListener('change', async (ev) => {
     const el = ev.target;
     if (el.id === 'projectInput') { if (el.files[0]) await openProject(el.files[0]); el.value = ''; return; }
+    if (el.dataset.file === 'fmt') { await openFormat(el.files[0]); el.value = ''; return; }
     if (el.dataset.file) { await addFile(el.dataset.file, el.files[0]); return; }
     const c = el.dataset.chg; if (!c) return;
     const d = el.dataset;
@@ -850,6 +920,8 @@
       case 'msc': { const x = S.msc.find((y) => y.id === d.id); if (x) x[d.field] = d.field === 'hour' ? (el.value ? +el.value : '') : d.field === 'hours' ? Number(el.value) : el.value; break; }
       case 'mscDay': { const x = S.msc.find((y) => y.id === d.id); const day = +d.day; x.days = el.checked ? [...new Set((x.days || []).concat(day))].sort() : (x.days || []).filter((y) => y !== day); break; }
       case 'assignTo': if (el.value) putSection(d.key, el.value); break;
+      case 'fmtSheet': fmtUseSheet(el.value); render(); return;
+      case 'fmtTitle': ui.fmt.title = el.value; render(); return;
       default: break;
     }
     persist(); render();
@@ -863,7 +935,8 @@
   // drag & drop files
   document.addEventListener('dragover', (ev) => { const z = ev.target.closest('[data-drop]'); if (z) { ev.preventDefault(); z.classList.add('over'); } });
   document.addEventListener('dragleave', (ev) => { const z = ev.target.closest('[data-drop]'); if (z) z.classList.remove('over'); });
-  document.addEventListener('drop', async (ev) => { const z = ev.target.closest('[data-drop]'); if (!z) return; ev.preventDefault(); z.classList.remove('over'); await addFile(z.dataset.drop, ev.dataTransfer.files[0]); });
+  document.addEventListener('drop', async (ev) => { const z = ev.target.closest('[data-drop]'); if (!z) return; ev.preventDefault(); z.classList.remove('over'); if (z.dataset.drop === 'fmt') await openFormat(ev.dataTransfer.files[0]); else await addFile(z.dataset.drop, ev.dataTransfer.files[0]); });
+  window.addEventListener('afterprint', () => document.body.classList.remove('print-fmt'));
   window.addEventListener('scroll', () => closePop(), { passive: true });
   $('#langBtn').addEventListener('click', () => { S.lang = S.lang === 'ar' ? 'en' : 'ar'; persist(); render(); });
   $('#saveBtn').addEventListener('click', saveProject);

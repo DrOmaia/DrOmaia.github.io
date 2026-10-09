@@ -246,19 +246,30 @@
     };
   }
 
+  /** Header row of a grid timetable: the first row with a contiguous run of distinct hours (8 … 6). */
+  function findGridHeader(rows) {
+    for (let r = 0; r < Math.min(rows.length, 20); r++) {
+      const cells = [];
+      (rows[r] || []).forEach((v, c) => { const h = headerHour(cellValue(v)); if (h != null && c > 0) cells.push([c, h]); });
+      const map = {}; const seen = new Set(); let prev = null;
+      for (const [c, h] of cells) {
+        if (prev != null && c - prev > 2) break;
+        if (h !== 'none' && seen.has(h)) break;
+        map[c] = h; if (h !== 'none') seen.add(h); prev = c;
+      }
+      if (seen.size >= 6) return { headerRow: r, colHour: map };
+    }
+    return null;
+  }
+
   // ---------- current-term timetable (261 style or this site's own export) ----------
   function parseCurrent(sheets, sheetName) {
     const sheet = sheets.find((s) => s.name === sheetName);
     if (!sheet) throw new Error('sheet-not-found');
     const rows = sheet.rows;
-    let headerRow = -1, colHour = {};
-    for (let r = 0; r < Math.min(rows.length, 20); r++) {
-      const map = {};
-      (rows[r] || []).forEach((v, c) => { const h = headerHour(cellValue(v)); if (h != null && c > 0) map[c] = h; });
-      const timed = Object.values(map).filter((h) => h !== 'none');
-      if (timed.length >= 6) { headerRow = r; colHour = map; break; }
-    }
-    if (headerRow < 0) throw new Error('not-timetable');
+    const gh = findGridHeader(rows);
+    if (!gh) throw new Error('not-timetable');
+    const { headerRow, colHour } = gh;
     const lastHourCol = Math.max(...Object.keys(colHour).map(Number));
     // blocks: a name in column A starts a block
     const blocks = [];
@@ -295,6 +306,60 @@
     });
     return { sheetName, rows: out };
   }
+
+  // ---------- any department timetable, read as it is (for the "format for printing" service) ----------
+  /** Reads a grid timetable without changing any text: names, hour cells, No time and the columns after them. */
+  function readGridRaw(sheets, sheetName) {
+    const sheet = sheets.find((s) => s.name === sheetName);
+    if (!sheet) throw new Error('sheet-not-found');
+    const rows = sheet.rows;
+    const gh = findGridHeader(rows);
+    if (!gh) throw new Error('not-timetable');
+    const { headerRow, colHour } = gh;
+    const header = rows[headerRow] || [];
+    const hourCols = Object.entries(colHour).filter(([, h]) => h !== 'none').map(([c, h]) => ({ col: +c, hour: h })).sort((a, b) => a.col - b.col);
+    const ntEntry = Object.entries(colHour).find(([, h]) => h === 'none');
+    const ntCol = ntEntry ? +ntEntry[0] : null;
+    const firstHourCol = hourCols[0].col;
+    const lastGridCol = Math.max(hourCols[hourCols.length - 1].col, ntCol == null ? -1 : ntCol);
+    // a column between the names and the first hour (e.g. "Unit load")
+    let unitCol = null;
+    for (let c = 1; c < firstHourCol; c++) if (txt(header[c])) { unitCol = c; break; }
+    // columns after the grid, until the first column without a heading
+    const extras = [];
+    for (let c = lastGridCol + 1; c < header.length; c++) {
+      const label = txt(header[c]);
+      if (!label || typeof cellValue(header[c]) === 'number') break;
+      extras.push({ col: c, label });
+    }
+    // title: first text above the header that is not a band heading
+    let title = '';
+    const lastCol = extras.length ? extras[extras.length - 1].col : lastGridCol;
+    for (let r = 0; r < headerRow && !title; r++) (rows[r] || []).slice(0, lastCol + 1).forEach((v) => { const t = txt(v); if (!title && t && /[A-Za-z\u0600-\u06ff]{3}/.test(t) && !/^(timeslots|teaching load|sections)$/i.test(t)) title = t; });
+    const val = (v) => { const c = cellValue(v); if (c == null || c === '') return ''; if (typeof c === 'number') return Math.round(c * 100) / 100; if (c instanceof Date) return c.toISOString().slice(0, 10); return String(c).trim(); };
+    const blocks = [];
+    let cur = null, blank = 0;
+    for (let r = headerRow + 1; r < rows.length; r++) {
+      const row = rows[r] || [];
+      const name = txt(row[0]);
+      if (name && /colou?r key|course colou?rs|matching summary|every section|ms[c]?\s*\/\s*phd teaching|^summary/i.test(name)) break;
+      const used = [unitCol, ...hourCols.map((h) => h.col), ntCol, ...extras.map((e) => e.col)].filter((c) => c != null);
+      const hasAny = used.some((c) => val(row[c]) !== '');
+      if (!name && !hasAny) { blank++; if (blank > 2) { if (cur) cur = null; } continue; }
+      blank = 0;
+      if (name) { cur = { name, rows: [] }; blocks.push(cur); }
+      if (!cur) { cur = { name: '', rows: [] }; blocks.push(cur); }
+      cur.rows.push({
+        unit: unitCol == null ? '' : val(row[unitCol]),
+        cells: Object.fromEntries(hourCols.map((h) => [h.hour, val(row[h.col])])),
+        nt: ntCol == null ? '' : val(row[ntCol]),
+        extras: extras.map((e) => val(row[e.col])),
+      });
+    }
+    return { sheetName, title, unitLabel: unitCol == null ? '' : txt(header[unitCol]), hours: hourCols.map((h) => h.hour), hasNoTime: ntCol != null, extras: extras.map((e) => e.label), blocks: blocks.filter((b) => b.rows.length) };
+  }
+  /** First course code in a cell's text, e.g. "IS 101 (L)" → IS101. */
+  function courseIn(text) { COURSE_RE.lastIndex = 0; const m = COURSE_RE.exec(String(text || '')); return m ? (m[1] + m[2]).toUpperCase() : null; }
 
   // ---------- preferences (Google Form export) ----------
   function parsePrefs(sheets, sheetName) {
@@ -825,7 +890,7 @@
   return {
     HOURS, DAY_NAMES, hourLabel, shortRoom, defaultCourseSettings,
     cellValue, txt, sheetsFromExcelJS, loadWorkbook, parseHour, headerHour, parseDays, normCourse,
-    looksOfficial, parseOfficial, parseCurrent, parsePrefs, parseFaculty,
+    looksOfficial, parseOfficial, parseCurrent, parsePrefs, parseFaculty, readGridRaw, courseIn,
     nameTokens, nameScore, matchNames,
     buildModel, memberAllows, inWindow, memberCost, propose, evaluate, officialNotes, freeRooms, describeMeetings,
     WEIGHTS: W,

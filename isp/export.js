@@ -16,6 +16,8 @@
   const HCOL = {}; E.HOURS.forEach((h, i) => { HCOL[h] = 3 + i; }); // C..L
   const NOTIME = 13, NCOL = 14, OCOL = 15, PCOL = 16, QCOL = 17, RCOL = 18, SCOL = 19, TCOL = 20; // M..T
   const LAST = TCOL;
+  const NOTICE = 'Unofficial simulation produced by a training tool. Not an official document; the data and results must not be relied on.';
+  function noticeFooter(ws) { ws.headerFooter = { oddFooter: '&L&8&"Tahoma,Italic"' + NOTICE + '&R&8Page &P of &N', evenFooter: '&L&8&"Tahoma,Italic"' + NOTICE + '&R&8Page &P of &N' }; }
 
   /**
    * ctx: {side, term, members:[{id,name,required,coop,senior,pseudo?}], secs (model), assign {key: memberId|'PT'|'HOLD'},
@@ -42,12 +44,12 @@
     for (let c = NCOL; c <= TCOL; c++) ws.getColumn(c).width = 11;
     ws.mergeCells(1, 1, 1, LAST);
     const gen = ctx.generated || new Date();
-    ws.getCell(1, 1).value = `IS Department – ${sideName} Teaching Timetable – Term ${ctx.term}   |   Draft generated ${gen.toISOString().slice(0, 10)}`;
+    ws.getCell(1, 1).value = `IS Department – ${sideName} Teaching Timetable – Term ${ctx.term}   |   Unofficial simulation draft, generated ${gen.toISOString().slice(0, 10)}`;
     ws.getCell(1, 1).font = { name: FONT, size: 14, bold: true, color: { argb: 'FF1F4E79' } };
     ws.getCell(1, 1).alignment = { vertical: 'middle' };
     ws.getRow(1).height = 26;
     ws.mergeCells(2, 3, 2, LAST);
-    ws.getCell(2, 3).value = 'Red: conflict or section count different from required   |   Orange italic text with dashed border: proposed time (needs registration approval)';
+    ws.getCell(2, 3).value = NOTICE + '   |   Red: conflict or section count different from required   |   Orange italic dashed: proposed time (needs registration approval)';
     ws.getCell(2, 3).font = { name: FONT, size: 9, italic: true, color: { argb: 'FF7F7F7F' } };
     ws.mergeCells(3, 3, 3, NOTIME); ws.getCell(3, 3).value = 'Timeslots';
     ws.getCell(3, 3).fill = fill('0000FF'); ws.getCell(3, 3).font = { name: FONT, size: 14, bold: true, color: { argb: 'FFFFFFFF' } }; ws.getCell(3, 3).alignment = center;
@@ -228,6 +230,7 @@
     ws.pageSetup = { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0, paperSize: 9, margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 } };
     ws.pageSetup.printArea = `A1:${colL(LAST)}${keyEnd}`;
     ws.pageSetup.printTitlesRow = '3:4';
+    noticeFooter(ws);
 
     // ---------- MSc / PhD block ----------
     r = keyEnd + 2;
@@ -287,10 +290,13 @@
 
     // ---------- Is Reg ----------
     await buildIsReg(wb, ctx, status);
+    noticeFooter(wb.getWorksheet('Is Reg'));
     // ---------- Time requests ----------
     buildTimeRequests(wb, ctx, status);
+    noticeFooter(wb.getWorksheet('Time requests'));
     // ---------- Official notes ----------
     buildNotes(wb, ctx);
+    noticeFooter(wb.getWorksheet('Official file notes'));
     // ---------- Lists (hidden, last sheet) ----------
     const lists = wb.addWorksheet('Lists', { state: 'hidden' });
     lists.getRow(1).values = ['SecKey', 'SecLoad', 'SecComp', '', ...E.HOURS.map((h) => `Lec_${String(h).padStart(2, '0')}`), 'NoTime'];
@@ -424,5 +430,79 @@
     if (r === 2) { ws.getCell(2, 1).value = 'No notes.'; }
   }
 
-  return { build, statusMap };
+  /**
+   * "Format for printing" service: the grid exactly as read (readGridRaw), laid out and coloured, nothing changed.
+   * fmt: {title, grid, sheetName}
+   */
+  async function buildFormatted(ExcelJS, fmt) {
+    const g = fmt.grid;
+    const wb = new ExcelJS.Workbook();
+    wb.creator = 'IS Timetable';
+    const ws = wb.addWorksheet(String(fmt.sheetName || 'Timetable').trim().slice(0, 31) || 'Timetable', { views: [{ state: 'frozen', xSplit: 1, ySplit: 4 }] });
+    const keep = g.extras.map((_, i) => g.blocks.some((b) => b.rows.some((r) => r.extras[i] !== ''))).map((v, i) => (v ? i : -1)).filter((i) => i >= 0);
+    const hasUnit = !!g.unitLabel;
+    const col = { name: 1 };
+    let c = 2;
+    if (hasUnit) col.unit = c++;
+    const hcol = {}; g.hours.forEach((h) => { hcol[h] = c++; });
+    if (g.hasNoTime) col.nt = c++;
+    const ecol = {}; keep.forEach((i) => { ecol[i] = c++; });
+    const last = c - 1;
+    ws.getColumn(1).width = 30; if (hasUnit) ws.getColumn(col.unit).width = 8;
+    g.hours.forEach((h) => { ws.getColumn(hcol[h]).width = 16; }); if (g.hasNoTime) ws.getColumn(col.nt).width = 16;
+    keep.forEach((i) => { ws.getColumn(ecol[i]).width = 12; });
+    ws.mergeCells(1, 1, 1, last); ws.getCell(1, 1).value = fmt.title || 'Teaching timetable';
+    ws.getCell(1, 1).font = { name: FONT, size: 14, bold: true, color: { argb: 'FF1F4E79' } }; ws.getRow(1).height = 26; ws.getCell(1, 1).alignment = { vertical: 'middle' };
+    ws.mergeCells(2, 1, 2, last); ws.getCell(2, 1).value = NOTICE;
+    ws.getCell(2, 1).font = { name: FONT, size: 9, italic: true, color: { argb: 'FF7F7F7F' } };
+    const firstH = hcol[g.hours[0]], lastH = g.hasNoTime ? col.nt : hcol[g.hours[g.hours.length - 1]];
+    ws.mergeCells(3, firstH, 3, lastH); ws.getCell(3, firstH).value = 'Timeslots';
+    ws.getCell(3, firstH).fill = fill('0000FF'); ws.getCell(3, firstH).font = { name: FONT, size: 13, bold: true, color: { argb: 'FFFFFFFF' } }; ws.getCell(3, firstH).alignment = center;
+    if (keep.length) {
+      const a = ecol[keep[0]], b = ecol[keep[keep.length - 1]];
+      if (b > a) ws.mergeCells(3, a, 3, b);
+      ws.getCell(3, a).value = 'Teaching Load'; ws.getCell(3, a).font = { name: FONT, size: 13, bold: true }; ws.getCell(3, a).alignment = center;
+      for (let x = a; x <= b; x++) ws.getCell(3, x).fill = fill('EAD1DC');
+    }
+    ws.getRow(3).height = 22; ws.getRow(4).height = 40;
+    ws.getCell(4, 1).value = 'Member'; if (hasUnit) ws.getCell(4, col.unit).value = g.unitLabel;
+    g.hours.forEach((h) => { const cell = ws.getCell(4, hcol[h]); cell.value = h > 12 ? h - 12 : h; cell.numFmt = '0":00"'; });
+    if (g.hasNoTime) ws.getCell(4, col.nt).value = 'No time';
+    keep.forEach((i) => { ws.getCell(4, ecol[i]).value = g.extras[i]; ws.getCell(4, ecol[i]).fill = fill('EAD1DC'); });
+    for (let x = 1; x <= last; x++) { const cell = ws.getCell(4, x); cell.font = { name: FONT, size: 11, bold: true }; cell.alignment = center; cell.border = { top: thin, left: thin, right: thin, bottom: med }; if (!cell.fill || !cell.fill.fgColor) cell.fill = fill('F2F2F2'); }
+    let r = 5;
+    g.blocks.forEach((b) => {
+      const first = r;
+      b.rows.forEach((row, ri) => {
+        ws.getRow(r).height = 20;
+        const put = (x, v, isGrid) => {
+          const cell = ws.getCell(r, x);
+          cell.value = v === '' ? null : v;
+          cell.alignment = center;
+          cell.font = { name: FONT, size: ri === 0 ? 11 : 10, bold: ri === 0 && isGrid, color: { argb: ri === 0 ? 'FF000000' : 'FF404040' } };
+          cell.border = { left: thin, right: thin, top: ri === 0 ? med : thin, bottom: thin };
+          const code = isGrid && v !== '' ? E.courseIn(v) : null;
+          if (code) cell.fill = fill(D.colourFor(code));
+        };
+        put(1, '', false);
+        if (hasUnit) put(col.unit, row.unit, false);
+        g.hours.forEach((h) => put(hcol[h], row.cells[h], true));
+        if (g.hasNoTime) put(col.nt, row.nt, true);
+        keep.forEach((i) => put(ecol[i], row.extras[i], false));
+        r++;
+      });
+      const lastR = r - 1;
+      if (lastR > first) ws.mergeCells(first, 1, lastR, 1);
+      const nc = ws.getCell(first, 1);
+      nc.value = b.name; nc.font = { name: FONT, size: 12, bold: true }; nc.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
+      for (let x = 1; x <= last; x++) { const cell = ws.getCell(lastR, x); cell.border = Object.assign({}, cell.border, { bottom: med }); }
+    });
+    ws.pageSetup = { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0, paperSize: 9, margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.5, header: 0.2, footer: 0.25 } };
+    ws.pageSetup.printArea = `A1:${colL(last)}${r - 1}`;
+    ws.pageSetup.printTitlesRow = '3:4';
+    noticeFooter(ws);
+    return wb;
+  }
+
+  return { build, statusMap, buildFormatted, NOTICE };
 });
