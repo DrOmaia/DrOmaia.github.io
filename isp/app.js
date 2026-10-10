@@ -803,7 +803,7 @@
       <div class="stat ${counted !== reqTotal ? 'warn' : 'good'}"><b>${counted} / ${reqTotal}</b>${esc(t('sAssigned'))}</div>
       <div class="stat ${unassigned ? 'bad' : 'good'}"><b>${unassigned}</b>${esc(t('sUnassigned'))}</div>
       <div class="stat ${conflicts ? 'bad' : 'good'}"><b>${conflicts}</b>${esc(t('sConflicts'))}</div>
-      <div class="stat ${requests ? 'warn' : ''}"><b>${requests}</b>${esc(t('sRequests'))}</div>
+      <button type="button" class="stat stat-link ${requests ? 'warn' : ''}" data-act="toReqs" title="${esc(t('timeReqTitle'))}"><b>${requests}</b>${esc(t('sRequests'))}</button>
       <div class="stat"><b>${lockedN} / ${S.members.length}</b>${esc(t('sLocked'))}</div>
     </div>
     <p class="legend small muted"><span><i class="lg prop"></i>${esc(t('lgProp'))}</span><span><i class="lg bad"></i>${esc(t('lgBad'))}</span><span><i class="lg pin">•</i>${esc(t('lgPin'))}</span><span>🔒 ${esc(t('lgRes'))}</span>${hasCur ? `<span><i class="lg new"></i>${esc(t('lgNew'))}</span>` : ''}${anyWishes ? `<span><i class="lg star">★</i>${esc(t('lgWish'))}</span>` : ''}${S.ref ? `<span><i class="lg moved"></i>${esc(t('lgMoved'))}</span>` : ''}<span>${esc(t('lgClick'))}</span><span>${esc(t('lgCard'))}</span></p>
@@ -812,7 +812,7 @@
     <div class="gridwrap"><table class="tt ${ui.focusCourse ? 'focusing' : ''}"><thead>${head}</thead><tbody>${ui.building && !S.built ? `<tr><td colspan="16" style="padding:30px;text-align:center">${esc(t('building'))}</td></tr>` : body}</tbody></table></div>
     <div class="attn">
       <div class="panel"><h2>${esc(t('attention'))}</h2>${items.length ? `<p class="small muted" style="margin:-4px 0 10px">${esc(t('attnHint'))}</p><ul>${items.join('')}</ul>` : `<p class="good">${esc(t('allGood'))}</p>`}</div>
-      <div class="panel"><h2>${esc(t('timeReqTitle'))}</h2>${reqs.length ? `<ul class="req-list">${reqs.join('')}</ul>` : `<p class="muted">—</p>`}</div>
+      <div class="panel" id="timeReqs"><h2>${esc(t('timeReqTitle'))}</h2>${reqs.length ? `<ul class="req-list">${reqs.join('')}</ul>` : `<p class="muted">—</p>`}</div>
     </div>
     ${S.built ? `<div class="panel chg-panel no-print">${changesBox()}</div>` : ''}`;
   }
@@ -1250,6 +1250,14 @@
     return R.off.lectures.filter((k) => secs[k]).sort((a, b) => order(a) - order(b) || (secs[a].hour == null ? 99 : secs[a].hour) - (secs[b].hour == null ? 99 : secs[b].hour) || a.localeCompare(b))
       .map(line).filter(Boolean).map((x, i) => `${i + 1}- ${x}`);
   }
+  /** The email to Admissions & Registration around the numbered lines (male and female sides have their own contact). */
+  function changeEmail(lines) {
+    if (!lines.length) return '';
+    const female = S.side === 'female';
+    return [female ? 'Dear Ms. Deem,' : 'Dear Mr. Rev,', '',
+      'We have some changes in our course assignment as the following, kindly implement it in the system and notify us:', '']
+      .concat(lines, ['', 'Regards,'], female ? [] : ['Dr. Omaia Al-Omari', 'Chair, Information Systems Department']).join('\n');
+  }
   /** The change list box (Proposal and Download pages): net changes since the first version, or since the last version sent. */
   function changesBox() {
     const lines = changeLines();
@@ -1257,7 +1265,7 @@
     const since = !S.sent ? t('chgSinceOff') : S.sent.auto ? t('chgSinceFirst', d) : t('chgSince', d);
     return `<div class="chg">
           <h2>${esc(t('chgTitle'))}</h2><p class="small muted" style="margin:0">${esc(since)}</p>
-          ${lines.length ? `<textarea class="input chg-text" dir="ltr" readonly rows="${Math.min(12, lines.length + 1)}">${esc(lines.join('\n'))}</textarea>` : `<p class="muted" style="margin:0">${esc(t('chgNone'))}</p>`}
+          ${lines.length ? `<textarea class="input chg-text" dir="ltr" readonly rows="${Math.min(18, lines.length + 8)}">${esc(changeEmail(lines))}</textarea>` : `<p class="muted" style="margin:0">${esc(t('chgNone'))}</p>`}
           <div class="row"><button class="btn" type="button" data-act="copyChanges" ${lines.length ? '' : 'disabled'}>${esc(t('copy'))}</button><button class="btn" type="button" data-act="markSent" title="${esc(t('markSentTip'))}">${esc(t('markSent'))}</button></div>
         </div>`;
   }
@@ -1477,7 +1485,8 @@
         const own = snapshot().assign[d.key]; if (s.officialHour === h) delete S.proposed[d.key]; else S.proposed[d.key] = h; delete S.autoTime[d.key]; if (memberById(own)) S.pins[d.key] = own; closePop(); persist(); render(); break;
       }
       case 'lock': { remember('uLock', nameOf(d.id)); if (isLocked(d.id)) delete S.decisions[d.id]; else S.decisions[d.id] = 'locked'; persist(); render(); break; }
-      case 'copyChanges': { const ok = await copyText(changeLines().join('\n')); toast(t(ok ? 'copied' : 'copyFail')); break; }
+      case 'copyChanges': { const ok = await copyText(changeEmail(changeLines())); toast(t(ok ? 'copied' : 'copyFail')); break; }
+      case 'toReqs': { const c = document.getElementById('timeReqs'); if (c) { c.scrollIntoView({ behavior: 'smooth', block: 'center' }); c.classList.remove('flash'); void c.offsetWidth; c.classList.add('flash'); setTimeout(() => c.classList.remove('flash'), 2600); } break; }
       case 'toChanges': { const c = main.querySelector('.chg'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'center' }); break; }
       case 'markSent': markSent(); persist(); render(); toast(t('sentDone')); break;
       case 'excel': try { await exportExcel(); } catch (e) { console.error(e); toast('Excel: ' + e.message); } break;
