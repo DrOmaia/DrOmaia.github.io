@@ -33,6 +33,8 @@
     wb.calcProperties = { fullCalcOnLoad: true };
     const sideName = ctx.side === 'female' ? 'Female' : 'Male';
     const title = `${sideName} ${ctx.term}`.trim();
+    // the clean timetable comes first in the file; it is filled at the end, linked to the detailed sheet
+    const clean = wb.addWorksheet('Timetable', { views: [{ state: 'frozen', xSplit: 1, ySplit: 3 }] });
     const ws = wb.addWorksheet(title.slice(0, 31), { views: [{ state: 'frozen', xSplit: 2, ySplit: 4 }], properties: { defaultRowHeight: 20 } });
     const secs = ctx.secs;
     const assign = ctx.assign;
@@ -328,6 +330,7 @@
     ws.addConditionalFormatting({ ref: `F${sumFirst + 5}:F${sumFirst + 6}`, rules: [{ type: 'expression', priority: 1, formulae: [`F${sumFirst + 5}>0`], style: { fill: fill('FFC7CE'), font: { color: { argb: 'FF9C0006' }, bold: true } } }] });
 
     // ---------- Is Reg ----------
+    buildClean(clean, ws, { SH, title: `IS Department – ${sideName} Teaching Timetable – Term ${ctx.term}`, blocks, rowsOfMember, LG, courseList });
     await buildIsReg(wb, ctx, status, { SH, chkRow });
     noticeFooter(wb.getWorksheet('Is Reg'));
     // ---------- Time requests ----------
@@ -372,6 +375,57 @@
     });
     wb.__extraNames = extraNames;
     return wb;
+  }
+
+  /** Clean timetable for printing / presenting: names, hours, No time, Senior, COOP, MSc/PhD, total load and sections.
+      Every cell is a formula on the detailed sheet, so a change there shows here too. */
+  function buildClean(cs, ws, o) {
+    const map = { 1: 1 }; for (let c = 3; c <= NOTIME; c++) map[c] = c - 1; // names, hours, No time
+    [[PCOL, 13], [QCOL, 14], [RCOL, 15], [SCOL, 16], [TCOL, 17]].forEach(([a, b]) => { map[a] = b; });
+    const last = 17;
+    const cached = (r, c) => { const v = ws.getCell(r, c).value; const x = v && typeof v === 'object' ? (v.result != null ? v.result : '') : v; return x == null ? '' : x; };
+    cs.getColumn(1).width = 28; for (let c = 2; c <= 12; c++) cs.getColumn(c).width = 15; for (let c = 13; c <= last; c++) cs.getColumn(c).width = 10;
+    cs.mergeCells(1, 1, 1, last); cs.getCell(1, 1).value = o.title;
+    cs.getCell(1, 1).font = { name: FONT, size: 14, bold: true, color: { argb: 'FF1F4E79' } }; cs.getRow(1).height = 26; cs.getCell(1, 1).alignment = { vertical: 'middle' };
+    cs.getRow(2).height = 6;
+    const heads = { 1: 'Member', 12: 'No time', 13: 'Senior\n(hrs)', 14: 'COOP\n(hrs)', 15: 'MSc / PhD\n(hrs)', 16: 'Total Load\n(hrs)', 17: 'Sections' };
+    E.HOURS.forEach((h) => { const c = cs.getCell(3, HCOL[h] - 1); c.value = h > 12 ? h - 12 : h; c.numFmt = '0":00"'; });
+    Object.entries(heads).forEach(([c, v]) => { cs.getCell(3, +c).value = v; });
+    cs.getRow(3).height = 34;
+    for (let c = 1; c <= last; c++) { const cell = cs.getCell(3, c); cell.font = { name: FONT, size: 11, bold: true }; cell.alignment = center; cell.fill = fill(c >= 13 ? 'EAD1DC' : 'F2F2F2'); cell.border = { top: thin, left: thin, right: thin, bottom: med }; }
+    const off = 5 - 4; // detailed rows start at 5, clean rows at 4
+    o.blocks.forEach((b) => {
+      const { first, last: lst } = o.rowsOfMember[b.m.id];
+      for (let r = first; r <= lst; r++) {
+        const cr = r - off; cs.getRow(cr).height = 20;
+        Object.entries(map).forEach(([dc, cc]) => {
+          dc = +dc; if (dc === 1 || dc >= PCOL) return;
+          const cell = cs.getCell(cr, cc);
+          cell.value = { formula: `IF(${o.SH}!${colL(dc)}${r}="","",${o.SH}!${colL(dc)}${r})`, result: cached(r, dc) };
+          cell.alignment = center; cell.font = { name: FONT, size: r === first || (r - first) % 2 === 0 ? 11 : 10, bold: (r - first) % 2 === 0, color: { argb: (r - first) % 2 === 0 ? 'FF000000' : 'FF404040' } };
+          cell.border = { left: thin, right: thin, top: r === first ? med : thin, bottom: r === lst ? med : thin };
+        });
+      }
+      const f = first - off, l = lst - off;
+      [1, 13, 14, 15, 16, 17].forEach((cc) => { if (l > f) cs.mergeCells(f, cc, l, cc); const cell = cs.getCell(f, cc); cell.border = { left: thin, right: thin, top: med, bottom: med }; });
+      const nm = cs.getCell(f, 1);
+      nm.value = { formula: `${o.SH}!$A$${first}`, result: b.m.name };
+      nm.font = { name: FONT, size: 12, bold: true, color: { argb: b.m.id === 'NA' ? 'FF7F7F7F' : 'FF000000' } }; nm.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
+      if (b.m.id === 'HOLD') nm.fill = fill('FFC000');
+      if (b.m.id === 'NA') nm.fill = fill('F2F2F2');
+      [[PCOL, 13], [QCOL, 14], [RCOL, 15], [SCOL, 16], [TCOL, 17]].forEach(([dc, cc]) => {
+        const cell = cs.getCell(f, cc);
+        cell.value = { formula: `IF(${o.SH}!${colL(dc)}${first}="","",${o.SH}!${colL(dc)}${first})`, result: cached(first, dc) };
+        cell.alignment = center; cell.font = { name: FONT, size: 11, bold: cc >= 16 };
+      });
+      const req = b.m.pseudo || b.m.required === '' || b.m.required == null ? null : Number(b.m.required);
+      if (req != null) cs.addConditionalFormatting({ ref: `${colL(17)}${f}`, rules: [{ type: 'expression', priority: 1, formulae: [`${colL(17)}${f}<>${req}`], style: { font: { color: { argb: 'FFC00000' }, bold: true } } }] });
+    });
+    const lastRow = o.LG - off;
+    cs.addConditionalFormatting({ ref: `B4:L${lastRow}`, rules: o.courseList.map((c, i) => ({ type: 'expression', priority: 2 + i, formulae: [`LEFT(B4,${c.length + 1})="${c}-"`], style: { fill: fill(D.colourFor(c)) } })) });
+    cs.pageSetup = { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0, paperSize: 9, margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 } };
+    cs.pageSetup.printArea = `A1:${colL(last)}${lastRow}`;
+    cs.pageSetup.printTitlesRow = '3:3';
   }
 
   function rowSpan(off, k) {
