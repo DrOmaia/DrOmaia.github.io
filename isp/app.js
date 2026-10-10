@@ -923,16 +923,18 @@
       const x = secs[inKey];
       if (x.needsTime && x.hour == null) return { why: t('whyPickHour') }; // no time in the official file: a member needs an hour
       if (!E.inWindow(m, x.hour)) return { why: t('whyWindow', m.name) };
+      // course limits (Teaches only / Never assign) guide the proposal; a move by hand is allowed with a warning
       const never = (m.never || []).map(E.normCourse).filter(Boolean);
-      if (x.noTime ? never.some((c) => c === x.course || c === x.prefix) : !E.memberAllows(m, x)) return { why: t('whyCourse', m.name, x.course) };
+      const warns = [];
+      if (x.noTime ? never.some((c) => c === x.course || c === x.prefix) : !E.memberAllows(m, x)) warns.push(t('warnCourse', m.name, x.course));
       const mine = Object.keys(after).filter((kk) => after[kk] === mid && kk !== inKey);
       for (const kk of mine) { if (secs[kk].slots.some((sl) => x.slots.includes(sl))) return { why: t('whyClash', m.name, kk) }; }
       // never more counted sections than the number entered: to replace one, swap or first move one to Not assigned
       const before = (ev.per[mid] || {}).counted || 0;
       const now = before + (x.counts ? 1 : 0) - (outKey && secs[outKey].counts ? 1 : 0);
       if (m.required !== '' && m.required != null && now > Number(m.required) && now > before) return { why: t('whyCount', m.name, Number(m.required)) };
-      if (x.hour != null && ((m.prefTime === 'am' && x.hour >= 13) || (m.prefTime === 'pm' && x.hour < 13))) return { warn: t('warnTime', m.name) };
-      return null;
+      if (x.hour != null && ((m.prefTime === 'am' && x.hour >= 13) || (m.prefTime === 'pm' && x.hour < 13))) warns.push(t('warnTime', m.name));
+      return warns.length ? { warn: warns.join(' — ') } : null;
     };
     const a = checkMember(to, k, swap), b = j ? checkMember(from, swap, k) : null;
     if (a && a.why) return { ok: false, why: a.why };
@@ -977,7 +979,7 @@
       else res = dropCheck(drag.key, drag.from, to, null, same ? { snap } : { snap, secs: secsFor(h) });
       drag.res[`m|${to}|${h}`] = res; td.classList.add(res.ok ? (res.warn ? 'dz-warn' : 'dz-ok') : 'dz-no');
       const m = memberById(to);
-      if (res.ok && m) { // how good a home this member is for the section
+      if (res.ok && m && E.memberAllows(m, sec)) { // how good a home this member is for the section
         const why = [];
         if ((m.prefs || []).filter(Boolean).map(E.normCourse).includes(sec.course)) why.push(t('bestWish'));
         if (Object.keys(as0).some((kk) => as0[kk] === to && sx0[kk].course === sec.course)) why.push(t('bestSame'));
@@ -996,8 +998,8 @@
   }
   /** Rows that take any number of sections at the same hour: dropping there always adds. */
   const addOnly = (mid) => mid === 'NA' || mid === 'HOLD';
-  /** Where the member's section goes when one is dropped on it: from ON-HOLD it goes to Not assigned, otherwise a swap. */
-  const swapBack = (from) => (from === 'HOLD' ? 'NA' : from);
+  /** Where the member's section goes when one is dropped on it: from ON-HOLD or part-timers it goes to Not assigned, otherwise a swap. */
+  const swapBack = (from) => (from === 'HOLD' || from === 'PT' ? 'NA' : from);
   function dropTarget(x, y) {
     const el = document.elementFromPoint(x, y); if (!el || !el.closest) return null;
     const td = el.closest('table.tt td.slot'); if (!td) return null;
