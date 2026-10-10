@@ -750,7 +750,7 @@
       if (ui.wasHealthy === false && hh.healthy) setTimeout(celebrate, 250);
       ui.wasHealthy = hh.healthy; ui.lastScore = hh.score;
     }
-    const head = `<tr><th style="text-align:left;padding-left:12px">${S.lang === 'ar' ? 'العضو' : 'Member'}</th>${E.HOURS.slice(0, 4).map((h) => `<th class="hr">${hl(h)}</th>`).join('')}<th class="brk" title="${esc(t('breakCol'))}"></th>${E.HOURS.slice(4).map((h) => `<th class="hr">${hl(h)}</th>`).join('')}<th>${esc(t('noTime'))}</th><th>${esc(t('load'))}</th><th>${esc(t('sections'))}</th><th title="${esc(t('prepsTip'))}">${esc(t('preps'))}</th></tr>`;
+    const head = `<tr><th style="text-align:left;padding-left:12px">${S.lang === 'ar' ? 'العضو' : 'Member'}</th>${E.HOURS.slice(0, 4).map((h) => `<th class="hr">${hl(h)}</th>`).join('')}<th class="brk" title="${esc(t('breakCol'))}"></th>${E.HOURS.slice(4).map((h) => `<th class="hr">${hl(h)}</th>`).join('')}<th>${esc(t('noTime'))}</th><th>${esc(t('load'))}</th><th class="cnt">${esc(t('sections'))}</th><th class="preps" title="${esc(t('prepsTip'))}">${esc(t('preps'))}</th></tr>`;
     const body = rows.map(({ m, pseudo }) => {
       const keys = byMember[m.id] || [];
       const p = ev.per[m.id] || { load: 0, counted: 0, total: 0 };

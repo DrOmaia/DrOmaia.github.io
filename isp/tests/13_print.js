@@ -7,7 +7,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const SP =
   await page.click('[data-act=go][data-step="4"]'); await page.waitForSelector('table.tt');
   await page.emulateMedia({ media: 'print' }); await page.waitForTimeout(300);
   await page.screenshot({ path: SP + '/s_print.png', fullPage: true });
-  const vis = await page.evaluate(() => ['.legend', '.howto', '.page-head', '.cell .star', '.cell .rlock', 'small.wishes', '.chg-panel', '.notice-bar', '.print-title'].map((q) => q + ':' + [...document.querySelectorAll(q)].some((e) => e.offsetParent !== null)));
+  const vis = await page.evaluate(() => ['.legend', '.howto', '.page-head', '.cell .star', '.cell .rlock', 'small.wishes', '.chg-panel', '.notice-bar', 'th.cnt', 'td.preps', '.print-title'].map((q) => q + ':' + [...document.querySelectorAll(q)].some((e) => e.offsetParent !== null)));
   console.log(vis.join(' '));
   await page.pdf({ path: SP + '/print.pdf', landscape: true, format: 'A4' }); await page.emulateMedia({ media: 'screen' }); await page.click('#langBtn'); await page.emulateMedia({ media: 'print' }); await page.pdf({ path: SP + '/print_en.pdf', landscape: true, format: 'A4' });
   await b.close();
