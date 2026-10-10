@@ -32,3 +32,6 @@ lives in the code. History of changes and decisions: [`CHANGELOG.md`](CHANGELOG.
    add or update a test in `isp/tests/` for the new behaviour.
 5. Commit with a clear message (what changed for the user), push to the working branch and to `main` to publish.
 6. Add a numbered entry to `CHANGELOG.md` (with the cache tag letter), and update `README.md` if a rule changed.
+7. If you changed this file or `README.md`, run `python3 tools/sync-ai-instructions.py` (copies them into the files
+   every AI tool reads automatically: `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.github/copilot-instructions.md`,
+   `.cursor/rules/isp.mdc`, `.windsurfrules`).
