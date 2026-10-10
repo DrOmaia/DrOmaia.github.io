@@ -1,0 +1,151 @@
+# IS Teaching Timetable (`/isp/`)
+
+A browser-only tool for the Chair of the Information Systems Department (PSU) to build next term's teaching
+timetable for the **Male** or **Female** side: it reads the department's Excel files, proposes who teaches every
+section, lets her adjust it by drag and drop, and produces an Excel file for registration plus an email of changes.
+
+- Live: <https://dromaia.github.io/isp/> (GitHub Pages, branch `main`, no build step).
+- Nothing is uploaded anywhere: files are read in the browser; work is kept in `localStorage` and in a saved
+  project file (`.json`). It is a training / simulation tool; results are unofficial drafts.
+- The interface is Arabic (default) and English; all file contents (Excel, email) are English.
+
+> **Editing this tool with an AI or by hand? Read [`CLAUDE.md`](CLAUDE.md) first** (rules and checklist), then this file.
+> The history of every change is in [`CHANGELOG.md`](CHANGELOG.md).
+
+---
+
+## 1. Files
+
+| File | What it holds |
+| --- | --- |
+| `index.html` | Page shell. Loads the scripts below with a cache tag `?v=YYYYMMDDx` (bump it on every change). |
+| `i18n.js` | All interface text: `window.ISPText = { ar: {...}, en: {...} }`. Both languages must have the same keys. |
+| `defaults.js` | Course colour palette (`COLOURS`, `colourFor(code)`), same colours as the department's Excel file. |
+| `engine.js` | No DOM. File readers, the model of sections, the proposal builder, checks. Works in the browser (`window.ISPEngine`) and in Node (`require`). |
+| `export.js` | Excel workbook builder (ExcelJS): clean timetable tab, detailed sheet with live formulas, Is Reg, Time requests, notes. `window.ISPExport`. |
+| `app.js` | The interface: state, the 5 steps, rendering, drag and drop, menus, change list / email, settings file, save / open. |
+| `styles.css` | All styles, including print rules (`@media print`). |
+| `vendor/` | `exceljs.min.js`, `jszip.min.js` (+ licences). Do not edit. |
+| `tests/` | Browser tests on **synthetic** sample files. See [`tests/README.md`](tests/README.md). |
+
+## 2. The five steps (what the user sees)
+
+1. **Start** – choose Male / Female and the new term number; or open a saved project; or open a saved settings file.
+   Extra service on this page: "Format a timetable for printing" (any department grid → coloured printable Excel).
+2. **Files** – four Excel files:
+   - Faculty list (e.g. `Total Sections.xlsx`): name, required sections, optional COOP / Senior hours.
+   - Official file from Admissions & Registration (e.g. `T262_CCIS_TIMETABLE.xlsx`): sheet `IS` is read
+     (SECTION, COURSE, ACTIVITY, START, DAYS, ROOMS, INSTRUCTOR…); all sheets are used for free-room suggestions.
+   - Current-term timetable grid (e.g. `261 male timetable.xlsx`, or this tool's own Excel): names in column A,
+     hours 8…6 in the header row. Used to keep each member's current courses.
+   - Optional Google-Form preferences: 1st/2nd/3rd preferred course, morning/afternoon, comments.
+   Names are matched across files (fuzzy, editable "Who is who?").
+3. **Settings** – tabs *Members* and *Courses*, plus buttons **Save settings / Open saved settings**.
+   Per member: required sections, COOP, Senior, preferred time, and **Edit limits**:
+   first / last class hour; **Teaches only** (each course: "Any time" = at least one section, or one reserved
+   section 🔒); **Never assign**; **Graduate Studies** (No time, counts as one section, hours 1–6 added to the load);
+   keep current-term courses; survey wishes. *Courses* tab: who teaches each course (members / as needed /
+   part-timers / ON-HOLD / not ours) and whether an untimed course counts as a section (default: no).
+4. **Proposal** – the board. Rows: **Not assigned** (top) · members · Part-timers (if any) · **ON-HOLD** (bottom);
+   columns 8:00…11:00 | break | 1:00…6:00 | No time | Load | Sections | Preps.
+   Drag a section to another member at the same hour (swap by dropping on a section), click a section for its menu
+   (To Not assigned · Change time · Back to saved place), click an empty cell for the sections that may go there,
+   🔒 Lock a member, ↶ Undo, Propose again, Print (clean print), change list for registration under the board.
+5. **Download** – Excel file, project file (save / next term), and the change list / email for registration.
+
+## 3. Rules the code enforces (business rules)
+
+- **Hours**: `HOURS = [8, 9, 10, 11, 13, 14, 15, 16, 17, 18]`; 12:00 is the break. Sun / Mon / Wed on campus, Tue online.
+- **Section = lecture key** `COURSE-SEC` (e.g. `IS201-498`); its tutorial / lab companion (e.g. `IS201-499 (T)`)
+  is paired automatically and moves with it. Cell text: `IS201-498 (L)` / `IS201-499 (T)` or `(Lab)`.
+- **No clash ever**: a member never has two sections whose meeting slots (day × hour) overlap — on every path
+  (proposal, drag, menus, assign list, time change, back to saved place). One function decides: `dropCheck()`
+  (plus `timeOk()` for a time change).
+- **Strict count**: never more *counted* sections than the member's required number (Graduate Studies counts;
+  untimed courses such as IS492 / IS499 do not count by default). Members with no number: no limit.
+  To replace a section: swap, or first move one to Not assigned.
+- **Member hours** (first / last class) are hard. **Course limits** (Teaches only / Never assign) are hard for the
+  proposal but only an orange warning for a move by hand.
+- **Reserved section** (Teaches only + a chosen section) is hard: pinned to the member, never changed by Propose
+  again. Moving it away by hand resets that entry to "Any time".
+- **Locked member** (🔒): nothing is dragged from / to his row, no swaps, never ★ best fit, Propose again keeps him.
+- **No time column**: holds any number of untimed sections and Graduate Studies; dropping there adds, never swaps.
+- **Sections with no time in the official file** (course has other timed sections, e.g. `IS311-514`) may go to any
+  hour column and any row (a member needs an hour); this becomes a *time request* ("request to set this time").
+- **Not assigned / ON-HOLD rows**: any number of sections at the same hour, dropping adds. Dropping an ON-HOLD or
+  part-timer section on a member's section = **Replace** (his section goes to Not assigned).
+- **Change list / email** for Admissions & Registration: *net* changes (A→B→C = one line to C; back to start = none)
+  compared with the first version she worked from, or with the last time she pressed **Sent to registration**.
+  Lines: `Please reassign IS201 at 11am sections 1465/1466 to Dr. X`; `Please reassign IS492 section 546 to …`;
+  `Please set IS311 section 514 at 8am and assign to Dr. X`; `Please put IS201 at 10am sections 498/499 ON HOLD`.
+  Moves to Not assigned / part-timers are not listed. Email wrapper — Male: "Dear Mr. Rev, … Regards, Dr. Omaia
+  Al-Omari, Chair, Information Systems Department"; Female: "Dear Ms. Deem, … Regards,".
+- Male and Female use the same code; only titles ("Male"/"Female") and the email wrapper differ.
+
+## 4. Data model (state `S`, saved in `localStorage` key `isp-timetable-v1` and in the project file)
+
+| Field | Meaning |
+| --- | --- |
+| `side`, `term`, `lang`, `step` | Male / female, term number, `ar`/`en`, current step 1–5. |
+| `files` | `{faculty, official, current, prefs}` → `{name, b64, sheet}` (the uploaded workbooks, base64). |
+| `members[]` | `{id, name, required, coop, senior, prefTime ('any'/'am'/'pm'), first, last, allowed[], res[], never[], keepCurrent, prefs[3], comment}`. `res[i]` is the reserved section key for `allowed[i]` (`''` = Any time). |
+| `msc[]` | Graduate Studies: `{id, member, program: 'Graduate Studies', hours}` (`member` `''` = Not assigned). |
+| `courses{}` | Per course code: `{cat: required/asneeded/parttime/onhold/none, counts, load?, compLoad?}`; `courseTouched{}` marks user edits. |
+| `secCat{}` | Per section override of the category (e.g. moved to ON-HOLD = `onhold`, to Not assigned = `required`). |
+| `assign{}` | Section key → member id (result of the proposal + edits). `pins{}` = sections changed by hand (kept by Propose again). `bans{}` = `key|memberId` never again. |
+| `proposed{}`, `autoTime{}` | Proposed hour for a section (time request); `autoTime` marks hours chosen by the proposal. |
+| `decisions{}` | `memberId → 'locked'`. |
+| `ref{}` | "Saved places": section → `[member, hour]` at the last save / open (for ↺ back to saved place). |
+| `sent` | Baseline of the change list: `{at, map{key→member}, hours{}, hold{}, auto}` (first version, or last "Sent to registration"). |
+| `currentMap{}`, `prefsMap{}`, `mapManual{}` | Name matching of the current timetable / preferences rows to members. |
+| `baseline` | Last term's timetable kept by "Start next term from this project". |
+
+Runtime only (not saved): `R` (parsed workbooks: `R.off` official, `R.cur` current, `R.prefs`, `R.fac`, `R.notes`)
+and `ui` (open panels, undo stack, focus course…). Pseudo rows use ids `NA` (Not assigned), `PT` (part-timers),
+`HOLD` (ON-HOLD). Old files are upgraded by `normalize()` ("final" → locked, `res[]` added, `forbidden` cleared).
+
+## 5. Where things are in the code
+
+**engine.js** – `parseOfficial` (sections, companions, rooms), `parseCurrent`, `parsePrefs`, `parseFaculty`,
+`matchNames` (fuzzy names), `buildModel` (sections with slots / load / counts), `memberAllows`, `inWindow`,
+`propose` (simulated annealing: pins, locked members, caps = strict counts, guarantees = "Any time" courses,
+hard clash / hours rules), `memberCost` (soft preferences), `evaluate` (issues: clash, window, notime, count,
+unassigned), `officialNotes`, `freeRooms`, `defaultCourseSettings`.
+
+**app.js** (in order) – state & helpers · parsing (`readFile`, `parseAll`, `applyFaculty`, `normalize`) · settings file
+(`saveSettings`, `applySettings`) · model (`model`, `modelWith`, reservations `reservedMap`/`guarantees`/`unreserve`,
+`effAssign`, `snapshot`) · undo (`remember`/`undo`) · proposal (`runPropose`, `build`) · views (`viewStart`,
+`viewFiles`, `viewSettings` → `viewMembers`/`allowedBox`/`resOptions`/`gradBox`/`viewCourses`, `viewProposal`,
+`viewExport`) · board rules (`dropCheck`, `timeOk`, `freeTime`) · drag and drop (`startDrag`, `markGradTargets`,
+`dropTarget`, `moveDrag`, `endDrag`, `setFreeHour`) · menus (`secPop`, `cellPop`) · change list (`sentBase`,
+`changeLines`, `changeEmail`, `changesBox`, `markSent`) · actions (`putSection`, `saveProject`, `openProject`,
+`exportExcel`, `nextTerm`) · event handlers (`click` switch on `data-act`, `change` switch on `data-chg`).
+
+**export.js** – `build` (detailed sheet: Not assigned block, member blocks, ON-HOLD, live formulas, check table,
+summary; hidden `Lists` sheet with dropdown names), `buildClean` (first tab "Timetable", formulas on the detailed
+sheet), `buildIsReg` (copy of the official sheet + instructor names, ON-HOLD written as ON-HOLD),
+`buildTimeRequests`, `buildNotes`, `buildFormatted` (print-format service), `toBuffer` (adds defined names).
+
+## 6. Excel file produced (Download → Excel)
+
+1. **Timetable** – clean, for printing / presenting: Member, hours, No time, Senior, COOP, Graduate Studies, Total
+   Load. Every cell is a formula on the detailed sheet, so edits there show here.
+2. **Male 262 / Female 262** – detailed working sheet: Not assigned block (top, outside the `Grid` name), member
+   blocks (two rows each: lecture / tutorial-lab), Part-timers, ON-HOLD; loads and section counts as formulas;
+   dropdowns of free sections per hour; check table (status of every section, "Changed vs this draft"); summary.
+3. **Is Reg** – the official IS sheet with INSTRUCTOR'S NAME filled (copy the column into the official file).
+4. **Time requests** – proposed hours with free rooms; "request to set this time" for sections with no official time.
+5. **Official file notes**; **Lists** (hidden helper).
+
+Checked by `tests/recalc.py` in LibreOffice: 0 formula errors.
+
+## 7. Run, test, publish
+
+```bash
+# serve locally (from the repository root)
+npx http-server -p 8099 -s -c-1 .        # then open http://127.0.0.1:8099/isp/
+# tests (Playwright + Chromium; LibreOffice for the Excel check)
+NODE_PATH=$(npm root -g) isp/tests/run_all.sh
+```
+
+Publish = push to `main` (GitHub Pages deploys in about a minute). Bump the cache tag in `index.html` first.

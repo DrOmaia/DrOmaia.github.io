@@ -15,6 +15,9 @@ Shared files: `site.js` (theme, language link, mobile menu), `research-data.js` 
 Research Assistant), `research-assistant.js/.css` (the on-page assistant), `publications.js/.css`, the two PDFs, and the
 images/icons. `/sat/` and `/isp/` are separate tools kept out of search engines with `noindex`.
 
+`/isp/` (IS Teaching Timetable) has its own documentation: [`isp/README.md`](isp/README.md), rules for editing it in
+[`isp/CLAUDE.md`](isp/CLAUDE.md), and its history in [`isp/CHANGELOG.md`](isp/CHANGELOG.md).
+
 ## How the two languages work
 
 The English files are the source of truth. Arabic text lives next to the English text as attributes:
