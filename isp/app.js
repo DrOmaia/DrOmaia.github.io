@@ -186,7 +186,15 @@
     return { n: list.length - skipped.length, skipped };
   }
   async function readSettingsFile(file) {
-    try { const obj = JSON.parse(await file.text()); if (!obj || obj.app !== 'isp-settings') throw new Error('x'); return obj; } catch (e) { toast(t('setBad')); return null; }
+    try {
+      const obj = JSON.parse((await file.text()).replace(/^\uFEFF/, ''));
+      if (obj && obj.app === 'isp-timetable') { await openProject(file); return null; } // a project file chosen with "Open saved settings"
+      if (!obj || obj.app !== 'isp-settings') throw new Error('x'); return obj;
+    } catch (e) { toast(t('setBad')); return null; }
+  }
+  function useSettingsFile(name, obj) {
+    if (S.step === 1) { ui.pendingSettings = { name, obj }; render(); return; } // applied when the project starts
+    clearUndo(); settingsApplied(applySettings(obj)); persist(); render();
   }
   function settingsApplied(r) { toast(t('setLoaded', r.n) + (r.skipped.length ? ' — ' + t('setSkipped', r.skipped.join(', ')) : '')); }
 
@@ -1402,7 +1410,8 @@
   }
   async function openProject(file) {
     try {
-      const obj = JSON.parse(await file.text());
+      const obj = JSON.parse((await file.text()).replace(/^\uFEFF/, ''));
+      if (obj && obj.app === 'isp-settings') { useSettingsFile(file.name, obj); return; } // a settings file chosen with "Open"
       if (!obj || obj.app !== 'isp-timetable') throw new Error('x');
       const lang = S.lang;
       S = Object.assign(blank(), obj); S.lang = obj.lang || lang; normalize(); clearUndo();
@@ -1549,8 +1558,7 @@
     if (el.id === 'settingsInput') {
       const f = el.files[0]; el.value = ''; if (!f) return;
       const obj = await readSettingsFile(f); if (!obj) return;
-      if (S.step === 1) { ui.pendingSettings = { name: f.name, obj }; render(); return; } // applied when the project starts
-      clearUndo(); settingsApplied(applySettings(obj)); persist(); render(); return;
+      useSettingsFile(f.name, obj); return;
     }
     if (el.dataset.file === 'fmt') { await openFormat(el.files[0]); el.value = ''; return; }
     if (el.dataset.file) { await addFile(el.dataset.file, el.files[0]); return; }

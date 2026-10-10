@@ -92,6 +92,9 @@ the check table and Is Reg.
     names, sticky hours row, icon-only Lock, scroll inside the grid, bigger menu buttons); Settings members as cards;
     Files and Download fit the screen. Test `isp/tests/17_phone_taps.js`. (r, s)
 
+31. **Open buttons accept either file**: "Open a saved project" with a settings file applies the settings, and "Open
+    saved settings" with a project file opens the project (a file saved with a BOM is read too). (t)
+
 Testing: Chromium (Playwright) with synthetic files in the male-file layout (male and female projects);
 LibreOffice recalculation 0 formula errors. Not yet tested with the real `262 sechd/male/` files.
-Cache tag ?v=20261010s.
+Cache tag ?v=20261010t.
