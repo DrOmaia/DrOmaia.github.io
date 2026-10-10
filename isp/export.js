@@ -384,7 +384,7 @@
     [[PCOL, 13], [QCOL, 14], [RCOL, 15], [SCOL, 16]].forEach(([a, b]) => { map[a] = b; });
     const last = 16;
     const cached = (r, c) => { const v = ws.getCell(r, c).value; const x = v && typeof v === 'object' ? (v.result != null ? v.result : '') : v; return x == null ? '' : x; };
-    cs.getColumn(1).width = 28; for (let c = 2; c <= 12; c++) cs.getColumn(c).width = 15; for (let c = 13; c <= last; c++) cs.getColumn(c).width = 10;
+    cs.getColumn(1).width = 28; for (let c = 2; c <= 12; c++) cs.getColumn(c).width = 15; cs.getColumn(12).width = 19; // No time: fits "Graduate Studies" for (let c = 13; c <= last; c++) cs.getColumn(c).width = 10;
     cs.mergeCells(1, 1, 1, last); cs.getCell(1, 1).value = o.title;
     cs.getCell(1, 1).font = { name: FONT, size: 14, bold: true, color: { argb: 'FF1F4E79' } }; cs.getRow(1).height = 26; cs.getCell(1, 1).alignment = { vertical: 'middle' };
     cs.getRow(2).height = 6;
@@ -402,7 +402,7 @@
           dc = +dc; if (dc === 1 || dc >= PCOL) return;
           const cell = cs.getCell(cr, cc);
           cell.value = { formula: `IF(${o.SH}!${colL(dc)}${r}="","",${o.SH}!${colL(dc)}${r})`, result: cached(r, dc) };
-          cell.alignment = center; cell.font = { name: FONT, size: r === first || (r - first) % 2 === 0 ? 11 : 10, bold: (r - first) % 2 === 0, color: { argb: (r - first) % 2 === 0 ? 'FF000000' : 'FF404040' } };
+          cell.alignment = cc === 12 ? { horizontal: 'center', vertical: 'middle' } : center; cell.font = { name: FONT, size: r === first || (r - first) % 2 === 0 ? 11 : 10, bold: (r - first) % 2 === 0, color: { argb: (r - first) % 2 === 0 ? 'FF000000' : 'FF404040' } };
           cell.border = { left: thin, right: thin, top: r === first ? med : thin, bottom: r === lst ? med : thin };
         });
       }
@@ -420,7 +420,7 @@
       });
     });
     const lastRow = o.LG - off;
-    cs.addConditionalFormatting({ ref: `B4:L${lastRow}`, rules: o.courseList.map((c, i) => ({ type: 'expression', priority: 2 + i, formulae: [`LEFT(B4,${c.length + 1})="${c}-"`], style: { fill: fill(D.colourFor(c)) } })) });
+    cs.addConditionalFormatting({ ref: `B4:L${lastRow}`, rules: [{ type: 'expression', priority: 1, formulae: ['LEFT(B4,8)="Graduate"'], style: { fill: fill('EDE3F6'), font: { color: { argb: 'FF5B2C83' }, bold: true } } }].concat(o.courseList.map((c, i) => ({ type: 'expression', priority: 2 + i, formulae: [`LEFT(B4,${c.length + 1})="${c}-"`], style: { fill: fill(D.colourFor(c)) } }))) });
     cs.pageSetup = { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0, paperSize: 9, margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 } };
     cs.pageSetup.printArea = `A1:${colL(last)}${lastRow}`;
     cs.pageSetup.printTitlesRow = '3:3';
