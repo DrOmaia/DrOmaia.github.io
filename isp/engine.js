@@ -546,7 +546,7 @@
         comp: comp ? comp.key : null, compAct: comp ? comp.activity : null,
         officialHour, hour, proposed: ph != null, needsTime, noTime,
         slots: [...new Set(slots)], cat,
-        counts: noTime ? cs.counts !== false : true,
+        counts: noTime ? cs.counts === true : true,
         load, compLoad,
       };
     });
@@ -581,7 +581,7 @@
   const W = {
     uncovered: 1000, countDiff: 400, keepMissing: 60, keepSameHour: -8, changeFrom: 15,
     pref: [-12, -9, -6], newCourse: 10, prefTime: 10, mixed: 25, gap: 12, gapExtra: 40, lateStart: 6,
-    prep: 6, proposedTime: 20, forbidden: 5000, asNeeded: 5,
+    prep: 6, proposedTime: 20, forbidden: 5000, asNeeded: 5, guarantee: 3000,
   };
 
   function memberCost(m, keys, secs, ctx) {
@@ -628,6 +628,9 @@
     const preps = new Set(courses).size;
     if (preps > 1) cost += (preps - 1) * W.prep;
     // forbidden (rejected) combinations
+    // courses guaranteed to the member ("Teaches only" with "Any time" or a reserved section)
+    const g = ctx.guarantee && ctx.guarantee[m.id];
+    if (g) Object.entries(g).forEach(([c, n]) => { const have = courses.filter((x) => x === c).length; if (have < n) cost += W.guarantee * (n - have); });
     const fb = ctx.forbidden && ctx.forbidden[m.id];
     if (fb && fb.length) { const sig = keys.slice().sort().join('|'); if (fb.includes(sig)) cost += W.forbidden; }
     return cost;
@@ -638,7 +641,9 @@
 
   /**
    * opts: {members, secs, current:{memberId:[{course,hour}]}, pins:{key:memberId}, bans:{'key|id':1},
-   *        locked:{memberId:true}, start:{key:memberId}, msc, forbidden:{memberId:[sig]}, iterations, restarts, seed}
+   *        locked:{memberId:true}, start:{key:memberId}, msc, forbidden:{memberId:[sig]}, iterations, restarts, seed,
+   *        caps:{memberId:max counted sections}, guarantee:{memberId:{course:n}}}
+   * Hard rules: pins, locked members, no clash, member hours and courses, never more counted sections than caps.
    * returns {assign:{key:memberId}, hours:{key:hour for auto-timed}, cost}
    */
   function propose(opts) {
@@ -648,7 +653,8 @@
     const assignable = Object.values(baseSecs).filter((s) => s.cat === 'required' || s.cat === 'asneeded' || opts.pins[s.key]);
     const keys = assignable.map((s) => s.key);
     const pins = opts.pins || {}, bans = opts.bans || {}, locked = opts.locked || {};
-    const ctx = { current: opts.current || {}, forbidden: opts.forbidden || {}, autoTime: {}, start: opts.start || null, stability: opts.stability || 0 };
+    const caps = opts.caps || {};
+    const ctx = { current: opts.current || {}, forbidden: opts.forbidden || {}, autoTime: {}, start: opts.start || null, stability: opts.stability || 0, guarantee: opts.guarantee || {} };
     const msc = {}; members.forEach((m) => { msc[m.id] = new Set(); });
     ctx.mscCount = {}; members.forEach((m) => { ctx.mscCount[m.id] = mscCounted(opts.msc, m.id); });
 
@@ -669,8 +675,11 @@
       const assign = {}; keys.forEach((k) => { assign[k] = null; });
       const byMember = {}; members.forEach((m) => { byMember[m.id] = []; });
       const occupied = {}; members.forEach((m) => { occupied[m.id] = new Map(); });
+      const cnt = {}; members.forEach((m) => { cnt[m.id] = ctx.mscCount[m.id] || 0; });
       const fits = (mid, s) => {
         const m = mById[mid]; if (!m) return false;
+        if (locked[mid]) return false;
+        if (s.counts && caps[mid] != null && cnt[mid] + 1 > caps[mid]) return false;
         if (bans[`${s.key}|${mid}`]) return false;
         if (!pins[s.key] && !memberAllows(m, s)) return false;
         if (s.needsTime && s.hour == null) return false;
@@ -679,8 +688,8 @@
         for (const sl of s.slots) { if (occ.has(sl) && occ.get(sl) !== s.key) return false; if (msc[mid].has(sl)) return false; }
         return true;
       };
-      const place = (k, mid) => { assign[k] = mid; byMember[mid].push(k); secs[k].slots.forEach((sl) => occupied[mid].set(sl, k)); };
-      const unplace = (k) => { const mid = assign[k]; if (mid == null) return; assign[k] = null; byMember[mid] = byMember[mid].filter((x) => x !== k); secs[k].slots.forEach((sl) => { if (occupied[mid].get(sl) === k) occupied[mid].delete(sl); }); };
+      const place = (k, mid) => { assign[k] = mid; byMember[mid].push(k); if (secs[k].counts) cnt[mid]++; secs[k].slots.forEach((sl) => occupied[mid].set(sl, k)); };
+      const unplace = (k) => { const mid = assign[k]; if (mid == null) return; assign[k] = null; byMember[mid] = byMember[mid].filter((x) => x !== k); if (secs[k].counts) cnt[mid]--; secs[k].slots.forEach((sl) => { if (occupied[mid].get(sl) === k) occupied[mid].delete(sl); }); };
       const setHour = (k, h) => { secs[k].hour = h; secs[k].proposed = true; secs[k].slots = slotsAt(secs[k], h); };
       const mcost = {}; const recost = (mid) => { mcost[mid] = memberCost(mById[mid], byMember[mid], secs, ctx); };
       const uncoveredCost = (k) => (assign[k] == null && secs[k].cat === 'required' ? W.uncovered : 0);
@@ -691,10 +700,25 @@
         if (!secs[k] || assign[k] != null || !mById[mid]) return;
         if (locked[mid] || rs === 0 || opts.startAll) {
           if (secs[k].needsTime && secs[k].hour == null && opts.startHours && opts.startHours[k] != null) setHour(k, opts.startHours[k]);
-          if (fits(mid, secs[k])) place(k, mid);
+          if (locked[mid] || fits(mid, secs[k])) place(k, mid); // a locked member keeps everything as it is
         }
       });
       const fixed = new Set(keys.filter((k) => pins[k] || (assign[k] != null && locked[assign[k]])));
+      // guaranteed courses first, so the section count leaves room for them
+      members.slice().sort(() => rand() - 0.5).forEach((m) => {
+        const g = ctx.guarantee[m.id]; if (!g || locked[m.id]) return;
+        Object.entries(g).forEach(([c, n]) => {
+          let have = byMember[m.id].filter((k) => secs[k].course === c).length;
+          const cands = keys.filter((k) => assign[k] == null && secs[k].course === c && !fixed.has(k));
+          const good = (k) => { const h = secs[k].hour; return h == null || m.prefTime === 'any' || !m.prefTime ? 0 : (m.prefTime === 'am') === (h < 12) ? 0 : 1; };
+          cands.sort((x, y) => good(x) - good(y) || rand() - 0.5);
+          for (const k of cands) {
+            if (have >= n) break;
+            if (secs[k].needsTime && secs[k].hour == null) setHour(k, HOURS[Math.floor(rand() * HOURS.length)]);
+            if (fits(m.id, secs[k])) { place(k, m.id); have++; }
+          }
+        });
+      });
       // 2) greedy from current-term courses
       if (!((rs === 0 || opts.startAll) && opts.start)) {
         const order = members.slice().sort(() => rand() - 0.5);
@@ -890,7 +914,8 @@
       if (ptCourses.has(c.code)) cat = 'parttime';
       else if (shared) cat = 'asneeded';
       const noTime = c.timed === 0;
-      out[c.code] = Object.assign({ cat, counts: noTime ? !/senior/i.test(c.name) : true }, (fixed && fixed[c.code]) || {});
+      // untimed courses (COOP, Senior Project, …) are not sections: their hours have their own columns
+      out[c.code] = Object.assign({ cat, counts: !noTime }, (fixed && fixed[c.code]) || {});
     });
     return out;
   }

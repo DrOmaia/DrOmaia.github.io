@@ -282,12 +282,6 @@ table.tt { border-collapse: separate; border-spacing: 0; direction: ltr; width: 
 tr.final td.name { box-shadow: inset 4px 0 0 var(--green); }
 tr.reject td.name { box-shadow: inset 4px 0 0 var(--red); }
 tr.review td.name { box-shadow: inset 4px 0 0 var(--orange); }
-tr.alt td { background: #fbfaf6; padding: 14px 16px; height: auto; }
-.alts { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 10px; }
-.alt-card { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
-.alt-card ul { margin: 0; padding-left: 18px; font-size: 13px; }
-.alt-card li .plus { color: var(--green); font-weight: 700; }
-.alt-card li .minus { color: var(--red); font-weight: 700; }
 .attn { margin-top: 18px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 18px; }
 .attn ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .attn li { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 8px 12px; border-radius: var(--r-sm); background: var(--red-wash); font-size: 14px; }
@@ -575,7 +569,7 @@ table.plain.msc select.num { width: 80px; }
 .mcard .cv [dir] { display: block; text-align: start; }
 
 /* ---- drag and drop board ---- */
-.tt .cell[data-key], .bench .cell[data-key] { cursor: grab; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.tt .cell[data-key] { cursor: grab; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 body.dragging, body.dragging * { cursor: grabbing !important; -webkit-user-select: none; user-select: none; }
 .drag-ghost { position: fixed; z-index: 90; margin: 0 !important; pointer-events: none; transform: rotate(-3deg) scale(1.06); box-shadow: 0 14px 30px rgba(16, 36, 50, .28); opacity: .96; }
 .cell.drag-src { opacity: .3; }
@@ -602,17 +596,6 @@ body.dragging, body.dragging * { cursor: grabbing !important; -webkit-user-selec
 .lg.moved { border: 1px solid var(--line); box-shadow: inset 4px 0 0 var(--psu-sky); }
 .drag-hint { margin: 10px 0 0; padding: 9px 12px; border-radius: var(--r-sm); background: var(--blue-wash); font-size: 13.5px; color: var(--ink); }
 .drag-hint b { color: var(--psu-navy); }
-/* bench of waiting sections */
-.bench { margin-top: 12px; padding: 10px 12px; border: 2px dashed #c9d3d0; border-radius: var(--r-md); background: #fbfcfc; transition: background-color .15s, border-color .15s; }
-.bench-head { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; font-size: 13.5px; }
-.bench-head b { color: var(--psu-navy); font-size: 14.5px; }
-.bench-head span { color: var(--muted); }
-.bench-items { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-.bench-items:empty { display: none; }
-.bench .cell { width: 104px; margin: 0 !important; }
-.bench .cell .bh { font-weight: 700; color: rgba(0, 0, 0, .7); }
-.bench.dz-ok { border-color: var(--green); background: #eef8f2; }
-.bench.dz-ok.dz-over { background: #dff2e7; border-style: solid; }
 /* health meter */
 .stat.health { flex: 1 1 280px; min-width: 260px; }
 .stat.health .hrow { display: flex; align-items: baseline; gap: 10px; }
@@ -632,7 +615,7 @@ body.dragging, body.dragging * { cursor: grabbing !important; -webkit-user-selec
 .confetti i { position: absolute; top: -12px; width: 8px; height: 13px; border-radius: 2px; animation: isp-fall 1.8s cubic-bezier(.2, .6, .4, 1) forwards; }
 @keyframes isp-fall { to { transform: translate(var(--dx), 105vh) rotate(var(--rot)); opacity: .9; } }
 @media (prefers-reduced-motion: reduce) { .drag-ghost { transform: none; } .hbar i { transition: none; } .stat.health .delta { animation: none; } }
-@media print { .bench, .drag-hint, .drag-tip, .drag-ghost, .confetti { display: none !important; } .cell.moved { box-shadow: none; } }
+@media print { .drag-hint, .drag-tip, .drag-ghost, .confetti { display: none !important; } .cell.moved { box-shadow: none; } }
 /* game instructions */
 .howto { margin-top: 10px; padding: 10px 14px; border-radius: var(--r-md); background: var(--blue-wash); font-size: 13.5px; color: var(--ink); }
 .howto-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
@@ -642,3 +625,38 @@ body.dragging, body.dragging * { cursor: grabbing !important; -webkit-user-selec
 .howto-show { margin: 8px 0 0; font-size: 13.5px; }
 @media print { .howto, .howto-show { display: none !important; } }
 @media (min-width: 900px) { .howto ol { grid-template-columns: 1fr 1fr; column-gap: 28px; grid-auto-flow: row; } }
+/* cells: lecture code with type, then the tutorial / lab code (never cut) */
+.tt td.slot { min-width: 100px; width: 100px; }
+table.tt { min-width: 1420px; }
+.cell { padding: 4px 3px; }
+.cell b { font-size: 11px; letter-spacing: -.02em; }
+.cell span { font-size: 10.5px; white-space: nowrap; letter-spacing: -.02em; }
+.cell .rlock { position: absolute; top: -5px; right: -3px; font-size: 10px; line-height: 1; font-style: normal; filter: saturate(.6); }
+/* Not assigned row (top) and ON-HOLD row (bottom) */
+.tt tr.na td { background: #f7f8f8; }
+.tt tr.na td.name { background: #eef1f0; color: var(--muted); }
+.tt tr.na td.slot:empty { background: #f7f8f8; }
+.tt tr.na td { border-bottom: 2px solid #c4cdca; }
+.tt tr.hold td { border-top: 2px solid #e2c36c; }
+/* one Lock button; a locked member is faded and out of the game */
+.dec .lockbtn { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-sm); font-size: 12px; font-weight: 700; padding: 2px 8px; color: var(--muted); font-family: inherit; cursor: pointer; }
+.dec .lockbtn:hover { border-color: var(--psu-navy); color: var(--psu-navy); }
+.dec .lockbtn.on { background: var(--psu-navy); border-color: var(--psu-navy); color: #fff; }
+.tt tr.locked td.slot, .tt tr.locked td.num { opacity: .55; }
+.tt tr.locked td.name { box-shadow: inset 4px 0 0 var(--psu-navy); }
+.tt tr.locked .cell[data-key] { cursor: default; }
+.tt td.name .lk { font-style: normal; font-size: 13px; }
+.pop .lockline { margin: 0; font-weight: 600; color: var(--psu-navy); }
+/* Settings: reserved section next to each "Teaches only" course */
+.resrow { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 2px 4px 2px 2px; border-radius: 8px; background: #f4f7f6; }
+.chipbox select.res { border: 1px solid var(--line); background: var(--surface); min-height: 30px; max-width: 290px; font-size: 13px; }
+.chipbox select.res.set { border-color: var(--blue); color: var(--blue-ink); font-weight: 600; }
+.reswarn { color: var(--red); font-weight: 700; font-size: 12.5px; }
+/* change list for Admissions & Registration */
+.exp .chg { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: var(--r-md); background: #fbfcfc; }
+.exp .chg h2 { font-size: 16px; margin: 0; }
+.exp .chg textarea { width: 100%; min-height: 0; height: auto; font: 13px/1.55 Tahoma, 'IBM Plex Sans Arabic', sans-serif; padding: 8px 10px; resize: vertical; white-space: pre; overflow: auto; }
+.exp .chg .row { gap: 8px; }
+.exp .chg .btn { margin-top: 0; }
+@media print { .tt tr.locked td.slot, .tt tr.locked td.num { opacity: 1; } }
+.cell .star { top: -5px; bottom: auto; left: -3px; font-size: 10px; }

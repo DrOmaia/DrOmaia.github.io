@@ -11,12 +11,12 @@
     app: 'isp-timetable', v: 1, side: null, term: '', lang: (S0() || {}).lang || 'ar', step: 1,
     files: {}, members: [], courses: {}, courseTouched: {}, secCat: {}, msc: [],
     currentMap: {}, prefsMap: {}, mapManual: {}, hoursSource: '', assign: {}, proposed: {}, autoTime: {}, pins: {}, bans: {},
-    decisions: {}, forbidden: {}, built: false, baseline: null, savedAt: null, ref: null,
+    decisions: {}, forbidden: {}, built: false, baseline: null, savedAt: null, ref: null, sent: null,
   });
   function S0() { try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch (e) { return null; } }
   let S = blank();
   let R = { wb: {}, sheets: {}, err: {}, off: null, cur: null, prefs: null, fac: null, notes: {}, curScore: {}, prefScore: {} };
-  const ui = { tab: 'members', open: {}, alts: {}, altBusy: null, building: false, dirty: false, undo: [] };
+  const ui = { tab: 'members', open: {}, building: false, dirty: false, undo: [] };
 
   // ---------------- helpers ----------------
   const L = () => TXT[S.lang] || TXT.ar;
@@ -25,8 +25,10 @@
   const uid = () => 'm' + Math.random().toString(36).slice(2, 9);
   const hl = (h) => E.hourLabel(h);
   const memberById = (id) => S.members.find((m) => m.id === id);
-  const newMember = (name) => ({ id: uid(), name, required: '', coop: 0, senior: 0, keepCurrent: true, first: 8, last: 18, allowed: [], never: [], prefTime: 'any', prefs: ['', '', ''] });
-  const pseudoName = (id) => (id === 'PT' ? 'Part-timers' : id === 'HOLD' ? 'ON-Hold' : '');
+  const newMember = (name) => ({ id: uid(), name, required: '', coop: 0, senior: 0, keepCurrent: true, first: 8, last: 18, allowed: [], res: [], never: [], prefTime: 'any', prefs: ['', '', ''] });
+  // rows that are not members: Not assigned (top), part-timers, ON-HOLD (bottom)
+  const pseudoName = (id) => (id === 'PT' ? 'Part-timers' : id === 'HOLD' ? 'ON-HOLD' : id === 'NA' ? t('naRow') : '');
+  const isLocked = (id) => !!id && S.decisions[id] === 'locked';
   const nameOf = (id) => (memberById(id) || {}).name || pseudoName(id) || id;
   const colour = (code) => '#' + D.colourFor(code);
   function bufToB64(buf) { const b = new Uint8Array(buf); let s = ''; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(s); }
@@ -115,6 +117,13 @@
     });
   }
   async function reparseAll() { for (const k of ['faculty', 'official', 'current', 'prefs']) await readFile(k); parseAll(); }
+  /** Older project files: "final" becomes locked, "reject" / "review" are dropped; every "Teaches only" entry gets a time choice. */
+  function normalize() {
+    S.decisions = S.decisions || {};
+    S.forbidden = {}; // left by the removed alternatives feature
+    Object.keys(S.decisions).forEach((id) => { if (S.decisions[id] === 'final' || S.decisions[id] === 'locked') S.decisions[id] = 'locked'; else delete S.decisions[id]; });
+    S.members.forEach((m) => { m.allowed = m.allowed || []; m.res = (m.res || []).slice(0, m.allowed.length); while (m.res.length < m.allowed.length) m.res.push(''); });
+  }
   /** Build or update the member list from the faculty file. Members already known keep their settings. */
   function applyFaculty() {
     if (!R.fac) return;
@@ -146,10 +155,34 @@
 
   // ---------------- model ----------------
   function model() { return R.off ? E.buildModel(R.off, { courses: S.courses, secCat: S.secCat, proposed: S.proposed, members: S.members }) : {}; }
+  /** The model with one section at another hour (to check a time change before making it). */
+  function modelWith(k, h) {
+    const p = Object.assign({}, S.proposed);
+    const o = R.off.sections[k];
+    if (h == null || (o && o.hour === h)) delete p[k]; else p[k] = h;
+    return E.buildModel(R.off, { courses: S.courses, secCat: S.secCat, proposed: p, members: S.members });
+  }
+  // ---- reservations: each course in "Teaches only" is guaranteed ("Any time") or one chosen section is reserved
+  const isCourse = (c) => !!(R.off && R.off.courses[E.normCourse(c)]);
+  function resEntries(m) { return (m.allowed || []).map((c, i) => ({ i, course: E.normCourse(c), key: (m.res || [])[i] || '' })).filter((x) => isCourse(x.course)); }
+  function reservedMap() {
+    const out = {};
+    S.members.forEach((m) => resEntries(m).forEach((x) => { if (x.key && R.off.sections[x.key] && !(x.key in out)) out[x.key] = m.id; }));
+    return out;
+  }
+  function guarantees() {
+    const out = {};
+    S.members.forEach((m) => resEntries(m).forEach((x) => { const g = out[m.id] = out[m.id] || {}; g[x.course] = (g[x.course] || 0) + 1; }));
+    return out;
+  }
+  /** A reserved section moved by hand away from its member: the entry goes back to "Any time". */
+  function unreserve(k, keep) { S.members.forEach((m) => { if (m.id !== keep) (m.res || []).forEach((v, i) => { if (v === k) m.res[i] = ''; }); }); }
   function effAssign(secs) {
     const out = {}, ids = new Set(S.members.map((m) => m.id));
+    const resv = R.off ? reservedMap() : {};
     Object.values(secs).forEach((s) => {
       const k = s.key, pin = S.pins[k];
+      if (resv[k] && ids.has(resv[k])) { out[k] = resv[k]; return; }
       if (pin && ids.has(pin)) { out[k] = pin; return; }
       if (s.cat === 'parttime') { out[k] = 'PT'; return; }
       if (s.cat === 'onhold') { out[k] = 'HOLD'; return; }
@@ -158,28 +191,30 @@
     });
     return out;
   }
-  const allRows = () => S.members.concat([{ id: 'PT', name: 'Part-timers', pseudo: true }, { id: 'HOLD', name: 'ON-Hold', pseudo: true }]);
+  const allRows = () => S.members.concat([{ id: 'PT', name: 'Part-timers', pseudo: true }, { id: 'HOLD', name: 'ON-HOLD', pseudo: true }]);
   function snapshot() {
     const secs = model();
     const assign = effAssign(secs);
     const ev = E.evaluate(secs, allRows(), assign, S.msc);
     return { secs, assign, ev };
   }
-  const sig = (keys) => keys.slice().sort().join('|');
 
   // ---------------- undo (proposal edits, kept in memory for this visit) ----------------
   const UNDO_KEYS = ['assign', 'pins', 'bans', 'proposed', 'autoTime', 'secCat', 'decisions', 'forbidden', 'built'];
   // the label is kept as a text key + values so it follows the interface language
   function remember(key, ...args) {
     const snap = {}; UNDO_KEYS.forEach((k) => { snap[k] = S[k]; });
+    snap.res = Object.fromEntries(S.members.map((m) => [m.id, m.res || []])); // reservations change when a reserved section is moved
     ui.undo.push({ s: JSON.stringify(snap), key, args });
     if (ui.undo.length > 50) ui.undo.shift();
   }
   function undo() {
     const u = ui.undo.pop();
     if (!u) { toast(t('nothingUndo')); return; }
-    Object.assign(S, JSON.parse(u.s));
-    ui.alts = {}; ui.altBusy = null; closePop();
+    const back = JSON.parse(u.s); const res = back.res; delete back.res;
+    Object.assign(S, back);
+    S.members.forEach((m) => { if (res && res[m.id] && res[m.id].length === (m.allowed || []).length) m.res = res[m.id]; });
+    closePop();
     persist(); render(); toast(t('undone', t(u.key, ...u.args)));
   }
   const clearUndo = () => { ui.undo = []; };
@@ -187,11 +222,14 @@
   // ---------------- proposal ----------------
   function runPropose(extra) {
     const secs = model();
-    const locked = {}; S.members.forEach((m) => { if (S.decisions[m.id] === 'final') locked[m.id] = true; });
+    const locked = {}; S.members.forEach((m) => { if (isLocked(m.id)) locked[m.id] = true; });
     const cur = effAssign(secs);
     const start = {}; Object.entries(cur).forEach(([k, v]) => { if (memberById(v)) start[k] = v; });
     const pins = {}; Object.entries(S.pins).forEach(([k, v]) => { if (memberById(v) && secs[k]) pins[k] = v; });
-    return E.propose(Object.assign({ members: S.members, secs, current: currentFor(), pins, bans: S.bans, locked, start, startHours: S.proposed, msc: S.msc, forbidden: S.forbidden, iterations: 40000, restarts: 4, seed: 262 }, extra || {}));
+    Object.entries(reservedMap()).forEach(([k, v]) => { if (secs[k]) pins[k] = v; }); // reserved sections: hard
+    // never more counted sections than the number entered (members without a number: no limit)
+    const caps = {}; S.members.forEach((m) => { if (m.required !== '' && m.required != null) caps[m.id] = Number(m.required); });
+    return E.propose(Object.assign({ members: S.members, secs, current: currentFor(), pins, bans: S.bans, locked, start, startHours: S.proposed, msc: S.msc, forbidden: S.forbidden, caps, guarantee: guarantees(), iterations: 40000, restarts: 4, seed: 262 }, extra || {}));
   }
   function applyResult(res) {
     S.assign = Object.assign({}, res.assign);
@@ -202,51 +240,14 @@
     if (!R.off) return;
     ui.building = true; render();
     setTimeout(() => {
-      if (fresh) Object.keys(S.autoTime).forEach((k) => { if (!S.pins[k]) { delete S.proposed[k]; delete S.autoTime[k]; } });
+      if (fresh) { const cur = effAssign(model()); Object.keys(S.autoTime).forEach((k) => { if (!S.pins[k] && !isLocked(cur[k])) { delete S.proposed[k]; delete S.autoTime[k]; } }); }
       const res = runPropose();
       applyResult(res);
-      S.built = true; ui.building = false; ui.alts = {};
+      S.built = true; ui.building = false;
       if (!S.ref && R.off) setRef();
       persist(); render();
     }, 30);
   }
-  function alternatives(mid) {
-    ui.altBusy = mid; render();
-    setTimeout(() => {
-      const secs = model(); const cur = effAssign(secs);
-      const mine = Object.keys(cur).filter((k) => cur[k] === mid);
-      const forb = JSON.parse(JSON.stringify(S.forbidden || {}));
-      forb[mid] = (forb[mid] || []).concat([sig(mine)]);
-      const pins = {}; Object.entries(S.pins).forEach(([k, v]) => { if (v !== mid && memberById(v)) pins[k] = v; });
-      const opts = [];
-      for (let i = 0; i < 2; i++) {
-        const res = runPropose({ forbidden: forb, pins, startAll: true, stability: 14, t0: 25, restarts: 2, iterations: 30000, seed: 1000 + i * 17 });
-        const theirs = Object.keys(res.assign).filter((k) => res.assign[k] === mid);
-        if (forb[mid].includes(sig(theirs))) break;
-        forb[mid].push(sig(theirs));
-        // changes vs current
-        const changes = {};
-        const before = {}; Object.entries(cur).forEach(([k, v]) => { if (memberById(v)) (before[v] = before[v] || []).push(k); });
-        const after = {}; Object.entries(res.assign).forEach(([k, v]) => { (after[v] = after[v] || []).push(k); });
-        S.members.forEach((m) => {
-          const b = before[m.id] || [], a = after[m.id] || [];
-          const add = a.filter((k) => !b.includes(k)), rem = b.filter((k) => !a.includes(k));
-          if (add.length || rem.length) changes[m.id] = { add, rem };
-        });
-        // problems this alternative would create
-        const secs2 = model(); Object.entries(res.hours).forEach(([k, h]) => { if (secs2[k]) { secs2[k].hour = h; secs2[k].proposed = true; } });
-        const ev2 = E.evaluate(secs2, S.members, res.assign, S.msc);
-        const evNow = E.evaluate(model(), S.members, Object.fromEntries(Object.entries(cur).filter(([, v]) => memberById(v))), S.msc);
-        const key = (i) => [i.type, i.member || '', i.a || '', i.b || ''].join('|');
-        const nowKeys = new Set(evNow.issues.map(key));
-        const fresh = ev2.issues.filter((i) => !nowKeys.has(key(i)));
-        opts.push({ res, changes, hours: res.hours, fresh });
-      }
-      ui.alts[mid] = { opts, forb: forb[mid] };
-      ui.altBusy = null; render();
-    }, 30);
-  }
-
   // ---------------- rendering ----------------
   function setLangAttrs() {
     document.documentElement.lang = S.lang; document.documentElement.dir = S.lang === 'ar' ? 'rtl' : 'ltr';
@@ -506,15 +507,65 @@
   function prefixes() { return [...new Set(courseCodes().map((c) => c.replace(/\d+$/, '')))]; }
   function chipBox(m, field) {
     const vals = m[field] || [];
+    if (field === 'allowed') return allowedBox(m);
     const choices = prefixes().concat(courseCodes()).filter((c) => !vals.includes(c));
     return `<div class="chipbox">${vals.map((v) => `<span class="chip" dir="ltr">${esc(v)}<button type="button" aria-label="remove" data-act="chipRm" data-id="${m.id}" data-field="${field}" data-val="${esc(v)}">×</button></span>`).join('')}
       <select data-chg="chipAdd" data-id="${m.id}" data-field="${field}"><option value="">+ ${esc(t('add'))}</option>${choices.map((c) => `<option>${esc(c)}</option>`).join('')}</select></div>`;
   }
+  /** Lecture days of a section, e.g. "Sun Mon Wed". */
+  function daysOf(k) {
+    const o = R.off && R.off.sections[k]; if (!o) return '';
+    return [...new Set(o.meetings.flatMap((x) => x.days))].sort().map((d) => E.DAY_NAMES[d]).join(' ');
+  }
+  const secLabel = (s) => [s.key, s.hour == null ? t('noTime') : hl(s.hour), daysOf(s.key)].filter(Boolean).join(' · ');
+  /** "Teaches only": each course gets a time choice: "Any time" (at least one section of it) or one reserved section. */
+  function allowedBox(m) {
+    const vals = m.allowed || [];
+    // a course can be added again (a second section of it); a prefix only once
+    const choices = prefixes().filter((c) => !vals.includes(c)).concat(courseCodes());
+    const secs = model();
+    const rows = vals.map((v, i) => {
+      const chip = `<span class="chip" dir="ltr">${esc(v)}<button type="button" aria-label="remove" data-act="chipRm" data-id="${m.id}" data-field="allowed" data-i="${i}">×</button></span>`;
+      if (!isCourse(v)) return chip;
+      const cur = (m.res || [])[i] || '';
+      const opts = resOptions(m, i, secs);
+      const out = cur && secs[cur] && !E.inWindow(m, secs[cur].hour);
+      return `<span class="resrow">${chip}<select class="input res ${cur ? 'set' : ''}" dir="ltr" data-chg="resv" data-id="${m.id}" data-i="${i}" aria-label="${esc(t('resTime'))}"><option value="">${esc(t('any'))}</option>${opts}</select>${out ? `<span class="reswarn">${esc(t('resOutside'))}</span>` : ''}</span>`;
+    }).join('');
+    return `<div class="chipbox">${rows}
+      <select data-chg="chipAdd" data-id="${m.id}" data-field="allowed"><option value="">+ ${esc(t('add'))}</option>${choices.map((c) => `<option>${esc(c)}</option>`).join('')}</select></div>`;
+  }
+  /** Sections of the course inside the member's hours; preferred time first; reserved / clashing ones last and greyed with the reason. */
+  function resOptions(m, i, secs) {
+    const course = E.normCourse(m.allowed[i]), cur = (m.res || [])[i] || '';
+    const resv = reservedMap();
+    const mine = (m.res || []).filter((v, j) => j !== i && v && secs[v]);
+    const snap = snapshot();
+    const items = Object.values(secs).filter((s) => s.course === course && (E.inWindow(m, s.hour) || s.key === cur)).map((s) => {
+      let why = '';
+      if (resv[s.key] && resv[s.key] !== m.id) why = t('resFor', nameOf(resv[s.key]));
+      else if (mine.includes(s.key)) why = t('resChosen');
+      else { const c = mine.find((k) => secs[k].slots.some((sl) => s.slots.includes(sl))); if (c) why = t('resClash', c); }
+      if (!why && s.key !== cur) why = resBlock(s.key, m.id, snap);
+      return { s, why };
+    });
+    const pref = (s) => (s.hour == null || !m.prefTime || m.prefTime === 'any' ? 0 : (m.prefTime === 'am') === (s.hour < 12) ? 0 : 1);
+    items.sort((a, b) => (a.why ? 1 : 0) - (b.why ? 1 : 0) || pref(a.s) - pref(b.s) || (a.s.hour == null ? 99 : a.s.hour) - (b.s.hour == null ? 99 : b.s.hour) || a.s.key.localeCompare(b.s.key));
+    return items.map(({ s, why }) => `<option value="${esc(s.key)}" ${s.key === cur ? 'selected' : ''} ${why && s.key !== cur ? 'disabled' : ''}>${esc(secLabel(s) + (why ? ` — ${why}` : ''))}</option>`).join('');
+  }
+  /** Same rules as a move by hand: no clash, not over his count, nobody locked. '' when the section may be reserved. */
+  function resBlock(k, mid, snap) {
+    const own = snap.assign[k] || 'NA';
+    if (own === mid) return '';
+    const c = dropCheck(k, own, mid, null, { snap });
+    return c.ok ? '' : c.why;
+  }
+  const allowedText = (m) => (m.allowed || []).map((v, i) => ((m.res || [])[i] ? m.res[i] : v)).join(', ');
   function memberChips(m) {
     const c = [];
     if (m.first > 8) c.push(t('lcFirst', hl(m.first)));
     if (m.last < 18) c.push(t('lcLast', hl(m.last)));
-    if ((m.allowed || []).length) c.push(t('lcOnly', m.allowed.join(', ')));
+    if ((m.allowed || []).length) c.push(t('lcOnly', allowedText(m)));
     if ((m.never || []).length) c.push(t('lcNever', m.never.join(', ')));
     const pr = (m.prefs || []).filter(Boolean); if (pr.length) c.push(t('lcPrefs', pr.join(' › ')));
     if (m.keepCurrent === false) c.push(t('lcNoKeep'));
@@ -611,6 +662,8 @@
   }
 
   // ---- step 4: proposal ----
+  const typeLine1 = (s) => (s.noTime ? s.key : `${s.key} (L)`);
+  const typeLine2 = (s) => (s.comp ? `${s.comp} (${s.compAct === 'Lab' ? 'Lab' : 'T'})` : '');
   function cellHtml(s, info) {
     const cls = ['cell'];
     if (s.proposed) cls.push('prop');
@@ -620,9 +673,9 @@
     if (info && info.wish) cls.push('wish');
     if (info && info.moved) cls.push('moved');
     if (ui.focusCourse) cls.push(ui.focusCourse === s.course ? 'hit' : 'dim');
-    const tips = [info && info.wish ? t('lgWish') : '', info && info.isNew ? t('lgNew') : '', info && info.moved ? t('lgMoved') : ''].filter(Boolean).join(' — ');
-    const comp = s.comp ? `${s.comp.split('-')[1]} ${s.compAct === 'Lab' ? 'Lab' : 'T'}` : '';
-    return `<div class="${cls.join(' ')}" data-key="${esc(s.key)}" data-course="${esc(s.course)}" style="background:${colour(s.course)}"${tips ? ` title="${esc(tips)}"` : ''}>${info && info.wish ? '<i class="star" aria-hidden="true">★</i>' : ''}<b>${esc(s.key)}</b>${comp ? `<span>${esc(comp)}</span>` : ''}${info && info.bench ? `<span class="bh">${esc(s.hour == null ? t('noTime') : hl(s.hour))}</span>` : ''}</div>`;
+    const tips = [info && info.res ? t('lgRes') : '', info && info.wish ? t('lgWish') : '', info && info.isNew ? t('lgNew') : '', info && info.moved ? t('lgMoved') : ''].filter(Boolean).join(' — ');
+    const l2 = typeLine2(s);
+    return `<div class="${cls.join(' ')}" data-act="sec" tabindex="0" data-key="${esc(s.key)}" data-course="${esc(s.course)}" style="background:${colour(s.course)}"${tips ? ` title="${esc(tips)}"` : ''}>${info && info.wish ? '<i class="star" aria-hidden="true">★</i>' : ''}${info && info.res ? '<i class="rlock" aria-hidden="true">🔒</i>' : ''}<b>${esc(typeLine1(s))}</b>${l2 ? `<span>${esc(l2)}</span>` : ''}</div>`;
   }
   function viewProposal() {
     if (!R.off) return `<p>${esc(t('needOfficial'))}</p>`;
@@ -630,15 +683,19 @@
     const { secs, assign, ev } = snapshot();
     const bad = new Set();
     ev.issues.forEach((i) => { if (i.type === 'clash' || i.type === 'window' || i.type === 'notime') { if (i.a) bad.add(i.a); if (i.b) bad.add(i.b); } });
-    const rows = S.members.map((m) => ({ m, pseudo: false })).concat(['PT', 'HOLD'].filter((id) => Object.values(assign).includes(id)).map((id) => ({ m: { id, name: pseudoName(id) }, pseudo: true })));
     const byMember = {}; Object.entries(assign).forEach(([k, v]) => { (byMember[v] = byMember[v] || []).push(k); });
+    // sections without a member wait in the Not assigned row at the top
+    byMember.NA = Object.values(secs).filter((s) => s.cat === 'required' && !assign[s.key]).sort((a, b) => a.key.localeCompare(b.key)).map((s) => s.key);
+    const prow = (id) => ({ m: { id, name: pseudoName(id) }, pseudo: true });
+    const rows = [prow('NA')].concat(S.members.map((m) => ({ m, pseudo: false })), (byMember.PT || []).length ? [prow('PT')] : [], [prow('HOLD')]);
+    const resv = reservedMap();
     const realKeys = Object.keys(assign).filter((k) => memberById(assign[k]));
     const reqTotal = S.members.reduce((a, m) => a + (Number(m.required) || 0), 0);
     const counted = realKeys.filter((k) => secs[k].counts).length;
     const unassigned = ev.issues.filter((i) => i.type === 'unassigned').length;
     const conflicts = ev.issues.filter((i) => ['clash', 'window', 'notime'].includes(i.type)).length;
     const requests = Object.values(secs).filter((s) => s.proposed && assign[s.key]).length;
-    const finals = S.members.filter((m) => S.decisions[m.id] === 'final').length;
+    const lockedN = S.members.filter((m) => isLocked(m.id)).length;
     // courses each member taught in the current term (for the "new" mark)
     const hasCur = !!(R.cur || S.baseline);
     const taught = {}; Object.entries(currentFor()).forEach(([id, items]) => { taught[id] = new Set(items.map((x) => x.course)); });
@@ -658,46 +715,38 @@
     const body = rows.map(({ m, pseudo }) => {
       const keys = byMember[m.id] || [];
       const p = ev.per[m.id] || { load: 0, counted: 0, total: 0 };
-      const dec = S.decisions[m.id] || '';
+      const locked = !pseudo && isLocked(m.id);
+      const info = (k) => ({ bad: bad.has(k), isNew: isNew(m.id, secs[k]), wish: isWish(m.id, secs[k]), moved: moved.has(k), res: resv[k] === m.id });
       const slot = (h) => {
         const ks = keys.filter((k) => secs[k].hour === h);
-        return `<td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="${h}">${ks.map((k) => cellHtml(secs[k], { bad: bad.has(k), isNew: isNew(m.id, secs[k]), wish: isWish(m.id, secs[k]), moved: moved.has(k) })).join('')}</td>`;
+        return `<td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="${h}">${ks.map((k) => cellHtml(secs[k], info(k))).join('')}</td>`;
       };
       const nt = keys.filter((k) => secs[k].hour == null);
       const req = Number(m.required);
       const cntBad = !pseudo && m.required !== '' && m.required != null && p.counted !== req;
-      const tr = `<tr data-mid="${m.id}" class="mem ${pseudo ? 'pseudo' : ''} ${m.id === 'HOLD' ? 'hold' : ''} ${dec}">
-        <td class="name" dir="ltr"><span class="nmtxt" ${pseudo ? '' : `data-card="${m.id}" data-act="card" tabindex="0"`}>${esc(m.name)}</span>${(() => {
-          if (pseudo) return '';
-          const w = wishesOf(m); if (!w.length) return '';
-          const mine = new Set(keys.map((k) => secs[k].course)); const got = w.filter((c) => mine.has(c)).length;
-          return `<small class="wishes ${got ? 'got' : ''}" dir="${S.lang === 'ar' ? 'rtl' : 'ltr'}" title="${esc(t('wishTip'))}">${esc(t('wishes', got, w.length))}</small>`;
-        })()}${pseudo ? '' : `<div class="dec no-print" dir="${S.lang === 'ar' ? 'rtl' : 'ltr'}">${['final', 'reject', 'review'].map((d) => `<button type="button" class="${d} ${dec === d ? 'on' : ''}" data-act="dec" data-id="${m.id}" data-dec="${d}">${esc(t(d))}</button>`).join('')}</div>`}</td>
+      const rowCls = ['mem', pseudo ? 'pseudo' : '', m.id === 'HOLD' ? 'hold' : '', m.id === 'NA' ? 'na' : '', locked ? 'locked' : ''].filter(Boolean).join(' ');
+      const nameHtml = pseudo ? `<span class="nmtxt">${esc(m.name)}</span>` : `<span class="nmtxt" data-card="${m.id}" data-act="card" tabindex="0">${locked ? '<i class="lk" aria-hidden="true">🔒</i> ' : ''}${esc(m.name)}</span>${(() => {
+        const w = wishesOf(m); if (!w.length) return '';
+        const mine = new Set(keys.map((k) => secs[k].course)); const got = w.filter((c) => mine.has(c)).length;
+        return `<small class="wishes ${got ? 'got' : ''}" dir="${S.lang === 'ar' ? 'rtl' : 'ltr'}" title="${esc(t('wishTip'))}">${esc(t('wishes', got, w.length))}</small>`;
+      })()}<div class="dec no-print" dir="${S.lang === 'ar' ? 'rtl' : 'ltr'}"><button type="button" class="lockbtn ${locked ? 'on' : ''}" data-act="lock" data-id="${m.id}" aria-pressed="${locked}" title="${esc(t(locked ? 'unlockTip' : 'lockTip'))}">🔒 ${esc(t('lock'))}</button></div>`;
+      return `<tr data-mid="${m.id}" class="${rowCls}">
+        <td class="name" dir="ltr">${nameHtml}</td>
         ${E.HOURS.slice(0, 4).map(slot).join('')}<td class="brk"></td>${E.HOURS.slice(4).map(slot).join('')}
-        <td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="nt">${nt.map((k) => cellHtml(secs[k], { bad: bad.has(k), isNew: isNew(m.id, secs[k]), wish: isWish(m.id, secs[k]), moved: moved.has(k) })).join('')}${pseudo ? '' : S.msc.filter((x) => x.member === m.id).map((x) => `<div class="cell grad"><b>${esc(x.program || 'MSc')}</b><span>${esc(t('gradHours', Number(x.hours === '' || x.hours == null ? 3 : x.hours)))}</span></div>`).join('')}</td>
-        <td class="num">${pseudo ? p.load : p.total}${!pseudo && p.total !== p.load ? `<small>${p.load} + ${(p.total - p.load)}</small>` : ''}</td>
+        <td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="nt">${nt.map((k) => cellHtml(secs[k], info(k))).join('')}${pseudo ? '' : S.msc.filter((x) => x.member === m.id).map((x) => `<div class="cell grad"><b>${esc(x.program || 'MSc')}</b><span>${esc(t('gradHours', Number(x.hours === '' || x.hours == null ? 3 : x.hours)))}</span></div>`).join('')}</td>
+        <td class="num">${m.id === 'NA' ? '' : pseudo ? p.load : p.total}${!pseudo && p.total !== p.load ? `<small>${p.load} + ${(p.total - p.load)}</small>` : ''}</td>
         <td class="num cnt ${cntBad ? 'bad' : ''}">${pseudo ? keys.length : `${p.counted} / ${m.required === '' ? '–' : req}`}</td>
         <td class="num preps" title="${esc(t('prepsTip'))}">${pseudo ? '' : p.preps || 0}</td></tr>`;
-      let alt = '';
-      if (!pseudo && dec === 'reject') {
-        const dirA = S.lang === 'ar' ? 'rtl' : 'ltr';
-        if (ui.altBusy === m.id) alt = `<tr class="alt"><td colspan="16" dir="${dirA}">${esc(t('computing'))}</td></tr>`;
-        else if (!ui.alts[m.id]) alt = `<tr class="alt"><td colspan="16" dir="${dirA}"><button class="btn small" type="button" data-act="showAlt" data-id="${m.id}">${esc(t('altTitle', m.name))}</button></td></tr>`;
-        else if (ui.alts[m.id]) {
-          const a = ui.alts[m.id];
-          alt = `<tr class="alt"><td colspan="16" dir="${dirA}"><b>${esc(t('altTitle', m.name))}</b>${a.opts.length ? `<div class="alts">${a.opts.map((o, i) => `<div class="alt-card"><b>${i + 1}</b><ul>${Object.entries(o.changes).map(([id, c]) => `<li><b>${esc(nameOf(id))}</b>: ${c.rem.map((k) => `<span class="minus">− ${esc(k)} ${hl(o.hours[k] != null ? o.hours[k] : secs[k] ? secs[k].hour : null)}</span>`).join(' ')} ${c.add.map((k) => `<span class="plus">+ ${esc(k)} ${hl(o.hours[k] != null ? o.hours[k] : secs[k] ? secs[k].hour : null)}</span>`).join(' ')}</li>`).join('')}</ul>${o.fresh && o.fresh.length ? `<p class="small" style="color:var(--red);margin:0" dir="ltr">⚠ ${o.fresh.map(issueText).map(esc).join(' | ')}</p>` : ''}<button class="btn small primary" type="button" data-act="useAlt" data-id="${m.id}" data-i="${i}">${esc(t('useAlt'))}</button></div>`).join('')}</div>` : `<p class="muted small">${esc(t('altNone'))}</p>`}
-            <div style="margin-top:10px"><button class="btn small" type="button" data-act="closeAlt" data-id="${m.id}">${esc(t('closeAlt'))}</button></div></td></tr>`;
-        }
-      }
-      return tr + alt;
     }).join('');
     // attention list
     const items = [];
+    const snap = { secs, assign, ev };
     ev.issues.forEach((i) => {
       if (i.type === 'unassigned') {
         const s = secs[i.a];
-        const opts = S.members.map((m) => `<option value="${m.id}">${esc(m.name)}</option>`).join('');
-        items.push(`<li><span class="t">${esc(t('issue').unassigned(i.a))} ${s.hour != null ? hl(s.hour) : ''}</span><span class="row" style="gap:6px"><select class="input" data-chg="assignTo" data-key="${i.a}"><option value="">${esc(t('assignTo'))}</option>${opts}</select><button class="btn small" type="button" data-act="toHold" data-key="${i.a}">${esc(t('toHold'))}</button></span></li>`);
+        // only members who can take it without a clash, outside their hours, a course limit, a lock or too many sections
+        const opts = S.members.filter((m) => dropCheck(i.a, 'NA', m.id, null, { snap }).ok).map((m) => `<option value="${m.id}">${esc(m.name)}</option>`).join('');
+        items.push(`<li><span class="t">${esc(t('issue').unassigned(i.a))} ${s.hour != null ? hl(s.hour) : ''}</span><span class="row" style="gap:6px"><select class="input" data-chg="assignTo" data-key="${i.a}"><option value="">${esc(opts ? t('assignTo') : t('nobodyFree'))}</option>${opts}</select><button class="btn small" type="button" data-act="toHold" data-key="${i.a}">${esc(t('toHold'))}</button></span></li>`);
       } else {
         const keys = [i.a, i.b].filter(Boolean).join(',');
         items.push(`<li class="${i.type === 'count' ? 'info' : ''}"><button type="button" class="go" data-act="goIssue" data-mid="${esc(i.member)}" data-keys="${esc(keys)}" title="${esc(t('goTip'))}"><span>${esc(issueText(i))}</span><i aria-hidden="true">⌖</i></button></li>`);
@@ -715,11 +764,10 @@
       <div class="stat ${unassigned ? 'bad' : 'good'}"><b>${unassigned}</b>${esc(t('sUnassigned'))}</div>
       <div class="stat ${conflicts ? 'bad' : 'good'}"><b>${conflicts}</b>${esc(t('sConflicts'))}</div>
       <div class="stat ${requests ? 'warn' : ''}"><b>${requests}</b>${esc(t('sRequests'))}</div>
-      <div class="stat"><b>${finals} / ${S.members.length}</b>${esc(t('sFinal'))}</div>
+      <div class="stat"><b>${lockedN} / ${S.members.length}</b>${esc(t('sLocked'))}</div>
     </div>
-    <p class="legend small muted"><span><i class="lg prop"></i>${esc(t('lgProp'))}</span><span><i class="lg bad"></i>${esc(t('lgBad'))}</span><span><i class="lg pin">•</i>${esc(t('lgPin'))}</span>${hasCur ? `<span><i class="lg new"></i>${esc(t('lgNew'))}</span>` : ''}${anyWishes ? `<span><i class="lg star">★</i>${esc(t('lgWish'))}</span>` : ''}${S.ref ? `<span><i class="lg moved"></i>${esc(t('lgMoved'))}</span>` : ''}<span>${esc(t('lgClick'))}</span><span>${esc(t('lgCard'))}</span></p>
+    <p class="legend small muted"><span><i class="lg prop"></i>${esc(t('lgProp'))}</span><span><i class="lg bad"></i>${esc(t('lgBad'))}</span><span><i class="lg pin">•</i>${esc(t('lgPin'))}</span><span>🔒 ${esc(t('lgRes'))}</span>${hasCur ? `<span><i class="lg new"></i>${esc(t('lgNew'))}</span>` : ''}${anyWishes ? `<span><i class="lg star">★</i>${esc(t('lgWish'))}</span>` : ''}${S.ref ? `<span><i class="lg moved"></i>${esc(t('lgMoved'))}</span>` : ''}<span>${esc(t('lgClick'))}</span><span>${esc(t('lgCard'))}</span></p>
     ${howTo()}
-    ${benchHtml(secs, assign)}
     ${courseBar(secs, assign)}
     <div class="gridwrap"><table class="tt ${ui.focusCourse ? 'focusing' : ''}"><thead>${head}</thead><tbody>${ui.building && !S.built ? `<tr><td colspan="16" style="padding:30px;text-align:center">${esc(t('building'))}</td></tr>` : body}</tbody></table></div>
     <div class="attn">
@@ -773,13 +821,6 @@
     }
     document.body.appendChild(box); setTimeout(() => box.remove(), 2600);
   }
-  /** Sections still waiting for a member, as pieces to drag into the timetable. */
-  function benchHtml(secs, assign) {
-    if (!S.built) return '';
-    const wait = Object.values(secs).filter((s) => s.cat === 'required' && !assign[s.key]).sort((a, b) => (a.hour == null ? 99 : a.hour) - (b.hour == null ? 99 : b.hour) || a.key.localeCompare(b.key));
-    return `<div class="bench no-print" data-bench="1"><div class="bench-head"><b>${esc(t('bench'))}</b><span>${esc(wait.length ? t('benchHint') : t('benchEmpty'))}</span></div>
-      <div class="bench-items" dir="ltr">${wait.map((s) => cellHtml(s, { bench: true })).join('')}</div></div>`;
-  }
   /** Row of course chips: clicking one highlights all its sections and lists who teaches them. */
   function courseBar(secs, assign) {
     const codes = [...new Set(Object.values(secs).filter((s) => assign[s.key] || s.cat === 'required').map((s) => s.course))].sort();
@@ -811,7 +852,7 @@
     const lim = [];
     if (m.first > 8) lim.push(t('lcFirst', hl(m.first)));
     if (m.last < 18) lim.push(t('lcLast', hl(m.last)));
-    if ((m.allowed || []).length) lim.push(t('lcOnly', m.allowed.join(', ')));
+    if ((m.allowed || []).length) lim.push(t('lcOnly', allowedText(m)));
     if ((m.never || []).length) lim.push(t('lcNever', m.never.join(', ')));
     if (m.keepCurrent === false) lim.push(t('lcNoKeep'));
     const grad = S.msc.filter((x) => x.member === mid).map((x) => `${x.program || 'MSc'} · ${t('gradHours', Number(x.hours === '' || x.hours == null ? 3 : x.hours))}`);
@@ -848,41 +889,63 @@
     return Object.keys(secs).filter((k) => S.ref[k] && ((assign[k] || '') !== S.ref[k][0] || (S.proposed[k] != null ? S.proposed[k] : null) !== S.ref[k][1]));
   }
   function refMoved(k) { const { secs, assign } = snapshot(); return refChanged({ [k]: secs[k] }, assign).length > 0; }
+  /** Can section k go back to its saved place now? → {ok, why} */
+  function restoreCheck(k) {
+    const r = S.ref && S.ref[k]; if (!r) return { ok: false, why: '' };
+    const snap = snapshot();
+    const from = snap.assign[k] || 'NA', to = r[0] || 'NA', hour = r[1] != null ? r[1] : (R.off.sections[k] || {}).hour;
+    if (from === to) return timeOk(k, to, hour, snap) ? { ok: true } : { ok: false, why: t('whyTime') };
+    return dropCheck(k, from, to, null, { snap, hour });
+  }
   function restoreRef(k) {
     const r = S.ref && S.ref[k]; if (!r) return;
     const [mid, hour] = r;
     if (hour == null) { delete S.proposed[k]; delete S.autoTime[k]; } else if (S.proposed[k] !== hour) { S.proposed[k] = hour; delete S.autoTime[k]; }
     if (mid) putSection(k, mid);
-    else { delete S.assign[k]; delete S.pins[k]; if (S.secCat[k] === 'parttime' || S.secCat[k] === 'onhold') delete S.secCat[k]; }
+    else { unreserve(k); delete S.assign[k]; delete S.pins[k]; if (S.secCat[k] === 'parttime' || S.secCat[k] === 'onhold') delete S.secCat[k]; }
   }
 
-  // ---------------- drag and drop: change the instructor at the same hour ----------------
-  /** Can section k move from `from` to `to` (swapping with section `swap` of `to`, if given)? → {ok, warn, why} */
-  function dropCheck(k, from, to, swap) {
-    const { secs, assign, ev } = snapshot();
+  // ---------------- one set of rules for every path: drag, click menu, assign list, time change, back to saved place ----------------
+  /** Can section k move from `from` to `to` (swapping with section `swap` of `to`, if given)? → {ok, warn, why}
+      o.snap: a snapshot to reuse; o.hour: check the section at another hour. 'NA' = Not assigned. */
+  function dropCheck(k, from, to, swap, o) {
+    o = o || {};
+    const snap = o.snap || snapshot();
+    const { assign, ev } = snap;
+    const secs = o.hour !== undefined && R.off.sections[k] && o.hour !== snap.secs[k].hour ? modelWith(k, o.hour) : snap.secs;
     const s = secs[k]; if (!s || from === to) return { ok: false, why: '' };
+    if (isLocked(from)) return { ok: false, why: t('whyLocked', nameOf(from)) };
+    if (isLocked(to)) return { ok: false, why: t('whyLocked', nameOf(to)) };
     const j = swap ? secs[swap] : null;
     const after = Object.assign({}, assign); after[k] = to; if (j) after[swap] = from;
     const checkMember = (mid, inKey, outKey) => {
-      const m = memberById(mid); if (!m) return null; // part-timers / ON-Hold: no member rules
+      const m = memberById(mid); if (!m) return null; // Not assigned / part-timers / ON-HOLD: no member rules
       const x = secs[inKey];
       if (!E.inWindow(m, x.hour)) return { why: t('whyWindow', m.name) };
       const never = (m.never || []).map(E.normCourse).filter(Boolean);
       if (x.noTime ? never.some((c) => c === x.course || c === x.prefix) : !E.memberAllows(m, x)) return { why: t('whyCourse', m.name, x.course) };
       const mine = Object.keys(after).filter((kk) => after[kk] === mid && kk !== inKey);
       for (const kk of mine) { if (secs[kk].slots.some((sl) => x.slots.includes(sl))) return { why: t('whyClash', m.name, kk) }; }
+      // never more counted sections than the number entered: to replace one, swap or first move one to Not assigned
       const before = (ev.per[mid] || {}).counted || 0;
       const now = before + (x.counts ? 1 : 0) - (outKey && secs[outKey].counts ? 1 : 0);
-      const warns = [];
-      // more sections than required is allowed for now (e.g. give one, then take one back); it shows in orange and red until fixed
-      if (m.required !== '' && m.required != null && now > Number(m.required) && now > before) warns.push(t('warnCount', m.name, now, Number(m.required)));
-      if (x.hour != null && ((m.prefTime === 'am' && x.hour >= 13) || (m.prefTime === 'pm' && x.hour < 13))) warns.push(t('warnTime', m.name));
-      return warns.length ? { warn: warns.join(' — '), over: now > Number(m.required || 99) } : null;
+      if (m.required !== '' && m.required != null && now > Number(m.required) && now > before) return { why: t('whyCount', m.name, Number(m.required)) };
+      if (x.hour != null && ((m.prefTime === 'am' && x.hour >= 13) || (m.prefTime === 'pm' && x.hour < 13))) return { warn: t('warnTime', m.name) };
+      return null;
     };
     const a = checkMember(to, k, swap), b = j ? checkMember(from, swap, k) : null;
     if (a && a.why) return { ok: false, why: a.why };
     if (b && b.why) return { ok: false, why: b.why };
-    return { ok: true, warn: [a && a.warn, b && b.warn].filter(Boolean).join(' — '), over: !!((a && a.over) || (b && b.over)) };
+    return { ok: true, warn: [a && a.warn, b && b.warn].filter(Boolean).join(' — ') };
+  }
+  /** Can section k of row mid start at hour h? The member must be free then and the hour inside his allowed hours. */
+  function timeOk(k, mid, h, snap) {
+    if (isLocked(mid)) return false;
+    const m = memberById(mid); if (!m) return true;
+    if (!E.inWindow(m, h)) return false;
+    const { assign } = snap || snapshot();
+    const secs = modelWith(k, h), x = secs[k];
+    return !Object.keys(assign).some((kk) => kk !== k && assign[kk] === mid && secs[kk] && secs[kk].slots.some((sl) => x.slots.includes(sl)));
   }
   let pend = null, drag = null;
   const dragTip = () => { let el = document.getElementById('dragTip'); if (!el) { el = document.createElement('div'); el.id = 'dragTip'; el.className = 'drag-tip'; el.hidden = true; document.body.appendChild(el); } return el; };
@@ -898,14 +961,14 @@
     src.classList.add('drag-src'); document.body.classList.add('dragging');
     const table = main.querySelector('table.tt'); table.classList.add('dragging');
     // mark every possible target in the same hour column
-    const { secs: sx0, assign: as0 } = snapshot(); const sec = sx0[drag.key];
+    const snap = snapshot(); const { secs: sx0, assign: as0 } = snap; const sec = sx0[drag.key];
     let best = null, bestScore = 0;
     table.querySelectorAll(`td.slot[data-h="${drag.h}"]`).forEach((td) => {
       const to = td.dataset.mid; if (to === drag.from) return;
-      const res = dropCheck(drag.key, drag.from, to, null);
+      const res = dropCheck(drag.key, drag.from, to, null, { snap });
       drag.res['m|' + to] = res; td.classList.add(res.ok ? (res.warn ? 'dz-warn' : 'dz-ok') : 'dz-no');
       const m = memberById(to);
-      if (res.ok && !res.over && m) { // how good a home this member is for the section
+      if (res.ok && m) { // how good a home this member is for the section
         const why = [];
         if ((m.prefs || []).filter(Boolean).map(E.normCourse).includes(sec.course)) why.push(t('bestWish'));
         if (Object.keys(as0).some((kk) => as0[kk] === to && sx0[kk].course === sec.course)) why.push(t('bestSame'));
@@ -913,23 +976,21 @@
         const sc = why.length * 2 - (res.warn ? 1 : 0);
         if (sc > bestScore) { bestScore = sc; best = { td, why }; }
       }
+      if (drag.h === 'nt') return; // No time: dropping always adds, never swaps
       td.querySelectorAll('.cell[data-key]').forEach((c) => {
-        const rs = dropCheck(drag.key, drag.from, to, c.dataset.key);
+        const rs = dropCheck(drag.key, drag.from, to, c.dataset.key, { snap });
         drag.res['s|' + c.dataset.key] = Object.assign({ to }, rs); c.classList.add(rs.ok ? 'sw-ok' : 'sw-no');
       });
     });
     if (best) { best.td.classList.add('dz-best'); drag.res['m|' + best.td.dataset.mid].best = best.why; }
-    const bench = main.querySelector('.bench'); if (bench && drag.from) bench.classList.add('dz-ok');
     moveDrag(x, y); autoScroll();
   }
   function dropTarget(x, y) {
     const el = document.elementFromPoint(x, y); if (!el || !el.closest) return null;
-    const bench = el.closest('.bench');
-    if (bench) return drag.from ? { el: bench, bench: true, to: '', res: { ok: true } } : null;
     const td = el.closest('table.tt td.slot'); if (!td) return null;
     if (td.dataset.h !== drag.h) return { none: true, why: t('whyHour') };
     if (td.dataset.mid === drag.from) return null;
-    const c = el.closest('.cell[data-key]');
+    const c = drag.h === 'nt' ? null : el.closest('.cell[data-key]');
     if (c && c.dataset.key !== drag.key) return { el: c, td, swap: c.dataset.key, to: td.dataset.mid, res: drag.res['s|' + c.dataset.key] };
     return { el: td, td, to: td.dataset.mid, res: drag.res['m|' + td.dataset.mid] };
   }
@@ -945,8 +1006,7 @@
     else if (tg && tg.res) {
       if (!tg.res.ok) { text = tg.res.why || t('whyHour'); cls = 'no'; }
       else {
-        const fromName = drag.from ? nameOf(drag.from) : t('bench');
-        text = tg.bench ? t('dropBench', drag.key) : tg.swap ? t('dropSwap', drag.key, tg.swap, fromName, nameOf(tg.to)) : t('dropMove', drag.key, nameOf(tg.to));
+        text = tg.swap ? t('dropSwap', drag.key, tg.swap, nameOf(drag.from), nameOf(tg.to)) : t('dropMove', drag.key, nameOf(tg.to));
         if (tg.res.warn) { text += ' — ' + tg.res.warn; cls = 'warn'; } else cls = 'ok';
         if (tg.res.best && tg.res.best.length) { text = '★ ' + text + ' — ' + t('bestIs', tg.res.best.join(t('sep'))); cls += ' best'; }
       }
@@ -966,14 +1026,10 @@
     const d = drag; const tg = d ? dropTarget(x, y) : null;
     cleanDrag();
     if (!d || !tg || !tg.res || !tg.res.ok) { if (tg && tg.res && !tg.res.ok && tg.res.why) toast(tg.res.why); return; }
-    if (tg.bench) {
-      remember('uBench', d.key);
-      toBench(d.key, d.from);
-      toast(t('benchDone', d.key));
-    } else if (tg.swap) {
+    if (tg.swap) {
       remember('uSwap', d.key, tg.swap);
       putSection(d.key, tg.to);
-      if (d.from) putSection(tg.swap, d.from); else toBench(tg.swap, tg.to);
+      putSection(tg.swap, d.from);
       toast(t('swapDone', d.key, tg.swap));
     } else {
       remember('uDrag', d.key, nameOf(tg.to));
@@ -984,11 +1040,6 @@
     const keys = [d.key].concat(tg.swap ? [tg.swap] : []);
     keys.forEach((k) => main.querySelectorAll(`.cell[data-key="${CSS.escape(k)}"]`).forEach((e) => e.classList.add('flash')));
     setTimeout(() => main.querySelectorAll('.flash').forEach((e) => e.classList.remove('flash')), 2600);
-  }
-  /** Take a section off its member (or part-timers / ON-Hold) and leave it waiting on the bench. */
-  function toBench(k, from) {
-    delete S.assign[k]; delete S.pins[k]; S.secCat[k] = 'required';
-    if (from && memberById(from)) S.bans[`${k}|${from}`] = 1;
   }
   function cleanDrag() {
     if (!drag) return;
@@ -1003,11 +1054,9 @@
   main.addEventListener('pointerdown', (ev) => {
     if (S.step !== 4 || ui.view || ev.button > 0 || drag) return;
     const cell = ev.target.closest('.cell[data-key]'); if (!cell) return;
-    const td = cell.closest('table.tt td.slot'), bench = cell.closest('.bench');
-    if (!td && !bench) return;
-    let h = td ? td.dataset.h : null;
-    if (bench) { const sx = snapshot().secs[cell.dataset.key]; if (!sx) return; h = sx.hour == null ? 'nt' : String(sx.hour); }
-    pend = { key: cell.dataset.key, from: td ? td.dataset.mid : '', h, x: ev.clientX, y: ev.clientY, type: ev.pointerType, cell };
+    const td = cell.closest('table.tt td.slot'); if (!td) return;
+    if (isLocked(td.dataset.mid)) return; // a locked member is out of the game
+    pend = { key: cell.dataset.key, from: td.dataset.mid, h: td.dataset.h, x: ev.clientX, y: ev.clientY, type: ev.pointerType, cell };
     if (ev.pointerType === 'touch') { const px = ev.clientX, py = ev.clientY; pend.timer = setTimeout(() => startDrag(px, py), 350); }
   });
   document.addEventListener('pointermove', (ev) => {
@@ -1043,67 +1092,110 @@
     if (i.type === 'notime') return t('issue').notime(nameOf(i.member), i.a);
     return i.type;
   }
-  // popover for a grid cell
-  function openPop(td) {
+  // ---- click menus: one for a section, one for an empty cell ----
+  function showPop(html, anchor, key) {
+    const pop = $('#pop');
+    pop.innerHTML = html; pop.hidden = false; pop.dir = S.lang === 'ar' ? 'rtl' : 'ltr';
+    const r = anchor.getBoundingClientRect();
+    const w = 320, ph = Math.min(pop.scrollHeight, window.innerHeight * 0.7);
+    const left = Math.min(window.innerWidth - w - 10, Math.max(10, r.left));
+    let top = r.bottom + 6; if (top + ph > window.innerHeight - 10) top = Math.max(10, r.top - ph - 6);
+    pop.style.left = left + 'px'; pop.style.top = top + 'px';
+    pop.dataset.key = key;
+  }
+  const lockedLine = () => `<p class="lockline">🔒 ${esc(t('lockedLine'))}</p>`;
+  /** Menu of one section: code with type, course name, days; To Not assigned, Change time, Back to saved place. */
+  function secPop(cell) {
+    const td = cell.closest('td.slot'); const mid = td.dataset.mid, k = cell.dataset.key;
+    if (isLocked(mid)) { showPop(lockedLine(), cell, 'k|' + k); return; }
+    const { secs } = snapshot(); const s = secs[k]; if (!s) return;
+    const o = R.off.sections[k], comp = s.comp ? R.off.sections[s.comp] : null;
+    const compDays = comp ? [...new Set(comp.meetings.flatMap((x) => x.days))].sort().map((d) => E.DAY_NAMES[d]).join(' ') : '';
+    const days = [daysOf(k), compDays ? `${compDays} (${s.compAct === 'Lab' ? 'Lab' : 'T'})` : ''].filter(Boolean).join(' · ') || (o && o.hour == null ? t('noTime') : '');
+    let html = `<h4><span class="sw" style="background:${colour(s.course)}"></span>${esc(typeLine1(s))}${s.comp ? ` + ${esc(typeLine2(s))}` : ''}</h4>
+      <div class="meta">${esc(s.name)}${days ? `<br>${esc(days)}` : ''}${s.hour != null ? ` · ${hl(s.hour)}` : ''}</div>`;
+    if (mid !== 'NA') html += `<button class="opt" type="button" data-act="put" data-key="${esc(k)}" data-mid="NA">⇡ ${esc(t('toNA'))}</button>`;
+    if (!s.noTime) html += `<button class="opt" type="button" data-act="timePick" data-key="${esc(k)}" data-mid="${esc(mid)}">🕒 ${esc(t('changeTime'))}</button><div id="tp-${esc(k)}"></div>`;
+    if (refMoved(k)) html += `<button class="opt" type="button" data-act="refBack" data-key="${esc(k)}">↺ ${esc(t('refBack', S.ref[k][0] ? nameOf(S.ref[k][0]) : t('naRow')))}</button>`;
+    showPop(html, cell, 'k|' + k);
+  }
+  /** Menu of an empty cell: only the sections that may legally go there. */
+  function cellPop(td) {
     const mid = td.dataset.mid, hRaw = td.dataset.h, h = hRaw === 'nt' ? null : +hRaw;
-    const { secs, assign } = snapshot();
-    const here = Object.keys(assign).filter((k) => assign[k] === mid && (hRaw === 'nt' ? secs[k].hour == null : secs[k].hour === h));
-    const isPseudo = mid === 'PT' || mid === 'HOLD';
-    const m = memberById(mid);
-    let html = `<h4>${esc(nameOf(mid))} · ${hRaw === 'nt' ? esc(t('noTime')) : hl(h)}</h4>`;
-    here.forEach((k) => {
-      const s = secs[k];
-      const notes = (R.notes[k] || []).map((n) => n.text);
-      html += `<div style="border-top:1px solid var(--line-2);padding-top:8px;margin-top:8px"><h4><span class="sw" style="background:${colour(s.course)}"></span>${esc(k)}${s.comp ? ` + ${esc(s.comp)}` : ''}</h4>
-        <div class="meta">${esc(s.name)}<br>${esc(E.describeMeetings(R.off, k))}${s.proposed ? `<br><b style="color:var(--orange)">${esc(t('proposedAt', hl(s.hour)))}</b> (${esc(t('official'))}: ${s.officialHour != null ? hl(s.officialHour) : t('noTime')})${S.autoTime[k] ? ` — ${esc(t('autoTime'))}` : ''}` : ''}</div>
-        ${notes.length ? `<div class="note">${notes.map(esc).join('<br>')}</div>` : ''}
-        ${!isPseudo ? `<button class="opt" type="button" data-act="rmSec" data-key="${k}" data-mid="${mid}">✕ ${esc(t('removeFrom', nameOf(mid)))}</button>` : `<button class="opt" type="button" data-act="toMembers" data-key="${k}">↩ ${esc(t('toMembers'))}</button>`}
-        ${!s.noTime ? `<button class="opt" type="button" data-act="timePick" data-key="${k}">🕒 ${esc(t('proposeTime'))}</button>` : ''}
-        ${s.proposed && !S.autoTime[k] && s.officialHour != null ? `<button class="opt" type="button" data-act="timeReset" data-key="${k}">↺ ${esc(t('restoreTime'))}</button>` : ''}
-        ${refMoved(k) ? `<button class="opt" type="button" data-act="refBack" data-key="${k}">↺ ${esc(t('refBack', S.ref[k][0] ? nameOf(S.ref[k][0]) : t('bench')))}</button>` : ''}
-        ${mid !== 'HOLD' ? `<button class="opt" type="button" data-act="toHold" data-key="${k}">⏸ ${esc(t('toHold'))}</button>` : ''}
-        ${mid !== 'PT' ? `<button class="opt" type="button" data-act="toPart" data-key="${k}">👥 ${esc(t('toPart'))}</button>` : ''}
-        <div id="tp-${k}"></div></div>`;
-    });
-    // what can go here
+    const head = `<h4>${esc(nameOf(mid))} · ${hRaw === 'nt' ? esc(t('noTime')) : hl(h)}</h4>`;
+    if (isLocked(mid)) { showPop(head + lockedLine(), td, 'c|' + mid + '|' + hRaw); return; }
+    const snap = snapshot(); const { secs, assign } = snap;
     const cands = Object.values(secs).filter((s) => {
-      if (assign[s.key] === mid) return false;
-      if (hRaw === 'nt') return s.hour == null;
-      return s.hour === h;
+      const from = assign[s.key] || 'NA';
+      if (from === mid) return false;
+      if (hRaw === 'nt' ? s.hour != null : s.hour !== h) return false;
+      if (mid === 'NA' && from === 'NA') return false;
+      return dropCheck(s.key, from, mid, null, { snap }).ok;
     });
     const opt = (s) => {
       const a = assign[s.key];
-      const note = a ? t('fromMember', nameOf(a)) : s.cat === 'none' || s.cat === 'asneeded' ? (s.cat === 'none' ? t('notOurs') : L().cats.asneeded) : '';
-      const allowed = isPseudo || !m || E.memberAllows(m, s) || s.noTime;
-      return `<button class="opt" type="button" data-act="put" data-key="${s.key}" data-mid="${mid}"><span class="sw" style="background:${colour(s.course)}"></span><span class="t">${esc(s.key)}</span><small>${esc(note)}${allowed ? '' : ' ⚠'}</small></button>`;
+      const note = a ? t('fromMember', nameOf(a)) : s.cat === 'none' ? t('notOurs') : s.cat === 'asneeded' ? L().cats.asneeded : '';
+      return `<button class="opt" type="button" data-act="put" data-key="${esc(s.key)}" data-mid="${esc(mid)}"><span class="sw" style="background:${colour(s.course)}"></span><span class="t">${esc(s.key)}</span><small>${esc(note)}</small></button>`;
     };
-    const okFor = (s) => (isPseudo || !m || E.memberAllows(m, s) ? 0 : 1);
-    cands.sort((a, b) => okFor(a) - okFor(b));
-    const free = cands.filter((s) => !assign[s.key]);
-    const taken = cands.filter((s) => assign[s.key]);
-    html += `<div class="grp">${esc(t('putHere'))}</div>${free.length || taken.length ? free.map(opt).join('') + taken.map(opt).join('') : `<p class="muted small">${esc(t('nothingHere'))}</p>`}`;
-    const pop = $('#pop');
-    pop.innerHTML = html; pop.hidden = false;
-    const r = td.getBoundingClientRect();
-    const w = 320, ph = Math.min(pop.scrollHeight, window.innerHeight * 0.7);
-    let left = Math.min(window.innerWidth - w - 10, Math.max(10, r.left));
-    let top = r.bottom + 6; if (top + ph > window.innerHeight - 10) top = Math.max(10, r.top - ph - 6);
-    pop.style.left = left + 'px'; pop.style.top = top + 'px';
-    pop.dataset.mid = mid; pop.dataset.h = hRaw;
+    const free = cands.filter((s) => !assign[s.key]), taken = cands.filter((s) => assign[s.key]);
+    showPop(head + `<div class="grp">${esc(t('putHere'))}</div>${cands.length ? free.map(opt).join('') + taken.map(opt).join('') : `<p class="muted small">${esc(t('nothingHere'))}</p>`}`, td, 'c|' + mid + '|' + hRaw);
   }
   function closePop() { const p = $('#pop'); p.hidden = true; p.innerHTML = ''; }
 
   // ---- step 5: export ----
+  // change list for Admissions & Registration: instructor changes since the last version sent to them (net result)
+  /** Instructor per section as registration has it: the last "Sent to registration" snapshot, or the official file. */
+  function sentBase() {
+    if (S.sent && S.sent.map) return S.sent.map;
+    const names = {};
+    R.off.rows.forEach((r) => { const lk = R.off.lectureOf[r.key] || r.key; if (r.instructor && !names[lk]) names[lk] = r.instructor; });
+    const match = E.matchNames([...new Set(Object.values(names))], S.members);
+    return Object.fromEntries(Object.entries(names).map(([k, n]) => [k, match[n] ? match[n].id : 'x:' + n]));
+  }
+  const ampm = (h) => (h < 12 ? `${h}am` : h === 12 ? '12pm' : `${h - 12}pm`);
+  function changeLines() {
+    if (!R.off) return [];
+    const { secs, assign } = snapshot();
+    const base = sentBase();
+    const out = [];
+    S.members.forEach((m) => {
+      Object.keys(assign).filter((k) => assign[k] === m.id && (base[k] || '') !== m.id)
+        .sort((a, b) => (secs[a].hour == null ? 99 : secs[a].hour) - (secs[b].hour == null ? 99 : secs[b].hour) || a.localeCompare(b))
+        .forEach((k) => {
+          const s = secs[k];
+          const nums = [s.sec].concat(s.comp ? [s.comp.split('-').pop()] : []).join('/');
+          out.push(s.hour == null ? `Please reassign ${s.course} section ${nums} to ${m.name}` : `Please reassign ${s.course} at ${ampm(s.hour)} section${s.comp ? 's' : ''} ${nums} to ${m.name}`);
+        });
+    });
+    return out.map((x, i) => `${i + 1}- ${x}`);
+  }
   function viewExport() {
     const { ev } = snapshot();
     const n = ev.issues.length;
+    const lines = changeLines();
+    const since = S.sent && S.sent.at ? t('chgSince', new Date(S.sent.at).toLocaleDateString(S.lang === 'ar' ? 'ar-u-ca-gregory-nu-latn' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })) : t('chgSinceOff');
     return `<div class="page-head"><div><h1>${esc(t('expTitle'))}</h1><p class="${n ? '' : 'ok-text'}">${esc(n ? t('remaining', n) : t('ready'))}</p></div></div>
     <div class="exp">
       <div class="panel"><h2>${esc(t('expExcel'))}</h2><p class="sub" style="margin:0">${esc(t('expExcelText'))}</p><ul>${L().expSheets.map((x) => `<li>${esc(x)}</li>`).join('')}</ul><p class="tip">${esc(t('howToPaste'))}</p><button class="btn primary big" type="button" data-act="excel">${esc(t('expExcelBtn'))}</button></div>
       <div class="panel"><h2>${esc(t('expProj'))}</h2><p class="sub" style="margin:0">${esc(t('expProjText'))}</p><button class="btn big" type="button" data-act="saveProject">${esc(t('expProjBtn'))}</button>
+        <div class="chg">
+          <h2>${esc(t('chgTitle'))}</h2><p class="small muted" style="margin:0">${esc(since)}</p>
+          ${lines.length ? `<textarea id="chgText" class="input" dir="ltr" readonly rows="${Math.min(12, lines.length + 1)}">${esc(lines.join('\n'))}</textarea>` : `<p class="muted" style="margin:0">${esc(t('chgNone'))}</p>`}
+          <div class="row"><button class="btn" type="button" data-act="copyChanges" ${lines.length ? '' : 'disabled'}>${esc(t('copy'))}</button><button class="btn" type="button" data-act="markSent" title="${esc(t('markSentTip'))}">${esc(t('markSent'))}</button></div>
+        </div>
         <hr style="border:0;border-top:1px solid var(--line-2);width:100%;margin:8px 0">
         <h2>${esc(t('nextTerm'))}</h2><p class="sub" style="margin:0">${esc(t('nextTermText'))}</p><button class="btn" type="button" data-act="nextTerm">${esc(t('nextTerm'))}</button></div>
     </div>`;
+  }
+  function markSent() {
+    const { assign } = snapshot();
+    const map = {}; R.off.lectures.forEach((k) => { map[k] = memberById(assign[k]) ? assign[k] : ''; });
+    S.sent = { at: new Date().toISOString(), map };
+  }
+  async function copyText(text) {
+    try { await navigator.clipboard.writeText(text); return true; } catch (e) { /* fall back below */ }
+    const ta = $('#chgText'); if (!ta) return false;
+    ta.focus(); ta.select(); try { return document.execCommand('copy'); } catch (e) { return false; }
   }
 
   // ---------------- actions ----------------
@@ -1156,7 +1248,7 @@
       const obj = JSON.parse(await file.text());
       if (!obj || obj.app !== 'isp-timetable') throw new Error('x');
       const lang = S.lang;
-      S = Object.assign(blank(), obj); S.lang = obj.lang || lang; clearUndo();
+      S = Object.assign(blank(), obj); S.lang = obj.lang || lang; normalize(); clearUndo();
       R = { wb: {}, sheets: {}, err: {}, fac: null, notes: {}, curScore: {}, prefScore: {} };
       await reparseAll();
       if (S.built && R.off) setRef();
@@ -1176,8 +1268,10 @@
       if (m.comment) lines.push(`Comment: ${m.comment}`);
       memberNotes[m.id] = lines;
     });
-    const members = S.members.concat([{ id: 'PT', name: 'Part-timers', pseudo: true }, { id: 'HOLD', name: 'ON-Hold', pseudo: true }]);
-    const wb = await X.build(window.ExcelJS, { side: S.side, term: S.term, members, secs, assign, off: R.off, notes: R.notes, msc: S.msc, decisions: S.decisions, officialWorkbook: R.wb.official, issues: ev.issues, per: ev.per, memberNotes, generated: new Date() });
+    const members = [{ id: 'NA', name: 'Not assigned', pseudo: true }].concat(S.members, [{ id: 'PT', name: 'Part-timers', pseudo: true }, { id: 'HOLD', name: 'ON-HOLD', pseudo: true }]);
+    const grid = Object.assign({}, assign);
+    Object.values(secs).forEach((s) => { if (!grid[s.key] && s.cat === 'required') grid[s.key] = 'NA'; }); // the Not assigned block at the top
+    const wb = await X.build(window.ExcelJS, { side: S.side, term: S.term, members, secs, assign: grid, off: R.off, notes: R.notes, msc: S.msc, decisions: S.decisions, officialWorkbook: R.wb.official, issues: ev.issues, per: ev.per, memberNotes, generated: new Date() });
     const buf = await X.toBuffer(wb, window.JSZip);
     download(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `${fileBase()} timetable.xlsx`);
   }
@@ -1185,15 +1279,18 @@
     const { secs, assign } = snapshot();
     const base = {};
     Object.entries(assign).forEach(([k, v]) => { if (memberById(v)) (base[v] = base[v] || []).push({ course: secs[k].course, hour: secs[k].hour }); });
-    const keep = { side: S.side, lang: S.lang, members: S.members.map((m) => Object.assign({}, m, { prefs: ['', '', ''], comment: '', fromPrefs: false })), courses: S.courses, courseTouched: S.courseTouched };
+    const keep = { side: S.side, lang: S.lang, members: S.members.map((m) => Object.assign({}, m, { prefs: ['', '', ''], comment: '', fromPrefs: false, res: (m.allowed || []).map(() => '') })), courses: S.courses, courseTouched: S.courseTouched };
     S = Object.assign(blank(), keep, { baseline: base, step: 1 }); clearUndo();
     ui.pickSide = S.side; ui.termDraft = '';
     R = { wb: {}, sheets: {}, err: {}, fac: null, notes: {}, curScore: {}, prefScore: {} };
     persist(); render(); window.scrollTo(0, 0);
   }
+  /** Put section k in row mid: a member, 'NA' (Not assigned), 'PT' (part-timers) or 'HOLD' (ON-HOLD). */
   function putSection(k, mid) {
-    const { secs } = snapshot();
+    const { secs, assign } = snapshot();
     const s = secs[k]; if (!s) return;
+    unreserve(k, mid);
+    if (mid === 'NA') { const from = assign[k]; delete S.assign[k]; delete S.pins[k]; S.secCat[k] = 'required'; if (memberById(from)) S.bans[`${k}|${from}`] = 1; return; }
     if (mid === 'PT') { S.secCat[k] = 'parttime'; delete S.pins[k]; delete S.assign[k]; return; }
     if (mid === 'HOLD') { S.secCat[k] = 'onhold'; delete S.pins[k]; delete S.assign[k]; return; }
     const cat = (S.courses[s.course] || {}).cat;
@@ -1207,7 +1304,7 @@
     const pop = $('#pop');
     if (!el) { if (!pop.hidden && !ev.target.closest('#pop')) closePop(); if (!ev.target.closest('#mcard')) hideCard(); return; }
     const act = el.dataset.act, d = el.dataset;
-    if (act !== 'cell' && act !== 'timePick' && !el.closest('#pop')) closePop();
+    if (act !== 'cell' && act !== 'sec' && act !== 'timePick' && !el.closest('#pop')) closePop();
     if (act !== 'card') hideCard();
     switch (act) {
       case 'home': ev.preventDefault(); ui.view = null; S.step = 1; render(); window.scrollTo(0, 0); break;
@@ -1218,56 +1315,64 @@
       case 'pick': ui.pickSide = d.side; ui.termDraft = $('#termIn') ? $('#termIn').value : ui.termDraft; render(); break;
       case 'start': startProject(); break;
       case 'openProject': $('#projectInput').click(); break;
-      case 'resumeAuto': { const saved = S0(); if (saved) { S = Object.assign(blank(), saved); clearUndo(); await reparseAll(); render(); } break; }
+      case 'resumeAuto': { const saved = S0(); if (saved) { S = Object.assign(blank(), saved); normalize(); clearUndo(); await reparseAll(); render(); } break; }
       case 'rmFile': clearUndo(); delete S.files[d.kind]; if (d.kind === 'current') S.currentMap = {}; if (d.kind === 'prefs') { S.prefsMap = {}; S.members.forEach((m) => { if (m.fromPrefs) { m.prefs = ['', '', '']; m.comment = ''; m.fromPrefs = false; } }); } await readFile(d.kind); parseAll(); S.built = false; persist(); render(); break;
       case 'tab': ui.tab = d.tab; render(); break;
       case 'mOpen': ui.open[d.id] = !ui.open[d.id]; render(); break;
       case 'mUp': case 'mDown': { const i = S.members.findIndex((m) => m.id === d.id); const j = act === 'mUp' ? i - 1 : i + 1; if (j >= 0 && j < S.members.length) { [S.members[i], S.members[j]] = [S.members[j], S.members[i]]; persist(); render(); } break; }
       case 'mDel': { const m = memberById(d.id); if (m && confirm(t('confirmDel', m.name))) { S.members = S.members.filter((x) => x.id !== d.id); Object.keys(S.assign).forEach((k) => { if (S.assign[k] === d.id) delete S.assign[k]; }); Object.keys(S.pins).forEach((k) => { if (S.pins[k] === d.id) delete S.pins[k]; }); Object.keys(S.currentMap).forEach((k) => { if (S.currentMap[k] === d.id) S.currentMap[k] = ''; }); Object.keys(S.prefsMap).forEach((k) => { if (S.prefsMap[k] === d.id) S.prefsMap[k] = ''; }); delete S.decisions[d.id]; persist(); render(); } break; }
       case 'mAdd': { const nm = newMember(t('newMemberName')); nm.required = 4; S.members.push(nm); persist(); render(); setTimeout(() => { const ins = main.querySelectorAll('.fac-nm'); const last = ins[ins.length - 1]; if (last) { last.focus(); last.select(); } }, 0); break; }
-      case 'chipRm': { const m = memberById(d.id); m[d.field] = (m[d.field] || []).filter((v) => v !== d.val); persist(); render(); break; }
+      case 'chipRm': {
+        const m = memberById(d.id);
+        if (d.field === 'allowed') { const i = +d.i; m.allowed = m.allowed.filter((_, j) => j !== i); m.res = (m.res || []).filter((_, j) => j !== i); }
+        else m[d.field] = (m[d.field] || []).filter((v) => v !== d.val);
+        persist(); render(); break;
+      }
       case 'mscAdd': S.msc.push({ id: uid(), member: '', program: 'MSc', hours: 3 }); persist(); render(); break;
       case 'mscDel': S.msc = S.msc.filter((x) => x.id !== d.id); persist(); render(); break;
       case 'rebuild': remember('uRebuild'); build(true); break;
       case 'print': window.print(); break;
       case 'undo': undo(); break;
       case 'howto': try { localStorage.setItem('isp-howto', d.v); } catch (e) { /* storage blocked */ } render(); break;
-      case 'refBack': { remember('uRef', d.key); restoreRef(d.key); closePop(); persist(); render(); toast(t('refDone', d.key)); break; }
-      case 'refAll': { const { secs, assign } = snapshot(); const ks = refChanged(secs, assign); if (!ks.length) break; remember('uRefAll'); ks.forEach(restoreRef); persist(); render(); toast(t('refAllDone', ks.length)); break; }
+      case 'refBack': { const c = restoreCheck(d.key); if (!c.ok) { toast(c.why || t('whyTime')); break; } remember('uRef', d.key); restoreRef(d.key); closePop(); persist(); render(); toast(t('refDone', d.key)); break; }
+      case 'refAll': {
+        const { secs, assign } = snapshot(); let ks = refChanged(secs, assign); if (!ks.length) break;
+        remember('uRefAll');
+        // each one only if it can go back without a clash; a second pass catches swaps
+        let done = 0;
+        for (let pass = 0; pass < 2; pass++) ks = ks.filter((k) => { if (!restoreCheck(k).ok) return true; restoreRef(k); done++; return false; });
+        persist(); render(); toast(ks.length ? t('refAllSome', done, ks.length) : t('refAllDone', done)); break;
+      }
       case 'focusCourse': ui.focusCourse = d.code && ui.focusCourse !== d.code ? d.code : null; render(); break;
       case 'card': { const c = document.getElementById('mcard'); if (c && !c.hidden && c.dataset.mid === d.card) hideCard(); else showCard(el); break; }
       case 'goIssue': goTo(d.mid, (d.keys || '').split(',').filter(Boolean)); break;
-      case 'cell': if (!pop.hidden && pop.dataset.mid === d.mid && pop.dataset.h === d.h) closePop(); else openPop(el); break;
-      case 'put': remember('uPut', d.key, nameOf(d.mid)); putSection(d.key, d.mid); closePop(); persist(); render(); break;
-      case 'rmSec': remember('uRm', d.key, nameOf(d.mid)); delete S.assign[d.key]; delete S.pins[d.key]; S.bans[`${d.key}|${d.mid}`] = 1; closePop(); persist(); render(); break;
-      case 'toHold': remember('uMove', d.key, 'ON-Hold'); S.secCat[d.key] = 'onhold'; delete S.pins[d.key]; delete S.assign[d.key]; closePop(); persist(); render(); break;
-      case 'toPart': remember('uMove', d.key, 'Part-timers'); S.secCat[d.key] = 'parttime'; delete S.pins[d.key]; delete S.assign[d.key]; closePop(); persist(); render(); break;
-      case 'toMembers': remember('uToMembers', d.key); S.secCat[d.key] = 'required'; closePop(); persist(); render(); break;
+      case 'cell': if (!pop.hidden && pop.dataset.key === `c|${d.mid}|${d.h}`) closePop(); else cellPop(el); break;
+      case 'sec': if (!pop.hidden && pop.dataset.key === 'k|' + d.key) closePop(); else secPop(el); break;
+      case 'put': {
+        const from = snapshot().assign[d.key] || 'NA';
+        const c = dropCheck(d.key, from, d.mid);
+        if (!c.ok) { toast(c.why || t('nothingHere')); break; }
+        remember('uPut', d.key, nameOf(d.mid)); putSection(d.key, d.mid); closePop(); persist(); render(); break;
+      }
+      case 'toHold': remember('uMove', d.key, 'ON-HOLD'); putSection(d.key, 'HOLD'); closePop(); persist(); render(); break;
       case 'timePick': {
         const box = document.getElementById('tp-' + d.key); if (!box) break;
-        const { secs } = snapshot(); const s = secs[d.key];
-        box.innerHTML = `<div class="hours" style="margin-top:6px">${E.HOURS.map((h) => `<button type="button" class="${s.hour === h ? 'on' : ''}" data-act="timeSet" data-key="${d.key}" data-h="${h}">${hl(h)}</button>`).join('')}</div>`;
+        const snap = snapshot(); const s = snap.secs[d.key];
+        // only hours where the member is free and inside his allowed hours
+        const hrs = E.HOURS.filter((h) => h === s.hour || timeOk(d.key, d.mid, h, snap));
+        box.innerHTML = hrs.length > 1 ? `<div class="hours" style="margin-top:6px">${hrs.map((h) => `<button type="button" class="${s.hour === h ? 'on' : ''}" data-act="timeSet" data-key="${esc(d.key)}" data-mid="${esc(d.mid)}" data-h="${h}">${hl(h)}</button>`).join('')}</div>` : `<p class="muted small">${esc(t('noOtherTime'))}</p>`;
         break;
       }
-      case 'timeSet': { remember('uTime', d.key); const { secs } = snapshot(); const s = secs[d.key]; const h = +d.h; if (s.officialHour === h) delete S.proposed[d.key]; else S.proposed[d.key] = h; delete S.autoTime[d.key]; if (S.assign[d.key]) S.pins[d.key] = S.assign[d.key]; closePop(); persist(); render(); break; }
-      case 'timeReset': remember('uTime', d.key); delete S.proposed[d.key]; delete S.autoTime[d.key]; closePop(); persist(); render(); break;
-      case 'dec': {
-        remember('uDec', nameOf(d.id));
-        const cur = S.decisions[d.id];
-        S.decisions[d.id] = cur === d.dec ? '' : d.dec;
-        if (S.decisions[d.id] === 'reject') alternatives(d.id); else { delete ui.alts[d.id]; }
-        persist(); render(); break;
+      case 'timeSet': {
+        const { secs } = snapshot(); const s = secs[d.key]; const h = +d.h;
+        if (s.hour === h) { closePop(); break; }
+        if (!timeOk(d.key, d.mid, h)) { toast(t('whyTime')); break; }
+        remember('uTime', d.key);
+        const own = snapshot().assign[d.key]; if (s.officialHour === h) delete S.proposed[d.key]; else S.proposed[d.key] = h; delete S.autoTime[d.key]; if (memberById(own)) S.pins[d.key] = own; closePop(); persist(); render(); break;
       }
-      case 'useAlt': {
-        const a = ui.alts[d.id]; const o = a && a.opts[+d.i]; if (!o) break;
-        remember('uAlt', nameOf(d.id));
-        Object.keys(S.pins).forEach((k) => { if (S.pins[k] === d.id) delete S.pins[k]; });
-        applyResult(o.res);
-        S.forbidden[d.id] = a.forb.filter((x) => x !== sig(Object.keys(o.res.assign).filter((k) => o.res.assign[k] === d.id)));
-        S.decisions[d.id] = ''; delete ui.alts[d.id]; persist(); render(); break;
-      }
-      case 'showAlt': alternatives(d.id); break;
-      case 'closeAlt': remember('uDec', nameOf(d.id)); S.decisions[d.id] = 'review'; delete ui.alts[d.id]; persist(); render(); break;
+      case 'lock': { remember('uLock', nameOf(d.id)); if (isLocked(d.id)) delete S.decisions[d.id]; else S.decisions[d.id] = 'locked'; persist(); render(); break; }
+      case 'copyChanges': { const ok = await copyText(changeLines().join('\n')); toast(t(ok ? 'copied' : 'copyFail')); break; }
+      case 'markSent': markSent(); persist(); render(); toast(t('sentDone')); break;
       case 'excel': try { await exportExcel(); } catch (e) { console.error(e); toast('Excel: ' + e.message); } break;
       case 'saveProject': saveProject(); break;
       case 'facTemplate': downloadTemplate(); break;
@@ -1295,12 +1400,18 @@
         break;
       }
       case 'mpref': { const m = memberById(d.id); m.prefs = (m.prefs || ['', '', '']).slice(); m.prefs[+d.j] = el.value; break; }
-      case 'chipAdd': { const m = memberById(d.id); if (el.value) m[d.field] = (m[d.field] || []).concat([el.value]); break; }
+      case 'chipAdd': { const m = memberById(d.id); if (el.value) { m[d.field] = (m[d.field] || []).concat([el.value]); if (d.field === 'allowed') { m.res = (m.res || []).slice(0, m.allowed.length - 1); while (m.res.length < m.allowed.length) m.res.push(''); } } break; }
+      case 'resv': {
+        const m = memberById(d.id); if (!m) break;
+        const why = el.value ? resBlock(el.value, m.id, snapshot()) : '';
+        if (why) { toast(why); break; }
+        m.res = m.res || []; m.res[+d.i] = el.value; if (el.value) { delete S.pins[el.value]; S.assign[el.value] = m.id; } break;
+      }
       case 'ccat': S.courses[d.code] = Object.assign({}, S.courses[d.code], { cat: el.value }); S.courseTouched[d.code] = true; Object.keys(S.secCat).forEach((k) => { if (k.startsWith(d.code + '-')) delete S.secCat[k]; }); break;
       case 'ccount': S.courses[d.code] = Object.assign({}, S.courses[d.code], { counts: el.checked }); S.courseTouched[d.code] = true; break;
       case 'msc': { const x = S.msc.find((y) => y.id === d.id); if (x) x[d.field] = d.field === 'hours' ? Number(el.value) : el.value; break; }
       case 'mscDay': { const x = S.msc.find((y) => y.id === d.id); const day = +d.day; x.days = el.checked ? [...new Set((x.days || []).concat(day))].sort() : (x.days || []).filter((y) => y !== day); break; }
-      case 'assignTo': if (el.value) { remember('uPut', d.key, nameOf(el.value)); putSection(d.key, el.value); } break;
+      case 'assignTo': if (el.value) { const c = dropCheck(d.key, 'NA', el.value); if (!c.ok) { toast(c.why); break; } remember('uPut', d.key, nameOf(el.value)); putSection(d.key, el.value); } break;
       case 'hoursSrc': S.hoursSource = el.value; if (el.value === 'file') applyFaculty(); break;
       case 'fmtSheet': fmtUseSheet(el.value); render(); return;
       case 'fmtTitle': ui.fmt.title = el.value; render(); return;
@@ -1313,7 +1424,8 @@
     if (ev.key === 'Escape') { if (drag) { cleanDrag(); return; } closePop(); hideCard(); if (ui.focusCourse && !ev.target.matches('input, select, textarea')) { ui.focusCourse = null; render(); } }
     if ((ev.ctrlKey || ev.metaKey) && !ev.shiftKey && (ev.key === 'z' || ev.key === 'Z') && S.step === 4 && !ui.view && !ev.target.matches('input, select, textarea')) { ev.preventDefault(); undo(); }
     if (ev.key === 'Enter' && ev.target.id === 'termIn') startProject();
-    if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches('td.slot')) { ev.preventDefault(); openPop(ev.target); }
+    if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches('td.slot')) { ev.preventDefault(); cellPop(ev.target); }
+    if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches('.cell[data-act=sec]')) { ev.preventDefault(); secPop(ev.target); }
   });
   // drag & drop files
   document.addEventListener('dragover', (ev) => { const z = ev.target.closest('[data-drop]'); if (z) { ev.preventDefault(); z.classList.add('over'); } });

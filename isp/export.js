@@ -21,7 +21,8 @@
   function noticeFooter(ws) { ws.headerFooter = { oddFooter: '&L&8&"Tahoma,Italic"' + NOTICE + '&R&8Page &P of &N', evenFooter: '&L&8&"Tahoma,Italic"' + NOTICE + '&R&8Page &P of &N' }; }
 
   /**
-   * ctx: {side, term, members:[{id,name,required,coop,senior,pseudo?}], secs (model), assign {key: memberId|'PT'|'HOLD'},
+   * ctx: {side, term, members:[{id,name,required,coop,senior,pseudo?}], secs (model), assign {key: memberId|'NA'|'PT'|'HOLD'},
+   *       ('NA' = Not assigned: shown as a block at the top of the grid, status Unassigned)
    *       off (parsed official), notes (officialNotes), msc, decisions, officialWorkbook (ExcelJS wb of the official file),
    *       issues (evaluate().issues), per (evaluate().per), generated (Date)}
    */
@@ -36,6 +37,7 @@
     const secs = ctx.secs;
     const assign = ctx.assign;
     const memberName = Object.fromEntries(ctx.members.map((m) => [m.id, m.name]));
+    const realIds = new Set(ctx.members.filter((m) => !m.pseudo).map((m) => m.id));
     const compLabel = (s) => (s.comp ? `${s.comp} (${s.compAct === 'Lab' ? 'Lab' : 'T'})` : '');
     const lLabel = (k) => `${k} (L)`;
 
@@ -50,7 +52,7 @@
     ws.getCell(1, 1).alignment = { vertical: 'middle' };
     ws.getRow(1).height = 26;
     ws.mergeCells(2, 3, 2, LAST); ws.getRow(2).height = 30; ws.getCell(2, 3).alignment = { wrapText: true, vertical: 'middle' };
-    ws.getCell(2, 3).value = NOTICE + '   |   To move a section, choose it from the list in a cell (only sections not yet placed at that hour are listed) and clear its old cell; loads, counts, the check table, Is Reg names and the summary update by themselves.   |   Red: duplicated section, section outside its hour, or sections different from required   |   Orange italic dashed: proposed time (needs registration approval)   |   MSc / PhD in the No time column: evening, counts as one section; hours in the MSc / PhD column';
+    ws.getCell(2, 3).value = NOTICE + '   |   Not assigned (top): sections without a member; to give one to a member, choose it in the member\'s cell and clear it here   |   To move a section, choose it from the list in a cell (only sections not yet placed with a member at that hour are listed) and clear its old cell; loads, counts, the check table, Is Reg names and the summary update by themselves.   |   Red: duplicated section, section outside its hour, or sections different from required   |   Orange italic dashed: proposed time (needs registration approval)   |   MSc / PhD in the No time column: evening, counts as one section; hours in the MSc / PhD column';
     ws.getCell(2, 3).font = { name: FONT, size: 9, italic: true, color: { argb: 'FF7F7F7F' } };
     ws.mergeCells(3, 3, 3, NOTIME); ws.getCell(3, 3).value = 'Timeslots';
     ws.getCell(3, 3).fill = fill('0000FF'); ws.getCell(3, 3).font = { name: FONT, size: 14, bold: true, color: { argb: 'FFFFFFFF' } }; ws.getCell(3, 3).alignment = center;
@@ -85,9 +87,13 @@
         let p = pairs.find((x) => !x[s.hour]); if (!p) { p = {}; pairs.push(p); } p[s.hour] = k;
       });
       if (!pairs.length) pairs.push({});
+      while (pairs.length * 2 < nt.length) pairs.push({}); // No time column: two cells per pair of rows
       return { pairs, nt };
     };
     const realMembers = ctx.members.filter((m) => !m.pseudo);
+    const na = ctx.members.find((m) => m.id === 'NA');
+    if (na) { const L = layout(sectionsOf('NA')); blocks.push({ m: na, ...L }); }
+    const naRows = blocks.reduce((a, b) => a + b.pairs.length * 2, 0); // rows of the Not assigned block (outside Grid)
     realMembers.forEach((m) => {
       const L = layout(sectionsOf(m.id));
       (ctx.msc || []).filter((x) => x.member === m.id).forEach((x) => L.nt.push({ grad: x.program === 'PhD' ? 'PhD' : 'MSc' }));
@@ -109,7 +115,8 @@
     const chkRow = {}; ctx.off.lectures.forEach((k, i) => { chkRow[k] = chkFirst + i; });
     const SH = `'${title.slice(0, 31).replace(/'/g, "''")}'`;
     const GRID = 'Grid';
-    const extraNames = [{ name: 'Grid', formula: `${SH}!$C$5:$${colL(NOTIME)}$${LG}` }];
+    const gridFirst = 5 + naRows; // Grid = member rows (with part-timers and ON-HOLD), not the Not assigned block
+    const extraNames = [{ name: 'Grid', formula: `${SH}!$C$${gridFirst}:$${colL(NOTIME)}$${LG}` }];
     const tagOf = (h) => (h === 'nt' ? 'NT' : String(h).padStart(2, '0'));
 
     const tFormula = 'IF(INDIRECT("R[-1]C",FALSE)="","",IFERROR(INDEX(SecComp,MATCH(INDIRECT("R[-1]C",FALSE),SecKey,0)),"?"))';
@@ -175,6 +182,7 @@
       nameCell.font = { name: FONT, size: 12, bold: true };
       nameCell.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true, indent: 1 };
       if (b.m.id === 'HOLD') nameCell.fill = fill('FFC000');
+      if (b.m.id === 'NA') { nameCell.fill = fill('F2F2F2'); nameCell.font = { name: FONT, size: 12, bold: true, color: { argb: 'FF7F7F7F' } }; }
       [OCOL, PCOL, QCOL, RCOL, SCOL, TCOL, PRCOL].forEach((c) => ws.mergeCells(first, c, last, c));
       // totals use the whole block
       const blockLoad = () => { let v = 0; for (let rr = first; rr <= last; rr++) { const cv = ws.getCell(rr, NCOL).value; v += cv && cv.result ? cv.result : 0; } return v; };
@@ -217,7 +225,7 @@
         const lines = [];
         if (req != null) lines.push(`Required sections: ${req}`);
         const dec = ctx.decisions && ctx.decisions[b.m.id];
-        if (dec) lines.push(`Decision: ${dec === 'final' ? 'Final' : dec === 'reject' ? 'Rejected – to revise' : 'Review next round'}`);
+        if (dec === 'locked') lines.push('Locked');
         const nonc = sectionsOf(b.m.id).filter((k) => !secs[k].counts);
         if (nonc.length) lines.push(`${nonc.join(', ')}: counted as hours, not as a section`);
         (ctx.memberNotes && ctx.memberNotes[b.m.id] || []).forEach((x) => lines.push(x));
@@ -226,7 +234,8 @@
         ws.getCell(first, TCOL).value = sectionsOf(b.m.id).length;
         ws.getCell(first, TCOL).font = { name: FONT, size: 11, bold: true, color: { argb: 'FF7F7F7F' } };
         if (b.m.id === 'PT') nameCell.note = { texts: [{ font: { name: FONT, size: 9 }, text: `Part-timers: ${sectionsOf('PT').length} sections. Names are left blank in Is Reg.` }] };
-        if (b.m.id === 'HOLD') nameCell.note = { texts: [{ font: { name: FONT, size: 9 }, text: 'ON-Hold: not offered unless the department decides otherwise. Names are left blank in Is Reg.' }] };
+        if (b.m.id === 'HOLD') nameCell.note = { texts: [{ font: { name: FONT, size: 9 }, text: 'ON-HOLD: kept without a member until needed. The instructor name in Is Reg is ON-HOLD.' }] };
+        if (b.m.id === 'NA') nameCell.note = { texts: [{ font: { name: FONT, size: 9 }, text: 'Sections without a member (status Unassigned). Choose one in a member\'s cell to assign it, then clear it here.' }] };
       }
       // thick line under the block
       for (let c = 1; c <= LAST; c++) { const cell = ws.getCell(last, c); cell.border = Object.assign({}, cell.border, { bottom: med }); }
@@ -244,12 +253,15 @@
 
     // ---------- conditional formatting (live) ----------
     const isL = (a) => `AND(${a}<>"",ISERROR(SEARCH("(T)",${a})),ISERROR(SEARCH("(Lab)",${a})))`;
-    const gridAbs = `$C$5:$${colL(NOTIME)}$${lastGrid}`;
-    const keyOf = 'LEFT(C5,FIND(" ",C5&" ")-1)';
-    ws.addConditionalFormatting({ ref: `C5:${colL(NOTIME)}${lastGrid}`, rules: [
-      { type: 'expression', priority: 1, formulae: [`AND(${isL('C5')},LEFT(C5,3)<>"MSc",LEFT(C5,3)<>"PhD",COUNTIF(${gridAbs},C5)>1)`], style: { fill: fill('FF0000'), font: { color: { argb: 'FFFFFFFF' }, bold: true } } },
-      { type: 'expression', priority: 2, formulae: [`AND(${isL('C5')},COUNTIFS($A$${chkFirst}:$A$${chkLast},${keyOf},$G$${chkFirst}:$G$${chkLast},"Outside its time")>0)`], style: { fill: fill('FF0000'), font: { color: { argb: 'FFFFFFFF' }, bold: true } } },
+    const gridAbs = `$C$${gridFirst}:$${colL(NOTIME)}$${lastGrid}`;
+    const G0 = `C${gridFirst}`;
+    const keyOf = `LEFT(${G0},FIND(" ",${G0}&" ")-1)`;
+    ws.addConditionalFormatting({ ref: `${G0}:${colL(NOTIME)}${lastGrid}`, rules: [
+      { type: 'expression', priority: 1, formulae: [`AND(${isL(G0)},LEFT(${G0},3)<>"MSc",LEFT(${G0},3)<>"PhD",COUNTIF(${gridAbs},${G0})>1)`], style: { fill: fill('FF0000'), font: { color: { argb: 'FFFFFFFF' }, bold: true } } },
+      { type: 'expression', priority: 2, formulae: [`AND(${isL(G0)},COUNTIFS($A$${chkFirst}:$A$${chkLast},${keyOf},$G$${chkFirst}:$G$${chkLast},"Outside its time")>0)`], style: { fill: fill('FF0000'), font: { color: { argb: 'FFFFFFFF' }, bold: true } } },
     ] });
+    // Not assigned block: a section already given to a member in the grid below is greyed and struck through
+    if (naRows) ws.addConditionalFormatting({ ref: `C5:${colL(NOTIME)}${gridFirst - 1}`, rules: [{ type: 'expression', priority: 1, formulae: [`AND(C5<>"",COUNTIF(${gridAbs},C5)>0)`], style: { font: { color: { argb: 'FFA6A6A6' }, strike: true } } }] });
     ws.addConditionalFormatting({ ref: `C5:${colL(NOTIME)}${lastGrid}`, rules: courseList.map((c, i) => ({ type: 'expression', priority: 3 + i, formulae: [`LEFT(C5,${c.length + 1})="${c}-"`], style: { fill: fill(D.colourFor(c)) } })) });
 
     // ---------- colour key ----------
@@ -286,18 +298,18 @@
       const una = s.cat === 'none' || s.cat === 'asneeded' ? 'Not assigned to IS' : 'Unassigned';
       const asg = s.counts ? 'Assigned' : 'Assigned (counted as hours)';
       const a = assign[k];
-      const realA = a && memberName[a] && a !== 'PT' && a !== 'HOLD';
+      const realA = realIds.has(a);
       const cachedSt = realA ? asg : a === 'PT' ? 'Part-timer' : a === 'HOLD' ? 'ON-Hold' : una;
-      const cachedName = realA ? memberName[a] : '';
+      const cachedName = realA ? memberName[a] : a === 'HOLD' ? 'ON-HOLD' : '';
       const time = s.proposed ? `${E.hourLabel(s.hour)} proposed${s.officialHour != null ? ` (official ${E.hourLabel(s.officialHour)})` : ' (no official time)'}` : s.hour != null ? E.hourLabel(s.hour) : 'No time';
       const vals = [k, s.prefix, time, E.describeMeetings(ctx.off, k), s.name, s.comp || ''];
       vals.forEach((v, i) => { const c = ws.getCell(row, 1 + i); c.value = v; cellStyle(c, i === 0 || i === 3 || i === 4); });
       if (s.proposed) ws.getCell(row, 3).font = { name: FONT, size: 10, italic: true, color: { argb: 'FFC65911' } };
-      ws.getCell(row, VCOL).value = { formula: `IF(${cnt}=1,SUMPRODUCT(${where}*ROW(${GRID})),0)`, result: placed[k] ? placed[k].row : 0 };
+      ws.getCell(row, VCOL).value = { formula: `IF(${cnt}=1,SUMPRODUCT(${where}*ROW(${GRID})),0)`, result: placed[k] && placed[k].row >= gridFirst ? placed[k].row : 0 };
       ws.getCell(row, WCOL).value = cachedName;
       const own = `INDEX($${colL(UCOL)}:$${colL(UCOL)},$${colL(VCOL)}${row})`;
-      ws.getCell(row, 7).value = { formula: `IF(${cnt}=0,"${una}",IF(${cnt}>1,"Duplicate",IF(${own}="ON-Hold","ON-Hold",IF(${own}="Part-timers","Part-timer",IF(AND(${expCol}>0,SUMPRODUCT(${where}*COLUMN(${GRID}))<>${expCol}),"Outside its time","${asg}")))))`, result: cachedSt };
-      ws.getCell(row, 8).value = { formula: `IF(LEFT(G${row},8)="Assigned",${own},"")`, result: cachedName };
+      ws.getCell(row, 7).value = { formula: `IF(${cnt}=0,"${una}",IF(${cnt}>1,"Duplicate",IF(${own}="ON-HOLD","ON-Hold",IF(${own}="Part-timers","Part-timer",IF(AND(${expCol}>0,SUMPRODUCT(${where}*COLUMN(${GRID}))<>${expCol}),"Outside its time","${asg}")))))`, result: cachedSt };
+      ws.getCell(row, 8).value = { formula: `IF(LEFT(G${row},8)="Assigned",${own},IF(G${row}="ON-Hold","ON-HOLD",""))`, result: cachedName };
       ws.getCell(row, 9).value = { formula: `IF(H${row}=$${colL(WCOL)}${row},"","Changed: was "&IF($${colL(WCOL)}${row}="","(none)",$${colL(WCOL)}${row})&", now "&IF(H${row}="","(none)",H${row}))`, result: '' };
       ws.getCell(row, 10).value = (ctx.notes[k] || []).map((n) => n.text).join('; ') || null;
       ws.getCell(row, 11).value = rowSpan(ctx.off, k);
@@ -317,7 +329,7 @@
     const memberTotalCells = realMembers.map((m) => `${colL(TCOL)}${rowsOfMember[m.id].first}`);
     const cnt0 = (f) => lecs.filter(f).length;
     const assignedNow = realMembers.reduce((a, m) => a + sectionsOf(m.id).filter((k) => secs[k].counts).length, 0);
-    const cachedSt = (s) => { const a = assign[s.key]; return a && memberName[a] && a !== 'PT' && a !== 'HOLD' ? 'A' : a === 'PT' ? 'P' : a === 'HOLD' ? 'H' : (s.cat === 'none' || s.cat === 'asneeded') ? 'N' : 'U'; };
+    const cachedSt = (s) => { const a = assign[s.key]; return realIds.has(a) ? 'A' : a === 'PT' ? 'P' : a === 'HOLD' ? 'H' : (s.cat === 'none' || s.cat === 'asneeded') ? 'N' : 'U'; };
     const sums = [
       [`Sections in the ${ctx.off.sheetName} sheet (lectures)`, lecs.length],
       ['Assigned to members', { formula: `COUNTIF(${GS},"Assigned*")`, result: cnt0((s) => cachedSt(s) === 'A') }],
@@ -368,7 +380,8 @@
       const cand = Object.values(secs).filter((s) => (h === 'nt' ? (s.noTime || (s.needsTime && s.hour == null)) : (s.hour === h && !s.noTime))).map((s) => (s.noTime ? s.key : lLabel(s.key)));
       const n = Math.max(1, cand.length), lastR = 1 + n;
       lists.getCell(1, cC).value = `Cand_${tag}`; lists.getCell(1, rC).value = `Rank_${tag}`; lists.getCell(1, kC).value = `Lec_${tag}`;
-      const free = cand.filter((k) => !Object.keys(placed).some((pk) => (secs[pk].noTime ? pk : lLabel(pk)) === k));
+      // sections in the Not assigned block are offered too (that block is outside Grid)
+      const free = cand.filter((k) => !Object.keys(placed).some((pk) => placed[pk].row >= gridFirst && (secs[pk].noTime ? pk : lLabel(pk)) === k));
       for (let j = 0; j < n; j++) {
         const row = 2 + j;
         lists.getCell(row, cC).value = cand[j] || null;
@@ -399,7 +412,7 @@
       let st, name = '', red = false;
       if (a && real.has(a)) { st = s.counts ? 'Assigned' : 'Assigned (counted as hours)'; name = memberName[a]; }
       else if (a === 'PT') st = 'Part-timer';
-      else if (a === 'HOLD' || s.cat === 'onhold') st = 'ON-Hold';
+      else if (a === 'HOLD' || s.cat === 'onhold') { st = 'ON-Hold'; name = 'ON-HOLD'; }
       else if (s.cat === 'parttime') st = 'Part-timer';
       else if (s.cat === 'none' || s.cat === 'asneeded') st = 'Not assigned to IS';
       else { st = 'Unassigned'; red = true; }
@@ -444,10 +457,10 @@
       const s = ctx.secs[lk];
       const nameCell = ws.getCell(row.excelRow, instrCol);
       const cr = link && link.chkRow[lk];
-      const nm = st.st.startsWith('Assigned') && !st.red ? st.name : '';
+      const nm = (st.st.startsWith('Assigned') && !st.red) || st.st === 'ON-Hold' ? st.name : '';
       const sc = ws.getCell(row.excelRow, lastSrcCol + 1);
       if (cr) {
-        nameCell.value = { formula: `IF(LEFT(${link.SH}!$G$${cr},8)="Assigned",${link.SH}!$H$${cr},"")`, result: nm };
+        nameCell.value = { formula: `IF(OR(LEFT(${link.SH}!$G$${cr},8)="Assigned",${link.SH}!$G$${cr}="ON-Hold"),${link.SH}!$H$${cr},"")`, result: nm };
         sc.value = { formula: `${link.SH}!$G$${cr}`, result: st.st.replace(' – conflict', '') };
       } else { nameCell.value = nm || null; sc.value = st.st; }
       sc.font = { name: FONT, size: 10, bold: true };
