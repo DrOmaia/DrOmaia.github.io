@@ -757,7 +757,7 @@
       return `<li><span><b>${esc(s.key)}</b> → ${hl(s.hour)} <span class="muted">(${s.officialHour != null ? hl(s.officialHour) : `${esc(t('noTime'))} · ${esc(t('reqSet'))}`})</span> · ${esc(nameOf(assign[s.key] || 'NA'))}<br><span class="small muted">${esc(t('freeRooms'))}: ${fr.map((g) => `${g.days.map((d) => E.DAY_NAMES[d]).join(' ')}: ${g.rooms.length ? g.rooms.map(E.shortRoom).join(' / ') : t('noFree')}`).join(' | ')}</span></span></li>`;
     });
     return `<div class="page-head"><div><h1>${esc(t('propTitle'))}</h1><p>${esc(t('rebuildHint'))}</p></div>
-      <div class="row"><button class="btn" type="button" data-act="undo" ${ui.undo.length ? `title="${esc(t('undoTip', t(ui.undo[ui.undo.length - 1].key, ...ui.undo[ui.undo.length - 1].args)))}"` : 'disabled'}>↶ ${esc(t('undo'))}</button>${moved.size ? `<button class="btn" type="button" data-act="refAll" title="${esc(t('refAllTip'))}">↺ ${esc(t('refAll', moved.size))}</button>` : ''}<button class="btn" type="button" data-act="print">${esc(t('printBtn'))}</button><button class="btn primary" type="button" data-act="rebuild" ${ui.building ? 'disabled' : ''}>${esc(ui.building ? t('building') : t('rebuild'))}</button></div></div>
+      <div class="row"><button class="btn" type="button" data-act="undo" ${ui.undo.length ? `title="${esc(t('undoTip', t(ui.undo[ui.undo.length - 1].key, ...ui.undo[ui.undo.length - 1].args)))}"` : 'disabled'}>↶ ${esc(t('undo'))}</button>${moved.size ? `<button class="btn" type="button" data-act="refAll" title="${esc(t('refAllTip'))}">↺ ${esc(t('refAll', moved.size))}</button>` : ''}<button class="btn" type="button" data-act="toChanges">✉ ${esc(t('chgBtn', changeLines().length))}</button><button class="btn" type="button" data-act="print">${esc(t('printBtn'))}</button><button class="btn primary" type="button" data-act="rebuild" ${ui.building ? 'disabled' : ''}>${esc(ui.building ? t('building') : t('rebuild'))}</button></div></div>
     <div class="stats">
       ${S.built ? healthCard(hh, delta) : ''}
       <div class="stat ${counted !== reqTotal ? 'warn' : 'good'}"><b>${counted} / ${reqTotal}</b>${esc(t('sAssigned'))}</div>
@@ -1187,17 +1187,25 @@
     if (!R.off) return [];
     const { secs, assign } = snapshot();
     const base = sentBase();
-    const out = [];
-    S.members.forEach((m) => {
-      Object.keys(assign).filter((k) => assign[k] === m.id && (base[k] || '') !== m.id)
-        .sort((a, b) => (secs[a].hour == null ? 99 : secs[a].hour) - (secs[b].hour == null ? 99 : secs[b].hour) || a.localeCompare(b))
-        .forEach((k) => {
-          const s = secs[k];
-          const nums = [s.sec].concat(s.comp ? [s.comp.split('-').pop()] : []).join('/');
-          out.push(s.hour == null ? `Please reassign ${s.course} section ${nums} to ${m.name}` : `Please reassign ${s.course} at ${ampm(s.hour)} section${s.comp ? 's' : ''} ${nums} to ${m.name}`);
-        });
-    });
-    return out.map((x, i) => `${i + 1}- ${x}`);
+    // sections with no time in the official file: the time she wants, or ON HOLD (since the last version sent)
+    const bHour = (k) => (S.sent && S.sent.hours && S.sent.hours[k] != null ? S.sent.hours[k] : null);
+    const bHold = (k) => !!(S.sent && S.sent.hold && S.sent.hold[k]);
+    const line = (k) => {
+      const s = secs[k], cur = assign[k], m = memberById(cur);
+      const nums = [s.sec].concat(s.comp ? [s.comp.split('-').pop()] : []).join('/');
+      const sec = `${s.course} section${s.comp ? 's' : ''} ${nums}`;
+      if (freeTime(k, secs)) {
+        if (cur === 'HOLD') return bHold(k) ? '' : `Please put ${sec} ON HOLD`;
+        const newTime = s.hour != null && s.hour !== bHour(k);
+        if (m && newTime) return `Please set ${sec} at ${ampm(s.hour)} and assign to ${m.name}`;
+        if (!m && newTime) return `Please set ${sec} at ${ampm(s.hour)}`;
+      }
+      if (!m || (base[k] || '') === cur) return '';
+      return s.hour == null ? `Please reassign ${s.course} section ${nums} to ${m.name}` : `Please reassign ${s.course} at ${ampm(s.hour)} section${s.comp ? 's' : ''} ${nums} to ${m.name}`;
+    };
+    const order = (k) => { const i = S.members.findIndex((m) => m.id === assign[k]); return i < 0 ? 999 : i; };
+    return R.off.lectures.filter((k) => secs[k]).sort((a, b) => order(a) - order(b) || (secs[a].hour == null ? 99 : secs[a].hour) - (secs[b].hour == null ? 99 : secs[b].hour) || a.localeCompare(b))
+      .map(line).filter(Boolean).map((x, i) => `${i + 1}- ${x}`);
   }
   function viewExport() {
     const { ev } = snapshot();
@@ -1218,9 +1226,13 @@
     </div>`;
   }
   function markSent() {
-    const { assign } = snapshot();
-    const map = {}; R.off.lectures.forEach((k) => { map[k] = memberById(assign[k]) ? assign[k] : ''; });
-    S.sent = { at: new Date().toISOString(), map };
+    const { secs, assign } = snapshot();
+    const map = {}, hours = {}, hold = {};
+    R.off.lectures.forEach((k) => {
+      map[k] = memberById(assign[k]) ? assign[k] : '';
+      if (secs[k] && freeTime(k, secs)) { hours[k] = secs[k].hour; hold[k] = assign[k] === 'HOLD'; }
+    });
+    S.sent = { at: new Date().toISOString(), map, hours, hold };
   }
   async function copyText(text) {
     try { await navigator.clipboard.writeText(text); return true; } catch (e) { /* fall back below */ }
@@ -1411,6 +1423,7 @@
       }
       case 'lock': { remember('uLock', nameOf(d.id)); if (isLocked(d.id)) delete S.decisions[d.id]; else S.decisions[d.id] = 'locked'; persist(); render(); break; }
       case 'copyChanges': { const ok = await copyText(changeLines().join('\n')); toast(t(ok ? 'copied' : 'copyFail')); break; }
+      case 'toChanges': S.step = 5; persist(); render(); setTimeout(() => { const c = main.querySelector('.chg'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 0); break;
       case 'markSent': markSent(); persist(); render(); toast(t('sentDone')); break;
       case 'excel': try { await exportExcel(); } catch (e) { console.error(e); toast('Excel: ' + e.message); } break;
       case 'saveProject': saveProject(); break;
