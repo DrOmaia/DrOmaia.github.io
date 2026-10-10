@@ -985,22 +985,26 @@
         const sc = why.length * 2 - (res.warn ? 1 : 0);
         if (sc > bestScore) { bestScore = sc; best = { td, why }; }
       }
-      if (drag.h === 'nt' || !same) return; // No time: dropping always adds, never swaps; another hour: no swap
+      if (drag.h === 'nt' || !same || addOnly(to)) return; // No time, Not assigned, ON-HOLD: dropping always adds, never swaps; another hour: no swap
       td.querySelectorAll('.cell[data-key]').forEach((c) => {
-        const rs = dropCheck(drag.key, drag.from, to, c.dataset.key, { snap });
+        const rs = dropCheck(drag.key, swapBack(drag.from), to, c.dataset.key, { snap });
         drag.res['s|' + c.dataset.key] = Object.assign({ to }, rs); c.classList.add(rs.ok ? 'sw-ok' : 'sw-no');
       });
     });
     if (best) { best.td.classList.add('dz-best'); drag.res[`m|${best.td.dataset.mid}|${best.td.dataset.h}`].best = best.why; }
     moveDrag(x, y); autoScroll();
   }
+  /** Rows that take any number of sections at the same hour: dropping there always adds. */
+  const addOnly = (mid) => mid === 'NA' || mid === 'HOLD';
+  /** Where the member's section goes when one is dropped on it: from ON-HOLD it goes to Not assigned, otherwise a swap. */
+  const swapBack = (from) => (from === 'HOLD' ? 'NA' : from);
   function dropTarget(x, y) {
     const el = document.elementFromPoint(x, y); if (!el || !el.closest) return null;
     const td = el.closest('table.tt td.slot'); if (!td) return null;
     const h = td.dataset.h;
     if (h !== drag.h && !drag.free) return { none: true, why: t('whyHour') };
     if (td.dataset.mid === drag.from && h === drag.h) return null;
-    const c = drag.h === 'nt' || h !== drag.h ? null : el.closest('.cell[data-key]');
+    const c = drag.h === 'nt' || h !== drag.h || addOnly(td.dataset.mid) ? null : el.closest('.cell[data-key]');
     if (c && c.dataset.key !== drag.key) return { el: c, td, swap: c.dataset.key, to: td.dataset.mid, res: drag.res['s|' + c.dataset.key] };
     return { el: td, td, to: td.dataset.mid, h, res: drag.res[`m|${td.dataset.mid}|${h}`] };
   }
@@ -1016,7 +1020,7 @@
     else if (tg && tg.res) {
       if (!tg.res.ok) { text = tg.res.why || t('whyHour'); cls = 'no'; }
       else {
-        text = tg.swap ? t('dropSwap', drag.key, tg.swap, nameOf(drag.from), nameOf(tg.to)) : tg.h !== drag.h ? t('dropTime', drag.key, nameOf(tg.to), tg.h === 'nt' ? t('noTime') : hl(+tg.h)) : t('dropMove', drag.key, nameOf(tg.to));
+        text = tg.swap ? t('dropSwap', drag.key, tg.swap, nameOf(swapBack(drag.from)), nameOf(tg.to)) : tg.h !== drag.h ? t('dropTime', drag.key, nameOf(tg.to), tg.h === 'nt' ? t('noTime') : hl(+tg.h)) : t('dropMove', drag.key, nameOf(tg.to));
         if (tg.res.warn) { text += ' — ' + tg.res.warn; cls = 'warn'; } else cls = 'ok';
         if (tg.res.best && tg.res.best.length) { text = '★ ' + text + ' — ' + t('bestIs', tg.res.best.join(t('sep'))); cls += ' best'; }
       }
@@ -1043,7 +1047,7 @@
     } else if (tg.swap) {
       remember('uSwap', d.key, tg.swap);
       putSection(d.key, tg.to);
-      putSection(tg.swap, d.from);
+      putSection(tg.swap, swapBack(d.from));
       toast(t('swapDone', d.key, tg.swap));
     } else {
       remember('uDrag', d.key, nameOf(tg.to));
