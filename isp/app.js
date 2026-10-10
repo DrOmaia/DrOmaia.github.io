@@ -1361,20 +1361,10 @@
   async function exportExcel() {
     toast(t('exporting'));
     const { secs, assign, ev } = snapshot();
-    const cur = currentFor();
-    const memberNotes = {};
-    S.members.forEach((m) => {
-      const lines = [];
-      if (cur[m.id] && cur[m.id].length) lines.push(`Current term: ${cur[m.id].map((x) => `${x.course}${x.hour ? ' ' + hl(x.hour) : ''}`).join(', ')}`);
-      const pr = (m.prefs || []).filter(Boolean); if (pr.length) lines.push(`Preferences: ${pr.join(', ')}`);
-      if (m.prefTime && m.prefTime !== 'any') lines.push(`Preferred time: ${m.prefTime === 'am' ? 'Morning' : 'Afternoon'}`);
-      if (m.comment) lines.push(`Comment: ${m.comment}`);
-      memberNotes[m.id] = lines;
-    });
     const members = [{ id: 'NA', name: 'Not assigned', pseudo: true }].concat(S.members, [{ id: 'PT', name: 'Part-timers', pseudo: true }, { id: 'HOLD', name: 'ON-HOLD', pseudo: true }]);
     const grid = Object.assign({}, assign);
     Object.values(secs).forEach((s) => { if (!grid[s.key] && s.cat === 'required') grid[s.key] = 'NA'; }); // the Not assigned block at the top
-    const wb = await X.build(window.ExcelJS, { side: S.side, term: S.term, members, secs, assign: grid, off: R.off, notes: R.notes, msc: S.msc, decisions: S.decisions, officialWorkbook: R.wb.official, issues: ev.issues, per: ev.per, memberNotes, generated: new Date() });
+    const wb = await X.build(window.ExcelJS, { side: S.side, term: S.term, members, secs, assign: grid, off: R.off, notes: R.notes, msc: S.msc, decisions: S.decisions, officialWorkbook: R.wb.official, issues: ev.issues, per: ev.per, generated: new Date() });
     const buf = await X.toBuffer(wb, window.JSZip);
     download(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `${fileBase()} timetable.xlsx`);
   }
