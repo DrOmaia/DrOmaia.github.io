@@ -108,6 +108,10 @@ section, lets her adjust it by drag and drop, and produces an Excel file for reg
    Drag a section to another member at the same hour (swap by dropping on a section), click a section for its menu
    (To Not assigned · Change time · Back to saved place), click an empty cell for the sections that may go there,
    🔒 Lock a member, ↶ Undo, Propose again, Print (clean print), change list for registration under the board.
+   **Phone / tablet**: tap a section (it is picked, allowed places light up, a bar shows ☰ Menu / ✕ Cancel), then tap
+   the new place (same rules as dragging; a locked place shows the reason and the section stays picked). Below 700px
+   the board is compact (narrow sticky names, sticky hours, scroll inside the grid); Settings shows one card per
+   member; no page scrolls sideways.
 5. **Download** – Excel file, project file (save / next term), and the change list / email for registration.
 
 ## 3. Rules the code enforces (business rules)

@@ -87,6 +87,11 @@ the check table and Is Reg.
     Not in Is Reg or the change list. Shown when printing the proposal and in the clean Excel tab (purple, wider No time
     column, q). Test `isp/tests/16_grad.js`. (p, q)
 
+30. **Phone use**: two taps to move (tap a section → allowed places light up → tap the new place; bar with Menu /
+    Cancel; locked place shows the reason and keeps the section picked). Compact board below 700px (narrow sticky
+    names, sticky hours row, icon-only Lock, scroll inside the grid, bigger menu buttons); Settings members as cards;
+    Files and Download fit the screen. Test `isp/tests/17_phone_taps.js`. (r, s)
+
 Testing: Chromium (Playwright) with synthetic files in the male-file layout (male and female projects);
 LibreOffice recalculation 0 formula errors. Not yet tested with the real `262 sechd/male/` files.
-Cache tag ?v=20261010q.
+Cache tag ?v=20261010s.

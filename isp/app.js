@@ -644,10 +644,10 @@
       const main = `<tr class="${open ? 'is-open' : ''}">
         <td class="idx">${i + 1}</td>
         <td class="nmcell" dir="ltr">${esc(m.name)}</td>
-        <td class="c"><input class="input num ${m.required === '' ? 'empty' : ''}" type="number" min="0" max="12" step="1" inputmode="numeric" value="${esc(m.required)}" data-chg="mf" data-id="${m.id}" data-field="required" aria-label="${esc(t('hSections'))}"></td>
-        <td class="c">${hoursSelect(m, 'coop', 3, t('hCoop'))}</td>
-        <td class="c">${hoursSelect(m, 'senior', 6, t('hSenior'))}</td>
-        <td class="c"><select class="input pt ${m.prefTime && m.prefTime !== 'any' ? 'set' : ''}" data-chg="mf" data-id="${m.id}" data-field="prefTime" aria-label="${esc(t('prefTime'))}">${['any', 'am', 'pm'].map((v) => `<option value="${v}" ${(m.prefTime || 'any') === v ? 'selected' : ''}>${esc(t(v === 'any' ? 'anyTime' : v))}</option>`).join('')}</select></td>
+        <td class="c" data-lbl="${esc(t('hSections'))}"><input class="input num ${m.required === '' ? 'empty' : ''}" type="number" min="0" max="12" step="1" inputmode="numeric" value="${esc(m.required)}" data-chg="mf" data-id="${m.id}" data-field="required" aria-label="${esc(t('hSections'))}"></td>
+        <td class="c" data-lbl="COOP">${hoursSelect(m, 'coop', 3, t('hCoop'))}</td>
+        <td class="c" data-lbl="Senior">${hoursSelect(m, 'senior', 6, t('hSenior'))}</td>
+        <td class="c" data-lbl="${esc(t('prefTime'))}"><select class="input pt ${m.prefTime && m.prefTime !== 'any' ? 'set' : ''}" data-chg="mf" data-id="${m.id}" data-field="prefTime" aria-label="${esc(t('prefTime'))}">${['any', 'am', 'pm'].map((v) => `<option value="${v}" ${(m.prefTime || 'any') === v ? 'selected' : ''}>${esc(t(v === 'any' ? 'anyTime' : v))}</option>`).join('')}</select></td>
         <td class="chips">${memberChips(m)}</td>
         <td class="acts">
           <button class="btn small ${open ? 'primary' : ''}" type="button" data-act="mOpen" data-id="${m.id}" aria-expanded="${open}">${esc(open ? t('closeLimits') : t('editLimits'))}</button>
@@ -767,7 +767,7 @@
         const w = wishesOf(m); if (!w.length) return '';
         const mine = new Set(keys.map((k) => secs[k].course)); const got = w.filter((c) => mine.has(c)).length;
         return `<small class="wishes ${got ? 'got' : ''}" dir="${S.lang === 'ar' ? 'rtl' : 'ltr'}" title="${esc(t('wishTip'))}">${esc(t('wishes', got, w.length))}</small>`;
-      })()}<div class="dec no-print" dir="${S.lang === 'ar' ? 'rtl' : 'ltr'}"><button type="button" class="lockbtn ${locked ? 'on' : ''}" data-act="lock" data-id="${m.id}" aria-pressed="${locked}" title="${esc(t(locked ? 'unlockTip' : 'lockTip'))}">🔒 ${esc(t('lock'))}</button></div>`;
+      })()}<div class="dec no-print" dir="${S.lang === 'ar' ? 'rtl' : 'ltr'}"><button type="button" class="lockbtn ${locked ? 'on' : ''}" data-act="lock" data-id="${m.id}" aria-pressed="${locked}" title="${esc(t(locked ? 'unlockTip' : 'lockTip'))}" aria-label="${esc(t('lock'))}">🔒 <span class="lbl">${esc(t('lock'))}</span></button></div>`;
       return `<tr data-mid="${m.id}" class="${rowCls}">
         <td class="name" dir="ltr">${nameHtml}</td>
         ${E.HOURS.slice(0, 4).map(slot).join('')}<td class="brk"></td>${E.HOURS.slice(4).map(slot).join('')}
@@ -994,18 +994,21 @@
   }
   let pend = null, drag = null;
   const dragTip = () => { let el = document.getElementById('dragTip'); if (!el) { el = document.createElement('div'); el.id = 'dragTip'; el.className = 'drag-tip'; el.hidden = true; document.body.appendChild(el); } return el; };
-  function startDrag(x, y) {
+  function startDrag(x, y, pick) {
     if (!pend) return;
     closePop(); hideCard();
-    drag = Object.assign({}, pend, { over: null, res: {} });
+    drag = Object.assign({}, pend, { over: null, res: {}, pick: !!pick });
     if (pend.timer) clearTimeout(pend.timer);
     pend = null;
     const src = drag.cell; const r = src.getBoundingClientRect();
-    const g = src.cloneNode(true); g.classList.add('drag-ghost'); g.classList.remove('flash', 'hit', 'dim'); g.style.width = r.width + 'px';
-    document.body.appendChild(g); drag.ghost = g; drag.dx = x - r.left; drag.dy = y - r.top;
+    if (!pick) {
+      const g = src.cloneNode(true); g.classList.add('drag-ghost'); g.classList.remove('flash', 'hit', 'dim'); g.style.width = r.width + 'px';
+      document.body.appendChild(g); drag.ghost = g; drag.dx = x - r.left; drag.dy = y - r.top;
+    }
     src.classList.add('drag-src'); document.body.classList.add('dragging');
     const table = main.querySelector('table.tt'); table.classList.add('dragging');
-    if (drag.grad) { markGradTargets(table); moveDrag(x, y); autoScroll(); return; }
+    const go = () => { if (pick) showPickBar(); else { moveDrag(x, y); autoScroll(); } };
+    if (drag.grad) { markGradTargets(table); go(); return; }
     // mark every possible target in the same hour column (any hour for a section with no official time)
     const snap = snapshot(); const { secs: sx0, assign: as0 } = snap; const sec = sx0[drag.key];
     drag.free = freeTime(drag.key, sx0);
@@ -1035,7 +1038,32 @@
       });
     });
     if (best) { best.td.classList.add('dz-best'); drag.res[`m|${best.td.dataset.mid}|${best.td.dataset.h}`].best = best.why; }
-    moveDrag(x, y); autoScroll();
+    go();
+  }
+  // ---- two taps (phone / tablet): tap a section, the allowed places light up, tap the new place ----
+  function startPick(cell) {
+    const td = cell.closest('table.tt td.slot'); if (!td || isLocked(td.dataset.mid)) return false;
+    pend = { key: cell.dataset.key || 'Graduate Studies', grad: cell.dataset.grad || null, from: td.dataset.mid, h: td.dataset.h, cell };
+    startDrag(0, 0, true); return true;
+  }
+  function pickBar() { let el = document.getElementById('pickBar'); if (!el) { el = document.createElement('div'); el.id = 'pickBar'; el.className = 'pick-bar no-print'; el.hidden = true; document.body.appendChild(el); } return el; }
+  function showPickBar() {
+    const el = pickBar(); el.dir = S.lang === 'ar' ? 'rtl' : 'ltr';
+    el.innerHTML = `<span>${esc(t('pickHint', drag.key))}</span>${drag.grad ? '' : `<button type="button" class="btn small" data-pick="menu">☰ ${esc(t('pickMenu'))}</button>`}<button type="button" class="btn small" data-pick="cancel">✕ ${esc(t('pickCancel'))}</button>`;
+    el.hidden = false;
+  }
+  /** A tap while a section is picked: move it there, explain why not, or cancel. */
+  function pickTap(ev) {
+    const b = ev.target.closest('#pickBar [data-pick]');
+    if (ev.target.closest('#pickBar')) {
+      if (b && b.dataset.pick === 'menu') { const c = drag.cell; cleanDrag(); ui.noClick = false; if (c.isConnected) secPop(c); }
+      else if (b) { cleanDrag(); ui.noClick = false; }
+      return;
+    }
+    const tg = dropTarget(ev.clientX, ev.clientY);
+    if (!tg || tg.none && !ev.target.closest('table.tt')) { cleanDrag(); ui.noClick = false; return; }
+    if (tg.none || !tg.res || !tg.res.ok) { toast((tg.res && tg.res.why) || tg.why || t('whyHour')); return; }
+    endDrag(ev.clientX, ev.clientY); ui.noClick = false;
   }
   /** Rows that take any number of sections at the same hour: dropping there always adds. */
   const addOnly = (mid) => mid === 'NA' || mid === 'HOLD';
@@ -1135,6 +1163,7 @@
     if (!drag) return;
     if (drag.ghost) drag.ghost.remove();
     if (drag.cell) drag.cell.classList.remove('drag-src');
+    if (drag.pick) pickBar().hidden = true;
     document.body.classList.remove('dragging');
     main.querySelectorAll('.dz-ok, .dz-warn, .dz-no, .dz-over, .dz-best, .sw-ok, .sw-no, table.tt.dragging').forEach((e) => e.classList.remove('dz-ok', 'dz-warn', 'dz-no', 'dz-over', 'dz-best', 'sw-ok', 'sw-no', 'dragging'));
     dragTip().hidden = true;
@@ -1142,6 +1171,7 @@
     ui.noClick = true; setTimeout(() => { ui.noClick = false; }, 60);
   }
   main.addEventListener('pointerdown', (ev) => {
+    ui.touch = ev.pointerType === 'touch' || ev.pointerType === 'pen';
     if (S.step !== 4 || ui.view || ev.button > 0 || drag) return;
     const cell = ev.target.closest('.cell[data-key], .cell[data-grad]'); if (!cell) return;
     const td = cell.closest('table.tt td.slot'); if (!td) return;
@@ -1155,11 +1185,11 @@
       if (pend.type === 'touch') { if (dist > 10) { clearTimeout(pend.timer); pend = null; } }
       else if (dist > 6) startDrag(ev.clientX, ev.clientY);
     }
-    if (drag) { ev.preventDefault(); moveDrag(ev.clientX, ev.clientY); }
+    if (drag && !drag.pick) { ev.preventDefault(); moveDrag(ev.clientX, ev.clientY); }
   });
-  document.addEventListener('pointerup', (ev) => { if (pend && pend.timer) clearTimeout(pend.timer); pend = null; if (drag) endDrag(ev.clientX, ev.clientY); });
-  document.addEventListener('pointercancel', () => { if (pend && pend.timer) clearTimeout(pend.timer); pend = null; cleanDrag(); });
-  document.addEventListener('touchmove', (ev) => { if (drag) ev.preventDefault(); }, { passive: false });
+  document.addEventListener('pointerup', (ev) => { if (pend && pend.timer) clearTimeout(pend.timer); pend = null; if (drag && !drag.pick) endDrag(ev.clientX, ev.clientY); });
+  document.addEventListener('pointercancel', () => { if (pend && pend.timer) clearTimeout(pend.timer); pend = null; if (drag && !drag.pick) cleanDrag(); });
+  document.addEventListener('touchmove', (ev) => { if (drag && !drag.pick) ev.preventDefault(); }, { passive: false });
   document.addEventListener('contextmenu', (ev) => { if (drag || (pend && pend.type === 'touch')) ev.preventDefault(); });
 
   /** Scroll to a member's cells (or the member's row) and make them flash. */
@@ -1416,7 +1446,10 @@
   }
 
   document.addEventListener('click', async (ev) => {
+    if (drag && drag.pick) { pickTap(ev); return; }
     if (ui.noClick) { ui.noClick = false; return; }
+    // touch: a tap on a section picks it (two taps to move)
+    if (ui.touch && S.step === 4 && !ui.view) { const c = ev.target.closest('table.tt .cell[data-key], table.tt .cell[data-grad]'); if (c && startPick(c)) return; }
     const el = ev.target.closest('[data-act]');
     const pop = $('#pop');
     if (!el) { if (!pop.hidden && !ev.target.closest('#pop')) closePop(); if (!ev.target.closest('#mcard')) hideCard(); return; }

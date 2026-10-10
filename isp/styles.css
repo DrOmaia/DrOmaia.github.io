@@ -699,3 +699,71 @@ button.stat.stat-link:hover { border-color: var(--psu-navy); box-shadow: 0 2px 8
 @media print { .notice-bar { display: none !important; } }
 @media print { .tt th.cnt, .tt td.cnt, .tt th.preps, .tt td.preps { display: none !important; } }
 .cell.grad b { white-space: normal; }
+/* two taps (phone / tablet): the picked section and the bar with what to do next */
+.cell.drag-src { outline: 3px solid var(--psu-navy); outline-offset: 1px; }
+.tt.dragging .cell.drag-src { opacity: 1; }
+.pick-bar { position: fixed; left: 8px; right: 8px; bottom: 74px; z-index: 70; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 12px; border-radius: var(--r-md); background: var(--psu-navy); color: #fff; font-size: 15px; font-weight: 600; box-shadow: 0 10px 28px rgba(16, 36, 50, .3); }
+.pick-bar span { flex: 1 1 180px; }
+.pick-bar .btn { background: #fff; color: var(--psu-navy); border-color: #fff; min-height: 40px; }
+/* phone: compact timetable — narrow sticky names, sticky hours, smaller cells, scroll inside the grid */
+@media (max-width: 700px) {
+  .gridwrap { max-height: 72vh; overflow: auto; -webkit-overflow-scrolling: touch; }
+  table.tt { min-width: 0; font-size: 12px; }
+  .tt th { top: 0; font-size: 11.5px; padding: 6px 2px; }
+  .tt th:first-child { position: sticky; left: 0; z-index: 3; }
+  .tt td { height: 54px; padding: 2px; }
+  .tt td.name { min-width: 104px; max-width: 112px; width: 108px; padding: 4px 6px; font-size: 12px; line-height: 1.25; }
+  .tt td.name small.wishes { display: none; }
+  .tt td.name .dec { margin-top: 3px; }
+  .dec .lockbtn { padding: 2px 8px; min-height: 32px; min-width: 38px; }
+  .dec .lockbtn .lbl { display: none; }
+  .tt td.slot { min-width: 82px; width: 82px; }
+  .cell { padding: 3px 2px; min-height: 40px; }
+  .cell b { font-size: 10.5px; }
+  .cell span { font-size: 9.5px; }
+  .tt td.num { min-width: 40px; font-size: 12px; }
+  .tt td.num small { font-size: 10px; }
+  .legend { display: none; }
+  .cbar .cchips { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+  .pop { width: auto !important; left: 8px !important; right: 8px; max-height: 60vh; }
+  .pop .opt { min-height: 44px; }
+  .pop .hours button { min-height: 40px; }
+}
+/* phone: Files, Settings and Download pages without sideways scrolling */
+@media (max-width: 700px) {
+  .top .brand small { display: none; }
+  .top-actions .btn { padding: 6px 10px; font-size: 14px; }
+  .upl { grid-template-columns: 34px 1fr; gap: 10px; }
+  .loaded { flex-wrap: wrap; }
+  table.fac td.acts { white-space: normal; }
+  table.fac .updown .btn { padding: 4px 8px; }
+  .match td:first-child { width: auto; }
+  .match, .match tbody, .match tr, .match td { display: block; width: 100%; }
+  .match td { border: 0; padding: 4px 0; }
+  .match tr { border-bottom: 1px solid var(--line-2); padding: 6px 0; }
+  /* members table → one card per member */
+  .mtable-wrap { overflow: visible; }
+  table.mtable { min-width: 0; }
+  .mtable thead { display: none; }
+  .mtable, .mtable tbody, .mtable tr, .mtable td { display: block; width: auto !important; }
+  .mtable tr:not(.more-row) { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .mtable tr.more-row { border-bottom: 1px solid var(--line); }
+  .mtable td { border: 0 !important; padding: 0 !important; }
+  .mtable td.idx { display: none; }
+  .mtable td.nmcell { grid-column: 1 / -1; font-size: 16px; }
+  .mtable td.c { text-align: start; }
+  .mtable td.c::before { content: attr(data-lbl); display: block; font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+  .mtable td.c .input, .mtable select.pt { width: 100%; }
+  .mtable td.chips, .mtable td.acts { grid-column: 1 / -1; }
+  .mtable td.acts .btn { width: 100%; min-height: 42px; }
+  .more2 { padding: 4px 0 12px; }
+  .chipbox select.res { max-width: 100%; }
+  .exp .btn { width: 100%; }
+}
+@media (max-width: 700px) {
+  .more2 { grid-template-columns: minmax(0, 1fr) !important; }
+  .more2 section { min-width: 0; }
+  .more2 select, .more2 .input { max-width: 100%; }
+  .prefs3 { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) { .more2 .field, .more2 select, .more2 .chipbox { width: 100%; min-width: 0; } .more2 .resrow { max-width: 100%; } }
