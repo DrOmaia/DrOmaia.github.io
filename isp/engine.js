@@ -841,7 +841,6 @@
       if (s.activity === 'L' && s.hour == null) add(L, 'notime', 'No time in the official file');
       s.rows.forEach((r) => {
         if (r.hour === 12) add(L, 'break', `${s.key} meets during the 12:00 break`);
-        if (r.days.includes(5)) add(L, 'thu', `${s.key} meets on Thursday`);
         if (r.activity === 'Lab' && !r.online && r.room && !/CLAB/i.test(r.room)) add(L, 'labroom', `${s.key} lab is in ${r.room.replace(/\s*\[.*\]/, '')}, which is not marked as a computer lab`);
         if (!r.online && r.room && r.hour != null) r.days.forEach((d) => {
           const others = (use[`${d}|${r.hour}|${r.room}`] || []).filter((u) => u.key !== s.key && u.course + u.key !== s.course + s.key);
