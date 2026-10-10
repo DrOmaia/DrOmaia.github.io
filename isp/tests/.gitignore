@@ -1,0 +1,7 @@
+data/
+state*.json
+old.json
+settings.json
+*.xlsx
+*.png
+*.pdf

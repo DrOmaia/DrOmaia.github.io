@@ -1,0 +1,30 @@
+const { chromium } = require('playwright'); const fs = require('fs'); const SP = __dirname;
+const ok = (c, msg) => { console.log((c ? 'PASS ' : 'FAIL ') + msg); if (!c) process.exitCode = 1; };
+(async () => {
+  const b = await chromium.launch(); const page = await b.newPage({ viewport: { width: 1500, height: 2300 } });
+  const errors = []; page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto('http://127.0.0.1:8099/isp/');
+  await page.evaluate((s) => localStorage.setItem('isp-timetable-v1', s), fs.readFileSync(SP + '/state1.json', 'utf8'));
+  await page.reload(); await page.click('[data-act=resumeAuto]'); await page.waitForFunction(() => window.ISPApp.runtime.off);
+  await page.click('[data-act=go][data-step="5"]'); await page.click('[data-act=markSent]');
+  await page.click('[data-act=go][data-step="4"]'); await page.waitForSelector('table.tt tr.na');
+  const K = 'IS311-514';
+  const ids = await page.evaluate(() => Object.fromEntries(window.ISPApp.state.members.map((m) => [m.name.split(' ').pop(), m.id])));
+  const drag = async (toSel) => {
+    const a = await page.locator(`.cell[data-key="${K}"]`).first().boundingBox(); const bb = await page.locator(toSel).first().boundingBox();
+    await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2); await page.mouse.down();
+    await page.mouse.move(a.x + 20, a.y + 20, { steps: 3 }); await page.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2, { steps: 8 }); await page.mouse.up(); await page.waitForTimeout(150);
+  };
+  const lines = async () => { await page.click('[data-act=toChanges]'); await page.waitForTimeout(300); const v = await page.$eval('.chg-text', (e) => e.value).catch(() => ''); await page.click('[data-act=go][data-step="4"]'); await page.waitForSelector('tr.hold'); return v; };
+  ok(/\(0\)/.test(await page.$eval('[data-act=toChanges]', (e) => e.textContent)), 'button on the proposal page shows the count');
+  await drag(`td.slot[data-mid="${ids.Adel}"][data-h="17"]`);
+  let v = await lines(); console.log(v); ok(/Please set IS311 section 514 at 5pm and assign to Mr\. Nasser Adel/.test(v), 'time + member line');
+  await drag('tr.hold td.slot[data-h="9"]');
+  v = await lines(); console.log(v); ok(/\n1- Please put IS311 section 514 ON HOLD\n/.test(v), 'ON HOLD line');
+  await drag('tr.na td.slot[data-h="13"]');
+  v = await lines(); console.log(v); ok(/\n1- Please set IS311 section 514 at 1pm\n/.test(v), 'time only line (not assigned)');
+  await page.click('[data-act=toChanges]'); await page.click('[data-act=markSent]');
+  ok(!(await page.$('.chg-text')), 'after Sent: empty');
+  ok(!errors.length, 'no errors ' + errors.join('|'));
+  await b.close();
+})();
