@@ -65,7 +65,7 @@
     ws.getCell(4, 1).fill = fill('00FF00'); ws.getCell(4, 2).fill = fill('00FF00');
     ws.getCell(4, 2).value = 'Unit load';
     E.HOURS.forEach((h) => { const c = ws.getCell(4, HCOL[h]); c.value = h > 12 ? h - 12 : h; c.numFmt = '0":00"'; });
-    const heads = { [NOTIME]: 'No time', [NCOL]: 'Course load', [OCOL]: 'Classes load', [PCOL]: 'Senior Project\n(hrs)', [QCOL]: 'COOP\n(hrs)', [RCOL]: 'MSc / PhD\n(hrs)', [SCOL]: 'Total Load\n(hrs)', [TCOL]: 'Sections\nassigned' };
+    const heads = { [NOTIME]: 'No time', [NCOL]: 'Course load', [OCOL]: 'Classes load', [PCOL]: 'Senior Project\n(hrs)', [QCOL]: 'COOP\n(hrs)', [RCOL]: 'Graduate\nStudies (hrs)', [SCOL]: 'Total Load\n(hrs)', [TCOL]: 'Sections\nassigned' };
     Object.entries(heads).forEach(([c, v]) => { ws.getCell(4, +c).value = v; if (+c >= NCOL && +c <= SCOL) ws.getCell(4, +c).fill = fill('EAD1DC'); });
     ws.getCell(4, TCOL).fill = fill('DDEBF7');
     for (let c = 2; c <= LAST; c++) { const cell = ws.getCell(4, c); cell.font = { name: FONT, size: 11, bold: true }; cell.alignment = center; cell.border = { top: thin, bottom: med, left: thin, right: thin }; }
@@ -93,7 +93,7 @@
     const naRows = blocks.reduce((a, b) => a + b.pairs.length * 2, 0); // rows of the Not assigned block (outside Grid)
     realMembers.forEach((m) => {
       const L = layout(sectionsOf(m.id));
-      (ctx.msc || []).filter((x) => x.member === m.id).forEach((x) => L.nt.push({ grad: x.program === 'PhD' ? 'PhD' : 'MSc' }));
+      (ctx.msc || []).filter((x) => x.member === m.id).forEach((x) => L.nt.push({ grad: 'Graduate Studies' }));
       while (L.pairs.length * 2 < L.nt.length) L.pairs.push({});
       blocks.push({ m, ...L });
     });
@@ -236,7 +236,7 @@
     const G0 = `C${gridFirst}`;
     const keyOf = `LEFT(${G0},FIND(" ",${G0}&" ")-1)`;
     ws.addConditionalFormatting({ ref: `${G0}:${colL(NOTIME)}${lastGrid}`, rules: [
-      { type: 'expression', priority: 1, formulae: [`AND(${isL(G0)},LEFT(${G0},3)<>"MSc",LEFT(${G0},3)<>"PhD",COUNTIF(${gridAbs},${G0})>1)`], style: { fill: fill('FF0000'), font: { color: { argb: 'FFFFFFFF' }, bold: true } } },
+      { type: 'expression', priority: 1, formulae: [`AND(${isL(G0)},LEFT(${G0},3)<>"MSc",LEFT(${G0},3)<>"PhD",LEFT(${G0},8)<>"Graduate",COUNTIF(${gridAbs},${G0})>1)`], style: { fill: fill('FF0000'), font: { color: { argb: 'FFFFFFFF' }, bold: true } } },
       { type: 'expression', priority: 2, formulae: [`AND(${isL(G0)},COUNTIFS($A$${chkFirst}:$A$${chkLast},${keyOf},$G$${chkFirst}:$G$${chkLast},"Outside its time")>0)`], style: { fill: fill('FF0000'), font: { color: { argb: 'FFFFFFFF' }, bold: true } } },
     ] });
     // Not assigned block: a section already given to a member in the grid below is greyed and struck through
@@ -377,7 +377,7 @@
     return wb;
   }
 
-  /** Clean timetable for printing / presenting: names, hours, No time, Senior, COOP, MSc/PhD and total load.
+  /** Clean timetable for printing / presenting: names, hours, No time, Senior, COOP, Graduate Studies and total load.
       Every cell is a formula on the detailed sheet, so a change there shows here too. */
   function buildClean(cs, ws, o) {
     const map = { 1: 1 }; for (let c = 3; c <= NOTIME; c++) map[c] = c - 1; // names, hours, No time
@@ -388,7 +388,7 @@
     cs.mergeCells(1, 1, 1, last); cs.getCell(1, 1).value = o.title;
     cs.getCell(1, 1).font = { name: FONT, size: 14, bold: true, color: { argb: 'FF1F4E79' } }; cs.getRow(1).height = 26; cs.getCell(1, 1).alignment = { vertical: 'middle' };
     cs.getRow(2).height = 6;
-    const heads = { 1: 'Member', 12: 'No time', 13: 'Senior\n(hrs)', 14: 'COOP\n(hrs)', 15: 'MSc / PhD\n(hrs)', 16: 'Total Load\n(hrs)' };
+    const heads = { 1: 'Member', 12: 'No time', 13: 'Senior\n(hrs)', 14: 'COOP\n(hrs)', 15: 'Graduate\nStudies (hrs)', 16: 'Total Load\n(hrs)' };
     E.HOURS.forEach((h) => { const c = cs.getCell(3, HCOL[h] - 1); c.value = h > 12 ? h - 12 : h; c.numFmt = '0":00"'; });
     Object.entries(heads).forEach(([c, v]) => { cs.getCell(3, +c).value = v; });
     cs.getRow(3).height = 34;

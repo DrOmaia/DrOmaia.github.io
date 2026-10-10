@@ -14,6 +14,7 @@ node 11_email.js | grep -E "^(PASS|FAIL)"
 node 12_time_requests_card.js
 node 13_print.js
 node 14_excel.js && python3 recalc.py "$PWD/outx.xlsx" "$PWD/outx_recalc.xlsx"
+node 16_grad.js | grep -E "^(PASS|FAIL)"
 node 15_female.js && python3 recalc.py "$PWD/female.xlsx" "$PWD/female_recalc.xlsx"
 echo "== sample data with a section that has no official time (IS311-514)"; node make_data.js
 node 01_build.js | grep -E "errors|cut"

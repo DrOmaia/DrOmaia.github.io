@@ -157,7 +157,7 @@
     return out;
   }
 
-  // ---------------- settings file: members, limits, reserved sections, survey wishes, courses, MSc / PhD ----------------
+  // ---------------- settings file: members, limits, reserved sections, survey wishes, courses, Graduate Studies ----------------
   const SET_FIELDS = ['required', 'coop', 'senior', 'prefTime', 'prefTimeTouched', 'first', 'last', 'allowed', 'res', 'never', 'keepCurrent', 'prefs', 'comment'];
   const pickSet = (x) => Object.fromEntries(SET_FIELDS.filter((f) => x[f] !== undefined).map((f) => [f, JSON.parse(JSON.stringify(x[f]))]));
   function saveSettings() {
@@ -181,7 +181,7 @@
     }
     Object.entries(obj.courses || {}).forEach(([c, v]) => { S.courses[c] = Object.assign({}, S.courses[c], v); S.courseTouched[c] = true; });
     const ids = E.matchNames((obj.msc || []).map((x) => x.member).filter(Boolean), S.members, 0.8);
-    if ((obj.msc || []).length) S.msc = obj.msc.map((x) => ({ id: uid(), member: ids[x.member] ? ids[x.member].id : '', program: x.program || 'MSc', hours: x.hours, counts: x.counts }));
+    if ((obj.msc || []).length) S.msc = obj.msc.map((x) => ({ id: uid(), member: ids[x.member] ? ids[x.member].id : '', program: 'Graduate Studies', hours: x.hours, counts: x.counts }));
     normalize();
     return { n: list.length - skipped.length, skipped };
   }
@@ -237,7 +237,7 @@
   }
 
   // ---------------- undo (proposal edits, kept in memory for this visit) ----------------
-  const UNDO_KEYS = ['assign', 'pins', 'bans', 'proposed', 'autoTime', 'secCat', 'decisions', 'forbidden', 'built'];
+  const UNDO_KEYS = ['assign', 'pins', 'bans', 'proposed', 'autoTime', 'secCat', 'decisions', 'forbidden', 'built', 'msc'];
   // the label is kept as a text key + values so it follows the interface language
   function remember(key, ...args) {
     const snap = {}; UNDO_KEYS.forEach((k) => { snap[k] = S[k]; });
@@ -598,6 +598,13 @@
     const c = dropCheck(k, own, mid, null, { snap });
     return c.ok ? '' : c.why;
   }
+  /** Graduate Studies of a member: No time, counts as one of his sections, hours added to his load. */
+  const gradHrs = (x) => Number(x.hours === '' || x.hours == null ? 3 : x.hours);
+  function gradBox(m) {
+    const mine = S.msc.filter((x) => x.member === m.id);
+    return `<div class="chipbox">${mine.map((x) => `<span class="resrow"><span class="chip">Graduate Studies<button type="button" aria-label="remove" data-act="mscDel" data-id="${x.id}">×</button></span><select class="input res" data-chg="msc" data-id="${x.id}" data-field="hours" aria-label="${esc(t('hours'))}">${[1, 2, 3, 4, 5, 6].map((h) => `<option value="${h}" ${gradHrs(x) === h ? 'selected' : ''}>${esc(t('gradHours', h))}</option>`).join('')}</select></span>`).join('')}
+      <button type="button" class="btn small" data-act="mscAdd" data-id="${m.id}">+ ${esc(t('add'))}</button></div>`;
+  }
   const allowedText = (m) => (m.allowed || []).map((v, i) => ((m.res || [])[i] ? m.res[i] : v)).join(', ');
   function memberChips(m) {
     const c = [];
@@ -606,6 +613,7 @@
     if ((m.allowed || []).length) c.push(t('lcOnly', allowedText(m)));
     if ((m.never || []).length) c.push(t('lcNever', m.never.join(', ')));
     const pr = (m.prefs || []).filter(Boolean); if (pr.length) c.push(t('lcPrefs', pr.join(' › ')));
+    S.msc.filter((x) => x.member === m.id).forEach((x) => c.push(`Graduate Studies · ${t('gradHours', gradHrs(x))}`));
     if (m.keepCurrent === false) c.push(t('lcNoKeep'));
     if (!c.length) return `<span class="muted small">${esc(t('noLimits'))}</span>`;
     return c.map((x) => `<span class="chip">${esc(x)}</span>`).join('');
@@ -653,6 +661,7 @@
         <section class="rule"><h4>${esc(t('gCourses'))}</h4><span class="kind">${esc(t('kindRule'))}</span>
           ${hintField(t('allowed'), t('allowedHint'), chipBox(m, 'allowed'))}
           ${hintField(t('never'), t('hintNever'), chipBox(m, 'never'))}
+          ${hintField(t('grad'), t('gradHint'), gradBox(m))}
           <label class="check"><input type="checkbox" ${m.keepCurrent !== false ? 'checked' : ''} data-chg="mf" data-id="${m.id}" data-field="keepCurrent">${esc(t('keepCurrent'))}</label>
           <span class="hint2">${esc(t('currentCourses'))}: <span dir="ltr">${esc(curTxt || t('noCurrent'))}</span></span>
         </section>
@@ -682,21 +691,11 @@
           <td>${noTime ? `<label class="check"><input type="checkbox" ${cs.counts !== false ? 'checked' : ''} data-chg="ccount" data-code="${c.code}"></label>` : '<span class="muted">✓</span>'}</td></tr>`;
       }).join('')}</tbody></table>`;
   }
-  function viewMsc() {
-    return `<p class="sub">${esc(t('mscText'))}</p>
-    ${S.msc.length ? `<table class="plain msc"><thead><tr><th>${esc(t('member'))}</th><th>${esc(t('program'))}</th><th>${esc(t('hours'))}</th><th></th></tr></thead><tbody>
-    ${S.msc.map((x) => `<tr>
-      <td><select class="input" data-chg="msc" data-id="${x.id}" data-field="member"><option value="">—</option>${S.members.map((m) => `<option value="${m.id}" ${m.id === x.member ? 'selected' : ''}>${esc(m.name)}</option>`).join('')}</select></td>
-      <td><select class="input" data-chg="msc" data-id="${x.id}" data-field="program">${['MSc', 'PhD'].map((p) => `<option value="${p}" ${p === x.program ? 'selected' : ''}>${p}</option>`).join('')}</select></td>
-      <td><select class="input num" data-chg="msc" data-id="${x.id}" data-field="hours">${[1, 2, 3, 4, 5, 6].map((h) => `<option value="${h}" ${Number(x.hours === '' || x.hours == null ? 3 : x.hours) === h ? 'selected' : ''}>${h}</option>`).join('')}</select></td>
-      <td><button class="btn small danger" type="button" data-act="mscDel" data-id="${x.id}">${esc(t('remove'))}</button></td></tr>`).join('')}</tbody></table>` : `<p class="muted">${esc(t('noMsc'))}</p>`}
-    <div class="row" style="margin-top:12px"><button class="btn" type="button" data-act="mscAdd">+ ${esc(t('addMsc'))}</button></div>`;
-  }
   function viewSettings() {
-    const tabs = [['members', t('tabMembers')], ['courses', t('tabCourses')], ['msc', t('tabMsc')]];
+    const tabs = [['members', t('tabMembers')], ['courses', t('tabCourses')]];
     return `<div class="page-head"><div><h1>${esc(t('setTitle'))}</h1></div><div class="row"><button class="btn" type="button" data-act="openSettings">${esc(t('setOpen'))}</button><button class="btn" type="button" data-act="saveSettings" title="${esc(t('setSaveTip'))}">${esc(t('setSave'))}</button></div></div>
     <div class="panel"><div class="tabs" role="tablist">${tabs.map(([k, v]) => `<button type="button" role="tab" class="${ui.tab === k ? 'on' : ''}" data-act="tab" data-tab="${k}">${esc(v)}</button>`).join('')}</div>
-    ${ui.tab === 'courses' ? viewCourses() : ui.tab === 'msc' ? viewMsc() : viewMembers()}</div>`;
+    ${ui.tab === 'courses' ? viewCourses() : viewMembers()}</div>`;
   }
 
   // ---- step 4: proposal ----
@@ -772,7 +771,7 @@
       return `<tr data-mid="${m.id}" class="${rowCls}">
         <td class="name" dir="ltr">${nameHtml}</td>
         ${E.HOURS.slice(0, 4).map(slot).join('')}<td class="brk"></td>${E.HOURS.slice(4).map(slot).join('')}
-        <td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="nt">${nt.map((k) => cellHtml(secs[k], info(k))).join('')}${pseudo ? '' : S.msc.filter((x) => x.member === m.id).map((x) => `<div class="cell grad"><b>${esc(x.program || 'MSc')}</b><span>${esc(t('gradHours', Number(x.hours === '' || x.hours == null ? 3 : x.hours)))}</span></div>`).join('')}</td>
+        <td class="slot" tabindex="0" data-act="cell" data-mid="${m.id}" data-h="nt">${nt.map((k) => cellHtml(secs[k], info(k))).join('')}${(m.id === 'NA' ? S.msc.filter((x) => !memberById(x.member)) : pseudo ? [] : S.msc.filter((x) => x.member === m.id)).map((x) => `<div class="cell grad" data-grad="${esc(x.id)}"><b>Graduate Studies</b><span>${esc(t('gradHours', gradHrs(x)))}</span></div>`).join('')}</td>
         <td class="num">${m.id === 'NA' ? '' : pseudo ? p.load : p.total}${!pseudo && p.total !== p.load ? `<small>${p.load} + ${(p.total - p.load)}</small>` : ''}</td>
         <td class="num cnt ${cntBad ? 'bad' : ''}">${pseudo ? keys.length : `${p.counted} / ${m.required === '' ? '–' : req}`}</td>
         <td class="num preps" title="${esc(t('prepsTip'))}">${pseudo ? '' : p.preps || 0}</td></tr>`;
@@ -896,7 +895,7 @@
     if ((m.allowed || []).length) lim.push(t('lcOnly', allowedText(m)));
     if ((m.never || []).length) lim.push(t('lcNever', m.never.join(', ')));
     if (m.keepCurrent === false) lim.push(t('lcNoKeep'));
-    const grad = S.msc.filter((x) => x.member === mid).map((x) => `${x.program || 'MSc'} · ${t('gradHours', Number(x.hours === '' || x.hours == null ? 3 : x.hours))}`);
+    const grad = S.msc.filter((x) => x.member === mid).map((x) => `Graduate Studies · ${t('gradHours', Number(x.hours === '' || x.hours == null ? 3 : x.hours))}`);
     const req = m.required === '' || m.required == null ? '–' : m.required;
     return `<h4 dir="ltr">${esc(m.name)}</h4>
       <p class="cnow">${esc(t('cardNow', p.counted || 0, req, p.preps || 0, p.total || 0))}</p>
@@ -906,7 +905,7 @@
       ${row(t('comment'), m.comment ? `<span dir="auto">${esc(m.comment)}</span>` : esc(t('noComment')))}
       ${row(t('cardLimits'), lim.length ? esc(lim.join(' · ')) : esc(t('noLimits')))}
       ${(Number(m.coop) || Number(m.senior)) ? row(t('cardHours'), esc(`COOP ${Number(m.coop) || 0} · Senior ${Number(m.senior) || 0}`)) : ''}
-      ${grad.length ? row('MSc / PhD', esc(grad.join(' · '))) : ''}`;
+      ${grad.length ? row(t('grad'), esc(grad.join(' · '))) : ''}`;
   }
   function cardEl() { let c = document.getElementById('mcard'); if (!c) { c = document.createElement('div'); c.id = 'mcard'; c.className = 'mcard'; c.hidden = true; c.setAttribute('role', 'tooltip'); document.body.appendChild(c); } return c; }
   function showCard(el) {
@@ -1006,6 +1005,7 @@
     document.body.appendChild(g); drag.ghost = g; drag.dx = x - r.left; drag.dy = y - r.top;
     src.classList.add('drag-src'); document.body.classList.add('dragging');
     const table = main.querySelector('table.tt'); table.classList.add('dragging');
+    if (drag.grad) { markGradTargets(table); moveDrag(x, y); autoScroll(); return; }
     // mark every possible target in the same hour column (any hour for a section with no official time)
     const snap = snapshot(); const { secs: sx0, assign: as0 } = snap; const sec = sx0[drag.key];
     drag.free = freeTime(drag.key, sx0);
@@ -1041,9 +1041,26 @@
   const addOnly = (mid) => mid === 'NA' || mid === 'HOLD';
   /** Where the member's section goes when one is dropped on it: from ON-HOLD or part-timers it goes to Not assigned, otherwise a swap. */
   const swapBack = (from) => (from === 'HOLD' || from === 'PT' ? 'NA' : from);
+  /** Graduate Studies: up or down to another member's No time cell (or Not assigned); counts as one of his sections. */
+  function markGradTargets(table) {
+    const { ev } = snapshot();
+    table.querySelectorAll('td.slot[data-h="nt"]').forEach((td) => {
+      const to = td.dataset.mid; if (to === drag.from || to === 'PT' || to === 'HOLD') return;
+      let res = { ok: true };
+      const m = memberById(to);
+      if (isLocked(to)) res = { ok: false, why: t('whyLocked', nameOf(to)) };
+      else if (m && m.required !== '' && m.required != null && ((ev.per[to] || {}).counted || 0) + 1 > Number(m.required)) res = { ok: false, why: t('whyCount', m.name, Number(m.required)) };
+      drag.res['g|' + to] = res; td.classList.add(res.ok ? 'dz-ok' : 'dz-no');
+    });
+  }
   function dropTarget(x, y) {
     const el = document.elementFromPoint(x, y); if (!el || !el.closest) return null;
     const td = el.closest('table.tt td.slot'); if (!td) return null;
+    if (drag.grad) {
+      if (td.dataset.h !== 'nt') return { none: true, why: t('whyGradNt') };
+      if (td.dataset.mid === drag.from) return null;
+      return { el: td, td, to: td.dataset.mid, h: 'nt', res: drag.res['g|' + td.dataset.mid] || { ok: false, why: '' } };
+    }
     const h = td.dataset.h;
     if (h !== drag.h && !drag.free) return { none: true, why: t('whyHour') };
     if (td.dataset.mid === drag.from && h === drag.h) return null;
@@ -1083,6 +1100,12 @@
     const d = drag; const tg = d ? dropTarget(x, y) : null;
     cleanDrag();
     if (!d || !tg || !tg.res || !tg.res.ok) { if (tg && tg.res && !tg.res.ok && tg.res.why) toast(tg.res.why); return; }
+    if (d.grad) {
+      const x = S.msc.find((y) => y.id === d.grad); if (!x) return;
+      remember('uDrag', 'Graduate Studies', nameOf(tg.to));
+      x.member = tg.to === 'NA' ? '' : tg.to;
+      toast(t('dropDone', 'Graduate Studies', nameOf(tg.to))); persist(); render(); return;
+    }
     if (tg.h && tg.h !== d.h) { // a section with no official time, put at another hour: a time request
       remember('uTime', d.key);
       setFreeHour(d.key, tg.h === 'nt' ? null : +tg.h, tg.to, d.from);
@@ -1120,10 +1143,10 @@
   }
   main.addEventListener('pointerdown', (ev) => {
     if (S.step !== 4 || ui.view || ev.button > 0 || drag) return;
-    const cell = ev.target.closest('.cell[data-key]'); if (!cell) return;
+    const cell = ev.target.closest('.cell[data-key], .cell[data-grad]'); if (!cell) return;
     const td = cell.closest('table.tt td.slot'); if (!td) return;
     if (isLocked(td.dataset.mid)) return; // a locked member is out of the game
-    pend = { key: cell.dataset.key, from: td.dataset.mid, h: td.dataset.h, x: ev.clientX, y: ev.clientY, type: ev.pointerType, cell };
+    pend = { key: cell.dataset.key || 'Graduate Studies', grad: cell.dataset.grad || null, from: td.dataset.mid, h: td.dataset.h, x: ev.clientX, y: ev.clientY, type: ev.pointerType, cell };
     if (ev.pointerType === 'touch') { const px = ev.clientX, py = ev.clientY; pend.timer = setTimeout(() => startDrag(px, py), 350); }
   });
   document.addEventListener('pointermove', (ev) => {
@@ -1424,7 +1447,7 @@
         else m[d.field] = (m[d.field] || []).filter((v) => v !== d.val);
         persist(); render(); break;
       }
-      case 'mscAdd': S.msc.push({ id: uid(), member: '', program: 'MSc', hours: 3 }); persist(); render(); break;
+      case 'mscAdd': S.msc.push({ id: uid(), member: d.id || '', program: 'Graduate Studies', hours: 3 }); persist(); render(); break;
       case 'mscDel': S.msc = S.msc.filter((x) => x.id !== d.id); persist(); render(); break;
       case 'rebuild': remember('uRebuild'); build(true); break;
       case 'print': window.print(); break;

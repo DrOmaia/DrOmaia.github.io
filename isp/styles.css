@@ -569,7 +569,7 @@ table.plain.msc select.num { width: 80px; }
 .mcard .cv [dir] { display: block; text-align: start; }
 
 /* ---- drag and drop board ---- */
-.tt .cell[data-key] { cursor: grab; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.tt .cell[data-key], .tt .cell[data-grad] { cursor: grab; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 body.dragging, body.dragging * { cursor: grabbing !important; -webkit-user-select: none; user-select: none; }
 .drag-ghost { position: fixed; z-index: 90; margin: 0 !important; pointer-events: none; transform: rotate(-3deg) scale(1.06); box-shadow: 0 14px 30px rgba(16, 36, 50, .28); opacity: .96; }
 .cell.drag-src { opacity: .3; }
@@ -698,3 +698,4 @@ button.stat.stat-link { font: inherit; text-align: start; cursor: pointer; }
 button.stat.stat-link:hover { border-color: var(--psu-navy); box-shadow: 0 2px 8px rgba(16, 36, 50, .12); }
 @media print { .notice-bar { display: none !important; } }
 @media print { .tt th.cnt, .tt td.cnt, .tt th.preps, .tt td.preps { display: none !important; } }
+.cell.grad b { white-space: normal; }
