@@ -464,8 +464,8 @@
         sc.value = { formula: `${link.SH}!$G$${cr}`, result: st.st.replace(' – conflict', '') };
       } else { nameCell.value = nm || null; sc.value = st.st; }
       sc.font = { name: FONT, size: 10, bold: true };
-      const notes = (ctx.notes[lk] || []).map((n) => n.text);
-      if (s && s.proposed) notes.unshift(`Proposed time ${E.hourLabel(s.hour)}${s.officialHour != null ? ` instead of ${E.hourLabel(s.officialHour)}` : ''} (needs registration approval)`);
+      const notes = (ctx.notes[lk] || []).map((n) => n.text).filter((x) => !(s && s.proposed && s.officialHour == null && x === 'No time in the official file'));
+      if (s && s.proposed) notes.unshift(s.officialHour != null ? `Proposed time ${E.hourLabel(s.hour)} instead of ${E.hourLabel(s.officialHour)} (needs registration approval)` : `No time in the official file: request to set this time to ${E.hourLabel(s.hour)}`);
       const nc = ws.getCell(row.excelRow, lastSrcCol + 2);
       nc.value = notes.join('; ') || null; nc.font = { name: FONT, size: 9, color: { argb: 'FF595959' } }; nc.alignment = { wrapText: false, vertical: 'middle' };
     });
@@ -490,7 +490,8 @@
       const fr = E.freeRooms(ctx.off, s.key, s.hour);
       const days = fr.map((g) => `${g.days.map((d) => E.DAY_NAMES[d]).join(' ')}${g.online ? ' (Online)' : ''}`).join(' | ');
       const rooms = fr.filter((g) => !g.online).map((g) => `${g.days.map((d) => E.DAY_NAMES[d]).join(' ')}: ${g.rooms.length ? g.rooms.map(E.shortRoom).join(' or ') : 'no free room found'}`).join(' | ');
-      ws.getRow(r).values = [s.key, s.comp || '', s.name, (status[s.key] && status[s.key].name) || '', s.officialHour != null ? E.hourLabel(s.officialHour) : 'No time', E.hourLabel(s.hour), days, rooms, (ctx.notes[s.key] || []).map((n) => n.text).join('; ')];
+      const note = [s.officialHour == null ? 'No time in the official file: request to set this time' : ''].concat((ctx.notes[s.key] || []).map((n) => n.text).filter((x) => !/^No time in the official file$/.test(x))).filter(Boolean).join('; ');
+      ws.getRow(r).values = [s.key, s.comp || '', s.name, (status[s.key] && status[s.key].name) || '', s.officialHour != null ? E.hourLabel(s.officialHour) : 'No time', E.hourLabel(s.hour), days, rooms, note];
       if (link) ws.getCell(r, 4).value = { formula: `IFERROR(INDEX(${link.SH}!$H$${link.chkFirst}:$H$${link.chkLast},MATCH($A${r},${link.SH}!$A$${link.chkFirst}:$A$${link.chkLast},0)),"")`, result: (status[s.key] && status[s.key].name) || '' };
       ws.getRow(r).eachCell((c) => { c.font = { name: FONT, size: 10 }; c.alignment = { vertical: 'middle', wrapText: true }; });
       r++;

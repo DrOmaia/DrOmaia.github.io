@@ -752,9 +752,9 @@
         items.push(`<li class="${i.type === 'count' ? 'info' : ''}"><button type="button" class="go" data-act="goIssue" data-mid="${esc(i.member)}" data-keys="${esc(keys)}" title="${esc(t('goTip'))}"><span>${esc(issueText(i))}</span><i aria-hidden="true">⌖</i></button></li>`);
       }
     });
-    const reqs = Object.values(secs).filter((s) => s.proposed && assign[s.key]).map((s) => {
+    const reqs = Object.values(secs).filter((s) => s.proposed && (assign[s.key] || !S.autoTime[s.key])).map((s) => {
       const fr = E.freeRooms(R.off, s.key, s.hour).filter((g) => !g.online);
-      return `<li><span><b>${esc(s.key)}</b> → ${hl(s.hour)} <span class="muted">(${s.officialHour != null ? hl(s.officialHour) : t('noTime')})</span> · ${esc(nameOf(assign[s.key]))}<br><span class="small muted">${esc(t('freeRooms'))}: ${fr.map((g) => `${g.days.map((d) => E.DAY_NAMES[d]).join(' ')}: ${g.rooms.length ? g.rooms.map(E.shortRoom).join(' / ') : t('noFree')}`).join(' | ')}</span></span></li>`;
+      return `<li><span><b>${esc(s.key)}</b> → ${hl(s.hour)} <span class="muted">(${s.officialHour != null ? hl(s.officialHour) : `${esc(t('noTime'))} · ${esc(t('reqSet'))}`})</span> · ${esc(nameOf(assign[s.key] || 'NA'))}<br><span class="small muted">${esc(t('freeRooms'))}: ${fr.map((g) => `${g.days.map((d) => E.DAY_NAMES[d]).join(' ')}: ${g.rooms.length ? g.rooms.map(E.shortRoom).join(' / ') : t('noFree')}`).join(' | ')}</span></span></li>`;
     });
     return `<div class="page-head"><div><h1>${esc(t('propTitle'))}</h1><p>${esc(t('rebuildHint'))}</p></div>
       <div class="row"><button class="btn" type="button" data-act="undo" ${ui.undo.length ? `title="${esc(t('undoTip', t(ui.undo[ui.undo.length - 1].key, ...ui.undo[ui.undo.length - 1].args)))}"` : 'disabled'}>↶ ${esc(t('undo'))}</button>${moved.size ? `<button class="btn" type="button" data-act="refAll" title="${esc(t('refAllTip'))}">↺ ${esc(t('refAll', moved.size))}</button>` : ''}<button class="btn" type="button" data-act="print">${esc(t('printBtn'))}</button><button class="btn primary" type="button" data-act="rebuild" ${ui.building ? 'disabled' : ''}>${esc(ui.building ? t('building') : t('rebuild'))}</button></div></div>
@@ -912,7 +912,7 @@
     o = o || {};
     const snap = o.snap || snapshot();
     const { assign, ev } = snap;
-    const secs = o.hour !== undefined && R.off.sections[k] && o.hour !== snap.secs[k].hour ? modelWith(k, o.hour) : snap.secs;
+    const secs = o.secs || (o.hour !== undefined && R.off.sections[k] && o.hour !== snap.secs[k].hour ? modelWith(k, o.hour) : snap.secs);
     const s = secs[k]; if (!s || from === to) return { ok: false, why: '' };
     if (isLocked(from)) return { ok: false, why: t('whyLocked', nameOf(from)) };
     if (isLocked(to)) return { ok: false, why: t('whyLocked', nameOf(to)) };
@@ -921,6 +921,7 @@
     const checkMember = (mid, inKey, outKey) => {
       const m = memberById(mid); if (!m) return null; // Not assigned / part-timers / ON-HOLD: no member rules
       const x = secs[inKey];
+      if (x.needsTime && x.hour == null) return { why: t('whyPickHour') }; // no time in the official file: a member needs an hour
       if (!E.inWindow(m, x.hour)) return { why: t('whyWindow', m.name) };
       const never = (m.never || []).map(E.normCourse).filter(Boolean);
       if (x.noTime ? never.some((c) => c === x.course || c === x.prefix) : !E.memberAllows(m, x)) return { why: t('whyCourse', m.name, x.course) };
@@ -938,6 +939,8 @@
     if (b && b.why) return { ok: false, why: b.why };
     return { ok: true, warn: [a && a.warn, b && b.warn].filter(Boolean).join(' — ') };
   }
+  /** A section with no time in the official file (its course has timed sections): it may go to any hour, as a time request. */
+  function freeTime(k, secs) { const o = R.off && R.off.sections[k]; const s = (secs || model())[k]; return !!(o && s && o.hour == null && !s.noTime); }
   /** Can section k of row mid start at hour h? The member must be free then and the hour inside his allowed hours. */
   function timeOk(k, mid, h, snap) {
     if (isLocked(mid)) return false;
@@ -960,13 +963,19 @@
     document.body.appendChild(g); drag.ghost = g; drag.dx = x - r.left; drag.dy = y - r.top;
     src.classList.add('drag-src'); document.body.classList.add('dragging');
     const table = main.querySelector('table.tt'); table.classList.add('dragging');
-    // mark every possible target in the same hour column
+    // mark every possible target in the same hour column (any hour for a section with no official time)
     const snap = snapshot(); const { secs: sx0, assign: as0 } = snap; const sec = sx0[drag.key];
+    drag.free = freeTime(drag.key, sx0);
+    const secsAt = {}; const secsFor = (h) => secsAt[h] || (secsAt[h] = modelWith(drag.key, h === 'nt' ? null : +h));
     let best = null, bestScore = 0;
-    table.querySelectorAll(`td.slot[data-h="${drag.h}"]`).forEach((td) => {
-      const to = td.dataset.mid; if (to === drag.from) return;
-      const res = dropCheck(drag.key, drag.from, to, null, { snap });
-      drag.res['m|' + to] = res; td.classList.add(res.ok ? (res.warn ? 'dz-warn' : 'dz-ok') : 'dz-no');
+    table.querySelectorAll(drag.free ? 'td.slot' : `td.slot[data-h="${drag.h}"]`).forEach((td) => {
+      const to = td.dataset.mid, h = td.dataset.h, same = h === drag.h;
+      if (to === drag.from && same) return;
+      let res;
+      if (!same && h === 'nt' && memberById(to)) res = { ok: false, why: t('whyPickHour') };
+      else if (to === drag.from) res = !memberById(to) || timeOk(drag.key, to, +h, snap) ? { ok: true } : { ok: false, why: t('whyTime') };
+      else res = dropCheck(drag.key, drag.from, to, null, same ? { snap } : { snap, secs: secsFor(h) });
+      drag.res[`m|${to}|${h}`] = res; td.classList.add(res.ok ? (res.warn ? 'dz-warn' : 'dz-ok') : 'dz-no');
       const m = memberById(to);
       if (res.ok && m) { // how good a home this member is for the section
         const why = [];
@@ -976,23 +985,24 @@
         const sc = why.length * 2 - (res.warn ? 1 : 0);
         if (sc > bestScore) { bestScore = sc; best = { td, why }; }
       }
-      if (drag.h === 'nt') return; // No time: dropping always adds, never swaps
+      if (drag.h === 'nt' || !same) return; // No time: dropping always adds, never swaps; another hour: no swap
       td.querySelectorAll('.cell[data-key]').forEach((c) => {
         const rs = dropCheck(drag.key, drag.from, to, c.dataset.key, { snap });
         drag.res['s|' + c.dataset.key] = Object.assign({ to }, rs); c.classList.add(rs.ok ? 'sw-ok' : 'sw-no');
       });
     });
-    if (best) { best.td.classList.add('dz-best'); drag.res['m|' + best.td.dataset.mid].best = best.why; }
+    if (best) { best.td.classList.add('dz-best'); drag.res[`m|${best.td.dataset.mid}|${best.td.dataset.h}`].best = best.why; }
     moveDrag(x, y); autoScroll();
   }
   function dropTarget(x, y) {
     const el = document.elementFromPoint(x, y); if (!el || !el.closest) return null;
     const td = el.closest('table.tt td.slot'); if (!td) return null;
-    if (td.dataset.h !== drag.h) return { none: true, why: t('whyHour') };
-    if (td.dataset.mid === drag.from) return null;
-    const c = drag.h === 'nt' ? null : el.closest('.cell[data-key]');
+    const h = td.dataset.h;
+    if (h !== drag.h && !drag.free) return { none: true, why: t('whyHour') };
+    if (td.dataset.mid === drag.from && h === drag.h) return null;
+    const c = drag.h === 'nt' || h !== drag.h ? null : el.closest('.cell[data-key]');
     if (c && c.dataset.key !== drag.key) return { el: c, td, swap: c.dataset.key, to: td.dataset.mid, res: drag.res['s|' + c.dataset.key] };
-    return { el: td, td, to: td.dataset.mid, res: drag.res['m|' + td.dataset.mid] };
+    return { el: td, td, to: td.dataset.mid, h, res: drag.res[`m|${td.dataset.mid}|${h}`] };
   }
   function moveDrag(x, y) {
     drag.x = x; drag.y = y;
@@ -1006,7 +1016,7 @@
     else if (tg && tg.res) {
       if (!tg.res.ok) { text = tg.res.why || t('whyHour'); cls = 'no'; }
       else {
-        text = tg.swap ? t('dropSwap', drag.key, tg.swap, nameOf(drag.from), nameOf(tg.to)) : t('dropMove', drag.key, nameOf(tg.to));
+        text = tg.swap ? t('dropSwap', drag.key, tg.swap, nameOf(drag.from), nameOf(tg.to)) : tg.h !== drag.h ? t('dropTime', drag.key, nameOf(tg.to), tg.h === 'nt' ? t('noTime') : hl(+tg.h)) : t('dropMove', drag.key, nameOf(tg.to));
         if (tg.res.warn) { text += ' — ' + tg.res.warn; cls = 'warn'; } else cls = 'ok';
         if (tg.res.best && tg.res.best.length) { text = '★ ' + text + ' — ' + t('bestIs', tg.res.best.join(t('sep'))); cls += ' best'; }
       }
@@ -1026,7 +1036,11 @@
     const d = drag; const tg = d ? dropTarget(x, y) : null;
     cleanDrag();
     if (!d || !tg || !tg.res || !tg.res.ok) { if (tg && tg.res && !tg.res.ok && tg.res.why) toast(tg.res.why); return; }
-    if (tg.swap) {
+    if (tg.h && tg.h !== d.h) { // a section with no official time, put at another hour: a time request
+      remember('uTime', d.key);
+      setFreeHour(d.key, tg.h === 'nt' ? null : +tg.h, tg.to, d.from);
+      toast(t('dropDone', d.key, `${nameOf(tg.to)} · ${tg.h === 'nt' ? t('noTime') : hl(+tg.h)}`));
+    } else if (tg.swap) {
       remember('uSwap', d.key, tg.swap);
       putSection(d.key, tg.to);
       putSection(tg.swap, d.from);
@@ -1040,6 +1054,12 @@
     const keys = [d.key].concat(tg.swap ? [tg.swap] : []);
     keys.forEach((k) => main.querySelectorAll(`.cell[data-key="${CSS.escape(k)}"]`).forEach((e) => e.classList.add('flash')));
     setTimeout(() => main.querySelectorAll('.flash').forEach((e) => e.classList.remove('flash')), 2600);
+  }
+  /** Section k with no official time: give it hour h (null = no time) in row `to`. */
+  function setFreeHour(k, h, to, from) {
+    if (h == null) delete S.proposed[k]; else S.proposed[k] = h;
+    delete S.autoTime[k];
+    if (to !== from) putSection(k, to); else if (memberById(to)) S.pins[k] = to;
   }
   function cleanDrag() {
     if (!drag) return;
@@ -1127,15 +1147,21 @@
     const snap = snapshot(); const { secs, assign } = snap;
     const cands = Object.values(secs).filter((s) => {
       const from = assign[s.key] || 'NA';
-      if (from === mid) return false;
-      if (hRaw === 'nt' ? s.hour != null : s.hour !== h) return false;
-      if (mid === 'NA' && from === 'NA') return false;
-      return dropCheck(s.key, from, mid, null, { snap }).ok;
+      const here = hRaw === 'nt' ? s.hour == null : s.hour === h;
+      if (here) {
+        if (from === mid || (mid === 'NA' && from === 'NA')) return false;
+        return dropCheck(s.key, from, mid, null, { snap }).ok;
+      }
+      // a section with no official time can come from any hour (a time request); a member needs an hour
+      if (!freeTime(s.key, secs) || (hRaw === 'nt' && memberById(mid))) return false;
+      if (from === mid) return !memberById(mid) || timeOk(s.key, mid, h, snap);
+      return dropCheck(s.key, from, mid, null, { snap, hour: h }).ok;
     });
     const opt = (s) => {
       const a = assign[s.key];
       const note = a ? t('fromMember', nameOf(a)) : s.cat === 'none' ? t('notOurs') : s.cat === 'asneeded' ? L().cats.asneeded : '';
-      return `<button class="opt" type="button" data-act="put" data-key="${esc(s.key)}" data-mid="${esc(mid)}"><span class="sw" style="background:${colour(s.course)}"></span><span class="t">${esc(s.key)}</span><small>${esc(note)}</small></button>`;
+      const moveH = (hRaw === 'nt' ? s.hour != null : s.hour !== h) ? hRaw : '';
+      return `<button class="opt" type="button" data-act="put" data-key="${esc(s.key)}" data-mid="${esc(mid)}" data-h="${moveH}"><span class="sw" style="background:${colour(s.course)}"></span><span class="t">${esc(s.key)}</span><small>${esc(moveH ? t('reqSet') : note)}</small></button>`;
     };
     const free = cands.filter((s) => !assign[s.key]), taken = cands.filter((s) => assign[s.key]);
     showPop(head + `<div class="grp">${esc(t('putHere'))}</div>${cands.length ? free.map(opt).join('') + taken.map(opt).join('') : `<p class="muted small">${esc(t('nothingHere'))}</p>`}`, td, 'c|' + mid + '|' + hRaw);
@@ -1350,6 +1376,12 @@
       case 'sec': if (!pop.hidden && pop.dataset.key === 'k|' + d.key) closePop(); else secPop(el); break;
       case 'put': {
         const from = snapshot().assign[d.key] || 'NA';
+        if (d.h) { // a section with no official time, to another hour
+          const h = d.h === 'nt' ? null : +d.h;
+          const okH = from === d.mid ? (!memberById(d.mid) || timeOk(d.key, d.mid, h)) : dropCheck(d.key, from, d.mid, null, { hour: h }).ok;
+          if (!okH || !freeTime(d.key)) { toast(t('whyTime')); break; }
+          remember('uTime', d.key); setFreeHour(d.key, h, d.mid, from); closePop(); persist(); render(); break;
+        }
         const c = dropCheck(d.key, from, d.mid);
         if (!c.ok) { toast(c.why || t('nothingHere')); break; }
         remember('uPut', d.key, nameOf(d.mid)); putSection(d.key, d.mid); closePop(); persist(); render(); break;
@@ -1360,11 +1392,14 @@
         const snap = snapshot(); const s = snap.secs[d.key];
         // only hours where the member is free and inside his allowed hours
         const hrs = E.HOURS.filter((h) => h === s.hour || timeOk(d.key, d.mid, h, snap));
-        box.innerHTML = hrs.length > 1 ? `<div class="hours" style="margin-top:6px">${hrs.map((h) => `<button type="button" class="${s.hour === h ? 'on' : ''}" data-act="timeSet" data-key="${esc(d.key)}" data-mid="${esc(d.mid)}" data-h="${h}">${hl(h)}</button>`).join('')}</div>` : `<p class="muted small">${esc(t('noOtherTime'))}</p>`;
+        if (freeTime(d.key, snap.secs) && !memberById(d.mid) && s.hour != null) hrs.push('nt');
+        box.innerHTML = hrs.length > 1 ? `<div class="hours" style="margin-top:6px">${hrs.map((h) => `<button type="button" class="${s.hour === h ? 'on' : ''}" data-act="timeSet" data-key="${esc(d.key)}" data-mid="${esc(d.mid)}" data-h="${h}">${h === 'nt' ? esc(t('noTime')) : hl(h)}</button>`).join('')}</div>` : `<p class="muted small">${esc(t('noOtherTime'))}</p>`;
         break;
       }
       case 'timeSet': {
-        const { secs } = snapshot(); const s = secs[d.key]; const h = +d.h;
+        const { secs } = snapshot(); const s = secs[d.key];
+        if (d.h === 'nt') { remember('uTime', d.key); delete S.proposed[d.key]; delete S.autoTime[d.key]; closePop(); persist(); render(); break; }
+        const h = +d.h;
         if (s.hour === h) { closePop(); break; }
         if (!timeOk(d.key, d.mid, h)) { toast(t('whyTime')); break; }
         remember('uTime', d.key);
