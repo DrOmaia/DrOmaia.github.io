@@ -74,7 +74,10 @@
     // official
     R.off = null; R.notes = {};
     if (R.sheets.official && !R.err.official) {
-      try { R.off = E.parseOfficial(R.sheets.official, S.files.official.sheet); R.notes = E.officialNotes(R.off); }
+      try {
+        R.off = E.parseOfficial(R.sheets.official, S.files.official.sheet); R.notes = E.officialNotes(R.off);
+        S.members.forEach((m) => { (m.res || []).forEach((k, i) => { if (k && !R.off.sections[k]) m.res[i] = ''; }); }); // section not in this file: back to "Any time"
+      }
       catch (e) { R.err.official = 'notOfficial'; }
     }
     // current
@@ -133,6 +136,7 @@
       const hit = auto[x.name] && old.find((m) => m.id === auto[x.name].id);
       const m = hit ? Object.assign({}, hit) : newMember(x.name);
       m.name = x.name;
+      if (m.fromSettings) return m; // the settings file wins
       if (x.required !== '' && x.required != null) m.required = x.required;
       if (S.hoursSource === 'file') {
         if (x.coop != null) m.coop = Math.max(0, Math.round(x.coop));
@@ -152,6 +156,39 @@
     else if (S.baseline) Object.entries(S.baseline).forEach(([id, items]) => { if (memberById(id)) out[id] = items; });
     return out;
   }
+
+  // ---------------- settings file: members, limits, reserved sections, survey wishes, courses, MSc / PhD ----------------
+  const SET_FIELDS = ['required', 'coop', 'senior', 'prefTime', 'prefTimeTouched', 'first', 'last', 'allowed', 'res', 'never', 'keepCurrent', 'prefs', 'comment'];
+  const pickSet = (x) => Object.fromEntries(SET_FIELDS.filter((f) => x[f] !== undefined).map((f) => [f, JSON.parse(JSON.stringify(x[f]))]));
+  function saveSettings() {
+    const data = {
+      app: 'isp-settings', v: 1, side: S.side, savedAt: new Date().toISOString(),
+      members: S.members.map((m) => Object.assign({ name: m.name }, pickSet(m))),
+      courses: S.courses,
+      msc: S.msc.map((x) => ({ member: (memberById(x.member) || {}).name || '', program: x.program, hours: x.hours, counts: x.counts })),
+    };
+    download(new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' }), `${fileBase()} - settings.json`);
+    toast(t('setSavedMsg'));
+  }
+  /** Settings file values win over the faculty list; members are matched by name. */
+  function applySettings(obj) {
+    const list = obj.members || [];
+    const skipped = [];
+    if (!S.members.length) S.members = list.map((x) => Object.assign(newMember(x.name), pickSet(x), { fromSettings: true }));
+    else {
+      const auto = E.matchNames(list.map((x) => x.name), S.members, 0.8);
+      list.forEach((x) => { const hit = auto[x.name] && memberById(auto[x.name].id); if (hit) Object.assign(hit, pickSet(x), { fromSettings: true, fromPrefs: false }); else skipped.push(x.name); });
+    }
+    Object.entries(obj.courses || {}).forEach(([c, v]) => { S.courses[c] = Object.assign({}, S.courses[c], v); S.courseTouched[c] = true; });
+    const ids = E.matchNames((obj.msc || []).map((x) => x.member).filter(Boolean), S.members, 0.8);
+    if ((obj.msc || []).length) S.msc = obj.msc.map((x) => ({ id: uid(), member: ids[x.member] ? ids[x.member].id : '', program: x.program || 'MSc', hours: x.hours, counts: x.counts }));
+    normalize();
+    return { n: list.length - skipped.length, skipped };
+  }
+  async function readSettingsFile(file) {
+    try { const obj = JSON.parse(await file.text()); if (!obj || obj.app !== 'isp-settings') throw new Error('x'); return obj; } catch (e) { toast(t('setBad')); return null; }
+  }
+  function settingsApplied(r) { toast(t('setLoaded', r.n) + (r.skipped.length ? ' — ' + t('setSkipped', r.skipped.join(', ')) : '')); }
 
   // ---------------- model ----------------
   function model() { return R.off ? E.buildModel(R.off, { courses: S.courses, secCat: S.secCat, proposed: S.proposed, members: S.members }) : {}; }
@@ -334,6 +371,7 @@
           <div class="field grow"><label for="termIn">${esc(t('termLabel'))}</label><input id="termIn" class="input" inputmode="numeric" placeholder="${esc(t('termPh'))}" value="${esc(ui.termDraft != null ? ui.termDraft : S.term)}"></div>
           <button class="btn primary big" type="button" data-act="start" ${pick ? '' : 'disabled'}>${esc(t('startBtn'))}</button>
         </div>
+        <p class="small" style="margin:12px 0 0"><button class="link" type="button" data-act="openSettings">${esc(t('setOpen'))}</button>${ui.pendingSettings ? ` <span class="ok-text">✓ ${esc(t('setReady', ui.pendingSettings.name))}</span>` : ''}</p>
       </div>
       <div class="panel resume-box">
         <h2>${esc(t('resumeTitle'))}</h2>
@@ -656,7 +694,7 @@
   }
   function viewSettings() {
     const tabs = [['members', t('tabMembers')], ['courses', t('tabCourses')], ['msc', t('tabMsc')]];
-    return `<div class="page-head"><div><h1>${esc(t('setTitle'))}</h1></div></div>
+    return `<div class="page-head"><div><h1>${esc(t('setTitle'))}</h1></div><div class="row"><button class="btn" type="button" data-act="openSettings">${esc(t('setOpen'))}</button><button class="btn" type="button" data-act="saveSettings" title="${esc(t('setSaveTip'))}">${esc(t('setSave'))}</button></div></div>
     <div class="panel"><div class="tabs" role="tablist">${tabs.map(([k, v]) => `<button type="button" role="tab" class="${ui.tab === k ? 'on' : ''}" data-act="tab" data-tab="${k}">${esc(v)}</button>`).join('')}</div>
     ${ui.tab === 'courses' ? viewCourses() : ui.tab === 'msc' ? viewMsc() : viewMembers()}</div>`;
   }
@@ -680,6 +718,7 @@
   function viewProposal() {
     if (!R.off) return `<p>${esc(t('needOfficial'))}</p>`;
     if (!S.built && !ui.building) { setTimeout(() => build(true), 0); }
+    if (S.built && !ui.building && !S.sent) { markSent(true); persist(); } // the first version: changes are counted from here
     const { secs, assign, ev } = snapshot();
     const bad = new Set();
     ev.issues.forEach((i) => { if (i.type === 'clash' || i.type === 'window' || i.type === 'notime') { if (i.a) bad.add(i.a); if (i.b) bad.add(i.b); } });
@@ -756,7 +795,8 @@
       const fr = E.freeRooms(R.off, s.key, s.hour).filter((g) => !g.online);
       return `<li><span><b>${esc(s.key)}</b> → ${hl(s.hour)} <span class="muted">(${s.officialHour != null ? hl(s.officialHour) : `${esc(t('noTime'))} · ${esc(t('reqSet'))}`})</span> · ${esc(nameOf(assign[s.key] || 'NA'))}<br><span class="small muted">${esc(t('freeRooms'))}: ${fr.map((g) => `${g.days.map((d) => E.DAY_NAMES[d]).join(' ')}: ${g.rooms.length ? g.rooms.map(E.shortRoom).join(' / ') : t('noFree')}`).join(' | ')}</span></span></li>`;
     });
-    return `<div class="page-head"><div><h1>${esc(t('propTitle'))}</h1><p>${esc(t('rebuildHint'))}</p></div>
+    return `<h1 class="print-title">IS Department – ${S.side === 'female' ? 'Female' : 'Male'} Teaching Timetable – Term ${esc(S.term)}</h1>
+    <div class="page-head"><div><h1>${esc(t('propTitle'))}</h1><p>${esc(t('rebuildHint'))}</p></div>
       <div class="row"><button class="btn" type="button" data-act="undo" ${ui.undo.length ? `title="${esc(t('undoTip', t(ui.undo[ui.undo.length - 1].key, ...ui.undo[ui.undo.length - 1].args)))}"` : 'disabled'}>↶ ${esc(t('undo'))}</button>${moved.size ? `<button class="btn" type="button" data-act="refAll" title="${esc(t('refAllTip'))}">↺ ${esc(t('refAll', moved.size))}</button>` : ''}<button class="btn" type="button" data-act="toChanges">✉ ${esc(t('chgBtn', changeLines().length))}</button><button class="btn" type="button" data-act="print">${esc(t('printBtn'))}</button><button class="btn primary" type="button" data-act="rebuild" ${ui.building ? 'disabled' : ''}>${esc(ui.building ? t('building') : t('rebuild'))}</button></div></div>
     <div class="stats">
       ${S.built ? healthCard(hh, delta) : ''}
@@ -773,7 +813,8 @@
     <div class="attn">
       <div class="panel"><h2>${esc(t('attention'))}</h2>${items.length ? `<p class="small muted" style="margin:-4px 0 10px">${esc(t('attnHint'))}</p><ul>${items.join('')}</ul>` : `<p class="good">${esc(t('allGood'))}</p>`}</div>
       <div class="panel"><h2>${esc(t('timeReqTitle'))}</h2>${reqs.length ? `<ul class="req-list">${reqs.join('')}</ul>` : `<p class="muted">—</p>`}</div>
-    </div>`;
+    </div>
+    ${S.built ? `<div class="panel chg-panel no-print">${changesBox()}</div>` : ''}`;
   }
 
   /** Short game instructions; can be hidden and shown again (remembered in this browser). */
@@ -1209,36 +1250,45 @@
     return R.off.lectures.filter((k) => secs[k]).sort((a, b) => order(a) - order(b) || (secs[a].hour == null ? 99 : secs[a].hour) - (secs[b].hour == null ? 99 : secs[b].hour) || a.localeCompare(b))
       .map(line).filter(Boolean).map((x, i) => `${i + 1}- ${x}`);
   }
+  /** The change list box (Proposal and Download pages): net changes since the first version, or since the last version sent. */
+  function changesBox() {
+    const lines = changeLines();
+    const d = S.sent && S.sent.at ? new Date(S.sent.at).toLocaleDateString(S.lang === 'ar' ? 'ar-u-ca-gregory-nu-latn' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+    const since = !S.sent ? t('chgSinceOff') : S.sent.auto ? t('chgSinceFirst', d) : t('chgSince', d);
+    return `<div class="chg">
+          <h2>${esc(t('chgTitle'))}</h2><p class="small muted" style="margin:0">${esc(since)}</p>
+          ${lines.length ? `<textarea class="input chg-text" dir="ltr" readonly rows="${Math.min(12, lines.length + 1)}">${esc(lines.join('\n'))}</textarea>` : `<p class="muted" style="margin:0">${esc(t('chgNone'))}</p>`}
+          <div class="row"><button class="btn" type="button" data-act="copyChanges" ${lines.length ? '' : 'disabled'}>${esc(t('copy'))}</button><button class="btn" type="button" data-act="markSent" title="${esc(t('markSentTip'))}">${esc(t('markSent'))}</button></div>
+        </div>`;
+  }
   function viewExport() {
     const { ev } = snapshot();
     const n = ev.issues.length;
-    const lines = changeLines();
-    const since = S.sent && S.sent.at ? t('chgSince', new Date(S.sent.at).toLocaleDateString(S.lang === 'ar' ? 'ar-u-ca-gregory-nu-latn' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })) : t('chgSinceOff');
     return `<div class="page-head"><div><h1>${esc(t('expTitle'))}</h1><p class="${n ? '' : 'ok-text'}">${esc(n ? t('remaining', n) : t('ready'))}</p></div></div>
     <div class="exp">
       <div class="panel"><h2>${esc(t('expExcel'))}</h2><p class="sub" style="margin:0">${esc(t('expExcelText'))}</p><ul>${L().expSheets.map((x) => `<li>${esc(x)}</li>`).join('')}</ul><p class="tip">${esc(t('howToPaste'))}</p><button class="btn primary big" type="button" data-act="excel">${esc(t('expExcelBtn'))}</button></div>
       <div class="panel"><h2>${esc(t('expProj'))}</h2><p class="sub" style="margin:0">${esc(t('expProjText'))}</p><button class="btn big" type="button" data-act="saveProject">${esc(t('expProjBtn'))}</button>
-        <div class="chg">
-          <h2>${esc(t('chgTitle'))}</h2><p class="small muted" style="margin:0">${esc(since)}</p>
-          ${lines.length ? `<textarea id="chgText" class="input" dir="ltr" readonly rows="${Math.min(12, lines.length + 1)}">${esc(lines.join('\n'))}</textarea>` : `<p class="muted" style="margin:0">${esc(t('chgNone'))}</p>`}
-          <div class="row"><button class="btn" type="button" data-act="copyChanges" ${lines.length ? '' : 'disabled'}>${esc(t('copy'))}</button><button class="btn" type="button" data-act="markSent" title="${esc(t('markSentTip'))}">${esc(t('markSent'))}</button></div>
-        </div>
+        ${changesBox()}
         <hr style="border:0;border-top:1px solid var(--line-2);width:100%;margin:8px 0">
         <h2>${esc(t('nextTerm'))}</h2><p class="sub" style="margin:0">${esc(t('nextTermText'))}</p><button class="btn" type="button" data-act="nextTerm">${esc(t('nextTerm'))}</button></div>
     </div>`;
   }
-  function markSent() {
+  /** Remember the timetable as registration has it now. auto: the first version she starts working from
+      (for an older project, the places at its last save / open). */
+  function markSent(auto) {
     const { secs, assign } = snapshot();
+    const useRef = auto && S.ref;
     const map = {}, hours = {}, hold = {};
     R.off.lectures.forEach((k) => {
-      map[k] = memberById(assign[k]) ? assign[k] : '';
-      if (secs[k] && freeTime(k, secs)) { hours[k] = secs[k].hour; hold[k] = assign[k] === 'HOLD'; }
+      const who = useRef && S.ref[k] ? S.ref[k][0] : assign[k];
+      map[k] = memberById(who) ? who : '';
+      if (secs[k] && freeTime(k, secs)) { hours[k] = useRef && S.ref[k] ? S.ref[k][1] : secs[k].hour; hold[k] = who === 'HOLD'; }
     });
-    S.sent = { at: new Date().toISOString(), map, hours, hold };
+    S.sent = { at: new Date().toISOString(), map, hours, hold, auto: !!auto };
   }
   async function copyText(text) {
     try { await navigator.clipboard.writeText(text); return true; } catch (e) { /* fall back below */ }
-    const ta = $('#chgText'); if (!ta) return false;
+    const ta = $('.chg-text'); if (!ta) return false;
     ta.focus(); ta.select(); try { return document.execCommand('copy'); } catch (e) { return false; }
   }
 
@@ -1265,6 +1315,7 @@
       const keepLang = S.lang; S = blank(); S.lang = keepLang; clearUndo(); R = { wb: {}, sheets: {}, err: {}, fac: null, notes: {}, curScore: {}, prefScore: {} };
     }
     S.side = side; S.term = term; S.step = 2; ui.termDraft = null;
+    if (ui.pendingSettings) { const r = applySettings(ui.pendingSettings.obj); ui.pendingSettings = null; settingsApplied(r); }
     persist(); render(); window.scrollTo(0, 0);
   }
   async function downloadTemplate() {
@@ -1359,6 +1410,8 @@
       case 'pick': ui.pickSide = d.side; ui.termDraft = $('#termIn') ? $('#termIn').value : ui.termDraft; render(); break;
       case 'start': startProject(); break;
       case 'openProject': $('#projectInput').click(); break;
+      case 'openSettings': $('#settingsInput').click(); break;
+      case 'saveSettings': saveSettings(); break;
       case 'resumeAuto': { const saved = S0(); if (saved) { S = Object.assign(blank(), saved); normalize(); clearUndo(); await reparseAll(); render(); } break; }
       case 'rmFile': clearUndo(); delete S.files[d.kind]; if (d.kind === 'current') S.currentMap = {}; if (d.kind === 'prefs') { S.prefsMap = {}; S.members.forEach((m) => { if (m.fromPrefs) { m.prefs = ['', '', '']; m.comment = ''; m.fromPrefs = false; } }); } await readFile(d.kind); parseAll(); S.built = false; persist(); render(); break;
       case 'tab': ui.tab = d.tab; render(); break;
@@ -1425,7 +1478,7 @@
       }
       case 'lock': { remember('uLock', nameOf(d.id)); if (isLocked(d.id)) delete S.decisions[d.id]; else S.decisions[d.id] = 'locked'; persist(); render(); break; }
       case 'copyChanges': { const ok = await copyText(changeLines().join('\n')); toast(t(ok ? 'copied' : 'copyFail')); break; }
-      case 'toChanges': S.step = 5; persist(); render(); setTimeout(() => { const c = main.querySelector('.chg'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 0); break;
+      case 'toChanges': { const c = main.querySelector('.chg'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'center' }); break; }
       case 'markSent': markSent(); persist(); render(); toast(t('sentDone')); break;
       case 'excel': try { await exportExcel(); } catch (e) { console.error(e); toast('Excel: ' + e.message); } break;
       case 'saveProject': saveProject(); break;
@@ -1437,6 +1490,12 @@
   document.addEventListener('change', async (ev) => {
     const el = ev.target;
     if (el.id === 'projectInput') { if (el.files[0]) await openProject(el.files[0]); el.value = ''; return; }
+    if (el.id === 'settingsInput') {
+      const f = el.files[0]; el.value = ''; if (!f) return;
+      const obj = await readSettingsFile(f); if (!obj) return;
+      if (S.step === 1) { ui.pendingSettings = { name: f.name, obj }; render(); return; } // applied when the project starts
+      clearUndo(); settingsApplied(applySettings(obj)); persist(); render(); return;
+    }
     if (el.dataset.file === 'fmt') { await openFormat(el.files[0]); el.value = ''; return; }
     if (el.dataset.file) { await addFile(el.dataset.file, el.files[0]); return; }
     const c = el.dataset.chg; if (!c) return;

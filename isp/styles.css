@@ -660,3 +660,36 @@ table.tt { min-width: 1420px; }
 .exp .chg .btn { margin-top: 0; }
 @media print { .tt tr.locked td.slot, .tt tr.locked td.num { opacity: 1; } }
 .cell .star { top: -5px; bottom: auto; left: -3px; font-size: 10px; }
+/* change list: whole lines, no side scroll; also under the proposal */
+.chg textarea { white-space: pre-wrap !important; overflow-x: hidden !important; }
+.chg-panel { margin-top: 18px; }
+.chg-panel .chg { border: 0; padding: 0; background: none; display: flex; flex-direction: column; gap: 8px; }
+.chg-panel .chg h2 { margin: 0; }
+.chg-panel textarea { width: 100%; font: 13px/1.55 Tahoma, 'IBM Plex Sans Arabic', sans-serif; padding: 8px 10px; resize: vertical; }
+/* clean print for presenting: the timetable only, no working marks */
+.print-title { display: none; }
+@media print {
+  .print-title { display: block; font-size: 16px; margin: 0 0 8px; color: #1f4e79; }
+  .page-head, .legend, .howto, .howto-show, .cbar, .chg-panel { display: none !important; }
+  .cell .star, .cell .rlock, .tt td.name .lk, .tt td.name small.wishes { display: none !important; }
+  .cell.pinned::after { content: none; }
+  .cell.new::before { display: none; }
+  .cell.moved, .tt tr.locked td.name { box-shadow: none; }
+  .cell.prop, .cell.bad { border-color: transparent; }
+  .cell.prop b { color: #111; font-style: normal; }
+}
+@media print {
+  table.tt { min-width: 0 !important; width: 100%; }
+  .tt td.slot { min-width: 0 !important; width: auto !important; }
+  .gridwrap { overflow: visible !important; }
+}
+@media print {
+  .gridwrap { direction: ltr; }
+  .tt td.name { min-width: 0 !important; width: 150px; }
+  .tt td.num { min-width: 0 !important; }
+  .print-title { text-align: left; direction: ltr; }
+}
+@media print { html[dir="rtl"] main { direction: ltr; } html[dir="rtl"] .notice-bar { direction: rtl; text-align: right; } }
+@media print { html[dir="rtl"] body { direction: ltr; } .tt th { white-space: normal; } }
+@page { size: A4 landscape; margin: 8mm; }
+@media print { html[dir="rtl"] { direction: ltr; } }
