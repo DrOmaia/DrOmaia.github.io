@@ -1,6 +1,7 @@
 // Synthetic files in the same layout as the department's male files (no real data).
 const ExcelJS = require(require('path').join(__dirname, '../vendor/exceljs.min.js'));
 const OUT = __dirname + '/data/';
+require('fs').mkdirSync(OUT, { recursive: true });
 const members = [
   ['Dr. Omaia Al-Omari', 1, 0, 3], ['Dr. Bayan Alghofaily', 3, 0, 0], ['Dr. Ahmed Hassan', 3, 1, 0], ['Dr. Khalid Saleh', 3, 0, 0],
   ['Dr. Faisal Noor', 3, 0, 0], ['Dr. Mohammed Ali', 3, 0, 2], ['Dr. Yousef Karim', 3, 0, 0], ['Dr. Tariq Aziz', 3, 2, 0],

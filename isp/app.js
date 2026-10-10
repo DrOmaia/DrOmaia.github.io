@@ -1063,7 +1063,7 @@
     else if (tg && tg.res) {
       if (!tg.res.ok) { text = tg.res.why || t('whyHour'); cls = 'no'; }
       else {
-        text = tg.swap ? t('dropSwap', drag.key, tg.swap, nameOf(swapBack(drag.from)), nameOf(tg.to)) : tg.h !== drag.h ? t('dropTime', drag.key, nameOf(tg.to), tg.h === 'nt' ? t('noTime') : hl(+tg.h)) : t('dropMove', drag.key, nameOf(tg.to));
+        text = tg.swap ? t(swapBack(drag.from) === drag.from ? 'dropSwap' : 'dropReplace', drag.key, tg.swap, nameOf(swapBack(drag.from)), nameOf(tg.to)) : tg.h !== drag.h ? t('dropTime', drag.key, nameOf(tg.to), tg.h === 'nt' ? t('noTime') : hl(+tg.h)) : t('dropMove', drag.key, nameOf(tg.to));
         if (tg.res.warn) { text += ' — ' + tg.res.warn; cls = 'warn'; } else cls = 'ok';
         if (tg.res.best && tg.res.best.length) { text = '★ ' + text + ' — ' + t('bestIs', tg.res.best.join(t('sep'))); cls += ' best'; }
       }
@@ -1091,7 +1091,7 @@
       remember('uSwap', d.key, tg.swap);
       putSection(d.key, tg.to);
       putSection(tg.swap, swapBack(d.from));
-      toast(t('swapDone', d.key, tg.swap));
+      toast(t(swapBack(d.from) === d.from ? 'swapDone' : 'replaceDone', d.key, tg.swap));
     } else {
       remember('uDrag', d.key, nameOf(tg.to));
       putSection(d.key, tg.to);
@@ -1237,8 +1237,8 @@
       const s = secs[k], cur = assign[k], m = memberById(cur);
       const nums = [s.sec].concat(s.comp ? [s.comp.split('-').pop()] : []).join('/');
       const sec = `${s.course} section${s.comp ? 's' : ''} ${nums}`;
+      if (cur === 'HOLD') return bHold(k) ? '' : s.hour == null ? `Please put ${sec} ON HOLD` : `Please put ${s.course} at ${ampm(s.hour)} section${s.comp ? 's' : ''} ${nums} ON HOLD`;
       if (freeTime(k, secs)) {
-        if (cur === 'HOLD') return bHold(k) ? '' : `Please put ${sec} ON HOLD`;
         const newTime = s.hour != null && s.hour !== bHour(k);
         if (m && newTime) return `Please set ${sec} at ${ampm(s.hour)} and assign to ${m.name}`;
         if (!m && newTime) return `Please set ${sec} at ${ampm(s.hour)}`;
@@ -1290,7 +1290,8 @@
     R.off.lectures.forEach((k) => {
       const who = useRef && S.ref[k] ? S.ref[k][0] : assign[k];
       map[k] = memberById(who) ? who : '';
-      if (secs[k] && freeTime(k, secs)) { hours[k] = useRef && S.ref[k] ? S.ref[k][1] : secs[k].hour; hold[k] = who === 'HOLD'; }
+      hold[k] = who === 'HOLD';
+      if (secs[k] && freeTime(k, secs)) hours[k] = useRef && S.ref[k] ? S.ref[k][1] : secs[k].hour;
     });
     S.sent = { at: new Date().toISOString(), map, hours, hold, auto: !!auto };
   }

@@ -696,3 +696,4 @@ table.tt { min-width: 1420px; }
 /* stat card that jumps to its list */
 button.stat.stat-link { font: inherit; text-align: start; cursor: pointer; }
 button.stat.stat-link:hover { border-color: var(--psu-navy); box-shadow: 0 2px 8px rgba(16, 36, 50, .12); }
+@media print { .notice-bar { display: none !important; } }
