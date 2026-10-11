@@ -9,7 +9,7 @@
   // ---------------- state ----------------
   const blank = () => ({
     app: 'isp-timetable', v: 1, side: null, term: '', lang: (S0() || {}).lang || 'ar', step: 1,
-    files: {}, members: [], courses: {}, courseTouched: {}, secCat: {}, msc: [],
+    files: {}, members: [], courses: {}, courseTouched: {}, secCat: {}, msc: [], extra: [], deleted: {},
     currentMap: {}, prefsMap: {}, mapManual: {}, hoursSource: '', assign: {}, proposed: {}, autoTime: {}, pins: {}, bans: {},
     decisions: {}, forbidden: {}, built: false, baseline: null, savedAt: null, ref: null, sent: null,
   });
@@ -124,6 +124,7 @@
   function normalize() {
     S.decisions = S.decisions || {};
     S.forbidden = {}; // left by the removed alternatives feature
+    S.extra = S.extra || []; S.deleted = S.deleted || {};
     Object.keys(S.decisions).forEach((id) => { if (S.decisions[id] === 'final' || S.decisions[id] === 'locked') S.decisions[id] = 'locked'; else delete S.decisions[id]; });
     S.members.forEach((m) => { m.allowed = m.allowed || []; m.res = (m.res || []).slice(0, m.allowed.length); while (m.res.length < m.allowed.length) m.res.push(''); });
   }
@@ -166,6 +167,7 @@
       members: S.members.map((m) => Object.assign({ name: m.name }, pickSet(m))),
       courses: S.courses,
       msc: S.msc.map((x) => ({ member: (memberById(x.member) || {}).name || '', program: x.program, hours: x.hours, counts: x.counts })),
+      extra: S.extra.map((x) => ({ member: (memberById(x.member) || {}).name || '', code: x.code })),
     };
     download(new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' }), `${fileBase()} - settings.json`);
     toast(t('setSavedMsg'));
@@ -182,6 +184,12 @@
     Object.entries(obj.courses || {}).forEach(([c, v]) => { S.courses[c] = Object.assign({}, S.courses[c], v); S.courseTouched[c] = true; });
     const ids = E.matchNames((obj.msc || []).map((x) => x.member).filter(Boolean), S.members, 0.8);
     if ((obj.msc || []).length) S.msc = obj.msc.map((x) => ({ id: uid(), member: ids[x.member] ? ids[x.member].id : '', program: 'Graduate Studies', hours: x.hours, counts: x.counts }));
+    if ((obj.extra || []).length) {
+      const xi = E.matchNames(obj.extra.map((x) => x.member).filter(Boolean), S.members, 0.8);
+      S.extra.forEach((x) => { delete S.assign[x.key]; delete S.pins[x.key]; delete S.proposed[x.key]; delete S.secCat[x.key]; });
+      S.extra = [];
+      obj.extra.forEach((x) => { const code = E.normCourse(x.code); if (code) addExtra(xi[x.member] ? xi[x.member].id : '', code, 1); });
+    }
     normalize();
     return { n: list.length - skipped.length, skipped };
   }
@@ -199,13 +207,57 @@
   function settingsApplied(r) { toast(t('setLoaded', r.n) + (r.skipped.length ? ' — ' + t('setSkipped', r.skipped.join(', ')) : '')); }
 
   // ---------------- model ----------------
-  function model() { return R.off ? E.buildModel(R.off, { courses: S.courses, secCat: S.secCat, proposed: S.proposed, members: S.members }) : {}; }
+  /** Courses added by hand (S.extra, not in the official file) join R.off as sections with no time. */
+  function syncExtras() {
+    if (!R.off) return;
+    const sig = JSON.stringify(S.extra);
+    if (R.off.xsig === sig) return;
+    const off = R.off;
+    Object.keys(off.sections).forEach((k) => { if (off.sections[k].extra) delete off.sections[k]; });
+    Object.keys(off.courses).forEach((c) => { if (off.courses[c].extra) delete off.courses[c]; });
+    off.lectures = off.lectures.filter((k) => off.sections[k]);
+    S.extra.forEach((x) => {
+      if (off.sections[x.key]) return;
+      const sec = x.key.slice(x.code.length + 1);
+      off.sections[x.key] = { key: x.key, course: x.code, sec, secNum: parseInt(sec, 10), courseName: '', crd: 3, rows: [], activity: 'L', hour: null, hours: [], meetings: [], excelRows: [], extra: true };
+      off.lectures.push(x.key);
+      if (!off.courses[x.code]) off.courses[x.code] = { code: x.code, name: '', crd: 3, lectures: [], timed: 0, untimed: 0, prefix: x.code.replace(/\d+$/, ''), extra: true };
+    });
+    off.xsig = sig;
+  }
+  /** The sections of the timetable (official + added by hand), without the ones she deleted. */
+  function modelP(proposed) {
+    if (!R.off) return {};
+    syncExtras();
+    const secs = E.buildModel(R.off, { courses: S.courses, secCat: S.secCat, proposed, members: S.members });
+    Object.keys(S.deleted || {}).forEach((k) => { delete secs[k]; });
+    return secs;
+  }
+  function model() { return modelP(S.proposed); }
+  /** Add n sections of a course that is not in the official file to member mid: No time, counted, kept with him. */
+  function addExtra(mid, code, n) {
+    syncExtras();
+    let i = 1;
+    for (let j = 0; j < n; j++) {
+      while (R.off.sections[`${code}-${i}`] || S.extra.some((x) => x.key === `${code}-${i}`)) i++;
+      const key = `${code}-${i}`;
+      S.extra = S.extra.concat([{ key, code, member: mid }]);
+      if (memberById(mid)) { S.assign[key] = mid; S.pins[key] = mid; }
+    }
+  }
+  /** Delete a section from the timetable (an added one is removed for good; an official one is hidden). */
+  function deleteSection(k) {
+    unreserve(k);
+    if (S.extra.some((x) => x.key === k)) S.extra = S.extra.filter((x) => x.key !== k);
+    else S.deleted = Object.assign({}, S.deleted, { [k]: 1 });
+    delete S.assign[k]; delete S.pins[k]; delete S.proposed[k]; delete S.autoTime[k]; delete S.secCat[k];
+  }
   /** The model with one section at another hour (to check a time change before making it). */
   function modelWith(k, h) {
     const p = Object.assign({}, S.proposed);
     const o = R.off.sections[k];
     if (h == null || (o && o.hour === h)) delete p[k]; else p[k] = h;
-    return E.buildModel(R.off, { courses: S.courses, secCat: S.secCat, proposed: p, members: S.members });
+    return modelP(p);
   }
   // ---- reservations: each course in "Teaches only" is guaranteed ("Any time") or one chosen section is reserved
   const isCourse = (c) => !!(R.off && R.off.courses[E.normCourse(c)]);
@@ -245,7 +297,7 @@
   }
 
   // ---------------- undo (proposal edits, kept in memory for this visit) ----------------
-  const UNDO_KEYS = ['assign', 'pins', 'bans', 'proposed', 'autoTime', 'secCat', 'decisions', 'forbidden', 'built', 'msc'];
+  const UNDO_KEYS = ['assign', 'pins', 'bans', 'proposed', 'autoTime', 'secCat', 'decisions', 'forbidden', 'built', 'msc', 'extra', 'deleted'];
   // the label is kept as a text key + values so it follows the interface language
   function remember(key, ...args) {
     const snap = {}; UNDO_KEYS.forEach((k) => { snap[k] = S[k]; });
@@ -477,7 +529,7 @@
     } else {
       const sheets = R.sheets[kind] || [];
       let sum = '';
-      if (kind === 'official' && R.off) { const lec = R.off.lectures.length, c = Object.keys(R.off.courses).length, u = R.off.lectures.filter((k) => R.off.sections[k].hour == null).length; sum = t('offSummary', lec, c, u); }
+      if (kind === 'official' && R.off) { const ls = R.off.lectures.filter((k) => !R.off.sections[k].extra), lec = ls.length, c = Object.values(R.off.courses).filter((x) => !x.extra).length, u = ls.filter((k) => R.off.sections[k].hour == null).length; sum = t('offSummary', lec, c, u); }
       if (kind === 'current' && R.cur) { const rows = R.cur.rows.filter((r) => r.kind === 'member'); sum = t('curSummary', rows.length, rows.filter((r) => S.currentMap[r.name]).length); }
       if (kind === 'prefs' && R.prefs) sum = t('prefSummary', R.prefs.list.length, R.prefs.list.filter((p) => S.prefsMap[p.name]).length);
       if (kind === 'faculty' && R.fac) sum = t('facSummary', S.members.length, S.members.reduce((a, m) => a + (Number(m.required) || 0), 0));
@@ -613,6 +665,13 @@
     return `<div class="chipbox">${mine.map((x) => `<span class="resrow"><span class="chip">Graduate Studies<button type="button" aria-label="remove" data-act="mscDel" data-id="${x.id}">×</button></span><select class="input res" data-chg="msc" data-id="${x.id}" data-field="hours" aria-label="${esc(t('hours'))}">${[1, 2, 3, 4, 5, 6].map((h) => `<option value="${h}" ${gradHrs(x) === h ? 'selected' : ''}>${esc(t('gradHours', h))}</option>`).join('')}</select></span>`).join('')}
       <button type="button" class="btn small" data-act="mscAdd" data-id="${m.id}">+ ${esc(t('add'))}</button></div>`;
   }
+  function extraBox(m) {
+    const mine = S.extra.filter((x) => x.member === m.id);
+    return `<div class="chipbox">${mine.map((x) => `<span class="chip">${esc(x.key)}<button type="button" aria-label="remove" data-act="extraDel" data-key="${esc(x.key)}">×</button></span>`).join('')}
+      <span class="resrow"><input class="input res" id="xc-${m.id}" dir="ltr" placeholder="${esc(t('extraCode'))}" aria-label="${esc(t('extraCode'))}" style="width:9em">
+      <select class="input res" id="xn-${m.id}" aria-label="${esc(t('extraN'))}">${[1, 2, 3, 4].map((n) => `<option value="${n}">${esc(t('extraSecs', n))}</option>`).join('')}</select>
+      <button type="button" class="btn small" data-act="extraAdd" data-id="${m.id}">+ ${esc(t('add'))}</button></span></div>`;
+  }
   const allowedText = (m) => (m.allowed || []).map((v, i) => ((m.res || [])[i] ? m.res[i] : v)).join(', ');
   function memberChips(m) {
     const c = [];
@@ -622,6 +681,7 @@
     if ((m.never || []).length) c.push(t('lcNever', m.never.join(', ')));
     const pr = (m.prefs || []).filter(Boolean); if (pr.length) c.push(t('lcPrefs', pr.join(' › ')));
     S.msc.filter((x) => x.member === m.id).forEach((x) => c.push(`Graduate Studies · ${t('gradHours', gradHrs(x))}`));
+    const xs = S.extra.filter((x) => x.member === m.id).map((x) => x.key); if (xs.length) c.push(`${t('extra')}: ${xs.join(', ')}`);
     if (m.keepCurrent === false) c.push(t('lcNoKeep'));
     if (!c.length) return `<span class="muted small">${esc(t('noLimits'))}</span>`;
     return c.map((x) => `<span class="chip">${esc(x)}</span>`).join('');
@@ -670,6 +730,7 @@
           ${hintField(t('allowed'), t('allowedHint'), chipBox(m, 'allowed'))}
           ${hintField(t('never'), t('hintNever'), chipBox(m, 'never'))}
           ${hintField(t('grad'), t('gradHint'), gradBox(m))}
+          ${hintField(t('extra'), t('extraHint'), extraBox(m))}
           <label class="check"><input type="checkbox" ${m.keepCurrent !== false ? 'checked' : ''} data-chg="mf" data-id="${m.id}" data-field="keepCurrent">${esc(t('keepCurrent'))}</label>
           <span class="hint2">${esc(t('currentCourses'))}: <span dir="ltr">${esc(curTxt || t('noCurrent'))}</span></span>
         </section>
@@ -691,7 +752,7 @@
     if (!R.off) return `<p class="muted">${esc(t('needOfficial'))}</p>`;
     const cats = L().cats;
     return `<p class="sub">${esc(t('catHelp'))}</p><table class="plain"><thead><tr><th>${esc(t('colCourse'))}</th><th></th><th>${esc(t('colCount'))}</th><th>${esc(t('colWho'))}</th><th>${esc(t('colCounts'))}</th></tr></thead><tbody>
-      ${Object.values(R.off.courses).map((c) => {
+      ${Object.values(R.off.courses).filter((c) => !c.extra).map((c) => {
         const cs = S.courses[c.code] || {};
         const noTime = c.timed === 0;
         return `<tr><td class="code"><span class="sw" style="background:${colour(c.code)}"></span>${esc(c.code)}</td><td dir="ltr" style="text-align:start">${esc(c.name)}</td><td>${c.lectures.length}${c.untimed ? ` <span class="chip warn">${c.untimed} ${esc(t('noTimeCourse'))}</span>` : ''}</td>
@@ -990,7 +1051,7 @@
     return { ok: true, warn: [a && a.warn, b && b.warn].filter(Boolean).join(' — ') };
   }
   /** A section with no time in the official file (its course has timed sections): it may go to any hour, as a time request. */
-  function freeTime(k, secs) { const o = R.off && R.off.sections[k]; const s = (secs || model())[k]; return !!(o && s && o.hour == null && !s.noTime); }
+  function freeTime(k, secs) { const o = R.off && R.off.sections[k]; const s = (secs || model())[k]; return !!(o && s && (o.extra || (o.hour == null && !s.noTime))); }
   /** Can section k of row mid start at hour h? The member must be free then and the hour inside his allowed hours. */
   function timeOk(k, mid, h, snap) {
     if (isLocked(mid)) return false;
@@ -1026,7 +1087,7 @@
       const to = td.dataset.mid, h = td.dataset.h, same = h === drag.h;
       if (to === drag.from && same) return;
       let res;
-      if (!same && h === 'nt' && memberById(to)) res = { ok: false, why: t('whyPickHour') };
+      if (!same && h === 'nt' && memberById(to) && !sec.extra) res = { ok: false, why: t('whyPickHour') };
       else if (to === drag.from) res = !memberById(to) || timeOk(drag.key, to, +h, snap) ? { ok: true } : { ok: false, why: t('whyTime') };
       else res = dropCheck(drag.key, drag.from, to, null, same ? { snap } : { snap, secs: secsFor(h) });
       drag.res[`m|${to}|${h}`] = res; td.classList.add(res.ok ? (res.warn ? 'dz-warn' : 'dz-ok') : 'dz-no');
@@ -1116,7 +1177,7 @@
     else if (tg && tg.res) {
       if (!tg.res.ok) { text = tg.res.why || t('whyHour'); cls = 'no'; }
       else {
-        text = tg.swap ? t(swapBack(drag.from) === drag.from ? 'dropSwap' : 'dropReplace', drag.key, tg.swap, nameOf(swapBack(drag.from)), nameOf(tg.to)) : tg.h !== drag.h ? t('dropTime', drag.key, nameOf(tg.to), tg.h === 'nt' ? t('noTime') : hl(+tg.h)) : t('dropMove', drag.key, nameOf(tg.to));
+        text = tg.swap ? t(swapBack(drag.from) === drag.from ? 'dropSwap' : 'dropReplace', drag.key, tg.swap, nameOf(swapBack(drag.from)), nameOf(tg.to)) : tg.h !== drag.h ? t('dropTime', drag.key, nameOf(tg.to), tg.h === 'nt' ? t('noTime') : hl(+tg.h), R.off.sections[drag.key] && R.off.sections[drag.key].extra) : t('dropMove', drag.key, nameOf(tg.to));
         if (tg.res.warn) { text += ' — ' + tg.res.warn; cls = 'warn'; } else cls = 'ok';
         if (tg.res.best && tg.res.best.length) { text = '★ ' + text + ' — ' + t('bestIs', tg.res.best.join(t('sep'))); cls += ' best'; }
       }
@@ -1243,8 +1304,9 @@
     let html = `<h4><span class="sw" style="background:${colour(s.course)}"></span>${esc(typeLine1(s))}${s.comp ? ` + ${esc(typeLine2(s))}` : ''}</h4>
       <div class="meta">${esc(s.name)}${days ? `<br>${esc(days)}` : ''}${s.hour != null ? ` · ${hl(s.hour)}` : ''}</div>`;
     if (mid !== 'NA') html += `<button class="opt" type="button" data-act="put" data-key="${esc(k)}" data-mid="NA">⇡ ${esc(t('toNA'))}</button>`;
-    if (!s.noTime) html += `<button class="opt" type="button" data-act="timePick" data-key="${esc(k)}" data-mid="${esc(mid)}">🕒 ${esc(t('changeTime'))}</button><div id="tp-${esc(k)}"></div>`;
+    if (!s.noTime || s.extra) html += `<button class="opt" type="button" data-act="timePick" data-key="${esc(k)}" data-mid="${esc(mid)}">🕒 ${esc(t('changeTime'))}</button><div id="tp-${esc(k)}"></div>`;
     if (refMoved(k)) html += `<button class="opt" type="button" data-act="refBack" data-key="${esc(k)}">↺ ${esc(t('refBack', S.ref[k][0] ? nameOf(S.ref[k][0]) : t('naRow')))}</button>`;
+    html += `<button class="opt del" type="button" data-act="secDel" data-key="${esc(k)}">🗑 ${esc(t('secDel'))}</button>`;
     showPop(html, cell, 'k|' + k);
   }
   /** Menu of an empty cell: only the sections that may legally go there. */
@@ -1261,7 +1323,7 @@
         return dropCheck(s.key, from, mid, null, { snap }).ok;
       }
       // a section with no official time can come from any hour (a time request); a member needs an hour
-      if (!freeTime(s.key, secs) || (hRaw === 'nt' && memberById(mid))) return false;
+      if (!freeTime(s.key, secs) || (hRaw === 'nt' && memberById(mid) && !s.extra)) return false;
       if (from === mid) return !memberById(mid) || timeOk(s.key, mid, h, snap);
       return dropCheck(s.key, from, mid, null, { snap, hour: h }).ok;
     });
@@ -1269,7 +1331,7 @@
       const a = assign[s.key];
       const note = a ? t('fromMember', nameOf(a)) : s.cat === 'none' ? t('notOurs') : s.cat === 'asneeded' ? L().cats.asneeded : '';
       const moveH = (hRaw === 'nt' ? s.hour != null : s.hour !== h) ? hRaw : '';
-      return `<button class="opt" type="button" data-act="put" data-key="${esc(s.key)}" data-mid="${esc(mid)}" data-h="${moveH}"><span class="sw" style="background:${colour(s.course)}"></span><span class="t">${esc(s.key)}</span><small>${esc(moveH ? t('reqSet') : note)}</small></button>`;
+      return `<button class="opt" type="button" data-act="put" data-key="${esc(s.key)}" data-mid="${esc(mid)}" data-h="${moveH}"><span class="sw" style="background:${colour(s.course)}"></span><span class="t">${esc(s.key)}</span><small>${esc(moveH && !s.extra ? t('reqSet') : note)}</small></button>`;
     };
     const free = cands.filter((s) => !assign[s.key]), taken = cands.filter((s) => assign[s.key]);
     showPop(head + `<div class="grp">${esc(t('putHere'))}</div>${cands.length ? free.map(opt).join('') + taken.map(opt).join('') : `<p class="muted small">${esc(t('nothingHere'))}</p>`}`, td, 'c|' + mid + '|' + hRaw);
@@ -1308,7 +1370,7 @@
       return s.hour == null ? `Please reassign ${s.course} section ${nums} to ${m.name}` : `Please reassign ${s.course} at ${ampm(s.hour)} section${s.comp ? 's' : ''} ${nums} to ${m.name}`;
     };
     const order = (k) => { const i = S.members.findIndex((m) => m.id === assign[k]); return i < 0 ? 999 : i; };
-    return R.off.lectures.filter((k) => secs[k]).sort((a, b) => order(a) - order(b) || (secs[a].hour == null ? 99 : secs[a].hour) - (secs[b].hour == null ? 99 : secs[b].hour) || a.localeCompare(b))
+    return R.off.lectures.filter((k) => secs[k] && !secs[k].extra).sort((a, b) => order(a) - order(b) || (secs[a].hour == null ? 99 : secs[a].hour) - (secs[b].hour == null ? 99 : secs[b].hour) || a.localeCompare(b))
       .map(line).filter(Boolean).map((x, i) => `${i + 1}- ${x}`);
   }
   /** The email to Admissions & Registration around the numbered lines (male and female sides have their own contact). */
@@ -1427,7 +1489,7 @@
     const members = [{ id: 'NA', name: 'Not assigned', pseudo: true }].concat(S.members, [{ id: 'PT', name: 'Part-timers', pseudo: true }, { id: 'HOLD', name: 'ON-HOLD', pseudo: true }]);
     const grid = Object.assign({}, assign);
     Object.values(secs).forEach((s) => { if (!grid[s.key] && s.cat === 'required') grid[s.key] = 'NA'; }); // the Not assigned block at the top
-    const wb = await X.build(window.ExcelJS, { side: S.side, term: S.term, members, secs, assign: grid, off: R.off, notes: R.notes, msc: S.msc, decisions: S.decisions, officialWorkbook: R.wb.official, issues: ev.issues, per: ev.per, generated: new Date() });
+    const wb = await X.build(window.ExcelJS, { side: S.side, term: S.term, members, secs, assign: grid, off: Object.assign({}, R.off, { lectures: R.off.lectures.filter((k) => secs[k]) }), notes: R.notes, msc: S.msc, decisions: S.decisions, officialWorkbook: R.wb.official, issues: ev.issues, per: ev.per, generated: new Date() });
     const buf = await X.toBuffer(wb, window.JSZip);
     download(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `${fileBase()} timetable.xlsx`);
   }
@@ -1521,13 +1583,21 @@
         if (!c.ok) { toast(c.why || t('nothingHere')); break; }
         remember('uPut', d.key, nameOf(d.mid)); putSection(d.key, d.mid); closePop(); persist(); render(); break;
       }
+      case 'secDel': remember('uDel', d.key); deleteSection(d.key); closePop(); persist(); render(); toast(t('delDone', d.key)); break;
+      case 'extraAdd': {
+        const inp = document.getElementById('xc-' + d.id), num = document.getElementById('xn-' + d.id);
+        const code = E.normCourse(inp && inp.value);
+        if (!/^[A-Z]{2,5}[0-9A-Z]{1,5}$/.test(code)) { toast(t('extraBad')); break; }
+        remember('uExtra', code); addExtra(d.id, code, Math.max(1, +(num && num.value) || 1)); persist(); render(); break;
+      }
+      case 'extraDel': remember('uDel', d.key); deleteSection(d.key); persist(); render(); break;
       case 'toHold': remember('uMove', d.key, 'ON-HOLD'); putSection(d.key, 'HOLD'); closePop(); persist(); render(); break;
       case 'timePick': {
         const box = document.getElementById('tp-' + d.key); if (!box) break;
         const snap = snapshot(); const s = snap.secs[d.key];
         // only hours where the member is free and inside his allowed hours
         const hrs = E.HOURS.filter((h) => h === s.hour || timeOk(d.key, d.mid, h, snap));
-        if (freeTime(d.key, snap.secs) && !memberById(d.mid) && s.hour != null) hrs.push('nt');
+        if (freeTime(d.key, snap.secs) && (s.extra || !memberById(d.mid)) && s.hour != null) hrs.push('nt');
         box.innerHTML = hrs.length > 1 ? `<div class="hours" style="margin-top:6px">${hrs.map((h) => `<button type="button" class="${s.hour === h ? 'on' : ''}" data-act="timeSet" data-key="${esc(d.key)}" data-mid="${esc(d.mid)}" data-h="${h}">${h === 'nt' ? esc(t('noTime')) : hl(h)}</button>`).join('')}</div>` : `<p class="muted small">${esc(t('noOtherTime'))}</p>`;
         break;
       }

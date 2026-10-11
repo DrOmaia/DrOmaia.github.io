@@ -47,12 +47,14 @@ section, lets her adjust it by drag and drop, and produces an Excel file for reg
    Per member: required sections, COOP, Senior, preferred time, and **Edit limits**:
    first / last class hour; **Teaches only** (each course: "Any time" = at least one section, or one reserved
    section 🔒); **Never assign**; **Graduate Studies** (No time, counts as one section, hours 1–6 added to the load);
+   **Course not in the file** (e.g. CYSXXX, n sections: No time, counted, load 3, movable to any hour / row, never in
+   the email to registration);
    keep current-term courses; survey wishes. *Courses* tab: who teaches each course (members / as needed /
    part-timers / ON-HOLD / not ours) and whether an untimed course counts as a section (default: no).
 4. **Proposal** – the board. Rows: **Not assigned** (top) · members · Part-timers (if any) · **ON-HOLD** (bottom);
    columns 8:00…11:00 | break | 1:00…6:00 | No time | Load | Sections | Preps.
    Drag a section to another member at the same hour (swap by dropping on a section), click a section for its menu
-   (To Not assigned · Change time · Back to saved place), click an empty cell for the sections that may go there,
+   (To Not assigned · Change time · Back to saved place · Delete from the timetable), click an empty cell for the sections that may go there,
    🔒 Lock a member, ↶ Undo, Propose again, Print (clean print), change list for registration under the board.
    **Phone / tablet**: tap a section (it is picked, allowed places light up, a bar shows ☰ Menu / ✕ Cancel), then tap
    the new place (same rules as dragging; a locked place shows the reason and the section stays picked). Below 700px
@@ -96,6 +98,7 @@ section, lets her adjust it by drag and drop, and produces an Excel file for reg
 | `side`, `term`, `lang`, `step` | Male / female, term number, `ar`/`en`, current step 1–5. |
 | `files` | `{faculty, official, current, prefs}` → `{name, b64, sheet}` (the uploaded workbooks, base64). |
 | `members[]` | `{id, name, required, coop, senior, prefTime ('any'/'am'/'pm'), first, last, allowed[], res[], never[], keepCurrent, prefs[3], comment}`. `res[i]` is the reserved section key for `allowed[i]` (`''` = Any time). |
+| `extra[]`, `deleted{}` | Sections added by hand `{key: 'CYSXXX-1', code, member}` (joined to `R.off` by `syncExtras()`, flag `extra`); sections deleted from the timetable. |
 | `msc[]` | Graduate Studies: `{id, member, program: 'Graduate Studies', hours}` (`member` `''` = Not assigned). |
 | `courses{}` | Per course code: `{cat: required/asneeded/parttime/onhold/none, counts, load?, compLoad?}`; `courseTouched{}` marks user edits. |
 | `secCat{}` | Per section override of the category (e.g. moved to ON-HOLD = `onhold`, to Not assigned = `required`). |

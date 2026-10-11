@@ -539,8 +539,9 @@
       const comp = off.companionOf[k] ? off.sections[off.companionOf[k]] : null;
       const cs = settings.courses[s.course] || {};
       const course = off.courses[s.course];
-      const noTime = course.timed === 0; // COOP / Senior style
-      const needsTime = s.hour == null && !noTime;
+      const extra = !!s.extra; // a course added by hand (not in the official file): No time until she gives it an hour
+      const noTime = extra ? proposed[k] == null : course.timed === 0; // COOP / Senior style
+      const needsTime = !extra && s.hour == null && !noTime;
       const cat = (settings.secCat && settings.secCat[k]) || cs.cat || 'required';
       const officialHour = s.hour;
       const ph = proposed[k];
@@ -562,14 +563,14 @@
         } else [1, 2, 3, 4].forEach((d) => pattern.add(d));
         slots = [...pattern].map((d) => d * 100 + ph);
       }
-      const load = cs.load != null ? cs.load : noTime ? 0 : Math.min(3, s.crd || 3);
+      const load = cs.load != null ? cs.load : extra ? 3 : noTime ? 0 : Math.min(3, s.crd || 3);
       const compLoad = comp ? (cs.compLoad != null ? cs.compLoad : noTime ? 0 : 0.5) : 0;
       secs[k] = {
         key: k, course: s.course, sec: s.sec, name: s.courseName, prefix: course.prefix,
         comp: comp ? comp.key : null, compAct: comp ? comp.activity : null,
-        officialHour, hour, proposed: ph != null, needsTime, noTime,
+        officialHour, hour, proposed: ph != null && !extra, needsTime, noTime, extra,
         slots: [...new Set(slots)], cat,
-        counts: noTime ? cs.counts === true : true,
+        counts: extra || !noTime ? true : cs.counts === true,
         load, compLoad,
       };
     });
@@ -581,6 +582,7 @@
     const list = (m.allowed || []).map(normCourse).filter(Boolean);
     const never = (m.never || []).map(normCourse).filter(Boolean);
     if (never.some((x) => x === sec.course || x === sec.prefix)) return false;
+    if (sec.extra) return true;
     if (sec.noTime) return list.includes(sec.course); // COOP/Senior only where explicitly allowed
     if (!list.length) return true;
     return list.some((x) => x === sec.course || x === sec.prefix);

@@ -98,7 +98,13 @@ the check table and Is Reg.
     "COURSE CODE", "START" / "CLASS TIME" such as 8:00-8:50, "INSTRUCTOR" / "Lecturer's NAME", "ROOM/ Loc."),
     headings may span two rows, title rows above are skipped, a note in the room column is not a room. The
     preferences form also accepts "1st choice", "Preference 1", "Name". Test `18_other_layout.js`. (2026-10-11 a)
+33. **Course not in the file + Delete**: in a member's *Edit limits*, "Course not in the file" adds sections of a course
+    the official file does not have (e.g. `CYSXXX`, 1–4 sections, keys `CYSXXX-1`…). They sit in his No time column,
+    count as sections (load 3), move to any hour / member / Not assigned / ON-HOLD, and are not in the email to
+    registration nor in Time requests; saved in the settings file. Every section's menu has **Delete from the
+    timetable** (an official section is hidden via `S.deleted`, an added one removed); Undo brings it back.
+    Test `19_extra_course.js`. (2026-10-11 b)
 
 Testing: Chromium (Playwright) with synthetic files in the male-file layout (male and female projects);
 LibreOffice recalculation 0 formula errors. Not yet tested with the real `262 sechd/male/` files.
-Cache tag ?v=20261011a.
+Cache tag ?v=20261011b.
