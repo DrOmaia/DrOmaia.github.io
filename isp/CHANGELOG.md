@@ -94,7 +94,11 @@ the check table and Is Reg.
 
 31. **Open buttons accept either file**: "Open a saved project" with a settings file applies the settings, and "Open
     saved settings" with a project file opens the project (a file saved with a BOM is read too). (t)
+32. **Official file in other layouts**: column names are matched loosely ("SECTION" / "SECTION NO.", "COURSE" /
+    "COURSE CODE", "START" / "CLASS TIME" such as 8:00-8:50, "INSTRUCTOR" / "Lecturer's NAME", "ROOM/ Loc."),
+    headings may span two rows, title rows above are skipped, a note in the room column is not a room. The
+    preferences form also accepts "1st choice", "Preference 1", "Name". Test `18_other_layout.js`. (2026-10-11 a)
 
 Testing: Chromium (Playwright) with synthetic files in the male-file layout (male and female projects);
 LibreOffice recalculation 0 formula errors. Not yet tested with the real `262 sechd/male/` files.
-Cache tag ?v=20261010t.
+Cache tag ?v=20261011a.

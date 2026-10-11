@@ -455,7 +455,7 @@
 
   async function buildIsReg(wb, ctx, status, link) {
     const off = ctx.off;
-    const ws = wb.addWorksheet('Is Reg', { views: [{ state: 'frozen', ySplit: off.headerRow }] });
+    const ws = wb.addWorksheet('Is Reg', { views: [{ state: 'frozen', ySplit: off.headerEnd || off.headerRow }] });
     const src = ctx.officialWorkbook && ctx.officialWorkbook.getWorksheet(off.sheetName);
     const instrCol = off.cols.instructor != null ? off.cols.instructor + 1 : (src ? src.columnCount + 1 : 12);
     const lastSrcCol = Math.max(instrCol, src ? src.columnCount : 11);

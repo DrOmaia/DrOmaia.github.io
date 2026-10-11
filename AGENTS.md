@@ -88,6 +88,9 @@ section, lets her adjust it by drag and drop, and produces an Excel file for reg
    - Faculty list (e.g. `Total Sections.xlsx`): name, required sections, optional COOP / Senior hours.
    - Official file from Admissions & Registration (e.g. `T262_CCIS_TIMETABLE.xlsx`): sheet `IS` is read
      (SECTION, COURSE, ACTIVITY, START, DAYS, ROOMS, INSTRUCTOR…); all sheets are used for free-room suggestions.
+     Any layout works if it has a section, a course code and a time column: names are matched loosely
+     (`OFFICIAL_COLS` in `engine.js`: "SECTION NO.", "COURSE CODE", "CLASS TIME" 8:00-8:50, "Lecturer's NAME"…),
+     headings may span two rows, title rows above them are skipped.
    - Current-term timetable grid (e.g. `261 male timetable.xlsx`, or this tool's own Excel): names in column A,
      hours 8…6 in the header row. Used to keep each member's current courses.
    - Optional Google-Form preferences: 1st/2nd/3rd preferred course, morning/afternoon, comments.

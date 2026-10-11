@@ -117,27 +117,49 @@
   const normCourse = (s) => String(s || '').toUpperCase().replace(/\s+/g, '');
 
   // ---------- official file ----------
+  /* Column names are matched loosely (case, spaces and punctuation ignored) so that different layouts from
+     Admissions & Registration work, e.g. "SECTION" or "SECTION NO.", "COURSE" or "COURSE CODE",
+     "START" or "CLASS TIME" (8:00-8:50), "INSTRUCTOR" or "Lecturer's NAME"; a heading may span two rows. */
   const OFFICIAL_COLS = {
-    section: /^section$|^sec(tion)?\s*(no|#)?$/i,
-    course: /^course$|^course\s*(code|no)$/i,
-    courseName: /course[_\s]*name|title/i,
-    activity: /activity|type/i,
-    crd: /crd|credit/i,
-    start: /^start/i,
-    end: /^end/i,
-    days: /^days?$/i,
-    rooms: /^rooms?$/i,
-    instructor: /instructor/i,
+    section: /^(section|sec|sect)( ?(no|num|number|#))?$/,
+    course: /^course( ?(code|no|num|number|#))?$/,
+    courseName: /course name|title/,
+    activity: /activity|type/,
+    crd: /crd|credit/,
+    start: /^start|^(class )?times?$/,
+    end: /^end/,
+    days: /^days?$/,
+    rooms: /^(rooms?|room loc|room location|location)$/,
+    instructor: /instructor|lecturer|teacher|professor/,
   };
+  const headText = (v) => txt(v).toLowerCase().replace(/[^a-z0-9#]+/g, ' ').trim();
+  function headerCols(cells) {
+    const cols = {};
+    cells.forEach((s, c) => {
+      if (!s) return;
+      for (const k of Object.keys(OFFICIAL_COLS)) if (cols[k] == null && OFFICIAL_COLS[k].test(s)) { cols[k] = c; break; }
+    });
+    return cols;
+  }
   function findHeader(rows, need) {
-    for (let r = 0; r < Math.min(rows.length, 15); r++) {
-      const cols = {};
-      (rows[r] || []).forEach((v, c) => {
-        const s = txt(v);
-        if (!s) return;
-        for (const k of Object.keys(OFFICIAL_COLS)) if (cols[k] == null && OFFICIAL_COLS[k].test(s)) { cols[k] = c; break; }
-      });
-      if (need.every((k) => cols[k] != null)) return { row: r, cols };
+    const n = Math.min(rows.length, 20);
+    const ok = (cols) => need.every((k) => cols[k] != null);
+    for (let r = 0; r < n; r++) {
+      const cols = headerCols((rows[r] || []).map(headText));
+      if (!ok(cols)) continue;
+      // a second heading row under it ("NO.", "CODE") is part of the heading, not data
+      const next = rows[r + 1] || [];
+      const more = next.some((v) => txt(v)) && !/^[A-Z]{2,4}\d{3}$/.test(normCourse(txt(next[cols.course])));
+      return { row: r, last: more ? r + 1 : r, cols };
+    }
+    // headings written on two rows ("SECTION" / "NO.")
+    for (let r = 0; r < n; r++) {
+      const one = (rows[r] || []).map(headText), two = (rows[r + 1] || []).map(headText);
+      if (!one.some(Boolean) || !two.some(Boolean)) continue;
+      const both = [];
+      for (let c = 0; c < Math.max(one.length, two.length); c++) both.push([one[c], two[c]].filter((x, i, a) => x && a.indexOf(x) === i).join(' '));
+      const cols = headerCols(both);
+      if (ok(cols)) return { row: r, last: r + 1, cols };
     }
     return null;
   }
@@ -154,7 +176,8 @@
       const sec = txt(row[cols.section]);
       if (!course || !sec || !/^[A-Z]{2,4}\d{3}$/.test(course)) continue;
       const act = txt(row[cols.activity]);
-      const room = txt(row[cols.rooms]);
+      let room = txt(row[cols.rooms]);
+      if (room.split(' ').length > 3) room = ''; // a note written in the room column is not a room
       rows.push({
         excelRow: r + 1,
         course, sec: sec.replace(/\.0$/, ''),
@@ -170,7 +193,7 @@
         instructor: cols.instructor != null ? txt(row[cols.instructor]) : '',
       });
     }
-    return { headerRow: h.row + 1, cols, rows };
+    return { headerRow: h.row + 1, headerEnd: h.last + 1, cols, rows };
   }
 
   /** Parse the official timetable workbook: sections of the chosen sheet + rooms used in every sheet. */
@@ -240,7 +263,7 @@
     const allRooms = {};
     roomUse.forEach((u) => { allRooms[u.room] = /CLAB/i.test(u.room) ? 'lab' : 'room'; });
     return {
-      sheetName, headerRow: main.headerRow, cols: main.cols, rows: main.rows, rowCount: sheet.rows.length,
+      sheetName, headerRow: main.headerRow, headerEnd: main.headerEnd, cols: main.cols, rows: main.rows, rowCount: sheet.rows.length,
       sections, lectures, companionOf, lectureOf, courses, roomUse, allRooms,
       keySheets: Object.fromEntries(Object.entries(keySheets).map(([k, v]) => [k, [...v]])),
     };
@@ -367,18 +390,18 @@
     if (!sheet) throw new Error('sheet-not-found');
     const rows = sheet.rows;
     let hr = -1, cols = {};
-    for (let r = 0; r < Math.min(rows.length, 5); r++) {
+    for (let r = 0; r < Math.min(rows.length, 10); r++) {
       const c = {};
       (rows[r] || []).forEach((v, i) => {
         const s = txt(v).toLowerCase();
         if (!s) return;
-        if (c.name == null && /full\s*name|^name$/.test(s)) c.name = i;
+        if (c.name == null && /full\s*name|^(your\s*)?name$|^الاسم/.test(s)) c.name = i;
         else if (c.email == null && /e-?mail/.test(s)) c.email = i;
-        else if (c.p1 == null && /first\s*pref/.test(s)) c.p1 = i;
-        else if (c.p2 == null && /second\s*pref/.test(s)) c.p2 = i;
-        else if (c.p3 == null && /third\s*pref/.test(s)) c.p3 = i;
+        else if (c.p1 == null && /(first|1st)\s*(pref|choice)|(pref\w*|choice)\s*(1|one)\b/.test(s)) c.p1 = i;
+        else if (c.p2 == null && /(second|2nd)\s*(pref|choice)|(pref\w*|choice)\s*(2|two)\b/.test(s)) c.p2 = i;
+        else if (c.p3 == null && /(third|3rd)\s*(pref|choice)|(pref\w*|choice)\s*(3|three)\b/.test(s)) c.p3 = i;
         else if (c.sup == null && /supervis/.test(s)) c.sup = i;
-        else if (c.time == null && /(morning|afternoon|class time)/.test(s)) c.time = i;
+        else if (c.time == null && /(morning|afternoon|class time|preferred time|time pref)/.test(s)) c.time = i;
         else if (c.comment == null && /comment|note/.test(s)) c.comment = i;
       });
       if (c.name != null && (c.p1 != null || c.time != null)) { hr = r; cols = c; break; }

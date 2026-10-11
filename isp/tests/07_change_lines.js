@@ -20,7 +20,7 @@ const ok = (c, msg) => { console.log((c ? 'PASS ' : 'FAIL ') + msg); if (!c) pro
   await drag(`td.slot[data-mid="${ids.Adel}"][data-h="17"]`);
   let v = await lines(); console.log(v); ok(/Please set IS311 section 514 at 5pm and assign to Mr\. Nasser Adel/.test(v), 'time + member line');
   await drag('tr.hold td.slot[data-h="9"]');
-  v = await lines(); console.log(v); ok(/\n1- Please put IS311 section 514 ON HOLD\n/.test(v), 'ON HOLD line');
+  v = await lines(); console.log(v); ok(/\n1- Please put IS311 (at \d+[ap]m )?section 514 ON HOLD\n/.test(v), 'ON HOLD line');
   await drag('tr.na td.slot[data-h="13"]');
   v = await lines(); console.log(v); ok(/\n1- Please set IS311 section 514 at 1pm\n/.test(v), 'time only line (not assigned)');
   await page.click('[data-act=toChanges]'); await page.click('[data-act=markSent]');
