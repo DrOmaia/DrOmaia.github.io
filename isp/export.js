@@ -331,8 +331,8 @@
 
     // ---------- Is Reg ----------
     buildClean(clean, ws, { SH, title: `IS Department – ${sideName} Teaching Timetable – Term ${ctx.term}`, blocks, rowsOfMember, LG, courseList });
-    await buildIsReg(wb, ctx, status, { SH, chkRow });
-    noticeFooter(wb.getWorksheet('Is Reg'));
+    if (!ctx.off.synthetic) await buildIsReg(wb, ctx, status, { SH, chkRow }); // no official file: nothing to fill
+    if (wb.getWorksheet('Is Reg')) noticeFooter(wb.getWorksheet('Is Reg'));
     // ---------- Time requests ----------
     buildTimeRequests(wb, ctx, status, { SH, chkFirst, chkLast });
     noticeFooter(wb.getWorksheet('Time requests'));

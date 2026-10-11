@@ -330,6 +330,75 @@
     return { sheetName, rows: out };
   }
 
+  // ---------- a timetable made by hand (same layout as the clean "Timetable" tab) ----------
+  /* Names in column A (a name starts a block of rows), hours in the header row, a "No time" column; cells hold
+     section keys such as "IS201-498 (L)", "IS201-499 (T)", "CYSXXX-1" or "Graduate Studies".
+     Rows named Not assigned / ON-HOLD / Part-timers are read as such. → {sheetName, rows:[{name, kind, items, grad}]} */
+  const MANUAL_RE = /([A-Za-z]{2,5})\s*([0-9X]{3})\s*-\s*([0-9A-Za-z]{1,6})(?:\s*\(\s*(L|T|Lab|Tut)\s*\))?/gi;
+  function parseManual(sheets, sheetName) {
+    const sheet = sheets.find((s) => s.name === sheetName);
+    if (!sheet) throw new Error('sheet-not-found');
+    const rows = sheet.rows;
+    const gh = findGridHeader(rows);
+    if (!gh) throw new Error('not-timetable');
+    const { headerRow, colHour } = gh;
+    const blocks = [];
+    let cur = null;
+    for (let r = headerRow + 1; r < rows.length; r++) {
+      const row = rows[r] || [];
+      const name = txt(row[0]);
+      if (name && /colou?r key|course colou?rs|matching summary|every section/i.test(name)) break;
+      if (name) {
+        const kind = /not\s*assigned|unassigned|غير مسند/i.test(name) ? 'na' : /on.?hold/i.test(name) ? 'hold' : /part.?tim|متعاون/i.test(name) ? 'pt' : 'member';
+        cur = { name, kind, items: [], grad: 0 }; blocks.push(cur);
+      }
+      if (!cur) continue;
+      Object.entries(colHour).forEach(([c, h]) => {
+        const s = txt(row[+c]);
+        if (!s) return;
+        if (/graduate|ms[c]?\s*\/\s*phd|^msc|^phd/i.test(s)) { cur.grad++; return; }
+        let m; MANUAL_RE.lastIndex = 0;
+        while ((m = MANUAL_RE.exec(s))) {
+          const act = (m[4] || '').toLowerCase();
+          cur.items.push({ course: (m[1] + m[2]).toUpperCase(), sec: m[3].toUpperCase(), act: act === 'lab' ? 'Lab' : act === 't' || act === 'tut' ? 'T' : act === 'l' ? 'L' : '', hour: h === 'none' ? null : h });
+        }
+      });
+    }
+    const out = blocks.filter((b) => b.items.length || b.grad || b.kind === 'member');
+    if (!out.some((b) => b.items.length)) throw new Error('not-timetable');
+    return { sheetName, rows: out };
+  }
+
+  /** No official file: the sections of a hand-made timetable become the official list (days: Sun–Wed). */
+  function offFromManual(man) {
+    const sections = {}, companionOf = {}, lectureOf = {}, courses = {}, lectures = [];
+    const add = (course, sec, act, hour) => {
+      const key = `${course}-${sec}`;
+      if (sections[key]) { if (hour != null && sections[key].hour == null) { sections[key].hour = hour; sections[key].hours = [hour]; sections[key].meetings = [{ days: [1, 2, 3, 4], hour, room: '', online: false, activity: act }]; } return key; }
+      sections[key] = { key, course, sec, secNum: parseInt(sec, 10), courseName: '', crd: 3, rows: [], activity: act, hour, hours: hour == null ? [] : [hour],
+        meetings: hour == null ? [] : [{ days: [1, 2, 3, 4], hour, room: '', online: false, activity: act }], excelRows: [] };
+      return key;
+    };
+    man.rows.forEach((r) => {
+      const ls = r.items.filter((i) => i.act !== 'T' && i.act !== 'Lab').map((i) => add(i.course, i.sec, 'L', i.hour));
+      r.items.filter((i) => i.act === 'T' || i.act === 'Lab').forEach((i) => {
+        const key = add(i.course, i.sec, i.act, i.hour), c = sections[key];
+        // a tutorial / lab goes with a lecture of the same course in the same row: number just before it, else same hour
+        const free = ls.filter((k) => sections[k].course === c.course && !companionOf[k]);
+        const lk = free.find((k) => sections[k].secNum === c.secNum - 1) || free.find((k) => sections[k].hour === c.hour);
+        if (lk) { companionOf[lk] = key; lectureOf[key] = lk; } else c.activity = 'L';
+      });
+    });
+    Object.values(sections).forEach((x) => {
+      if (lectureOf[x.key]) return;
+      lectures.push(x.key);
+      const c = courses[x.course] || (courses[x.course] = { code: x.course, name: '', crd: 3, lectures: [], timed: 0, untimed: 0, prefix: x.course.replace(/\d+$/, '') });
+      c.lectures.push(x.key); if (x.hour != null) c.timed++; else c.untimed++;
+    });
+    return { sheetName: man.sheetName, headerRow: 1, cols: {}, rows: [], rowCount: 0, synthetic: true,
+      sections, lectures, companionOf, lectureOf, courses, roomUse: [], allRooms: {}, keySheets: {} };
+  }
+
   // ---------- any department timetable, read as it is (for the "format for printing" service) ----------
   /** Reads a grid timetable without changing any text: names, hour cells, No time and the columns after them. */
   function readGridRaw(sheets, sheetName) {
@@ -947,7 +1016,7 @@
   return {
     HOURS, DAY_NAMES, hourLabel, shortRoom, defaultCourseSettings,
     cellValue, txt, sheetsFromExcelJS, loadWorkbook, parseHour, headerHour, parseDays, normCourse,
-    looksOfficial, parseOfficial, parseCurrent, parsePrefs, parseFaculty, readGridRaw, courseIn,
+    looksOfficial, parseOfficial, parseCurrent, parseManual, offFromManual, findGridHeader, parsePrefs, parseFaculty, readGridRaw, courseIn,
     nameTokens, nameScore, matchNames,
     buildModel, memberAllows, mscOf, inWindow, memberCost, propose, evaluate, officialNotes, freeRooms, describeMeetings,
     WEIGHTS: W,

@@ -9,7 +9,7 @@
   // ---------------- state ----------------
   const blank = () => ({
     app: 'isp-timetable', v: 1, side: null, term: '', lang: (S0() || {}).lang || 'ar', step: 1,
-    files: {}, members: [], courses: {}, courseTouched: {}, secCat: {}, msc: [], extra: [], deleted: {},
+    files: {}, members: [], courses: {}, courseTouched: {}, secCat: {}, msc: [], extra: [], deleted: {}, manual: null,
     currentMap: {}, prefsMap: {}, mapManual: {}, hoursSource: '', assign: {}, proposed: {}, autoTime: {}, pins: {}, bans: {},
     decisions: {}, forbidden: {}, built: false, baseline: null, savedAt: null, ref: null, sent: null,
   });
@@ -53,6 +53,7 @@
     }
     if (kind === 'prefs') return (sheets.find((s) => /response|form/i.test(s.name)) || sheets[0]).name;
     if (kind === 'faculty') return (sheets.find((s) => !s.hidden) || sheets[0]).name;
+    if (kind === 'manual') return (sheets.find((s) => /^timetable$/i.test(s.name.trim())) || sheets.find((s) => !s.hidden && E.findGridHeader(s.rows)) || sheets[0]).name;
     return sheets[0].name;
   }
   async function readFile(kind) {
@@ -80,6 +81,12 @@
       }
       catch (e) { R.err.official = 'notOfficial'; }
     }
+    // a timetable made by hand; with no official file its sections are the list of sections
+    R.man = null;
+    if (R.sheets.manual && !R.err.manual) {
+      try { R.man = E.parseManual(R.sheets.manual, S.files.manual.sheet); } catch (e) { R.err.manual = 'notManual'; }
+    }
+    if (!R.off && R.man && !S.files.official) { R.off = E.offFromManual(R.man); R.notes = {}; }
     // current
     R.cur = null; R.curScore = {};
     if (R.sheets.current && !R.err.current) {
@@ -119,7 +126,7 @@
       if (!m.prefTimeTouched) m.prefTime = p.time; m.fromPrefs = true;
     });
   }
-  async function reparseAll() { for (const k of ['faculty', 'official', 'current', 'prefs']) await readFile(k); parseAll(); }
+  async function reparseAll() { for (const k of ['faculty', 'official', 'current', 'prefs', 'manual']) await readFile(k); parseAll(); }
   /** Older project files: "final" becomes locked, "reject" / "review" are dropped; every "Teaches only" entry gets a time choice. */
   function normalize() {
     S.decisions = S.decisions || {};
@@ -316,6 +323,72 @@
   }
   const clearUndo = () => { ui.undo = []; };
 
+  // ---------------- a timetable made by hand: it becomes the board as it is (Files step or Proposal page) ----------------
+  /** Read R.man into a plan by row name: {plan: {key: [row, hour]}, grad: {row: n}, extra: [{key, code, row}]}. */
+  function manualPlan() {
+    const off = R.off, plan = {}, grad = {}, extra = [];
+    if (!off) return null;
+    R.man.rows.forEach((r) => {
+      const row = r.kind === 'member' ? r.name : r.kind === 'na' ? 'NA' : r.kind === 'hold' ? 'HOLD' : 'PT';
+      if (r.grad && r.kind === 'member') grad[row] = r.grad;
+      r.items.forEach((i) => {
+        const key = `${i.course}-${i.sec}`, o = off.sections[key];
+        if (o && !o.extra) {
+          const lk = off.lectureOf[key];
+          if (lk) { if (!plan[lk]) plan[lk] = [row, null]; return; } // tutorial / lab: moves with its lecture
+          plan[key] = [row, i.hour != null && i.hour !== o.hour ? i.hour : null];
+          return;
+        }
+        if (i.act === 'T' || i.act === 'Lab' || plan[key]) return;
+        extra.push({ key, code: i.course, row }); plan[key] = [row, i.hour]; // not in the official file: a course added by hand
+      });
+    });
+    return { name: (S.files.manual || {}).name || '', plan, grad, extra };
+  }
+  /** Row names of the plan → member ids (names not in the list become members with the number of sections they hold). */
+  function resolveManual() {
+    const names = [...new Set(Object.values(S.manual.plan).map((v) => v[0]).concat(Object.keys(S.manual.grad)))].filter((n) => !['NA', 'HOLD', 'PT'].includes(n));
+    const auto = E.matchNames(names, S.members, 0.6);
+    const ids = { NA: 'NA', HOLD: 'HOLD', PT: 'PT' }, fresh = [];
+    names.forEach((n) => {
+      let m = auto[n] && memberById(auto[n].id);
+      if (!m) { m = newMember(n); m.fromManual = true; S.members.push(m); fresh.push(m); }
+      ids[n] = m.id;
+    });
+    return { ids, fresh };
+  }
+  /** Put the hand-made timetable on the board as it is; it is also the start of the change list and the saved places. */
+  function applyManual() {
+    const p = S.manual; if (!p || !R.off) return;
+    const { ids } = resolveManual();
+    const mine = new Set(p.extra.map((x) => x.key));
+    S.extra = S.extra.filter((x) => !mine.has(x.key)).concat(p.extra.map((x) => ({ key: x.key, code: x.code, member: memberById(ids[x.row]) ? ids[x.row] : '' })));
+    syncExtras();
+    S.assign = {}; S.pins = {}; S.proposed = {}; S.autoTime = {}; S.bans = {}; S.secCat = {}; S.deleted = {};
+    Object.entries(p.plan).forEach(([k, [row, h]]) => {
+      const o = R.off.sections[k]; if (!o) return;
+      const to = ids[row];
+      if (h != null) S.proposed[k] = h;
+      if (to === 'HOLD') S.secCat[k] = 'onhold';
+      else if (to === 'PT') S.secCat[k] = 'parttime';
+      else if (to === 'NA') S.secCat[k] = 'required';
+      else if (memberById(to)) { S.assign[k] = to; const cat = (S.courses[o.course] || {}).cat; if (cat !== 'required' && cat !== 'asneeded') S.secCat[k] = 'required'; }
+    });
+    // official sections that are not in the table: Not assigned (unless the course is not the department's)
+    R.off.lectures.forEach((k) => { const cat = (S.courses[R.off.sections[k].course] || {}).cat; if (!p.plan[k] && (cat === 'parttime' || cat === 'onhold')) S.secCat[k] = 'required'; });
+    // reservations that disagree with the table (or are not in it) are dropped
+    S.members.forEach((m) => { m.res = (m.res || []).map((k) => (k && (!p.plan[k] || ids[p.plan[k][0]] !== m.id) ? '' : k)); });
+    // Graduate Studies cells
+    Object.entries(p.grad).forEach(([row, n]) => {
+      const id = ids[row]; const have = S.msc.filter((x) => x.member === id).length;
+      for (let i = have; i < n; i++) S.msc = S.msc.concat([{ id: uid(), member: id, program: 'Graduate Studies', hours: 3 }]);
+    });
+    // members added from the table: their number of sections is what they hold
+    const fresh = S.members.filter((m) => m.fromManual && m.required === '');
+    if (fresh.length) { const { ev } = snapshot(); fresh.forEach((m) => { m.required = (ev.per[m.id] || {}).counted || 0; }); }
+    S.built = true; S.ref = null; setRef(); S.sent = null; markSent(true);
+  }
+
   // ---------------- proposal ----------------
   function runPropose(extra) {
     const secs = model();
@@ -355,7 +428,7 @@
     if (step <= 1) return true;
     if (!S.side || !S.term) return false;
     if (step === 2) return true;
-    if (!R.off || !(R.cur || S.baseline) || !S.members.length) return false;
+    if (!R.off || !(R.cur || S.baseline || R.man) || !S.members.length) return false;
     return true;
   }
   function render() {
@@ -532,6 +605,7 @@
       if (kind === 'official' && R.off) { const ls = R.off.lectures.filter((k) => !R.off.sections[k].extra), lec = ls.length, c = Object.values(R.off.courses).filter((x) => !x.extra).length, u = ls.filter((k) => R.off.sections[k].hour == null).length; sum = t('offSummary', lec, c, u); }
       if (kind === 'current' && R.cur) { const rows = R.cur.rows.filter((r) => r.kind === 'member'); sum = t('curSummary', rows.length, rows.filter((r) => S.currentMap[r.name]).length); }
       if (kind === 'prefs' && R.prefs) sum = t('prefSummary', R.prefs.list.length, R.prefs.list.filter((p) => S.prefsMap[p.name]).length);
+      if (kind === 'manual' && R.man) sum = t('manSummary', R.man.rows.filter((r) => r.kind === 'member').length, R.man.rows.reduce((a, r) => a + r.items.filter((i) => i.act !== 'T' && i.act !== 'Lab').length, 0));
       if (kind === 'faculty' && R.fac) sum = t('facSummary', S.members.length, S.members.reduce((a, m) => a + (Number(m.required) || 0), 0));
       body = `<div class="loaded"><span class="fname">${esc(f.name)}</span>
         ${sheets.length > 1 ? `<label class="small muted">${esc(t('sheet'))} <select class="input" data-chg="sheet" data-kind="${kind}">${sheets.map((s) => `<option value="${esc(s.name)}" ${s.name === f.sheet ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></label>` : ''}
@@ -596,6 +670,7 @@
       ${uploadBlock('official', 2, t('f1Title'), t('f1Req'), t('f1From'))}
       ${uploadBlock('current', 3, t('f2Title'), t('f2Req'), t('f2From'))}
       ${uploadBlock('prefs', 4, t('f3Title'), t('f3Req'), t('f3From'))}
+      ${uploadBlock('manual', 5, t('f4Title'), t('f3Req'), t('f4From'))}
     </div>`;
   }
 
@@ -785,7 +860,7 @@
   }
   function viewProposal() {
     if (!R.off) return `<p>${esc(t('needOfficial'))}</p>`;
-    if (!S.built && !ui.building) { setTimeout(() => build(true), 0); }
+    if (!S.built && !ui.building) { if (S.manual) applyManual(); else setTimeout(() => build(true), 0); }
     if (S.built && !ui.building && !S.sent) { markSent(true); persist(); } // the first version: changes are counted from here
     const { secs, assign, ev } = snapshot();
     const bad = new Set();
@@ -865,7 +940,7 @@
     });
     return `<h1 class="print-title">IS Department – ${S.side === 'female' ? 'Female' : 'Male'} Teaching Timetable – Term ${esc(S.term)}</h1>
     <div class="page-head"><div><h1>${esc(t('propTitle'))}</h1><p>${esc(t('rebuildHint'))}</p></div>
-      <div class="row"><button class="btn" type="button" data-act="undo" ${ui.undo.length ? `title="${esc(t('undoTip', t(ui.undo[ui.undo.length - 1].key, ...ui.undo[ui.undo.length - 1].args)))}"` : 'disabled'}>↶ ${esc(t('undo'))}</button>${moved.size ? `<button class="btn" type="button" data-act="refAll" title="${esc(t('refAllTip'))}">↺ ${esc(t('refAll', moved.size))}</button>` : ''}<button class="btn" type="button" data-act="toChanges">✉ ${esc(t('chgBtn', changeLines().length))}</button><button class="btn" type="button" data-act="print">${esc(t('printBtn'))}</button><button class="btn primary" type="button" data-act="rebuild" ${ui.building ? 'disabled' : ''}>${esc(ui.building ? t('building') : t('rebuild'))}</button></div></div>
+      <div class="row"><button class="btn" type="button" data-act="undo" ${ui.undo.length ? `title="${esc(t('undoTip', t(ui.undo[ui.undo.length - 1].key, ...ui.undo[ui.undo.length - 1].args)))}"` : 'disabled'}>↶ ${esc(t('undo'))}</button>${moved.size ? `<button class="btn" type="button" data-act="refAll" title="${esc(t('refAllTip'))}">↺ ${esc(t('refAll', moved.size))}</button>` : ''}${S.manual ? `<button class="btn" type="button" data-act="manualBack" title="${esc(t('manBackTip'))}">↺ ${esc(t('manBack'))}</button>` : ''}<button class="btn" type="button" data-act="manualPick" title="${esc(t('manPickTip'))}">📄 ${esc(t('manPick'))}</button><input type="file" id="manualInput" accept=".xlsx,.xlsm" data-file="manual" hidden><button class="btn" type="button" data-act="toChanges">✉ ${esc(t('chgBtn', changeLines().length))}</button><button class="btn" type="button" data-act="print">${esc(t('printBtn'))}</button><button class="btn primary" type="button" data-act="rebuild" ${ui.building ? 'disabled' : ''}>${esc(ui.building ? t('building') : t('rebuild'))}</button></div></div>
     <div class="stats">
       ${S.built ? healthCard(hh, delta) : ''}
       <div class="stat ${counted !== reqTotal ? 'warn' : 'good'}"><b>${counted} / ${reqTotal}</b>${esc(t('sAssigned'))}</div>
@@ -1433,10 +1508,12 @@
     if (kind === 'prefs') S.prefsMap = {};
     if (kind === 'current' || kind === 'prefs') Object.keys(S.mapManual).forEach((k) => { if (k.startsWith(kind + '|')) delete S.mapManual[k]; });
     main.querySelectorAll('[data-drop]').forEach((d) => { if (d.dataset.drop === kind) d.textContent = t('reading'); });
-    clearUndo();
+    if (kind === 'manual' && S.built) remember('uManual'); else clearUndo();
     await readFile(kind); parseAll();
     if (kind === 'faculty' && R.fac) { S.hoursSource = R.fac.hasCoop || R.fac.hasSenior ? 'file' : 'manual'; applyFaculty(); parseAll(); }
+    if (kind === 'manual') { S.manual = R.man ? manualPlan() : null; if (S.manual) resolveManual(); }
     S.built = false; persist(); render();
+    if (kind === 'manual' && R.man && S.step === 4) toast(t('manDone'));
   }
   function startProject() {
     const side = ui.pickSide || S.side;
@@ -1532,6 +1609,8 @@
       case 'fmtClose': ui.view = null; render(); window.scrollTo(0, 0); break;
       case 'fmtPrint': document.body.classList.add('print-fmt'); window.print(); break;
       case 'fmtExcel': try { await fmtExcel(); } catch (e) { console.error(e); toast('Excel: ' + e.message); } break;
+      case 'manualBack': remember('uManual'); applyManual(); persist(); render(); break;
+      case 'manualPick': $('#manualInput').click(); break;
       case 'go': { const n = +d.step; if (n >= 1 && n <= 5 && canReach(n)) { S.step = n; persist(); render(); window.scrollTo(0, 0); main.focus({ preventScroll: true }); } break; }
       case 'pick': ui.pickSide = d.side; ui.termDraft = $('#termIn') ? $('#termIn').value : ui.termDraft; render(); break;
       case 'start': startProject(); break;
@@ -1539,7 +1618,7 @@
       case 'openSettings': $('#settingsInput').click(); break;
       case 'saveSettings': saveSettings(); break;
       case 'resumeAuto': { const saved = S0(); if (saved) { S = Object.assign(blank(), saved); normalize(); clearUndo(); await reparseAll(); render(); } break; }
-      case 'rmFile': clearUndo(); delete S.files[d.kind]; if (d.kind === 'current') S.currentMap = {}; if (d.kind === 'prefs') { S.prefsMap = {}; S.members.forEach((m) => { if (m.fromPrefs) { m.prefs = ['', '', '']; m.comment = ''; m.fromPrefs = false; } }); } await readFile(d.kind); parseAll(); S.built = false; persist(); render(); break;
+      case 'rmFile': clearUndo(); delete S.files[d.kind]; if (d.kind === 'manual') S.manual = null; if (d.kind === 'current') S.currentMap = {}; if (d.kind === 'prefs') { S.prefsMap = {}; S.members.forEach((m) => { if (m.fromPrefs) { m.prefs = ['', '', '']; m.comment = ''; m.fromPrefs = false; } }); } await readFile(d.kind); parseAll(); S.built = false; persist(); render(); break;
       case 'tab': ui.tab = d.tab; render(); break;
       case 'mOpen': ui.open[d.id] = !ui.open[d.id]; render(); break;
       case 'mUp': case 'mDown': { const i = S.members.findIndex((m) => m.id === d.id); const j = act === 'mUp' ? i - 1 : i + 1; if (j >= 0 && j < S.members.length) { [S.members[i], S.members[j]] = [S.members[j], S.members[i]]; persist(); render(); } break; }
@@ -1635,7 +1714,7 @@
     const c = el.dataset.chg; if (!c) return;
     const d = el.dataset;
     switch (c) {
-      case 'sheet': S.files[d.kind].sheet = el.value; if (d.kind === 'current') S.currentMap = {}; if (d.kind === 'prefs') S.prefsMap = {}; R.err[d.kind] = null; parseAll(); if (d.kind === 'faculty' && R.fac) { applyFaculty(); parseAll(); } S.built = false; break;
+      case 'sheet': S.files[d.kind].sheet = el.value; if (d.kind === 'current') S.currentMap = {}; if (d.kind === 'prefs') S.prefsMap = {}; R.err[d.kind] = null; parseAll(); if (d.kind === 'manual') { S.manual = R.man ? manualPlan() : null; if (S.manual) resolveManual(); } if (d.kind === 'faculty' && R.fac) { applyFaculty(); parseAll(); } S.built = false; break;
       case 'map': (d.kind === 'current' ? S.currentMap : S.prefsMap)[d.name] = el.value; S.mapManual[d.kind + '|' + d.name] = true; if (d.kind === 'current') parseAll(); if (d.kind === 'prefs') applyPrefs(); if (d.kind === 'current') R.curScore[d.name] = 1; else R.prefScore[d.name] = 1; break;
       case 'mf': {
         const m = memberById(d.id); if (!m) break;

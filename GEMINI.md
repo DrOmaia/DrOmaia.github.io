@@ -84,7 +84,7 @@ section, lets her adjust it by drag and drop, and produces an Excel file for reg
 
 1. **Start** – choose Male / Female and the new term number; or open a saved project; or open a saved settings file.
    Extra service on this page: "Format a timetable for printing" (any department grid → coloured printable Excel).
-2. **Files** – four Excel files:
+2. **Files** – Excel files (the first four as before, the fifth optional):
    - Faculty list (e.g. `Total Sections.xlsx`): name, required sections, optional COOP / Senior hours.
    - Official file from Admissions & Registration (e.g. `T262_CCIS_TIMETABLE.xlsx`): sheet `IS` is read
      (SECTION, COURSE, ACTIVITY, START, DAYS, ROOMS, INSTRUCTOR…); all sheets are used for free-room suggestions.
@@ -94,6 +94,10 @@ section, lets her adjust it by drag and drop, and produces an Excel file for reg
    - Current-term timetable grid (e.g. `261 male timetable.xlsx`, or this tool's own Excel): names in column A,
      hours 8…6 in the header row. Used to keep each member's current courses.
    - Optional Google-Form preferences: 1st/2nd/3rd preferred course, morning/afternoon, comments.
+   - Optional **my own timetable** (layout of the clean Timetable tab, `parseManual`): used as the board as it is
+     instead of the proposal (`manualPlan` / `applyManual`); with no official file its sections are the list
+     (`offFromManual`, days Sun–Wed, no Is Reg sheet). Also on the Proposal page: 📄 Upload my timetable,
+     ↺ My timetable (back to it after Propose again).
    Names are matched across files (fuzzy, editable "Who is who?").
 3. **Settings** – tabs *Members* and *Courses*, plus buttons **Save settings / Open saved settings**.
    Per member: required sections, COOP, Senior, preferred time, and **Edit limits**:
@@ -151,6 +155,7 @@ section, lets her adjust it by drag and drop, and produces an Excel file for reg
 | `files` | `{faculty, official, current, prefs}` → `{name, b64, sheet}` (the uploaded workbooks, base64). |
 | `members[]` | `{id, name, required, coop, senior, prefTime ('any'/'am'/'pm'), first, last, allowed[], res[], never[], keepCurrent, prefs[3], comment}`. `res[i]` is the reserved section key for `allowed[i]` (`''` = Any time). |
 | `extra[]`, `deleted{}` | Sections added by hand `{key: 'CYSXXX-1', code, member}` (joined to `R.off` by `syncExtras()`, flag `extra`); sections deleted from the timetable. |
+| `manual` | The hand-made timetable as a plan by row name: `{name, plan{key→[row, hour]}, grad{row→n}, extra[]}` (row = member name or `NA`/`HOLD`/`PT`). |
 | `msc[]` | Graduate Studies: `{id, member, program: 'Graduate Studies', hours}` (`member` `''` = Not assigned). |
 | `courses{}` | Per course code: `{cat: required/asneeded/parttime/onhold/none, counts, load?, compLoad?}`; `courseTouched{}` marks user edits. |
 | `secCat{}` | Per section override of the category (e.g. moved to ON-HOLD = `onhold`, to Not assigned = `required`). |

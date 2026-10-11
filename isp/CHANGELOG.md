@@ -104,7 +104,16 @@ the check table and Is Reg.
     registration nor in Time requests; saved in the settings file. Every section's menu has **Delete from the
     timetable** (an official section is hidden via `S.deleted`, an added one removed); Undo brings it back.
     Test `19_extra_course.js`. (2026-10-11 b)
+34. **My own timetable as the board**: a timetable made by hand in the layout of the clean *Timetable* tab (names in
+    column A, hours in the header row, No time column, cells `IS201-498 (L)` / `IS201-499 (T)` / `CYSXXX-1` /
+    `Graduate Studies`, rows Not assigned / ON-HOLD / Part-timers) can be uploaded in the Files step (5th, optional
+    file) or on the Proposal page (📄 Upload my timetable). It is put on the board as it is: another hour = time
+    request, sections not in the official file = courses added by hand, new names = members (their number of sections
+    = what they hold), official sections not in it = Not assigned, reservations that disagree are dropped. It is the
+    start of the change list and the saved places. Without the official file its sections become the list (days
+    Sun–Wed, no Is Reg sheet). Propose again redistributes; **↺ My timetable** puts it back. Test `20_manual_table.js`.
+    (2026-10-11 c)
 
 Testing: Chromium (Playwright) with synthetic files in the male-file layout (male and female projects);
 LibreOffice recalculation 0 formula errors. Not yet tested with the real `262 sechd/male/` files.
-Cache tag ?v=20261011b.
+Cache tag ?v=20261011c.
