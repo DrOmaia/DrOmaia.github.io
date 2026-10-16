@@ -26,7 +26,7 @@
     .suggest a { display:inline-block; margin-top:6px; font-size:1.15rem; }
     h2.sec { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:34px 2px 14px; font-size:1.05rem; letter-spacing:.02em; }
     h2.sec span { font-size:.95rem; color:var(--muted); font-weight:700; }
-    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr)); gap:14px; }
     .card { position:relative; display:flex; flex-direction:column; gap:6px; padding:20px 20px 18px; background:var(--card); border:1px solid var(--line); border-radius:18px; text-decoration:none; color:var(--text); box-shadow:var(--shadow); transition:transform .18s ease, border-color .18s ease; }
     .card:hover { transform:translateY(-3px); border-color:var(--gold); }
     .card:focus-visible, a:focus-visible { outline:3px solid var(--gold); outline-offset:3px; }
@@ -74,6 +74,13 @@
       <p>Learn Python in 30 days. Everything runs in your browser, nothing to install.</p>
       <span class="go">Open course →</span>
     </a>
+    <a class="card" href="/JavaScript/">
+      <span class="tag">30 days · JavaScript</span>
+      <h3>JS30</h3>
+      <div class="ar-line" lang="ar">تعلّم جافاسكربت في 30 يومًا</div>
+      <p>Learn JavaScript and build your own interactive web pages. Everything runs in your browser.</p>
+      <span class="go">Open course →</span>
+    </a>
     <a class="card" href="/ENG30/">
       <span class="tag">30 days · A2–B1</span>
       <h3>English in 30 Days</h3>
@@ -98,6 +105,7 @@
   var KNOWN = [
     { slug: "AI12", href: "/AI12/", label: "AI12 — AI for university teaching" },
     { slug: "PYthon", href: "/PYthon/", label: "Py30 — Learn Python in 30 days", alias: ["py30", "python"] },
+    { slug: "JavaScript", href: "/JavaScript/", label: "JS30 — Learn JavaScript in 30 days", alias: ["js30", "js", "javascript"] },
     { slug: "ENG30", href: "/ENG30/", label: "English in 30 Days", alias: ["eng", "english"] },
     { slug: "publications", href: "/publications.html", label: "Publications / المنشورات", alias: ["publication", "papers"] },
     { slug: "ar", href: "/ar/", label: "العربية" }
