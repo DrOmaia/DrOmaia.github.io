@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0F172A">
-<meta name="description" content="Hassan’s Pre-Med Academic Roadmap & Strategic Equivalency Portal — دليل حسان الأكاديمي للمسار الطبي والمعادلات: الأساسات، معادلة الأردن العلمية وفق نظام رقم (5) لسنة 2025/2026 (4 اختبارات × 25%، المعدل المدرسي 0%)، مصر، السعودية ETEC، خارطة الطريق صفاً بصف، المحاكي، والاستشارات النظامية.">
+<meta name="description" content="Hassan’s Pre-Med Admission Strategy — استراتيجية حسان للقبول في الطب: الأردن (نظام رقم 5 لسنة 2025/2026، 4 اختبارات × 25%)، مصر (تنسيق الطب، SAT 60%)، السعودية (جامعة الأمير سلطان)، جورجيا (برامج الطب بالإنجليزية). محاكي تفاعلي، خارطة طريق صفاً بصف، وملخص A4.">
 <link rel="canonical" href="https://dromaia.github.io/sat/">
-<title>Hassan’s Pre-Med Academic Roadmap & Strategic Equivalency Portal | دليل حسان الأكاديمي للمسار الطبي والمعادلات</title>
+<title>Hassan’s Pre-Med Admission Strategy | استراتيجية حسان للقبول في الطب</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,10 +14,10 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
-tailwind.config = { theme: { extend: {
+if(window.tailwind){tailwind.config = { theme: { extend: {
   colors: { navy: '#0F172A', canvas: '#F8FAFC' },
   fontFamily: { cairo: ['Cairo', 'sans-serif'], inter: ['Inter', 'sans-serif'] }
-} } };
+} } };}
 </script>
 <style>
   html{scroll-behavior:smooth;overflow-x:clip}
@@ -34,18 +34,29 @@ tailwind.config = { theme: { extend: {
   .card{background:#fff;border:1px solid #E2E8F0;border-radius:1.25rem;box-shadow:0 1px 2px rgba(15,23,42,.04),0 14px 34px -22px rgba(15,23,42,.22)}
   .eyebrow{color:#0F766E;font-size:.72rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
   .pill{display:inline-flex;align-items:center;gap:.5rem;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);border-radius:999px;padding:.45rem .9rem;font-size:.82rem;backdrop-filter:blur(8px)}
-  .badge-auto{animation:glow 2.2s ease-in-out infinite}
-  @keyframes glow{0%,100%{box-shadow:0 0 0 2px rgba(245,158,11,.35),0 0 14px rgba(245,158,11,.35)}50%{box-shadow:0 0 0 3px rgba(245,158,11,.75),0 0 30px rgba(245,158,11,.6)}}
-  /* pathway tree connectors */
-  .connector-v{width:3px;height:36px;margin-inline:auto;background:linear-gradient(#F59E0B,#0D9488)}
-  .connector-dot{width:12px;height:12px;border-radius:50%;background:#F59E0B;margin:-2px auto 0;box-shadow:0 0 0 4px rgba(245,158,11,.22)}
-  .branch{position:relative}
-  .branch::before{content:"";position:absolute;top:-22px;left:50%;width:3px;height:22px;background:#0D9488;transform:translateX(-50%)}
-  .tree{transition:.3s}
-  .tree.view-jo .col-sa,.tree.view-sa .col-jo{opacity:.35;filter:grayscale(1)}
-  @media (max-width:1023px){.tree.view-jo .col-sa,.tree.view-sa .col-jo{display:none}}
-  .sw{border:1px solid #CBD5E1;background:#fff;color:#334155;border-radius:999px;padding:.5rem 1rem;font-weight:700;font-size:.85rem;transition:.2s}
-  .sw[aria-pressed="true"]{background:#0F172A;color:#fff;border-color:#0F172A}
+  /* country tabs */
+  .tab{border:1px solid #CBD5E1;background:#fff;color:#334155;border-radius:999px;padding:.6rem 1.1rem;font-weight:800;font-size:.9rem;transition:.2s;display:inline-flex;align-items:center;gap:.5rem}
+  .tab[aria-selected="true"]{color:#fff;border-color:transparent;box-shadow:0 8px 20px -12px rgba(15,23,42,.6)}
+  .tab[data-tab="jo"][aria-selected="true"]{background:#0D9488}
+  .tab[data-tab="eg"][aria-selected="true"]{background:#B45309}
+  .tab[data-tab="sa"][aria-selected="true"]{background:#0F172A}
+  .tab[data-tab="ge"][aria-selected="true"]{background:#6D28D9}
+  .panel[hidden]{display:none}
+  .panel{animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  .c-jo{--c:#0D9488;--cl:#F0FDFA;--cb:#99F6E4}
+  .c-eg{--c:#B45309;--cl:#FFFBEB;--cb:#FCD34D}
+  .c-sa{--c:#0F172A;--cl:#F1F5F9;--cb:#CBD5E1}
+  .c-ge{--c:#6D28D9;--cl:#F5F3FF;--cb:#C4B5FD}
+  .ico{width:3rem;height:3rem;flex:none;border-radius:.75rem;display:grid;place-items:center;font-size:1.25rem;color:#fff;background:var(--c)}
+  .req{border:1px solid #E2E8F0;background:#F8FAFC;border-radius:.9rem;padding:.9rem}
+  .req b.w{display:inline-block;border-radius:999px;background:var(--c);color:#fff;font-size:.65rem;padding:.1rem .55rem;font-weight:800}
+  .syn{border:1px solid var(--cb);background:var(--cl);border-radius:.9rem;padding:.9rem;color:#0F172A}
+  /* segmented control */
+  .seg{display:inline-flex;border:1px solid #CBD5E1;border-radius:999px;overflow:hidden;background:#fff}
+  .seg button{padding:.4rem .85rem;font-size:.75rem;font-weight:800;color:#475569;border:0;background:transparent}
+  .seg button+button{border-inline-start:1px solid #E2E8F0}
+  .seg button[aria-pressed="true"]{background:#0F172A;color:#fff}
   /* status chips */
   .st{cursor:pointer;user-select:none;transition:.2s;border:1px solid transparent}
   .st[data-status="planned"]{background:#F1F5F9;color:#475569;border-color:#CBD5E1}
@@ -63,21 +74,20 @@ tailwind.config = { theme: { extend: {
   .meter>i{position:absolute;top:0;bottom:0;inset-inline-start:0;background:linear-gradient(90deg,#0D9488,#14B8A6);transition:width .5s}
   .marks{position:relative;height:0}
   .mark{position:absolute;top:-15px;width:2px;height:20px;background:#F59E0B;transform:translateX(-50%)}
-  .mark.teal{background:#0D9488}
   .mark.red{background:#EF4444}
-  /* accordion */
   details>summary{list-style:none}
   details>summary::-webkit-details-marker{display:none}
   details[open] .chev{transform:rotate(180deg)}
   .chev{transition:transform .25s}
   :focus-visible{outline:3px solid #F59E0B;outline-offset:3px}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
-  table th,table td{padding:.65rem .75rem;vertical-align:top}
+  table th,table td{padding:.6rem .75rem;vertical-align:top}
   .cell{display:inline-flex;align-items:center;gap:.25rem;border-radius:999px;padding:.15rem .6rem;font-size:.75rem;font-weight:700;white-space:nowrap}
   .cell.ideal{background:#0D9488;color:#fff}
   .cell.ok{background:#CCFBF1;color:#134E4A}
   .cell.soft{background:#F1F5F9;color:#475569}
   .cell.warn{background:#FEF3C7;color:#78350F}
+  .cell.bad{background:#FEE2E2;color:#7F1D1D}
   .print-only{display:none}
 
   /* ===== PRINT ENGINE: single-page A4 executive summary ===== */
@@ -85,22 +95,24 @@ tailwind.config = { theme: { extend: {
   @media print{
     body>*:not(#printSummary){display:none!important}
     body{background:#fff!important;color:#111!important}
-    #printSummary{display:block!important;color:#111;font-size:10px;line-height:1.3;width:100%}
+    #printSummary{display:block!important;color:#111;font-size:9.5px;line-height:1.3;width:100%}
     #printSummary .p-head{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:2px solid #0F172A;padding-bottom:5px;margin-bottom:6px}
     #printSummary h1{font-size:15px;margin:0;color:#0F172A}
     #printSummary .p-sub{margin:2px 0 0;color:#475569;font-size:8.5px}
     #printSummary .p-verdict{background:#0F172A;color:#fff;border-radius:6px;padding:5px 9px;font-weight:800;font-size:9px;white-space:nowrap;print-color-adjust:exact;-webkit-print-color-adjust:exact}
     #printSummary .p-grid2{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:5px}
     #printSummary .p-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:5px}
+    #printSummary .p-grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:5px}
     #printSummary .p-box{border:1px solid #CBD5E1;border-radius:6px;padding:5px 7px;break-inside:avoid}
     #printSummary .p-box b.t{display:block;font-size:9.5px;color:#0F172A;margin-bottom:2px}
     #printSummary .p-box p{margin:1px 0}
     #printSummary .p-lvl{font-size:7px;letter-spacing:.14em;text-transform:uppercase;color:#0F766E;font-weight:800}
-    #printSummary .p-teal{border-color:#0D9488}
-    #printSummary .p-amber{border-color:#F59E0B;background:#FFFBEB;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+    #printSummary .p-jo{border-color:#0D9488;background:#F0FDFA;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+    #printSummary .p-eg{border-color:#F59E0B;background:#FFFBEB;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+    #printSummary .p-sa{border-color:#0F172A;background:#F1F5F9;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+    #printSummary .p-ge{border-color:#6D28D9;background:#F5F3FF;print-color-adjust:exact;-webkit-print-color-adjust:exact}
     #printSummary .p-red{border-color:#EF4444;background:#FEF2F2;print-color-adjust:exact;-webkit-print-color-adjust:exact}
-    #printSummary .p-green{border-color:#0D9488;background:#F0FDFA;print-color-adjust:exact;-webkit-print-color-adjust:exact}
-    #printSummary .chip{display:inline-block;border:1px solid #CBD5E1;border-radius:999px;padding:0 5px;font-size:8px;margin:1px 1px 0 0;background:#fff}
+    #printSummary .chip{display:inline-block;border:1px solid #CBD5E1;border-radius:999px;padding:0 5px;font-size:7.5px;margin:1px 1px 0 0;background:#fff}
     #printSummary .chip.a{border-color:#F59E0B;background:#FEF3C7;color:#78350F;print-color-adjust:exact;-webkit-print-color-adjust:exact}
     #printSummary .chip.t{border-color:#0D9488;background:#CCFBF1;color:#134E4A;print-color-adjust:exact;-webkit-print-color-adjust:exact}
     #printSummary .chip.r{border-color:#EF4444;background:#FEE2E2;color:#7F1D1D;print-color-adjust:exact;-webkit-print-color-adjust:exact}
@@ -112,7 +124,7 @@ tailwind.config = { theme: { extend: {
     #printSummary .p-task.completed{color:#0F766E}
     #printSummary .p-task.progress{color:#B45309}
     #printSummary .p-term{font-weight:800;color:#0F172A;margin-top:3px;font-size:8px;border-bottom:1px dashed #E2E8F0}
-    #printSummary table{width:100%;border-collapse:collapse;margin-bottom:5px;font-size:8px}
+    #printSummary table{width:100%;border-collapse:collapse;margin-bottom:5px;font-size:7.8px}
     #printSummary th,#printSummary td{border:1px solid #CBD5E1;padding:2px 4px;text-align:start;vertical-align:top}
     #printSummary th{background:#E2E8F0;print-color-adjust:exact;-webkit-print-color-adjust:exact}
     #printSummary .p-foot{border-top:1px solid #CBD5E1;padding-top:3px;font-size:7.5px;color:#475569}
@@ -128,8 +140,8 @@ tailwind.config = { theme: { extend: {
     <a href="#top" class="flex items-center gap-3 min-w-0">
       <span class="w-10 h-10 shrink-0 rounded-xl bg-teal-600 grid place-items-center text-white text-lg"><i class="fa-solid fa-user-doctor"></i></span>
       <span class="min-w-0 leading-tight">
-        <b class="block text-sm sm:text-base truncate"><span class="ar">دليل حسان الأكاديمي للمسار الطبي</span><span class="en">Hassan’s Pre-Med Roadmap</span></b>
-        <small class="block text-[11px] text-slate-300 truncate"><span class="ar">بوابة المعادلات الاستراتيجية · Grade 10 → Medical School</span><span class="en">Strategic Equivalency Portal · Grade 10 → Medical School</span></small>
+        <b class="block text-sm sm:text-base truncate"><span class="ar">استراتيجية حسان للقبول في الطب</span><span class="en">Hassan’s Pre-Med Admission Strategy</span></b>
+        <small class="block text-[11px] text-slate-300 truncate"><span class="ar">الأردن · مصر · السعودية (جامعة الأمير سلطان) · جورجيا · Grade 10 → Medical School</span><span class="en">Jordan · Egypt · Saudi Arabia (PSU) · Georgia · Grade 10 → Medical School</span></small>
       </span>
     </a>
     <div class="flex items-center gap-2 shrink-0">
@@ -141,26 +153,26 @@ tailwind.config = { theme: { extend: {
 
 <!-- ================= HERO ================= -->
 <header id="top" class="band text-white">
-  <div class="max-w-7xl mx-auto px-4 pt-10 pb-16 sm:pt-16 sm:pb-20">
+  <div class="max-w-7xl mx-auto px-4 pt-10 pb-16 sm:pt-14 sm:pb-20">
     <p class="text-teal-300 text-xs font-bold tracking-[.2em] uppercase mb-3"><span class="ar">حسان · الصف العاشر · 2026/2027 · مسار الدبلوم الأمريكي</span><span class="en">Hassan · Grade 10 · 2026/2027 · American Diploma track</span></p>
     <h1 class="text-3xl sm:text-5xl font-extrabold leading-tight max-w-4xl">
-      <span class="ar">دليل حسان الأكاديمي للمسار الطبي والمعادلات</span>
-      <span class="en">Hassan’s Pre-Med Academic Roadmap &amp; Strategic Equivalency Portal</span>
+      <span class="ar">استراتيجية القبول في الطب: أربع دول، نواة واحدة</span>
+      <span class="en">Medical-school admission strategy: four countries, one core</span>
     </h1>
     <p class="mt-4 text-slate-300 text-base sm:text-lg leading-relaxed max-w-3xl">
-      <span class="ar">المصدر الواحد الموثوق لرحلة حسان من الصف العاشر إلى كلية الطب: الأساسات المشتركة، المسار الذهبي (معادلة الأردن العلمية وفق نظام رقم (5) لسنة 2025/2026: 4 اختبارات × 25% بلا وزن للمعدل المدرسي، وتفتح مصر تلقائياً)، مسار السعودية عبر اختبارات هيئة تقويم التعليم، والاستشارات النظامية للمسارات البديلة.</span>
-      <span class="en">The single source of truth for Hassan’s journey from Grade 10 to medical school: the shared foundations, the Golden Pathway (Jordan scientific equivalency under Regulation No. (5) 2025/2026: 4 exams × 25% with zero GPA weight, unlocking Egypt automatically), the Saudi ETEC track, and regulatory advisory on alternative paths.</span>
+      <span class="ar">AP Biology + AP Chemistry + Digital SAT هي النواة المشتركة. يضاف إليها AP Pre-Calculus وخانة رابعة للأردن، الفيزياء المدرسية لمصر، القدرات والتحصيلي والإنجليزية لجامعة الأمير سلطان، والإنجليزية ومقابلة القبول لجورجيا.</span>
+      <span class="en">AP Biology + AP Chemistry + Digital SAT form the shared core. Jordan adds AP Pre-Calculus and a 4th slot, Egypt adds school Physics, Prince Sultan University adds GAT, SAAT and English, and Georgia adds English and an admission interview.</span>
     </p>
     <div class="mt-6 flex flex-wrap gap-2">
-      <span class="pill border-amber-400/60 bg-amber-500/15"><i class="fa-solid fa-gavel text-amber-400"></i><span><span class="ar">الأردن: نظام رقم (5) لسنة 2025/2026 (الجريدة الرسمية) · 4 × 25% · المعدل المدرسي 0%</span><span class="en">Jordan: Official Gazette Regulation No. (5) 2025/2026 · 4 × 25% · school GPA 0%</span></span></span>
+      <span class="pill border-amber-400/60 bg-amber-500/15"><i class="fa-solid fa-gavel text-amber-400"></i><span><span class="ar">الأردن: نظام رقم (5) لسنة 2025/2026 · 4 × 25% · المعدل المدرسي 0%</span><span class="en">Jordan: Regulation No. (5) 2025/2026 · 4 × 25% · school GPA 0%</span></span></span>
       <span class="pill"><i class="fa-solid fa-location-dot text-amber-400"></i><span><span class="ar">الآن:</span><span class="en">Now:</span> <b id="nowLabel"></b></span></span>
       <span class="pill"><i class="fa-solid fa-hourglass-half text-amber-400"></i><span><span class="ar">المحطة القادمة:</span><span class="en">Next milestone:</span> <b id="nextLabel"></b> · <b class="num" id="nextDays">—</b> <span class="ar">يوم</span><span class="en">days</span></span></span>
-      <span class="pill"><i class="fa-solid fa-chart-line text-teal-300"></i><span><span class="ar">تقدم الخطة</span><span class="en">Plan progress</span> <b class="num" id="statPct">0%</b> · <span class="num" id="statDone">0</span>/<span class="num" id="statTotal">0</span> <span class="ar">مهمة مكتملة</span><span class="en">tasks done</span></span></span>
+      <span class="pill"><i class="fa-solid fa-chart-line text-teal-300"></i><span><span class="ar">تقدم الخطة</span><span class="en">Plan progress</span> <b class="num" id="statPct">0%</b> · <span class="num" id="statDone">0</span>/<span class="num" id="statTotal">0</span></span></span>
     </div>
     <div class="mt-7 flex flex-wrap gap-3">
-      <a href="#pathway" class="inline-flex items-center gap-2 rounded-full bg-teal-600 px-5 py-3 font-bold hover:bg-teal-500 transition"><i class="fa-solid fa-diagram-project"></i><span class="ar">شجرة المسارات</span><span class="en">Pathway tree</span></a>
+      <a href="#tracks" class="inline-flex items-center gap-2 rounded-full bg-teal-600 px-5 py-3 font-bold hover:bg-teal-500 transition"><i class="fa-solid fa-earth-asia"></i><span class="ar">مسارات الدول</span><span class="en">Country tracks</span></a>
       <a href="#calc" class="inline-flex items-center gap-2 rounded-full border border-white/30 px-5 py-3 font-bold hover:bg-white/10 transition"><i class="fa-solid fa-calculator"></i><span class="ar">المحاكي</span><span class="en">Simulator</span></a>
-      <a href="#advisory" class="inline-flex items-center gap-2 rounded-full border border-white/30 px-5 py-3 font-bold hover:bg-white/10 transition"><i class="fa-solid fa-scale-balanced"></i><span class="ar">الاستشارات النظامية</span><span class="en">Regulatory advisory</span></a>
+      <a href="#roadmap" class="inline-flex items-center gap-2 rounded-full border border-white/30 px-5 py-3 font-bold hover:bg-white/10 transition"><i class="fa-solid fa-route"></i><span class="ar">خارطة الطريق</span><span class="en">Roadmap</span></a>
       <button id="printBtn2" class="sm:hidden inline-flex items-center gap-2 rounded-full bg-amber-500 text-navy px-5 py-3 font-bold"><i class="fa-solid fa-print"></i><span class="ar">طباعة A4</span><span class="en">Print A4</span></button>
     </div>
   </div>
@@ -171,576 +183,310 @@ tailwind.config = { theme: { extend: {
 <!-- ================= KEY NUMBERS ================= -->
 <section class="-mt-8 relative z-10 mb-12" aria-label="Key numbers">
   <div class="card p-4 sm:p-5 grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
-    <div class="rounded-xl bg-slate-50 p-3"><b class="num block text-2xl sm:text-3xl text-teal-700">4 × 25%</b><small class="text-slate-600 leading-tight block"><span class="ar">خانات معادلة الأردن: 3 AP + الخانة الرابعة</span><span class="en">Jordan equivalency slots: 3 AP + the 4th slot</span></small></div>
-    <div class="rounded-xl bg-amber-50 p-3"><b class="num block text-2xl sm:text-3xl text-amber-600">0%</b><small class="text-slate-600 leading-tight block"><span class="ar">وزن المعدل المدرسي في معادلة الأردن (ناجح/راسب فقط)</span><span class="en">school GPA weight in Jordan (Pass/Fail only)</span></small></div>
-    <div class="rounded-xl bg-slate-50 p-3"><b class="num block text-2xl sm:text-3xl text-teal-700">0</b><small class="text-slate-600 leading-tight block"><span class="ar">اختبارات إضافية لطب مصر</span><span class="en">extra exams for Egypt medicine</span></small></div>
-    <div class="rounded-xl bg-slate-50 p-3"><b class="num block text-2xl sm:text-3xl text-teal-700">2</b><small class="text-slate-600 leading-tight block"><span class="ar">اختبارات ETEC للسعودية (GAT + SAAT)</span><span class="en">ETEC tests for KSA (GAT + SAAT)</span></small></div>
-    <div class="rounded-xl bg-slate-50 p-3 col-span-2 sm:col-span-1"><b class="num block text-2xl sm:text-3xl text-teal-700">85%</b><small class="text-slate-600 leading-tight block"><span class="ar">حد المعادلة العلمية لترخيص الأطباء في الأردن</span><span class="en">equivalency floor for doctor licensing in Jordan</span></small></div>
+    <div class="rounded-xl bg-slate-50 p-3"><b class="num block text-2xl sm:text-3xl text-teal-700">4</b><small class="text-slate-600 leading-tight block"><span class="ar">دول · نواة واحدة: AP Bio + AP Chem + SAT</span><span class="en">countries · one core: AP Bio + AP Chem + SAT</span></small></div>
+    <div class="rounded-xl bg-slate-50 p-3"><b class="num block text-2xl sm:text-3xl text-teal-700">4 × 25%</b><small class="text-slate-600 leading-tight block"><span class="ar">معادلة الأردن: 3 AP + الخانة الرابعة</span><span class="en">Jordan equivalency: 3 AP + the 4th slot</span></small></div>
+    <div class="rounded-xl bg-amber-50 p-3"><b class="num block text-2xl sm:text-3xl text-amber-600">0%</b><small class="text-slate-600 leading-tight block"><span class="ar">وزن المعدل في الأردن (ناجح/راسب)</span><span class="en">GPA weight in Jordan (Pass/Fail)</span></small></div>
+    <div class="rounded-xl bg-slate-50 p-3"><b class="num block text-2xl sm:text-3xl text-teal-700">60%</b><small class="text-slate-600 leading-tight block"><span class="ar">وزن Digital SAT في تنسيق طب مصر</span><span class="en">Digital SAT weight in Egypt medical coordination</span></small></div>
+    <div class="rounded-xl bg-slate-50 p-3 col-span-2 sm:col-span-1"><b class="num block text-2xl sm:text-3xl text-teal-700">85%</b><small class="text-slate-600 leading-tight block"><span class="ar">حد المعادلة لترخيص الأطباء في الأردن</span><span class="en">equivalency floor for doctor licensing in Jordan</span></small></div>
   </div>
 </section>
 
-<!-- ================= LEVEL 1: FOUNDATIONS ================= -->
+<!-- ================= FOUNDATIONS ================= -->
 <section id="foundations" class="mb-14">
   <div class="mb-5">
-    <p class="eyebrow"><span class="ar">المستوى 1 · الأساسات المشتركة</span><span class="en">Level 1 · Universal prerequisite baseline</span></p>
-    <h2 class="text-2xl sm:text-3xl font-extrabold mt-1"><span class="ar">قاعدة الانطلاق لكل المسارات</span><span class="en">The baseline every track builds on</span></h2>
+    <p class="eyebrow"><span class="ar">الأساسات المشتركة</span><span class="en">Shared foundations</span></p>
+    <h2 class="text-2xl sm:text-3xl font-extrabold mt-1"><span class="ar">ما يخدم الدول الأربع معاً</span><span class="en">What serves all four countries at once</span></h2>
   </div>
-  <div class="grid gap-5">
-    <!-- School record (GPA) -->
-    <article class="card p-5 sm:p-7">
-      <div class="flex flex-col sm:flex-row sm:items-start gap-5">
-        <div class="w-14 h-14 shrink-0 rounded-2xl bg-teal-50 text-teal-700 grid place-items-center text-2xl"><i class="fa-solid fa-school"></i></div>
-        <div class="flex-1 min-w-0">
-          <div class="flex flex-wrap items-center gap-2">
-            <h3 class="text-xl sm:text-2xl font-extrabold"><span class="ar">المواد المدرسية والمعدل (الصفوف 10 · 11 · 12)</span><span class="en">School subjects &amp; GPA (Grades 10 · 11 · 12)</span></h3>
-            <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 text-xs font-extrabold px-3 py-1"><i class="fa-solid fa-gavel"></i><span class="ar">الأردن: 0% · ناجح/راسب فقط</span><span class="en">Jordan: 0% · Pass/Fail only</span></span>
-            <span class="inline-flex items-center gap-1 rounded-full bg-red-500 text-white text-xs font-extrabold px-3 py-1"><i class="fa-solid fa-atom"></i><span class="ar">الفيزياء المدرسية إلزامية</span><span class="en">School Physics MANDATORY</span></span>
-          </div>
-          <p class="mt-2 text-slate-600 leading-relaxed"><span class="ar">بموجب نظام رقم (5) لسنة 2025/2026 (الجريدة الرسمية) لم يعد للمعدل المدرسي أي وزن في معادلة وزارة التربية والتعليم الأردنية (<b class="num text-amber-700">0%</b>): المواد المدرسية شرط <b>ناجح/راسب</b> فقط لأهلية ملف المعادلة. لكنه يبقى <b class="num text-teal-700">40%</b> من درجة تنسيق مصر ويدخل في النسبة الموزونة السعودية، لذلك يبقى المعدل القوي ضرورياً لباقي المسارات.</span><span class="en">Under Official Gazette Regulation No. (5) 2025/2026 the school GPA carries <b class="num text-amber-700">0%</b> weight in the Jordan MoE equivalency: school subjects are a <b>Pass/Fail prerequisite</b> only. It still counts for <b class="num text-teal-700">40%</b> of Egypt’s Coordination score and feeds the Saudi weighted score, so a strong GPA remains essential for the other tracks.</span></p>
-          <div class="mt-4 grid grid-cols-3 gap-3">
-            <div class="rounded-xl bg-amber-50 p-3"><small class="text-slate-500 block"><span class="ar">الأردن</span><span class="en">Jordan</span></small><b class="text-sm sm:text-base text-amber-700"><span class="ar">0% · ناجح/راسب</span><span class="en">0% · Pass/Fail</span></b></div>
-            <div class="rounded-xl bg-slate-50 p-3"><small class="text-slate-500 block"><span class="ar">مصر</span><span class="en">Egypt</span></small><b class="num text-xl sm:text-2xl text-teal-700">40%</b></div>
-            <div class="rounded-xl bg-slate-50 p-3"><small class="text-slate-500 block"><span class="ar">السعودية</span><span class="en">Saudi Arabia</span></small><b class="text-sm sm:text-base text-teal-700"><span class="ar">ضمن الموزونة</span><span class="en">In weighted score</span></b></div>
-          </div>
-          <div class="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm flex gap-3 text-red-900">
-            <i class="fa-solid fa-triangle-exclamation text-red-500 mt-1"></i>
-            <p><span class="ar"><b>شرط إلزامي:</b> يجب دراسة مادة الفيزياء واجتيازها كمادة مدرسية داخل المدرسة. هذا متطلب أساسي لأهلية كليات الطب المصرية (ضمن المواد المدرسية الثمانية المطلوبة)، وفي الأردن تُعامل كباقي المواد: ناجح/راسب.</span><span class="en"><b>Mandatory:</b> Physics must be taken and passed as an in-school course. It is an essential prerequisite for Egyptian medical faculties (one of the 8 required school subjects); in Jordan it is treated like every school subject: Pass/Fail.</span></p>
-          </div>
-        </div>
-      </div>
+  <div class="grid md:grid-cols-3 gap-5">
+    <article class="card p-5">
+      <div class="flex items-center gap-3"><span class="w-11 h-11 shrink-0 rounded-xl bg-teal-50 text-teal-700 grid place-items-center text-xl"><i class="fa-solid fa-school"></i></span><b><span class="ar">المواد المدرسية والمعدل</span><span class="en">School subjects &amp; GPA</span></b></div>
+      <ul class="mt-3 space-y-1.5 text-sm text-slate-700">
+        <li class="flex gap-2"><span class="shrink-0">🇯🇴</span><span><span class="ar"><b>0%</b> — ناجح/راسب فقط (نظام رقم 5)</span><span class="en"><b>0%</b> — Pass/Fail only (Regulation No. 5)</span></span></li>
+        <li class="flex gap-2"><span class="shrink-0">🇪🇬</span><span><span class="ar"><b>40%</b> من درجة التنسيق + <b class="text-red-600">الفيزياء المدرسية إلزامية</b></span><span class="en"><b>40%</b> of coordination score + <b class="text-red-600">school Physics mandatory</b></span></span></li>
+        <li class="flex gap-2"><span class="shrink-0">🇸🇦</span><span><span class="ar"><b>30%</b> من المفاضلة وحد أدنى <b>95%</b> لطب جامعة الأمير سلطان</span><span class="en"><b>30%</b> of selection and a <b>95%</b> minimum for PSU medicine</span></span></li>
+        <li class="flex gap-2"><span class="shrink-0">🇬🇪</span><span><span class="ar">شهادة ثانوية (HSD) مصدّقة بأساس أحياء/كيمياء</span><span class="en">Attested HSD with a biology/chemistry base</span></span></li>
+      </ul>
+      <p class="mt-3 text-xs text-slate-500"><span class="ar">الخلاصة: معدل 95%+ يفتح الدول الأربع؛ أي رسوب يغلق الأردن.</span><span class="en">Bottom line: a 95%+ GPA opens all four; any failed subject closes Jordan.</span></p>
     </article>
-    <!-- Digital SAT -->
-    <article class="card p-5 sm:p-7">
-      <div class="flex flex-col sm:flex-row sm:items-start gap-5">
-        <div class="w-14 h-14 shrink-0 rounded-2xl bg-teal-50 text-teal-700 grid place-items-center text-2xl"><i class="fa-solid fa-laptop-code"></i></div>
-        <div class="flex-1 min-w-0">
-          <div class="flex flex-wrap items-center gap-2">
-            <h3 class="text-xl sm:text-2xl font-extrabold">Digital SAT <span class="text-slate-500 font-semibold text-base">(College Board)</span></h3>
-            <span class="inline-flex items-center gap-1 rounded-full bg-teal-600 text-white text-xs font-extrabold px-3 py-1"><i class="fa-solid fa-4"></i><span class="ar">الخانة الرابعة · الخيار (أ) · 25%</span><span class="en">4th slot · Option A · 25%</span></span>
-            <span class="inline-flex items-center gap-1 rounded-full bg-navy text-white text-xs font-extrabold px-3 py-1"><i class="fa-solid fa-bullseye"></i><span class="ar">1550+ = 100%</span><span class="en">1550+ = 100%</span></span>
-            <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 text-xs font-extrabold px-3 py-1"><i class="fa-solid fa-flag"></i><span class="ar">حد الأردن الأدنى 1050 = 75%</span><span class="en">Jordan minimum 1050 = 75%</span></span>
-          </div>
-          <p class="mt-2 text-slate-600 leading-relaxed"><span class="ar">في الأردن صار Digital SAT <b>الخيار (أ) للخانة الرابعة (25%)</b> من معادلة نظام رقم (5): يُحوَّل إلى نسبة بمقياس الوزارة (الحد الأدنى <b class="num">1050</b> = 75% … 1410–1420 = 93% … 1550+ = 100%)، ويمكن استبداله بـ AP Computer Science Principles إن كانت نسبته أعلى. ويمثل <b class="num text-teal-700">60%</b> من ترتيب القبول في الجامعات المصرية، وهو معترف به لدى أفضل كليات الطب الخاصة في السعودية (مثل جامعة الفيصل).</span><span class="en">In Jordan the Digital SAT is now <b>Option A for the 4th slot (25%)</b> of the Regulation No. (5) equivalency, converted on the Ministry scale (minimum <b class="num">1050</b> = 75% … 1410–1420 = 93% … 1550+ = 100%); AP Computer Science Principles can replace it when its percentage is higher. It also accounts for <b class="num text-teal-700">60%</b> of Egyptian university ranking and is recognized by top private Saudi medical colleges (e.g., Alfaisal).</span></p>
-          <div class="mt-5">
-            <div class="flex flex-wrap justify-between gap-x-3 text-xs text-slate-500 mb-2"><span class="num">400</span><span><span class="ar">الحد الأدنى</span><span class="en">Minimum</span> <b class="num text-amber-600">1050</b> = 75%</span><span><span class="ar">الهدف</span><span class="en">Target</span> <b class="num text-teal-700">1410</b> = 93%</span><span><b class="num text-teal-700">1550</b> = 100%</span><span class="num">1600</span></div>
-            <div class="meter"><i style="width:84.2%"></i></div>
-            <div class="marks"><span class="mark" style="inset-inline-start:54.2%" title="1050"></span><span class="mark teal" style="inset-inline-start:84.2%" title="1410"></span><span class="mark teal" style="inset-inline-start:95.8%" title="1550"></span></div>
-          </div>
-          <div class="mt-6">
-            <p class="text-[11px] font-extrabold tracking-widest uppercase text-slate-500 mb-2"><i class="fa-solid fa-ruler-horizontal text-teal-700"></i> <span class="ar">مقياس الوزارة: Digital SAT ← نسبة الخانة الرابعة</span><span class="en">Ministry scale: Digital SAT → 4th-slot percentage</span></p>
-            <div class="flex flex-wrap gap-1.5 text-xs" id="satScaleChips">
-              <span class="cell ideal num">1550–1600 → 100%</span>
-              <span class="cell ok num">1500 → 97%</span>
-              <span class="cell ok num">1450 → 95%</span>
-              <span class="cell ok num">1410–1420 → 93% <span class="ar font-normal">(= AP 4)</span><span class="en font-normal">(= AP 4)</span></span>
-              <span class="cell soft num">1350–1360 → 90%</span>
-              <span class="cell warn num">1050 → 75% <span class="ar font-normal">(الحد الأدنى)</span><span class="en font-normal">(minimum)</span></span>
-              <span class="cell num" style="background:#FEE2E2;color:#7F1D1D">&lt; 1050 → <span class="ar font-normal">غير محتسب</span><span class="en font-normal">not counted</span></span>
-            </div>
-            <p class="text-[11px] text-slate-500 mt-2"><span class="ar">الدرجات بين النقاط المنشورة تُقدَّر خطياً في المحاكي (مثال: 1300 ≈ 87.5%).</span><span class="en">Scores between the published anchors are interpolated linearly in the simulator (e.g., 1300 ≈ 87.5%).</span></p>
-          </div>
-          <div class="mt-5 grid grid-cols-3 gap-3">
-            <div class="rounded-xl bg-slate-50 p-3"><small class="text-slate-500 block"><span class="ar">الأردن</span><span class="en">Jordan</span></small><b class="text-sm sm:text-base text-teal-700"><span class="ar">الخانة 4 · 25% (أو AP CSP)</span><span class="en">Slot 4 · 25% (or AP CSP)</span></b></div>
-            <div class="rounded-xl bg-slate-50 p-3"><small class="text-slate-500 block"><span class="ar">مصر</span><span class="en">Egypt</span></small><b class="num text-xl sm:text-2xl text-teal-700">60%</b></div>
-            <div class="rounded-xl bg-slate-50 p-3"><small class="text-slate-500 block"><span class="ar">السعودية (خاصة)</span><span class="en">Saudi (private)</span></small><b class="text-sm sm:text-base text-teal-700"><span class="ar">معترف به (الفيصل)</span><span class="en">Recognized (Alfaisal)</span></b></div>
-          </div>
-        </div>
-      </div>
+    <article class="card p-5">
+      <div class="flex items-center gap-3"><span class="w-11 h-11 shrink-0 rounded-xl bg-teal-50 text-teal-700 grid place-items-center text-xl"><i class="fa-solid fa-laptop-code"></i></span><b>Digital SAT</b></div>
+      <ul class="mt-3 space-y-1.5 text-sm text-slate-700">
+        <li class="flex gap-2"><span class="shrink-0">🇯🇴</span><span><span class="ar">الخانة الرابعة (25%) بمقياس الوزارة: 1050 = 75% · 1410 = 93% · 1550+ = 100%</span><span class="en">4th slot (25%) on the Ministry scale: 1050 = 75% · 1410 = 93% · 1550+ = 100%</span></span></li>
+        <li class="flex gap-2"><span class="shrink-0">🇪🇬</span><span><span class="ar"><b>60%</b> من درجة تنسيق الطب</span><span class="en"><b>60%</b> of the medical coordination score</span></span></li>
+        <li class="flex gap-2"><span class="shrink-0">🇸🇦</span><span><span class="ar">بديل القدرات في PSU: SAT ≥ <b>1350</b></span><span class="en">GAT alternative at PSU: SAT ≥ <b>1350</b></span></span></li>
+        <li class="flex gap-2"><span class="shrink-0">🇬🇪</span><span><span class="ar">غير مطلوب؛ يقوّي الملف</span><span class="en">Not required; strengthens the file</span></span></li>
+      </ul>
+      <p class="mt-3 text-xs text-slate-500"><span class="ar">هدف واحد يخدم الثلاثة: <b>1410+</b> (الصف 11، إعادة إن لزم).</span><span class="en">One target serves three tracks: <b>1410+</b> (Grade 11, retake if needed).</span></p>
+    </article>
+    <article class="card p-5">
+      <div class="flex items-center gap-3"><span class="w-11 h-11 shrink-0 rounded-xl bg-teal-50 text-teal-700 grid place-items-center text-xl"><i class="fa-solid fa-dna"></i></span><b>AP Biology + AP Chemistry</b></div>
+      <ul class="mt-3 space-y-1.5 text-sm text-slate-700">
+        <li class="flex gap-2"><span class="shrink-0">🇯🇴</span><span><span class="ar">خانتان من الأربع (50%)</span><span class="en">Two of the four slots (50%)</span></span></li>
+        <li class="flex gap-2"><span class="shrink-0">🇪🇬</span><span><span class="ar">المادتان العلميتان الخارجيتان الإلزاميتان</span><span class="en">The two mandatory external sciences</span></span></li>
+        <li class="flex gap-2"><span class="shrink-0">🇸🇦</span><span><span class="ar">الأساس الأكاديمي لتحصيلي ≥ 85 بالإنجليزية</span><span class="en">Academic base for SAAT ≥ 85 in English</span></span></li>
+        <li class="flex gap-2"><span class="shrink-0">🇬🇪</span><span><span class="ar">كفاءة بمستوى الإعفاء لمقابلة القبول (أحياء/كيمياء)</span><span class="en">Exemption-level competency for the admission interview (Bio/Chem)</span></span></li>
+      </ul>
+      <p class="mt-3 text-xs text-slate-500"><span class="ar">هدف درجة 4+ في كل منهما (= 93%).</span><span class="en">Target a 4+ in each (= 93%).</span></p>
     </article>
   </div>
 </section>
 
-<!-- ================= LEVELS 2–3: PATHWAY SWITCHER + TREE ================= -->
-<section id="pathway" class="mb-14">
+<!-- ================= COUNTRY TRACKS (TABS) ================= -->
+<section id="tracks" class="mb-14">
   <div class="mb-5 flex flex-wrap items-end justify-between gap-4">
     <div>
-      <p class="eyebrow"><span class="ar">المستويان 2–3 · شجرة المسارات</span><span class="en">Levels 2–3 · Pathway tree</span></p>
-      <h2 class="text-2xl sm:text-3xl font-extrabold mt-1"><span class="ar">من الأساسات إلى مقعد في كلية الطب</span><span class="en">From foundations to a medical-school seat</span></h2>
-    </div>
-    <div class="flex flex-wrap gap-2" role="group" aria-label="Pathway switcher">
-      <button class="sw" data-view="all" aria-pressed="true"><i class="fa-solid fa-layer-group me-1"></i><span class="ar">كل المسارات</span><span class="en">All pathways</span></button>
-      <button class="sw" data-view="jo" aria-pressed="false"><i class="fa-solid fa-crown me-1 text-amber-500"></i><span class="ar">الذهبي: الأردن ← مصر</span><span class="en">Golden: Jordan → Egypt</span></button>
-      <button class="sw" data-view="sa" aria-pressed="false"><i class="fa-solid fa-kaaba me-1"></i><span class="ar">السعودية ETEC</span><span class="en">Saudi ETEC</span></button>
+      <p class="eyebrow"><span class="ar">مسارات الدول الأربع</span><span class="en">The four country tracks</span></p>
+      <h2 class="text-2xl sm:text-3xl font-extrabold mt-1"><span class="ar">اختر الدولة لعرض متطلباتها وأوزانها</span><span class="en">Pick a country to see its requirements and weights</span></h2>
     </div>
   </div>
-  <p id="swSummary" class="text-sm text-slate-600 mb-6 max-w-3xl">
-    <span data-view="all"><span class="ar">الثلاثي الذهبي + الخانة الرابعة (SAT أو AP CSP) يخدمان الأردن ومصر معاً، واختبارات ETEC تخدم القبول المحلي في السعودية، والأساسات مشتركة للجميع.</span><span class="en">The Golden Trio + the 4th slot (SAT or AP CSP) serve Jordan and Egypt together, ETEC tests serve Saudi domestic admission, and the foundations are shared by all.</span></span>
-    <span data-view="jo" hidden><span class="ar">التركيز: 4 اختبارات × 25% — AP Pre-Calculus + Biology + Chemistry + خانة رابعة (Digital SAT بمقياس الوزارة أو AP Computer Science Principles، الأعلى يُحتسب) = معادلة الأردن بلا وزن للمعدل، ومعها قبول طب مصر تحصيل حاصل.</span><span class="en">Focus: 4 exams × 25% — AP Pre-Calculus + Biology + Chemistry + a 4th slot (Digital SAT on the Ministry scale or AP Computer Science Principles, whichever is higher) = Jordan equivalency with zero GPA weight, with Egypt medical admission auto-fulfilled.</span></span>
-    <span data-view="sa" hidden><span class="ar">التركيز: القدرات GAT والتحصيلي SAAT بالإنجليزية مع المعدل المدرسي لتكوين النسبة الموزونة، ومواد AP ترفع أداء التحصيلي.</span><span class="en">Focus: GAT and SAAT in English with school GPA form the composite weighted score, and the AP sciences power SAAT performance.</span></span>
-  </p>
-
-  <!-- root node -->
-  <div class="text-center">
-    <div class="inline-flex items-center gap-2 rounded-full bg-amber-500 text-navy font-extrabold px-5 py-2 shadow-md"><i class="fa-solid fa-layer-group"></i><span class="ar">الأساسات: المواد المدرسية (ناجح/راسب) + الفيزياء + Digital SAT</span><span class="en">Foundations: School subjects (Pass/Fail) + Physics + Digital SAT</span></div>
-    <div class="connector-v"></div><div class="connector-dot"></div>
-    <div class="hidden lg:block h-[3px] mx-auto bg-teal-600 rounded" style="width:calc(50% + 1.25rem)"></div>
+  <div class="flex flex-wrap gap-2 mb-5" role="tablist" aria-label="Country tracks">
+    <button class="tab" role="tab" data-tab="jo" aria-selected="true" aria-controls="p-jo">🇯🇴 <span class="ar">الأردن</span><span class="en">Jordan</span></button>
+    <button class="tab" role="tab" data-tab="eg" aria-selected="false" aria-controls="p-eg">🇪🇬 <span class="ar">مصر</span><span class="en">Egypt</span></button>
+    <button class="tab" role="tab" data-tab="sa" aria-selected="false" aria-controls="p-sa">🇸🇦 <span class="ar">السعودية (جامعة الأمير سلطان)</span><span class="en">Saudi Arabia (Prince Sultan University)</span></button>
+    <button class="tab" role="tab" data-tab="ge" aria-selected="false" aria-controls="p-ge">🇬🇪 <span class="ar">جورجيا</span><span class="en">Georgia</span></button>
   </div>
 
-  <div id="tree" class="tree grid lg:grid-cols-2 gap-8 lg:gap-10 mt-5">
-    <!-- ===== JORDAN → EGYPT ===== -->
-    <div class="col-jo branch">
-      <article class="card p-5 sm:p-6 border-teal-200">
-        <div class="flex items-start gap-4">
-          <div class="w-12 h-12 shrink-0 rounded-xl bg-teal-600 text-white grid place-items-center text-xl"><i class="fa-solid fa-crown"></i></div>
-          <div class="min-w-0">
-            <p class="eyebrow"><span class="ar">المستوى 2 · المسار الذهبي الرئيسي</span><span class="en">Level 2 · Primary Golden Pathway</span></p>
-            <h3 class="text-xl font-extrabold"><span class="ar">معادلة الأردن العلمية — نظام رقم (5) لسنة 2025/2026</span><span class="en">Jordan MoE Scientific Equivalency — Regulation No. (5) 2025/2026</span></h3>
-            <p class="text-sm text-slate-600 mt-1"><span class="ar">النظام المنشور في الجريدة الرسمية والساري على حسان (بدأ الصف العاشر في سبتمبر 2026): المعادلة = <b>4 اختبارات × 25%</b> (المجموع 100%). درجة AP تُحوَّل إلى نسبة: <b class="num">3 = 86% · 4 = 93% · 5 = 100%</b> (الحد الأدنى المقبول 3). المعدل المدرسي <b class="num text-amber-700">0%</b>: المواد المدرسية شرط <b>ناجح/راسب</b> فقط.</span><span class="en">The Official Gazette regulation applicable to Hassan (started Grade 10 in September 2026): equivalency = <b>4 exams × 25%</b> (total 100%). Each AP score converts to a percentage: <b class="num">3 = 86% · 4 = 93% · 5 = 100%</b> (minimum accepted 3). School GPA weight is <b class="num text-amber-700">0%</b>: school subjects are a <b>Pass/Fail</b> prerequisite only.</span></p>
-          </div>
-        </div>
-
-        <p class="mt-5 mb-2 text-xs font-extrabold tracking-widest text-amber-600 uppercase"><i class="fa-solid fa-crown"></i> <span class="ar">نموذج 4 × 25% · كل خانة = اختبار مستقل · لا مادتين من صندوق تصنيف واحد في الوزارة</span><span class="en">The 4 × 25% model · each slot = one distinct exam · no two subjects from the same MoE category box</span></p>
-        <div class="grid sm:grid-cols-2 gap-3">
-          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4">
-            <div class="flex items-center justify-between gap-2"><span class="text-2xl text-teal-700"><i class="fa-solid fa-square-root-variable"></i></span><span class="flex items-center gap-1"><span class="num text-[10px] rounded-full bg-teal-600 text-white px-2 py-[2px] font-extrabold">25%</span><span class="text-[10px] rounded-full bg-white border border-slate-300 px-2 py-[2px] text-slate-600"><span class="ar">صندوق الرياضيات</span><span class="en">Math box</span></span></span></div>
-            <b class="block mt-2"><span class="ar">الخانة 1 · </span><span class="en">Slot 1 · </span>AP Pre-Calculus</b>
-            <p class="text-xs text-slate-600 mt-1"><span class="ar">يستوفي متطلب الرياضيات العلمية الإلزامي ويغني عن AP Calculus الأصعب. 5 = 100% · 4 = 93% · 3 = 86%.</span><span class="en">Fulfills the mandatory Scientific Mathematics requirement, replacing the harder AP Calculus. 5 = 100% · 4 = 93% · 3 = 86%.</span></p>
-          </div>
-          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4">
-            <div class="flex items-center justify-between gap-2"><span class="text-2xl text-teal-700"><i class="fa-solid fa-dna"></i></span><span class="flex items-center gap-1"><span class="num text-[10px] rounded-full bg-teal-600 text-white px-2 py-[2px] font-extrabold">25%</span><span class="text-[10px] rounded-full bg-white border border-slate-300 px-2 py-[2px] text-slate-600"><span class="ar">صندوق مستقل</span><span class="en">Independent box</span></span></span></div>
-            <b class="block mt-2"><span class="ar">الخانة 2 · </span><span class="en">Slot 2 · </span>AP Biology</b>
-            <p class="text-xs text-slate-600 mt-1"><span class="ar">مادة علمية أساسية في تصنيف مستقل، وإلزامية أيضاً لمسار مصر. 5 = 100% · 4 = 93% · 3 = 86%.</span><span class="en">Core scientific subject in an independent category; also mandatory for the Egypt track. 5 = 100% · 4 = 93% · 3 = 86%.</span></p>
-          </div>
-          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4">
-            <div class="flex items-center justify-between gap-2"><span class="text-2xl text-teal-700"><i class="fa-solid fa-flask-vial"></i></span><span class="flex items-center gap-1"><span class="num text-[10px] rounded-full bg-teal-600 text-white px-2 py-[2px] font-extrabold">25%</span><span class="text-[10px] rounded-full bg-white border border-slate-300 px-2 py-[2px] text-slate-600"><span class="ar">صندوق مستقل</span><span class="en">Independent box</span></span></span></div>
-            <b class="block mt-2"><span class="ar">الخانة 3 · </span><span class="en">Slot 3 · </span>AP Chemistry</b>
-            <p class="text-xs text-slate-600 mt-1"><span class="ar">مادة علمية أساسية في تصنيف مستقل، وتكمل متطلب مصر الثاني. 5 = 100% · 4 = 93% · 3 = 86%.</span><span class="en">Core scientific subject in an independent category; completes Egypt’s second science. 5 = 100% · 4 = 93% · 3 = 86%.</span></p>
-          </div>
-          <div class="rounded-xl bg-amber-50 border border-amber-300 p-4">
-            <div class="flex items-center justify-between gap-2"><span class="text-2xl text-amber-600"><i class="fa-solid fa-chess-knight"></i></span><span class="flex items-center gap-1"><span class="num text-[10px] rounded-full bg-amber-500 text-navy px-2 py-[2px] font-extrabold">25%</span><span class="text-[10px] rounded-full bg-white border border-amber-300 px-2 py-[2px] text-amber-800"><span class="ar">خيار (أ) أو (ب)</span><span class="en">Option A or B</span></span></span></div>
-            <b class="block mt-2"><span class="ar">الخانة 4 · الخانة الاستراتيجية</span><span class="en">Slot 4 · the strategic slot</span></b>
-            <ul class="text-xs text-slate-700 mt-1 space-y-1.5">
-              <li class="flex gap-1.5"><b class="text-teal-700 shrink-0">A</b><span><b>Digital SAT</b> <span class="ar">بمقياس الوزارة: 1050 = 75% (حد أدنى) · 1350–1360 = 90% · 1410–1420 = 93% · 1450 = 95% · 1500 = 97% · 1550+ = 100%.</span><span class="en">on the Ministry scale: 1050 = 75% (minimum) · 1350–1360 = 90% · 1410–1420 = 93% · 1450 = 95% · 1500 = 97% · 1550+ = 100%.</span></span></li>
-              <li class="flex gap-1.5"><b class="text-teal-700 shrink-0">B</b><span><b>AP Computer Science Principles (CSP)</b> <span class="ar">— مادة AP رابعة سهلة وعالية الدرجات: 70% اختيار من متعدد + 30% مشروع رقمي (Create Performance Task)، بلا أسئلة Java مقالية. 5 = 100% · 4 = 93% · 3 = 86%.</span><span class="en">— an accessible, high-scoring 4th AP subject: 70% MCQ + 30% digital project (Create Performance Task), no Java FRQs. 5 = 100% · 4 = 93% · 3 = 86%.</span></span></li>
-            </ul>
-            <p class="mt-2 text-xs font-bold text-amber-900 rounded-lg bg-white/70 border border-amber-200 p-2"><i class="fa-solid fa-arrow-up-wide-short"></i> <span class="ar">من يؤدّي الاختبارين يستعمل <u>الأعلى نسبةً</u> منهما للخانة الرابعة.</span><span class="en">Taking both lets Hassan use <u>whichever yields the higher percentage</u> for the 4th slot.</span></p>
-          </div>
-        </div>
-        <div class="mt-4 flex flex-wrap gap-2 text-xs">
-          <span class="rounded-full bg-teal-50 border border-teal-200 text-teal-800 px-3 py-1"><i class="fa-solid fa-check"></i> <span class="ar">+ النجاح في كل المواد المدرسية (ناجح/راسب · وزن 0%)</span><span class="en">+ All school subjects passed (Pass/Fail · 0% weight)</span></span>
-          <span class="rounded-full bg-teal-50 border border-teal-200 text-teal-800 px-3 py-1"><i class="fa-solid fa-check"></i> <span class="ar">+ شهادة الدبلوم الأمريكي مصدّقة</span><span class="en">+ Attested American Diploma</span></span>
-          <span class="rounded-full bg-teal-50 border border-teal-200 text-teal-800 px-3 py-1"><i class="fa-solid fa-check"></i> <span class="ar">+ الاختبارات الأربعة خلال الصفوف 10–12</span><span class="en">+ All 4 exams within Grades 10–12</span></span>
-        </div>
-      </article>
-
-      <!-- SUB-BRANCH: EGYPT -->
-      <div class="connector-v" style="height:30px"></div>
-      <article class="card p-5 sm:p-6 border-amber-300 relative">
-        <span class="badge-auto absolute -top-3 end-4 inline-flex items-center gap-1 rounded-full bg-amber-500 text-navy text-xs font-extrabold px-3 py-1"><i class="fa-solid fa-wand-magic-sparkles"></i><span class="ar">تحصيل حاصل · Auto-fulfilled</span><span class="en">Auto-fulfilled · تحصيل حاصل</span></span>
-        <div class="flex items-start gap-4">
-          <div class="w-12 h-12 shrink-0 rounded-xl bg-amber-100 text-amber-700 grid place-items-center text-xl"><i class="fa-solid fa-star-of-life"></i></div>
-          <div class="min-w-0">
-            <p class="eyebrow" style="color:#B45309"><span class="ar">فرع تلقائي من مسار الأردن</span><span class="en">Automatic sub-branch of the Jordan track</span></p>
-            <h3 class="text-xl font-extrabold"><span class="ar">قبول كليات الطب المصرية</span><span class="en">Egyptian Medical-School Acceptance</span></h3>
-            <p class="text-sm text-slate-600 mt-1"><span class="ar">تشترط مصر <b>8 مواد مدرسية</b> (منها الفيزياء المدرسية) + <b>مادتين علميتين خارجيتين</b>: AP Biology إلزامية + AP Chemistry (أو Physics أو Math). وبما أن الثلاثي الذهبي يتضمن AP Biology وAP Chemistry، فإن إكمال مسار الأردن يحقق <b class="text-amber-700">100%</b> من متطلبات طب مصر تلقائياً <b>بدون أي اختبار خارجي إضافي</b>.</span><span class="en">Egypt requires <b>8 school subjects</b> (incl. school Physics) + <b>2 external science exams</b>: AP Biology (mandatory) + AP Chemistry (or Physics / Math). Because the Golden Trio already contains AP Biology and AP Chemistry, completing the Jordan track satisfies <b class="text-amber-700">100%</b> of Egypt’s medical prerequisites automatically, <b>with zero extra external exams</b>.</span></p>
-          </div>
-        </div>
-        <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
-          <div class="rounded-lg bg-slate-50 p-2"><b class="block text-teal-700 num text-lg">8</b><span class="text-slate-600"><span class="ar">مواد مدرسية</span><span class="en">school subjects</span></span></div>
-          <div class="rounded-lg bg-slate-50 p-2"><b class="block text-teal-700 num text-lg">2</b><span class="text-slate-600"><span class="ar">مواد AP علمية</span><span class="en">AP sciences</span></span></div>
-          <div class="rounded-lg bg-slate-50 p-2"><b class="block text-teal-700 num text-lg">40%</b><span class="text-slate-600"><span class="ar">المعدل المدرسي</span><span class="en">School GPA</span></span></div>
-          <div class="rounded-lg bg-slate-50 p-2"><b class="block text-teal-700 num text-lg">60%</b><span class="text-slate-600">Digital SAT</span></div>
-        </div>
-      </article>
+  <!-- ===== JORDAN ===== -->
+  <article id="p-jo" class="panel card p-5 sm:p-6 c-jo" role="tabpanel">
+    <div class="flex items-start gap-4">
+      <div class="ico"><i class="fa-solid fa-crown"></i></div>
+      <div class="min-w-0">
+        <p class="eyebrow"><span class="ar">المسار الرئيسي · نظام رقم (5) لسنة 2025/2026 (الجريدة الرسمية)</span><span class="en">Primary track · Official Gazette Regulation No. (5) 2025/2026</span></p>
+        <h3 class="text-xl font-extrabold"><span class="ar">معادلة التوجيهي العلمية = 4 اختبارات خارجية × 25%</span><span class="en">Scientific Tawjihi equivalency = 4 external exams × 25%</span></h3>
+        <p class="text-sm text-slate-600 mt-1"><span class="ar">المعدل المدرسي <b class="text-amber-700">0%</b> (ناجح/راسب فقط). كل اختبار AP يُحوَّل: <b class="num">5 = 100% · 4 = 93% · 3 = 86%</b>، والحد الأدنى 3. ملف المعادلة يُقدَّم بعد التخرج والاختبارات الأربعة خلال الصفوف 10–12.</span><span class="en">School GPA <b class="text-amber-700">0%</b> (Pass/Fail only). Each AP converts: <b class="num">5 = 100% · 4 = 93% · 3 = 86%</b>, minimum 3. The file is submitted after graduation with all four exams taken in Grades 10–12.</span></p>
+      </div>
     </div>
-
-    <!-- ===== SAUDI ETEC ===== -->
-    <div class="col-sa branch">
-      <article class="card p-5 sm:p-6 border-teal-200 h-full">
-        <div class="flex items-start gap-4">
-          <div class="w-12 h-12 shrink-0 rounded-xl bg-navy text-white grid place-items-center text-xl"><i class="fa-solid fa-kaaba"></i></div>
-          <div class="min-w-0">
-            <p class="eyebrow"><span class="ar">المستوى 3 · مسار السعودية</span><span class="en">Level 3 · Saudi Arabia track</span></p>
-            <h3 class="text-xl font-extrabold"><span class="ar">القبول المحلي عبر اختبارات هيئة تقويم التعليم والتدريب (ETEC)</span><span class="en">Domestic admission via ETEC national testing</span></h3>
-            <p class="text-sm text-slate-600 mt-1"><span class="ar">القبول في كليات الطب السعودية يعتمد على النسبة الموزونة التي تجمع المعدل المدرسي مع اختبارين وطنيين متاحين بالإنجليزية.</span><span class="en">Saudi medical admission uses a composite weighted score combining school GPA with two national tests available in English.</span></p>
-          </div>
-        </div>
-        <div class="grid sm:grid-cols-2 gap-3 mt-5">
-          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4">
-            <div class="flex items-center justify-between gap-2"><span class="text-2xl text-teal-700"><i class="fa-solid fa-brain"></i></span><span class="text-[10px] rounded-full bg-amber-100 border border-amber-300 text-amber-800 px-2 py-[2px]"><span class="ar">إلزامي</span><span class="en">Mandatory</span></span></div>
-            <b class="block mt-2">GAT <span class="text-slate-500 font-semibold text-xs">· <span class="ar">القدرات العامة (بالإنجليزية)</span><span class="en">General Aptitude Test (English)</span></span></b>
-            <p class="text-xs text-slate-600 mt-1"><span class="ar">المقياس الوطني الإلزامي لتكوين النسبة الموزونة.</span><span class="en">Mandatory national testing metric for the weighted score.</span></p>
-          </div>
-          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4">
-            <div class="flex items-center justify-between gap-2"><span class="text-2xl text-teal-700"><i class="fa-solid fa-microscope"></i></span><span class="text-[10px] rounded-full bg-amber-100 border border-amber-300 text-amber-800 px-2 py-[2px]"><span class="ar">إلزامي</span><span class="en">Mandatory</span></span></div>
-            <b class="block mt-2">SAAT <span class="text-slate-500 font-semibold text-xs">· <span class="ar">التحصيلي (بالإنجليزية)</span><span class="en">Standardized Achievement Admission Test (English)</span></span></b>
-            <p class="text-xs text-slate-600 mt-1"><span class="ar">إلزامي لكليات الطب ويحدد ترتيب المتقدمين (أحياء، كيمياء، فيزياء، رياضيات).</span><span class="en">Mandatory for medical colleges; determines applicant ranking (biology, chemistry, physics, math).</span></p>
-          </div>
-        </div>
-        <div class="mt-4 rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm flex gap-3 text-teal-900">
-          <i class="fa-solid fa-rocket text-teal-700 mt-1"></i>
-          <p><span class="ar"><b>التآزر:</b> AP Biology وAP Chemistry تمنحان تمكناً أكاديمياً متقدماً يرفع درجات التحصيلي مباشرة، ومع Digital SAT يؤهلان لأفضل برامج الطب في الجامعات الخاصة (مثل الفيصل).</span><span class="en"><b>Synergy:</b> AP Biology and AP Chemistry provide advanced academic mastery directly powering top SAAT scores, and with the Digital SAT they qualify for top private medicine programs (e.g., Alfaisal).</span></p>
-        </div>
-        <div class="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
-          <div class="rounded-lg bg-slate-50 p-2"><b class="block text-teal-700">GPA</b><span class="text-slate-600"><span class="ar">المعدل المدرسي</span><span class="en">School GPA</span></span></div>
-          <div class="rounded-lg bg-slate-50 p-2"><b class="block text-teal-700">GAT</b><span class="text-slate-600"><span class="ar">القدرات</span><span class="en">Aptitude</span></span></div>
-          <div class="rounded-lg bg-slate-50 p-2"><b class="block text-teal-700">SAAT</b><span class="text-slate-600"><span class="ar">التحصيلي</span><span class="en">Achievement</span></span></div>
-        </div>
-      </article>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
+      <div class="req"><b class="w">25%</b> <b class="block mt-1">1 · AP Pre-Calculus</b><p class="text-xs text-slate-600 mt-1"><span class="ar">رياضيات STEM الإلزامية؛ يغني عن AP Calculus.</span><span class="en">Mandatory STEM math; replaces AP Calculus.</span></p></div>
+      <div class="req"><b class="w">25%</b> <b class="block mt-1">2 · AP Biology</b><p class="text-xs text-slate-600 mt-1"><span class="ar">نواة علمية؛ مشترك مع مصر وجورجيا.</span><span class="en">Science core; shared with Egypt and Georgia.</span></p></div>
+      <div class="req"><b class="w">25%</b> <b class="block mt-1">3 · AP Chemistry</b><p class="text-xs text-slate-600 mt-1"><span class="ar">نواة علمية؛ مشترك مع مصر وجورجيا.</span><span class="en">Science core; shared with Egypt and Georgia.</span></p></div>
+      <div class="req" style="border-color:#FCD34D;background:#FFFBEB"><b class="w" style="background:#B45309">25%</b> <b class="block mt-1"><span class="ar">4 · الخانة الاستراتيجية</span><span class="en">4 · Strategic slot</span></b><p class="text-xs text-slate-700 mt-1"><span class="ar"><b>أ)</b> Digital SAT بمقياس الوزارة، أو <b>ب)</b> AP Computer Science Principles (70% اختيار من متعدد + 30% مشروع رقمي، بلا Java). يُحتسب الأعلى.</span><span class="en"><b>A)</b> Digital SAT on the Ministry scale, or <b>B)</b> AP Computer Science Principles (70% MCQ + 30% digital project, no Java). The higher counts.</span></p></div>
     </div>
-  </div>
+    <div class="grid md:grid-cols-2 gap-3 mt-4">
+      <div class="req">
+        <b class="block text-sm"><i class="fa-solid fa-ruler-horizontal text-teal-700"></i> <span class="ar">مقياس الوزارة: Digital SAT ← %</span><span class="en">Ministry scale: Digital SAT → %</span></b>
+        <div class="flex flex-wrap gap-1.5 mt-2 text-xs num">
+          <span class="cell ideal">1550–1600 → 100%</span><span class="cell ok">1500 → 97%</span><span class="cell ok">1450 → 95%</span><span class="cell ok">1410–1420 → 93%</span><span class="cell soft">1350–1360 → 90%</span><span class="cell warn">1050 → 75%</span><span class="cell bad">&lt; 1050 → ✖</span>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-2"><span class="ar">بين النقاط: تقدير خطي في المحاكي (1300 ≈ 87.5%).</span><span class="en">Between anchors: linear estimate in the simulator (1300 ≈ 87.5%).</span></p>
+      </div>
+      <div class="req">
+        <b class="block text-sm"><i class="fa-solid fa-graduation-cap text-teal-700"></i> <span class="ar">درجة AP ← % (Pre-Calc · Bio · Chem · CSP)</span><span class="en">AP score → % (Pre-Calc · Bio · Chem · CSP)</span></b>
+        <div class="flex flex-wrap gap-1.5 mt-2 text-xs num">
+          <span class="cell ideal">5 → 100%</span><span class="cell ok">4 → 93%</span><span class="cell soft">3 → 86%</span><span class="cell bad">1–2 → ✖</span>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-2"><span class="ar">تقدير تخطيطي: نحو 60% من العلامة الخام ≈ درجة 4؛ 75%+ ≈ 5 (College Board لا تنشر حدوداً ثابتة).</span><span class="en">Planning estimate: about 60% raw ≈ a 4; 75%+ ≈ a 5 (College Board publishes no fixed cut-offs).</span></p>
+      </div>
+    </div>
+    <div class="syn mt-4 text-sm flex gap-3"><i class="fa-solid fa-id-card mt-1" style="color:var(--c)"></i><p><span class="ar"><b>الترخيص لاحقاً:</b> نقابة الأطباء والتعليم العالي يشترطان معادلة علمية ≥ <b>85%</b>؛ 3 AP بدرجة 4 + SAT 1410 = 93% تتجاوزه بأمان.</span><span class="en"><b>Licensing later:</b> the Medical Association and MoHE require a scientific equivalency ≥ <b>85%</b>; three APs at 4 + SAT 1410 = 93% clears it safely.</span></p></div>
+  </article>
 
-  <!-- ===== REQUIREMENTS MATRIX ===== -->
+  <!-- ===== EGYPT ===== -->
+  <article id="p-eg" class="panel card p-5 sm:p-6 c-eg" role="tabpanel" hidden>
+    <div class="flex items-start gap-4">
+      <div class="ico"><i class="fa-solid fa-star-of-life"></i></div>
+      <div class="min-w-0">
+        <p class="eyebrow" style="color:#B45309"><span class="ar">تنسيق كليات الطب · طلاب الشهادات الأجنبية</span><span class="en">Medical coordination · foreign-certificate applicants</span></p>
+        <h3 class="text-xl font-extrabold"><span class="ar">درجة التنسيق = 40% معدل مدرسي + 60% Digital SAT</span><span class="en">Coordination score = 40% school GPA + 60% Digital SAT</span></h3>
+        <p class="text-sm text-slate-600 mt-1"><span class="ar">الأهلية تتطلب 8 مواد مدرسية (منها الفيزياء) ومادتين علميتين خارجيتين. حدود قبول الطب تُعلن سنوياً من مكتب التنسيق.</span><span class="en">Eligibility needs 8 school subjects (incl. Physics) and two external sciences. Medicine cut-offs are announced yearly by the Coordination Office.</span></p>
+      </div>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
+      <div class="req"><b class="w"><span class="ar">إلزامي</span><span class="en">Mandatory</span></b> <b class="block mt-1">AP Biology</b><p class="text-xs text-slate-600 mt-1"><span class="ar">المادة العلمية الخارجية الأولى (درجة ≥ 3).</span><span class="en">First external science (score ≥ 3).</span></p></div>
+      <div class="req"><b class="w"><span class="ar">إلزامي</span><span class="en">Mandatory</span></b> <b class="block mt-1">AP Chemistry</b><p class="text-xs text-slate-600 mt-1"><span class="ar">المادة العلمية الخارجية الثانية.</span><span class="en">Second external science.</span></p></div>
+      <div class="req"><b class="w"><span class="ar">إلزامي</span><span class="en">Mandatory</span></b> <b class="block mt-1"><span class="ar">الفيزياء المدرسية</span><span class="en">School Physics</span></b><p class="text-xs text-slate-600 mt-1"><span class="ar">تُدرَس وتُجتاز داخل المدرسة ضمن المواد الثمانية.</span><span class="en">Taken and passed in school among the 8 subjects.</span></p></div>
+      <div class="req"><b class="w">60%</b> <b class="block mt-1">Digital SAT</b><p class="text-xs text-slate-600 mt-1"><span class="ar">الوزن الأكبر في الترتيب (من 1600) مع 40% للمعدل.</span><span class="en">Largest ranking weight (out of 1600) with 40% GPA.</span></p></div>
+    </div>
+    <div class="syn mt-4 text-sm flex gap-3"><i class="fa-solid fa-wand-magic-sparkles mt-1" style="color:var(--c)"></i><p><span class="ar"><b>التآزر:</b> SAT الذي يُؤخذ لمصر هو نفسه الذي يملأ الخانة الرابعة في الأردن، وAP Biology وChemistry مشتركتان؛ فإكمال مسار الأردن يحقق متطلبات طب مصر <b>بلا أي اختبار إضافي</b>.</span><span class="en"><b>Synergy:</b> the SAT taken for Egypt is the same one that fills Jordan’s 4th slot, and AP Biology and Chemistry are shared, so completing the Jordan track meets Egypt’s medical prerequisites <b>with zero extra exams</b>.</span></p></div>
+  </article>
+
+  <!-- ===== SAUDI ARABIA — PSU ===== -->
+  <article id="p-sa" class="panel card p-5 sm:p-6 c-sa" role="tabpanel" hidden>
+    <div class="flex items-start gap-4">
+      <div class="ico"><i class="fa-solid fa-hospital"></i></div>
+      <div class="min-w-0">
+        <p class="eyebrow" style="color:#334155"><span class="ar">جامعة الأمير سلطان (الرياض) · كلية الطب · دليل القبول 2026–2027</span><span class="en">Prince Sultan University (Riyadh) · College of Medicine · 2026–2027 admission guide</span></p>
+        <h3 class="text-xl font-extrabold"><span class="ar">القبول في السنة التحضيرية للطب: معدل 30% + اختبارات 70%</span><span class="en">Admission to the medicine Preparatory Year: GPA 30% + tests 70%</span></h3>
+        <p class="text-sm text-slate-600 mt-1"><span class="ar">لا قبول مباشر في برنامج MBBS؛ الدخول عبر السنة التحضيرية، والمفاضلة على المقاعد المتاحة. الاختبارات الوطنية تُؤدَّى بالإنجليزية للمسار الطبي. يُتحقق من فئة قبول غير السعوديين والمنح في سنة التقديم.</span><span class="en">No direct MBBS admission; entry is via the Preparatory Year, ranked against available seats. National tests are taken in English for the medical track. Verify the non-Saudi admission category and scholarships in the application year.</span></p>
+      </div>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
+      <div class="req"><b class="w">30% · ≥ 95%</b> <b class="block mt-1"><span class="ar">المعدل المدرسي</span><span class="en">School GPA</span></b><p class="text-xs text-slate-600 mt-1"><span class="ar">حد أدنى 95% ووزن 30% في المفاضلة.</span><span class="en">Minimum 95% and 30% of the selection score.</span></p></div>
+      <div class="req"><b class="w">≥ 85</b> <b class="block mt-1">SAAT <span class="ar text-xs text-slate-500">التحصيلي (بالإنجليزية)</span><span class="en text-xs text-slate-500">Achievement test (English)</span></b><p class="text-xs text-slate-600 mt-1"><span class="ar">إلزامي؛ أحياء وكيمياء وفيزياء ورياضيات — تغطيها مواد AP.</span><span class="en">Mandatory; biology, chemistry, physics, math — covered by the AP courses.</span></p></div>
+      <div class="req"><b class="w">≥ 85 <span class="ar">أو</span><span class="en">or</span> SAT ≥ 1350</b> <b class="block mt-1">GAT <span class="ar text-xs text-slate-500">القدرات (بالإنجليزية)</span><span class="en text-xs text-slate-500">General aptitude (English)</span></b><p class="text-xs text-slate-600 mt-1"><span class="ar">القدرات ≥ 85 أو Digital SAT ≥ 1350 (مع التحصيلي إلزامياً في الحالتين).</span><span class="en">GAT ≥ 85 or Digital SAT ≥ 1350 (SAAT stays mandatory either way).</span></p></div>
+      <div class="req"><b class="w"><span class="ar">إنجليزية</span><span class="en">English</span></b> <b class="block mt-1">IELTS 5.0 · TOEFL iBT 50</b><p class="text-xs text-slate-600 mt-1"><span class="ar">أو STEP/EPT 50؛ النتيجة خلال سنتين. دونها: برنامج الإنجليزية المكثف أولاً.</span><span class="en">Or STEP/EPT 50; result within 2 years. Otherwise the Intensive English Program comes first.</span></p></div>
+    </div>
+    <div class="syn mt-4 text-sm flex gap-3"><i class="fa-solid fa-rocket mt-1" style="color:var(--c)"></i><p><span class="ar"><b>التآزر:</b> AP Biology وChemistry وPre-Calculus هي الأساس الأكاديمي لتحصيلي ≥ 85 بالإنجليزية، وSAT 1410+ يغني عن القدرات. المتطلب الوحيد الذي يبقى خاصاً بالسعودية: التحصيلي + إثبات الإنجليزية + المعدل 95%.</span><span class="en"><b>Synergy:</b> AP Biology, Chemistry and Pre-Calculus are the academic base for SAAT ≥ 85 in English, and SAT 1410+ replaces GAT. The only Saudi-specific remainder: SAAT + English proof + the 95% GPA.</span></p></div>
+    <p class="text-[11px] text-slate-500 mt-3"><span class="ar">الأرقام من دليل قبول كلية الطب 2026–2027 لجامعة الأمير سلطان (psu.edu.sa) وقد تتغير سنوياً؛ تحقّق منها عند التقديم.</span><span class="en">Figures from PSU’s 2026–2027 College of Medicine admission guide (psu.edu.sa); they may change yearly, so verify at application.</span></p>
+  </article>
+
+  <!-- ===== GEORGIA ===== -->
+  <article id="p-ge" class="panel card p-5 sm:p-6 c-ge" role="tabpanel" hidden>
+    <div class="flex items-start gap-4">
+      <div class="ico"><i class="fa-solid fa-earth-europe"></i></div>
+      <div class="min-w-0">
+        <p class="eyebrow" style="color:#6D28D9"><span class="ar">برامج الطب الأوروبية بالإنجليزية · مثال: جامعة تبليسي الطبية الحكومية</span><span class="en">European medical programs in English · e.g., Tbilisi State Medical University</span></p>
+        <h3 class="text-xl font-extrabold"><span class="ar">القبول بالملف والمقابلة: شهادة ثانوية + إنجليزية + أحياء وكيمياء</span><span class="en">File-and-interview admission: HSD + English + biology and chemistry</span></h3>
+        <p class="text-sm text-slate-600 mt-1"><span class="ar">لا امتحان وطني للطلاب الدوليين؛ تقيّم الجامعة الملف وتجري مقابلة أونلاين، ثم تُعتمد الوثائق (مترجمة وموثقة) لدى المركز الوطني لجودة التعليم (NCEQE).</span><span class="en">No national exam for international students; the university assesses the file and holds an online interview, then documents (translated and notarized) are approved by the National Center for Educational Quality Enhancement (NCEQE).</span></p>
+      </div>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
+      <div class="req"><b class="w"><span class="ar">مطلوب</span><span class="en">Required</span></b> <b class="block mt-1"><span class="ar">شهادة الثانوية (HSD)</span><span class="en">High School Diploma (HSD)</span></b><p class="text-xs text-slate-600 mt-1"><span class="ar">مصدّقة، بأساس قوي في الأحياء والكيمياء.</span><span class="en">Attested, with a strong biology and chemistry foundation.</span></p></div>
+      <div class="req"><b class="w"><span class="ar">مطلوب</span><span class="en">Required</span></b> <b class="block mt-1"><span class="ar">إثبات الإنجليزية</span><span class="en">English proficiency</span></b><p class="text-xs text-slate-600 mt-1"><span class="ar">IELTS/TOEFL أو معادلة مدرسية؛ عادةً B1–B2 بحسب الجامعة.</span><span class="en">IELTS/TOEFL or school equivalency; typically B1–B2 depending on the university.</span></p></div>
+      <div class="req"><b class="w"><span class="ar">مقابلة</span><span class="en">Interview</span></b> <b class="block mt-1"><span class="ar">تقييم القبول: أحياء + كيمياء</span><span class="en">Admission assessment: biology + chemistry</span></b><p class="text-xs text-slate-600 mt-1"><span class="ar">مقابلة أونلاين (Zoom) تتضمن عادةً أسئلة في الأحياء والكيمياء.</span><span class="en">Online (Zoom) interview, typically with biology and chemistry questions.</span></p></div>
+      <div class="req" style="border-color:#FCA5A5;background:#FEF2F2"><b class="w" style="background:#DC2626"><span class="ar">قبل التسجيل</span><span class="en">Before enrolling</span></b> <b class="block mt-1"><span class="ar">اعتراف الأردن بالجامعة</span><span class="en">Jordanian recognition</span></b><p class="text-xs text-slate-700 mt-1"><span class="ar">تأكد أن الجامعة والبرنامج في قائمة التعليم العالي الأردني المعترف بها، وإلا تعذّر الترخيص لاحقاً.</span><span class="en">Confirm the university and program are on Jordan’s MoHE recognized list, or licensing later is blocked.</span></p></div>
+    </div>
+    <div class="syn mt-4 text-sm flex gap-3"><i class="fa-solid fa-bolt mt-1" style="color:var(--c)"></i><p><span class="ar"><b>التآزر:</b> AP Biology وAP Chemistry تمنحان حسان كفاءة بمستوى الإعفاء في المادتين اللتين تدور حولهما المقابلة، فيصبح اجتياز مقابلات القبول الطبية في جورجيا سهلاً ومباشراً. يبقى فقط إثبات الإنجليزية (الصف 12) وتصديق الوثائق.</span><span class="en"><b>Synergy:</b> AP Biology and AP Chemistry give Hassan exemption-level competency in exactly the two subjects the interview covers, making Georgian medical admission interviews straightforward to pass. What remains is English proof (Grade 12) and document attestation.</span></p></div>
+  </article>
+
+  <!-- ===== COMPARISON MATRIX ===== -->
   <div class="mt-10">
-    <h3 class="text-lg font-extrabold mb-3"><i class="fa-solid fa-table-cells text-teal-700 me-1"></i> <span class="ar">مصفوفة المتطلبات الرسمية: الأردن · مصر · السعودية</span><span class="en">Official requirements matrix: Jordan · Egypt · Saudi Arabia</span></h3>
+    <h3 class="text-lg font-extrabold mb-3"><i class="fa-solid fa-table-cells text-teal-700 me-1"></i> <span class="ar">مصفوفة المتطلبات: الدول الأربع</span><span class="en">Requirements matrix: all four countries</span></h3>
     <div class="card overflow-hidden">
       <div class="overflow-x-auto">
-        <table class="w-full text-sm min-w-[680px]">
+        <table class="w-full text-sm min-w-[820px]">
           <thead class="bg-slate-100 text-slate-600 text-xs uppercase tracking-wider">
-            <tr><th class="text-start"><span class="ar">المتطلب</span><span class="en">Requirement</span></th><th class="text-start">🇯🇴 <span class="ar">الأردن — نظام رقم (5) لسنة 2025/2026</span><span class="en">Jordan — Regulation No. (5) 2025/2026</span></th><th class="text-start">🇪🇬 <span class="ar">مصر</span><span class="en">Egypt</span></th><th class="text-start">🇸🇦 <span class="ar">السعودية</span><span class="en">Saudi Arabia</span></th></tr>
+            <tr><th class="text-start"><span class="ar">المتطلب</span><span class="en">Requirement</span></th><th class="text-start">🇯🇴 <span class="ar">الأردن</span><span class="en">Jordan</span></th><th class="text-start">🇪🇬 <span class="ar">مصر</span><span class="en">Egypt</span></th><th class="text-start">🇸🇦 <span class="ar">السعودية (PSU)</span><span class="en">Saudi (PSU)</span></th><th class="text-start">🇬🇪 <span class="ar">جورجيا</span><span class="en">Georgia</span></th></tr>
           </thead>
           <tbody class="divide-y divide-slate-200">
-            <tr><td class="font-bold"><span class="ar">المعدل المدرسي</span><span class="en">School GPA</span></td><td><b class="num text-amber-700">0%</b> · <span class="ar">شرط ناجح/راسب فقط</span><span class="en">Pass/Fail prerequisite only</span></td><td><b class="num text-teal-700">40%</b> <span class="ar">من درجة التنسيق</span><span class="en">of coordination score</span></td><td><span class="ar">ضمن النسبة الموزونة</span><span class="en">Part of weighted score</span></td></tr>
-            <tr><td class="font-bold"><span class="ar">الفيزياء المدرسية</span><span class="en">School Physics</span></td><td><span class="ar">ضمن المواد المدرسية (ناجح/راسب)</span><span class="en">Among school subjects (Pass/Fail)</span></td><td><b class="text-red-600"><span class="ar">إلزامية</span><span class="en">Mandatory</span></b> <span class="ar">(ضمن 8 مواد)</span><span class="en">(one of 8 subjects)</span></td><td><span class="ar">تدعم التحصيلي</span><span class="en">Supports SAAT</span></td></tr>
-            <tr><td class="font-bold">Digital SAT</td><td><b class="text-teal-700"><span class="ar">الخانة 4 · 25% (خيار أ)</span><span class="en">Slot 4 · 25% (option A)</span></b><br><small class="num text-slate-500">1050 = 75% · 1410 = 93% · 1550+ = 100%</small></td><td><b class="num text-teal-700">60%</b> <span class="ar">من الترتيب</span><span class="en">of ranking</span></td><td><span class="ar">معترف به في الكليات الخاصة (الفيصل)</span><span class="en">Recognized by private colleges (Alfaisal)</span></td></tr>
-            <tr><td class="font-bold"><span class="ar">اختبارات AP</span><span class="en">AP exams</span></td><td><b class="num text-teal-700">3 × 25%</b> · AP ≥ 3/5<br><small class="text-slate-500">Pre-Calc + Bio + Chem · <span class="ar">+ AP CSP كخيار (ب) للخانة 4</span><span class="en">+ AP CSP as option B for slot 4</span></small></td><td>2 <span class="ar">مواد علمية</span><span class="en">sciences</span><br><small class="text-slate-500">Bio <span class="ar">إلزامي</span><span class="en">mandatory</span> + Chem</small></td><td><span class="ar">أساس متقدم للتحصيلي والجامعات الخاصة</span><span class="en">Advanced base for SAAT + private colleges</span></td></tr>
-            <tr><td class="font-bold">GAT · SAAT</td><td>—</td><td>—</td><td><b class="text-amber-700"><span class="ar">إلزامي (بالإنجليزية)</span><span class="en">Mandatory (English)</span></b></td></tr>
-            <tr><td class="font-bold"><span class="ar">اختبارات خارجية إضافية بعد الثلاثي؟</span><span class="en">Extra external tests after the Trio?</span></td><td><span class="ar">الخانة 4 فقط: SAT أو AP CSP (الأعلى نسبةً)</span><span class="en">Slot 4 only: SAT or AP CSP (whichever is higher)</span></td><td><b class="text-teal-700"><span class="ar">لا — تحصيل حاصل</span><span class="en">No — auto-fulfilled</span></b></td><td><span class="ar">نعم: GAT + SAAT</span><span class="en">Yes: GAT + SAAT</span></td></tr>
-            <tr><td class="font-bold"><span class="ar">ترخيص مزاولة الطب</span><span class="en">Medical licensing</span></td><td><span class="ar">معادلة علمية موثقة ≥ <b class="num">85%</b> (نقابة الأطباء + التعليم العالي)</span><span class="en">Verified scientific equivalency ≥ <b class="num">85%</b> (Medical Association + MoHE)</span></td><td>—</td><td>—</td></tr>
-            <tr><td class="font-bold"><span class="ar">درجة AP ↔ نسبة</span><span class="en">AP score ↔ %</span></td><td colspan="3"><span class="num">3 = 86% · 4 = 93% · 5 = 100%</span> <span class="text-slate-500">(<span class="ar">الحد الأدنى المقبول 3 · تنطبق على Pre-Calc وBio وChem وCSP</span><span class="en">minimum accepted 3 · applies to Pre-Calc, Bio, Chem and CSP</span>)</span></td></tr>
+            <tr><td class="font-bold"><span class="ar">المعدل المدرسي</span><span class="en">School GPA</span></td><td><b class="text-amber-700">0%</b> · <span class="ar">ناجح/راسب</span><span class="en">Pass/Fail</span></td><td><b class="text-teal-700">40%</b></td><td><b class="text-teal-700">30%</b> · <span class="ar">حد أدنى</span><span class="en">min</span> 95%</td><td><span class="ar">HSD مصدّقة</span><span class="en">Attested HSD</span></td></tr>
+            <tr><td class="font-bold"><span class="ar">الفيزياء المدرسية</span><span class="en">School Physics</span></td><td><span class="ar">ناجح/راسب</span><span class="en">Pass/Fail</span></td><td><b class="text-red-600"><span class="ar">إلزامية</span><span class="en">Mandatory</span></b></td><td><span class="ar">تدعم التحصيلي</span><span class="en">Supports SAAT</span></td><td>—</td></tr>
+            <tr><td class="font-bold">Digital SAT</td><td><span class="ar">الخانة 4 · 25% · 1050=75% → 1550+=100%</span><span class="en">Slot 4 · 25% · 1050=75% → 1550+=100%</span></td><td><b class="text-teal-700">60%</b></td><td><span class="ar">بديل القدرات: ≥ 1350</span><span class="en">GAT alternative: ≥ 1350</span></td><td><span class="ar">اختياري</span><span class="en">Optional</span></td></tr>
+            <tr><td class="font-bold">AP Biology + AP Chemistry</td><td>2 × 25% (≥ 3)</td><td><b class="text-red-600"><span class="ar">إلزاميان</span><span class="en">Mandatory</span></b></td><td><span class="ar">أساس التحصيلي</span><span class="en">SAAT base</span></td><td><span class="ar">كفاءة المقابلة</span><span class="en">Interview competency</span></td></tr>
+            <tr><td class="font-bold">AP Pre-Calculus</td><td>25% (≥ 3)</td><td>—</td><td><span class="ar">يدعم رياضيات التحصيلي</span><span class="en">Supports SAAT math</span></td><td>—</td></tr>
+            <tr><td class="font-bold">AP CSP</td><td><span class="ar">خيار ب للخانة 4</span><span class="en">Option B for slot 4</span></td><td>—</td><td>—</td><td>—</td></tr>
+            <tr><td class="font-bold">GAT · SAAT</td><td>—</td><td>—</td><td><b class="text-amber-700">SAAT ≥ 85 · GAT ≥ 85 <span class="ar">أو</span><span class="en">or</span> SAT 1350</b></td><td>—</td></tr>
+            <tr><td class="font-bold"><span class="ar">إثبات الإنجليزية</span><span class="en">English proficiency</span></td><td>—</td><td>—</td><td>IELTS 5.0 · TOEFL iBT 50 (≤ 2 <span class="ar">سنة</span><span class="en">yrs</span>)</td><td>IELTS/TOEFL <span class="ar">أو معادلة مدرسية</span><span class="en">or school equivalency</span> (B1–B2)</td></tr>
+            <tr><td class="font-bold"><span class="ar">مقابلة قبول</span><span class="en">Admission interview</span></td><td>—</td><td>—</td><td><span class="ar">بحسب الكلية</span><span class="en">Per college</span></td><td><b class="text-violet-700"><span class="ar">أونلاين · أحياء/كيمياء</span><span class="en">Online · Bio/Chem</span></b></td></tr>
+            <tr><td class="font-bold"><span class="ar">ما يبقى بعد النواة</span><span class="en">Beyond the core</span></td><td>AP Pre-Calc + <span class="ar">الخانة 4</span><span class="en">slot 4</span></td><td><b class="text-teal-700"><span class="ar">لا شيء</span><span class="en">Nothing</span></b></td><td>SAAT + <span class="ar">إنجليزية</span><span class="en">English</span> + GPA 95%</td><td><span class="ar">إنجليزية + مقابلة</span><span class="en">English + interview</span></td></tr>
+            <tr><td class="font-bold"><span class="ar">الترخيص في الأردن</span><span class="en">Licensing in Jordan</span></td><td colspan="4"><span class="ar">معادلة علمية ≥ <b>85%</b> + جامعة وبرنامج معترف بهما لدى التعليم العالي الأردني (مهم خصوصاً لجورجيا)</span><span class="en">Scientific equivalency ≥ <b>85%</b> + a university and program recognized by Jordan’s MoHE (critical for Georgia)</span></td></tr>
           </tbody>
         </table>
       </div>
     </div>
   </div>
-
-  <!-- ===== CONVERSION TABLES ===== -->
-  <div class="mt-8">
-    <h3 class="text-lg font-extrabold mb-3"><i class="fa-solid fa-right-left text-teal-700 me-1"></i> <span class="ar">جداول التحويل لمعادلة الأردن (نظام رقم 5)</span><span class="en">Conversion tables for the Jordan equivalency (Regulation No. 5)</span></h3>
-    <div class="grid md:grid-cols-2 gap-5">
-      <div class="card overflow-hidden">
-        <div class="p-4 border-b border-slate-100 flex items-center gap-3"><span class="w-10 h-10 shrink-0 rounded-xl bg-teal-50 text-teal-700 grid place-items-center"><i class="fa-solid fa-laptop-code"></i></span><div><b class="block"><span class="ar">Digital SAT ← نسبة الخانة الرابعة (خيار أ)</span><span class="en">Digital SAT → 4th-slot percentage (option A)</span></b><small class="text-slate-500"><span class="ar">مقياس الوزارة</span><span class="en">Ministry scale</span></small></div></div>
-        <table class="w-full text-sm">
-          <thead class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider"><tr><th class="text-start">Digital SAT</th><th class="text-start"><span class="ar">النسبة</span><span class="en">Percentage</span></th><th class="text-start"><span class="ar">يعادل AP</span><span class="en">AP equivalent</span></th></tr></thead>
-          <tbody class="divide-y divide-slate-100 num">
-            <tr class="bg-teal-50/60"><td class="font-bold">1550–1600</td><td><b class="text-teal-700">100%</b></td><td>= AP 5</td></tr>
-            <tr><td class="font-bold">1500</td><td>97%</td><td>—</td></tr>
-            <tr><td class="font-bold">1450</td><td>95%</td><td>—</td></tr>
-            <tr class="bg-teal-50/60"><td class="font-bold">1410–1420</td><td><b class="text-teal-700">93%</b></td><td>= AP 4</td></tr>
-            <tr><td class="font-bold">1350–1360</td><td>90%</td><td>—</td></tr>
-            <tr class="bg-amber-50"><td class="font-bold">1050</td><td><b class="text-amber-700">75%</b></td><td><span class="ar">الحد الأدنى</span><span class="en">minimum</span></td></tr>
-            <tr class="bg-red-50 text-red-800"><td class="font-bold">&lt; 1050</td><td>—</td><td><span class="ar">غير محتسب</span><span class="en">not counted</span></td></tr>
-          </tbody>
-        </table>
-        <p class="p-3 text-[11px] text-slate-500"><span class="ar">الدرجات بين النقاط المنشورة تُقدَّر خطياً في المحاكي؛ الجدول الرسمي الكامل لدى الوزارة هو المرجع.</span><span class="en">Scores between the published anchors are interpolated linearly in the simulator; the Ministry’s full official table is the reference.</span></p>
-      </div>
-      <div class="card overflow-hidden">
-        <div class="p-4 border-b border-slate-100 flex items-center gap-3"><span class="w-10 h-10 shrink-0 rounded-xl bg-teal-50 text-teal-700 grid place-items-center"><i class="fa-solid fa-graduation-cap"></i></span><div><b class="block"><span class="ar">درجة AP الخام ← درجة AP ← نسبة الوزارة</span><span class="en">AP raw score → AP score → Ministry percentage</span></b><small class="text-slate-500"><span class="ar">لكل خانة AP (Pre-Calc · Bio · Chem · CSP)</span><span class="en">for every AP slot (Pre-Calc · Bio · Chem · CSP)</span></small></div></div>
-        <table class="w-full text-sm">
-          <thead class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider"><tr><th class="text-start"><span class="ar">الخام (تقريبي)</span><span class="en">Raw (approx.)</span></th><th class="text-start"><span class="ar">درجة AP</span><span class="en">AP score</span></th><th class="text-start"><span class="ar">نسبة الوزارة</span><span class="en">Ministry %</span></th></tr></thead>
-          <tbody class="divide-y divide-slate-100 num">
-            <tr class="bg-teal-50/60"><td class="font-bold">≈ 75%+</td><td>5</td><td><b class="text-teal-700">100%</b></td></tr>
-            <tr class="bg-teal-50/60"><td class="font-bold">≈ 60%</td><td>4</td><td><b class="text-teal-700">93%</b> <small class="text-slate-500"><span class="ar">(الهدف التخطيطي)</span><span class="en">(planning target)</span></small></td></tr>
-            <tr><td class="font-bold">≈ 45–50%</td><td>3</td><td>86% <small class="text-slate-500"><span class="ar">(الحد الأدنى)</span><span class="en">(minimum)</span></small></td></tr>
-            <tr class="bg-red-50 text-red-800"><td class="font-bold">&lt; 45%</td><td>1–2</td><td><span class="ar">غير محتسب</span><span class="en">not counted</span></td></tr>
-          </tbody>
-        </table>
-        <p class="p-3 text-[11px] text-slate-500"><span class="ar">نسبة الدرجة الخام المقابلة لكل درجة AP تقديرية للتخطيط (نحو 60% من العلامة الخام ≈ درجة 4): College Board لا تنشر حدوداً ثابتة وتختلف من اختبار إلى آخر وسنة إلى أخرى. نسب الوزارة (86 · 93 · 100) هي الرسمية.</span><span class="en">The raw percentage behind each AP score is a planning estimate (about 60% of the raw marks ≈ a score of 4): College Board publishes no fixed cut-offs and they vary by exam and year. The Ministry percentages (86 · 93 · 100) are the official part.</span></p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ================= EXAM VALIDITY & REGULATORY LIFESPANS ================= -->
-<section id="validity" class="mb-14">
-  <div class="mb-5">
-    <p class="eyebrow"><span class="ar">دليل الصلاحيات · متى يُؤخذ كل اختبار</span><span class="en">Validity guide · when to take each test</span></p>
-    <h2 class="text-2xl sm:text-3xl font-extrabold mt-1"><span class="ar">دليل صلاحيات واعتماد الاختبارات الرسمية</span><span class="en">Official Exam Validity &amp; Regulatory Lifespans</span></h2>
-    <p class="text-sm text-slate-600 mt-2 max-w-3xl"><span class="ar">لكل درجة ساعتان: صلاحية الجهة المُصدِرة، ونافذة القبول لدى كل مؤسسة. التوقيت أدناه يُبقي كل الدرجات سارية حتى يوم التقديم.</span><span class="en">Every score has two clocks: the issuing body’s validity and each institution’s acceptance window. The timing below keeps every score alive until application day.</span></p>
-  </div>
-
-  <div class="grid md:grid-cols-3 gap-5">
-    <!-- Digital SAT -->
-    <article class="card p-5 flex flex-col">
-      <div class="flex items-start justify-between gap-3">
-        <div class="flex items-center gap-3 min-w-0"><span class="w-11 h-11 shrink-0 rounded-xl bg-teal-50 text-teal-700 grid place-items-center text-xl"><i class="fa-solid fa-laptop-code"></i></span><div class="min-w-0"><b class="block">Digital SAT</b><small class="text-slate-500">College Board</small></div></div>
-        <span class="inline-flex items-center gap-1 rounded-full bg-navy text-white text-xs font-extrabold px-3 py-1 whitespace-nowrap shrink-0"><i class="fa-regular fa-clock"></i> <span class="ar">5 سنوات</span><span class="en">5 years</span></span>
-      </div>
-      <p class="text-xs text-slate-500 mt-3"><span class="ar">صلاحية نظام College Board: 5 سنوات من تاريخ الاختبار.</span><span class="en">College Board system validity: 5 years from the test date.</span></p>
-      <p class="mt-4 text-[11px] font-extrabold tracking-widest uppercase text-slate-500"><span class="ar">نافذة القبول لدى المؤسسات</span><span class="en">Institutional acceptance window</span></p>
-      <ul class="mt-2 space-y-2 text-sm text-slate-700">
-        <li class="flex gap-2"><span class="shrink-0">🇯🇴</span><span><span class="ar"><b>وزارة التربية الأردنية:</b> مقبول إذا أُنجز خلال سنوات الثانوية (الصفوف 10–12) لملف المعادلة — الخانة الرابعة (خيار أ)، حد أدنى 1050 = 75%.</span><span class="en"><b>Jordan MoE:</b> valid when completed during senior high-school years (Grades 10–12) for the equivalency file — 4th slot (option A), minimum 1050 = 75%.</span></span></li>
-        <li class="flex gap-2"><span class="shrink-0">🇪🇬</span><span><span class="ar"><b>مكتب التنسيق المصري:</b> صالح ضمن دورة التخرج من الثانوية (عادةً 2–3 سنوات).</span><span class="en"><b>Egypt Coordination Office:</b> valid within the secondary graduation cycle (typically 2–3 years).</span></span></li>
-        <li class="flex gap-2"><span class="shrink-0">🇸🇦</span><span><span class="ar"><b>الجامعات السعودية (الخاصة/الطبية مثل الفيصل):</b> صالح لسنتين فقط من تاريخ التقديم.</span><span class="en"><b>Saudi universities (private / medical, e.g., Alfaisal):</b> strictly valid for 2 years from the application date.</span> <span class="inline-flex rounded-full bg-red-100 text-red-700 text-[11px] font-extrabold px-2 py-[1px]"><span class="ar">سنتان</span><span class="en">2 years</span></span></span></li>
-      </ul>
-      <div class="mt-auto pt-4">
-        <p class="text-[11px] font-extrabold tracking-widest uppercase text-slate-500 mb-2"><span class="ar">الصف المثالي</span><span class="en">Ideal grade</span></p>
-        <div class="grid grid-cols-3 gap-1 text-center text-xs font-bold">
-          <span class="rounded-lg bg-slate-100 text-slate-500 py-1.5"><span class="ar">10 · تدريب</span><span class="en">10 · practice</span></span>
-          <span class="rounded-lg bg-teal-600 text-white py-1.5">★ 11 · <span class="ar">مثالي</span><span class="en">ideal</span></span>
-          <span class="rounded-lg bg-amber-100 text-amber-800 py-1.5"><span class="ar">12 · إعادة</span><span class="en">12 · retake</span></span>
-        </div>
-        <p class="text-xs text-teal-900 bg-teal-50 border border-teal-200 rounded-lg p-2 mt-2"><i class="fa-solid fa-lightbulb text-teal-700"></i> <span class="ar">أنجزه في الصف 11 ليبقى صالحاً لدى الجميع حتى كل مواعيد التقديم.</span><span class="en">Complete in Grade 11 to remain universally valid across all deadlines.</span></p>
-      </div>
-    </article>
-
-    <!-- AP exams -->
-    <article class="card p-5 flex flex-col">
-      <div class="flex items-start justify-between gap-3">
-        <div class="flex items-center gap-3 min-w-0"><span class="w-11 h-11 shrink-0 rounded-xl bg-teal-50 text-teal-700 grid place-items-center text-xl"><i class="fa-solid fa-graduation-cap"></i></span><div class="min-w-0"><b class="block"><span class="ar">اختبارات AP</span><span class="en">AP Exams</span></b><small class="text-slate-500">Advanced Placement · College Board</small></div></div>
-        <span class="inline-flex items-center gap-1 rounded-full bg-teal-600 text-white text-xs font-extrabold px-3 py-1 whitespace-nowrap shrink-0"><i class="fa-solid fa-infinity"></i> <span class="ar">غير محدد الصلاحية</span><span class="en">No expiration</span></span>
-      </div>
-      <p class="text-xs text-slate-500 mt-3"><span class="ar">سجل رسمي دائم لدى College Board بلا تاريخ انتهاء؛ إرسال الدرجات إلكترونياً نشط 4 سنوات ثم يُسترجع من الأرشيف.</span><span class="en">Lifelong official College Board record with no expiration; active online score send for 4 years, archived retrieval afterwards.</span></p>
-      <p class="mt-4 text-[11px] font-extrabold tracking-widest uppercase text-slate-500"><span class="ar">نافذة القبول لدى المؤسسات</span><span class="en">Institutional acceptance window</span></p>
-      <ul class="mt-2 space-y-2 text-sm text-slate-700">
-        <li class="flex gap-2"><span class="shrink-0">🇯🇴</span><span><span class="ar"><b>معادلة الأردن:</b> يجب أداؤها خلال السنوات الثلاث الأخيرة من المدرسة (الصفوف 10، 11، 12).</span><span class="en"><b>Jordan MoE equivalency:</b> must be taken during the last 3 years of school (Grades 10, 11, 12).</span></span></li>
-        <li class="flex gap-2"><span class="shrink-0">🇪🇬</span><span><span class="ar"><b>قبول كليات الطب المصرية:</b> صالح طوال فترة التخرج من الثانوية.</span><span class="en"><b>Egypt medical faculty admission:</b> valid throughout the high-school graduation period.</span></span></li>
-        <li class="flex gap-2"><span class="shrink-0"><i class="fa-solid fa-building-columns text-teal-700"></i></span><span><span class="ar"><b>احتساب المواد الجامعية:</b> يُقبل عادةً خلال 3–4 سنوات من تاريخ الاختبار.</span><span class="en"><b>University course credit:</b> typically accepted within 3–4 years of the test date.</span></span></li>
-      </ul>
-      <div class="mt-auto pt-4">
-        <p class="text-[11px] font-extrabold tracking-widest uppercase text-slate-500 mb-2"><span class="ar">الصف المثالي</span><span class="en">Ideal grade</span></p>
-        <div class="grid grid-cols-3 gap-1 text-center text-xs font-bold">
-          <span class="rounded-lg bg-amber-100 text-amber-800 py-1.5">10 · Pre-Calc</span>
-          <span class="rounded-lg bg-teal-600 text-white py-1.5">★ 11 · Bio (+Pre-Calc)</span>
-          <span class="rounded-lg bg-teal-600 text-white py-1.5">★ 12 · Chem (+CSP)</span>
-        </div>
-        <p class="text-xs text-teal-900 bg-teal-50 border border-teal-200 rounded-lg p-2 mt-2"><i class="fa-solid fa-lightbulb text-teal-700"></i> <span class="ar">الخانات الأربع (3 AP + SAT أو AP CSP) كلها داخل نافذة الأردن (10–12)، ودرجات AP لا تنتهي صلاحيتها لدى College Board أبداً. AP CSP: مشروع Create يُسلَّم قبل نهاية أبريل ثم الاختبار في مايو.</span><span class="en">All 4 slots (3 AP + SAT or AP CSP) sit inside Jordan’s window (10–12), and AP scores never expire with College Board. AP CSP: the Create task is submitted by end of April, then the exam in May.</span></p>
-      </div>
-    </article>
-
-    <!-- GAT & SAAT -->
-    <article class="card p-5 flex flex-col">
-      <div class="flex items-start justify-between gap-3">
-        <div class="flex items-center gap-3 min-w-0"><span class="w-11 h-11 shrink-0 rounded-xl bg-teal-50 text-teal-700 grid place-items-center text-xl"><i class="fa-solid fa-kaaba"></i></span><div class="min-w-0"><b class="block">GAT &amp; SAAT</b><small class="text-slate-500">ETEC / Qiyas · <span class="ar">السعودية</span><span class="en">Saudi Arabia</span></small></div></div>
-        <span class="inline-flex items-center gap-1 rounded-full bg-navy text-white text-xs font-extrabold px-3 py-1 whitespace-nowrap shrink-0"><i class="fa-regular fa-clock"></i> <span class="ar">5 سنوات</span><span class="en">5 years</span></span>
-      </div>
-      <p class="text-xs text-slate-500 mt-3"><span class="ar">صلاحية هيئة تقويم التعليم والتدريب الرسمية: 5 سنوات من إعلان النتائج.</span><span class="en">Official ETEC validity: 5 years from the announcement of results.</span></p>
-      <p class="mt-4 text-[11px] font-extrabold tracking-widest uppercase text-slate-500"><span class="ar">نافذة التنفيذ الموصى بها</span><span class="en">Recommended execution window</span></p>
-      <ul class="mt-2 space-y-2 text-sm text-slate-700">
-        <li class="flex gap-2"><span class="shrink-0"><i class="fa-solid fa-brain text-teal-700"></i></span><span><span class="ar"><b>القدرات GAT (بالإنجليزية):</b> الصف 11 والصف 12 — محاولة مبكرة ثم تحسين.</span><span class="en"><b>GAT (English):</b> Grade 11 and Grade 12 — an early attempt, then improve.</span></span></li>
-        <li class="flex gap-2"><span class="shrink-0"><i class="fa-solid fa-microscope text-teal-700"></i></span><span><span class="ar"><b>التحصيلي SAAT (بالإنجليزية):</b> الصف 12 بعد اكتمال مواد AP العلمية.</span><span class="en"><b>SAAT (English):</b> Grade 12, after the AP sciences are complete.</span></span></li>
-        <li class="flex gap-2"><span class="shrink-0"><i class="fa-solid fa-shield-halved text-teal-700"></i></span><span><span class="ar">كلا الاختبارين يبقيان صالحين لسنوات بعد التقديم، فلا خطر انتهاء قبل القبول.</span><span class="en">Both stay valid for years beyond the application, so no expiry risk before admission.</span></span></li>
-      </ul>
-      <div class="mt-auto pt-4">
-        <p class="text-[11px] font-extrabold tracking-widest uppercase text-slate-500 mb-2"><span class="ar">الصف المثالي</span><span class="en">Ideal grade</span></p>
-        <div class="grid grid-cols-3 gap-1 text-center text-xs font-bold">
-          <span class="rounded-lg bg-slate-100 text-slate-500 py-1.5">10 · —</span>
-          <span class="rounded-lg bg-teal-600 text-white py-1.5">★ 11 · GAT</span>
-          <span class="rounded-lg bg-teal-600 text-white py-1.5">★ 12 · GAT + SAAT</span>
-        </div>
-        <p class="text-xs text-teal-900 bg-teal-50 border border-teal-200 rounded-lg p-2 mt-2"><i class="fa-solid fa-lightbulb text-teal-700"></i> <span class="ar">GAT في الصف 11 و12، وSAAT في الصف 12 — بالإنجليزية للمسار الطبي.</span><span class="en">GAT in Grades 11 &amp; 12, SAAT in Grade 12 — in English for the medical track.</span></p>
-      </div>
-    </article>
-  </div>
-
-  <!-- Timeline comparison -->
-  <div class="card mt-5 overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm min-w-[640px]">
-        <thead class="bg-slate-100 text-slate-600 text-xs uppercase tracking-wider">
-          <tr><th class="text-start"><span class="ar">الاختبار</span><span class="en">Exam</span></th><th class="text-start"><span class="ar">الصف 10</span><span class="en">Grade 10</span><br><small class="num normal-case tracking-normal">2026/27</small></th><th class="text-start"><span class="ar">الصف 11</span><span class="en">Grade 11</span><br><small class="num normal-case tracking-normal">2027/28</small></th><th class="text-start"><span class="ar">الصف 12</span><span class="en">Grade 12</span><br><small class="num normal-case tracking-normal">2028/29</small></th><th class="text-start"><span class="ar">التقديم 2029</span><span class="en">Applications 2029</span></th><th class="text-start"><span class="ar">الصلاحية</span><span class="en">Lifespan</span></th></tr>
-        </thead>
-        <tbody class="divide-y divide-slate-200">
-          <tr><td class="font-bold">Digital SAT</td><td><span class="cell soft"><span class="ar">تدريب</span><span class="en">Practice</span></span></td><td><span class="cell ideal">★ <span class="ar">مثالي</span><span class="en">Ideal</span></span></td><td><span class="cell warn"><span class="ar">إعادة إن لزم</span><span class="en">Retake if needed</span></span></td><td><span class="cell ok">✓ <span class="ar">صالح لدى الجميع</span><span class="en">Valid everywhere</span></span></td><td><span class="num">5</span> <span class="ar">سنوات · السعودية: سنتان من التقديم</span><span class="en">years · KSA: 2 years from application</span></td></tr>
-          <tr><td class="font-bold">AP Pre-Calculus</td><td><span class="cell ok">✓ <span class="ar">مقبول</span><span class="en">OK</span></span></td><td><span class="cell ideal">★ <span class="ar">مثالي</span><span class="en">Ideal</span></span></td><td><span class="cell ok">✓ <span class="ar">مقبول</span><span class="en">OK</span></span></td><td><span class="cell ok">✓ <span class="ar">صالح</span><span class="en">Valid</span></span></td><td><span class="ar">بلا انتهاء · الأردن: خلال الصفوف 10–12</span><span class="en">No expiry · Jordan: within Grades 10–12</span></td></tr>
-          <tr><td class="font-bold">AP Biology</td><td>—</td><td><span class="cell ideal">★ <span class="ar">مثالي</span><span class="en">Ideal</span></span></td><td><span class="cell ok">✓ <span class="ar">مقبول</span><span class="en">OK</span></span></td><td><span class="cell ok">✓ <span class="ar">صالح</span><span class="en">Valid</span></span></td><td><span class="ar">بلا انتهاء · الأردن: خلال الصفوف 10–12</span><span class="en">No expiry · Jordan: within Grades 10–12</span></td></tr>
-          <tr><td class="font-bold">AP Chemistry</td><td>—</td><td><span class="cell ok">✓ <span class="ar">مقبول</span><span class="en">OK</span></span></td><td><span class="cell ideal">★ <span class="ar">مثالي</span><span class="en">Ideal</span></span></td><td><span class="cell ok">✓ <span class="ar">صالح</span><span class="en">Valid</span></span></td><td><span class="ar">بلا انتهاء · الأردن: خلال الصفوف 10–12</span><span class="en">No expiry · Jordan: within Grades 10–12</span></td></tr>
-          <tr><td class="font-bold">AP Computer Science Principles <small class="text-slate-500"><span class="ar">(الخانة 4 · خيار ب)</span><span class="en">(slot 4 · option B)</span></small></td><td>—</td><td><span class="cell ok">✓ <span class="ar">مقبول</span><span class="en">OK</span></span></td><td><span class="cell ideal">★ <span class="ar">مثالي إن كان SAT &lt; 93%</span><span class="en">Ideal if SAT &lt; 93%</span></span></td><td><span class="cell ok">✓ <span class="ar">صالح</span><span class="en">Valid</span></span></td><td><span class="ar">بلا انتهاء · الأردن: خلال الصفوف 10–12 · يُحتسب الأعلى بينه وبين SAT</span><span class="en">No expiry · Jordan: within Grades 10–12 · the higher of CSP and SAT counts</span></td></tr>
-          <tr><td class="font-bold">GAT <small class="text-slate-500">(EN)</small></td><td>—</td><td><span class="cell ideal">★ <span class="ar">محاولة أولى</span><span class="en">First attempt</span></span></td><td><span class="cell ideal">★ <span class="ar">تحسين</span><span class="en">Improve</span></span></td><td><span class="cell ok">✓ <span class="ar">صالح</span><span class="en">Valid</span></span></td><td><span class="num">5</span> <span class="ar">سنوات من إعلان النتائج</span><span class="en">years from results announcement</span></td></tr>
-          <tr><td class="font-bold">SAAT <small class="text-slate-500">(EN)</small></td><td>—</td><td>—</td><td><span class="cell ideal">★ <span class="ar">مثالي</span><span class="en">Ideal</span></span></td><td><span class="cell ok">✓ <span class="ar">صالح</span><span class="en">Valid</span></span></td><td><span class="num">5</span> <span class="ar">سنوات من إعلان النتائج</span><span class="en">years from results announcement</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-<!-- ================= ROADMAP: GRADE BY GRADE ================= -->
-<section id="roadmap" class="mb-14">
-  <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
-    <div>
-      <p class="eyebrow"><span class="ar">خارطة الطريق · صفاً بصف</span><span class="en">Roadmap · Grade by grade</span></p>
-      <h2 class="text-2xl sm:text-3xl font-extrabold mt-1"><span class="ar">الصف 10 ← 11 ← 12: مهام كل فصل بدقة</span><span class="en">Grade 10 → 11 → 12: exact tasks per term</span></h2>
-    </div>
-    <p class="text-xs text-slate-500 max-w-md"><i class="fa-solid fa-hand-pointer"></i> <span class="ar">اضغط على الحالة لتبديلها: مخطط ← قيد التنفيذ ← مكتمل (تُحفظ على هذا الجهاز وتغذّي شريط التقدم في الأعلى)</span><span class="en">Tap a status to cycle: Planned → In progress → Completed (saved on this device and feeds the progress pill above)</span></p>
-  </div>
-  <div id="tl" class="grid md:grid-cols-3 gap-5"></div>
 </section>
 
 <!-- ================= SIMULATOR ================= -->
 <section id="calc" class="mb-14">
   <div class="mb-5">
     <p class="eyebrow"><span class="ar">المحاكي التفاعلي</span><span class="en">Interactive simulator</span></p>
-    <h2 class="text-2xl sm:text-3xl font-extrabold mt-1"><span class="ar">حاسبة الدرجات المكافئة: الأردن · مصر · السعودية</span><span class="en">Equivalent score calculator: Jordan · Egypt · Saudi Arabia</span></h2>
-    <p class="text-sm text-slate-600 mt-2 max-w-3xl"><span class="ar">الأردن وفق نظام رقم (5) لسنة 2025/2026: 4 اختبارات × 25%، المعدل المدرسي 0% (ناجح/راسب فقط)، والخانة الرابعة تأخذ الأعلى بين Digital SAT (مقياس الوزارة) وAP CSP. المعدل يبقى مؤثراً في مصر والسعودية.</span><span class="en">Jordan per Regulation No. (5) 2025/2026: 4 exams × 25%, school GPA 0% (Pass/Fail only), and the 4th slot takes the higher of the Digital SAT (Ministry scale) and AP CSP. GPA still matters for Egypt and Saudi Arabia.</span></p>
+    <h2 class="text-2xl sm:text-3xl font-extrabold mt-1"><span class="ar">حرّك الدرجات وشاهد الدول الأربع تتحرك معها</span><span class="en">Move the scores and watch all four countries respond</span></h2>
   </div>
   <div class="grid lg:grid-cols-2 gap-6">
     <div class="card p-5 sm:p-6 space-y-5">
-      <div><div class="flex justify-between gap-2 mb-1"><label for="sGpa" class="font-bold"><span class="ar">المعدل المدرسي</span><span class="en">School GPA</span> <span class="text-xs text-slate-500 font-normal"><span class="ar">(مصر · السعودية — 0% في الأردن)</span><span class="en">(Egypt · Saudi — 0% in Jordan)</span></span></label><b class="num text-teal-700" id="vGpa">90%</b></div><input id="sGpa" type="range" min="60" max="100" value="90"></div>
-      <div><div class="flex justify-between gap-2 mb-1"><label for="sSat" class="font-bold">Digital SAT <span class="text-xs text-slate-500 font-normal"><span class="ar">(الخانة 4 · خيار أ)</span><span class="en">(slot 4 · option A)</span></span></label><span><b class="num text-teal-700" id="vSat">1300</b> <small class="num text-slate-500" id="vSatPct"></small></span></div><input id="sSat" type="range" min="400" max="1600" step="10" value="1300"></div>
+      <div><div class="flex justify-between gap-2 mb-1"><label for="sGpa" class="font-bold"><span class="ar">المعدل المدرسي</span><span class="en">School GPA</span> <span class="text-xs text-slate-500 font-normal"><span class="ar">(مصر 40% · PSU 30% · الأردن 0%)</span><span class="en">(Egypt 40% · PSU 30% · Jordan 0%)</span></span></label><b class="num text-teal-700" id="vGpa">95%</b></div><input id="sGpa" type="range" min="60" max="100" value="95"></div>
+      <div><div class="flex justify-between gap-2 mb-1"><label for="sSat" class="font-bold">Digital SAT</label><span><b class="num text-teal-700" id="vSat">1410</b> <small class="num text-slate-500" id="vSatPct"></small></span></div><input id="sSat" type="range" min="400" max="1600" step="10" value="1410"></div>
       <div>
-        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"><span class="ar">درجات AP (1–5) · 3 أساسية + CSP اختياري</span><span class="en">AP scores (1–5) · 3 core + optional CSP</span></p>
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"><span class="ar">درجات AP (1–5)</span><span class="en">AP scores (1–5)</span></p>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div><div class="flex justify-between mb-1 text-xs"><label for="sPre" class="font-bold">AP Pre-Calc</label><b class="num text-teal-700" id="vPre">4</b></div><input id="sPre" type="range" min="1" max="5" value="4"></div>
           <div><div class="flex justify-between mb-1 text-xs"><label for="sBio" class="font-bold">AP Biology</label><b class="num text-teal-700" id="vBio">4</b></div><input id="sBio" type="range" min="1" max="5" value="4"></div>
           <div><div class="flex justify-between mb-1 text-xs"><label for="sChem" class="font-bold">AP Chem</label><b class="num text-teal-700" id="vChem">4</b></div><input id="sChem" type="range" min="1" max="5" value="4"></div>
-          <div class="rounded-lg bg-amber-50 border border-amber-200 p-1.5 -m-1.5"><div class="flex justify-between mb-1 text-xs"><label for="sCsp" class="font-bold">AP CSP <span class="text-slate-500 font-normal"><span class="ar">(خيار ب)</span><span class="en">(option B)</span></span></label><span><b class="num text-teal-700" id="vCsp">—</b> <small class="num text-slate-500" id="vCspPct"></small></span></div><input id="sCsp" type="range" min="0" max="5" value="0" aria-describedby="cspHint"><small id="cspHint" class="block text-[10px] text-slate-500 mt-1"><span class="ar">0 = لم يُؤخذ</span><span class="en">0 = not taken</span></small></div>
+          <div><div class="flex justify-between mb-1 text-xs"><label for="sCsp" class="font-bold">AP CSP</label><span><b class="num text-teal-700" id="vCsp">—</b> <small class="num text-slate-500" id="vCspPct"></small></span></div><input id="sCsp" type="range" min="0" max="5" value="0"><small class="block text-[10px] text-slate-500 mt-1"><span class="ar">0 = لم يُؤخذ</span><span class="en">0 = not taken</span></small></div>
+        </div>
+      </div>
+      <div class="rounded-xl border border-amber-200 bg-amber-50 p-3 flex flex-wrap items-center justify-between gap-3">
+        <b class="text-sm text-amber-900"><i class="fa-solid fa-chess-knight"></i> <span class="ar">الخانة الرابعة في الأردن</span><span class="en">Jordan’s 4th slot</span></b>
+        <div class="seg" role="group" aria-label="4th slot mode">
+          <button type="button" data-mode="auto" aria-pressed="true"><span class="ar">تلقائي (الأعلى)</span><span class="en">Auto (higher)</span></button>
+          <button type="button" data-mode="sat" aria-pressed="false">Digital SAT</button>
+          <button type="button" data-mode="csp" aria-pressed="false">AP CSP</button>
         </div>
       </div>
       <div class="grid grid-cols-2 gap-3">
-        <div><div class="flex justify-between mb-1"><label for="sGat" class="font-bold">GAT <span class="ar text-slate-500 font-normal text-xs">القدرات</span></label><b class="num text-teal-700" id="vGat">80%</b></div><input id="sGat" type="range" min="0" max="100" value="80"></div>
-        <div><div class="flex justify-between mb-1"><label for="sSaat" class="font-bold">SAAT <span class="ar text-slate-500 font-normal text-xs">التحصيلي</span></label><b class="num text-teal-700" id="vSaat">80%</b></div><input id="sSaat" type="range" min="0" max="100" value="80"></div>
+        <div><div class="flex justify-between mb-1"><label for="sGat" class="font-bold">GAT <span class="text-slate-500 font-normal text-xs"><span class="ar">القدرات</span><span class="en">aptitude</span></span></label><b class="num text-teal-700" id="vGat">85</b></div><input id="sGat" type="range" min="0" max="100" value="85"></div>
+        <div><div class="flex justify-between mb-1"><label for="sSaat" class="font-bold">SAAT <span class="text-slate-500 font-normal text-xs"><span class="ar">التحصيلي</span><span class="en">achievement</span></span></label><b class="num text-teal-700" id="vSaat">85</b></div><input id="sSaat" type="range" min="0" max="100" value="85"></div>
       </div>
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <div class="flex flex-col gap-2">
-          <label class="flex items-center gap-2 text-sm text-slate-700"><input id="cSchool" type="checkbox" checked class="w-5 h-5 accent-teal-600"><span class="ar">النجاح في كل المواد المدرسية (شرط الأردن · ناجح/راسب)</span><span class="en">All school subjects passed (Jordan prerequisite · Pass/Fail)</span></label>
-          <label class="flex items-center gap-2 text-sm text-slate-700"><input id="cPhys" type="checkbox" checked class="w-5 h-5 accent-teal-600"><span class="ar">الفيزياء مأخوذة كمادة مدرسية (شرط مصر)</span><span class="en">Physics taken as a school course (Egypt prerequisite)</span></label>
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="flex flex-col gap-2 text-sm text-slate-700">
+          <label class="flex items-center gap-2"><input id="cSchool" type="checkbox" checked class="w-5 h-5 accent-teal-600"><span class="ar">كل المواد المدرسية ناجحة (شرط الأردن)</span><span class="en">All school subjects passed (Jordan prerequisite)</span></label>
+          <label class="flex items-center gap-2"><input id="cPhys" type="checkbox" checked class="w-5 h-5 accent-teal-600"><span class="ar">الفيزياء مأخوذة كمادة مدرسية (شرط مصر)</span><span class="en">Physics taken as a school course (Egypt prerequisite)</span></label>
+          <label class="flex items-center gap-2"><input id="cEng" type="checkbox" checked class="w-5 h-5 accent-teal-600"><span class="ar">إثبات إنجليزية ساري (IELTS 5.0+ / TOEFL iBT 50+) — PSU وجورجيا</span><span class="en">Valid English proof (IELTS 5.0+ / TOEFL iBT 50+) — PSU and Georgia</span></label>
         </div>
         <button id="resetCalc" class="text-xs text-slate-500 hover:text-teal-700"><i class="fa-solid fa-rotate-left"></i> <span class="ar">إعادة الضبط</span><span class="en">Reset</span></button>
       </div>
     </div>
     <div class="space-y-4">
-      <div class="card p-5" id="rJo"><div class="flex items-center justify-between gap-3"><h3 class="font-extrabold">🇯🇴 <span class="ar">معادلة الأردن العلمية — 4 × 25%</span><span class="en">Jordan scientific equivalency — 4 × 25%</span></h3><span class="pill-res rounded-full px-3 py-1 text-xs font-extrabold"></span></div><b class="num text-3xl block mt-2 score"></b><div class="meter mt-2"><i></i></div><div class="marks"><span class="mark red" style="inset-inline-start:85%" title="85%"></span></div><div class="slots grid grid-cols-2 sm:grid-cols-4 gap-1.5 mt-5 text-center text-xs"></div><p class="text-xs text-slate-500 mt-3 note"></p></div>
-      <div class="card p-5" id="rEg"><div class="flex items-center justify-between gap-3"><h3 class="font-extrabold">🇪🇬 <span class="ar">تنسيق مصر (طب)</span><span class="en">Egypt coordination (medicine)</span></h3><span class="pill-res rounded-full px-3 py-1 text-xs font-extrabold"></span></div><b class="num text-3xl block mt-2 score"></b><div class="meter mt-2"><i></i></div><p class="text-xs text-slate-500 mt-3 note"></p></div>
-      <div class="card p-5" id="rSa"><div class="flex items-center justify-between gap-3"><h3 class="font-extrabold">🇸🇦 <span class="ar">النسبة الموزونة (السعودية)</span><span class="en">Saudi weighted score</span></h3><span class="pill-res rounded-full px-3 py-1 text-xs font-extrabold"></span></div><b class="num text-3xl block mt-2 score"></b><div class="meter mt-2"><i></i></div><p class="text-xs text-slate-500 mt-3 note"></p></div>
-      <p class="text-[11px] text-slate-500 leading-relaxed"><i class="fa-solid fa-circle-info"></i> <span class="ar">أداة تخطيط عائلية توضيحية. الأردن (نظام رقم 5 لسنة 2025/2026) = متوسط 4 خانات × 25%: AP Pre-Calc + AP Biology + AP Chemistry (3 = 86، 4 = 93، 5 = 100) + الخانة الرابعة = الأعلى بين Digital SAT بمقياس الوزارة (1050 = 75 … 1550+ = 100، بين النقاط تقدير خطي) وAP CSP؛ المعدل المدرسي 0% وشرطه النجاح فقط؛ الخط الأحمر = حد 85% لترخيص الطب. مصر = 40% معدل + 60% SAT (من 1600) مع شرط الفيزياء المدرسية وAP Biology + AP Chemistry. السعودية = صيغة توضيحية 30% معدل + 30% قدرات + 40% تحصيلي، والنسب الفعلية تحددها كل جامعة. يجب التحقق من الجهات الرسمية في سنة التقديم.</span><span class="en">Illustrative family-planning tool. Jordan (Regulation No. 5, 2025/2026) = average of 4 slots × 25%: AP Pre-Calc + AP Biology + AP Chemistry (3 = 86, 4 = 93, 5 = 100) + a 4th slot = the higher of the Digital SAT on the Ministry scale (1050 = 75 … 1550+ = 100, interpolated between anchors) and AP CSP; school GPA 0%, passing is the only condition; the red line marks the 85% medical-licensing floor. Egypt = 40% GPA + 60% SAT (out of 1600) with school Physics and AP Biology + AP Chemistry required. Saudi = illustrative 30% GPA + 30% GAT + 40% SAAT; each university sets its own weights. Reverify with official bodies in the application year.</span></p>
+      <div class="card p-5 c-jo" id="rJo"><div class="flex items-center justify-between gap-3"><h3 class="font-extrabold">🇯🇴 <span class="ar">الأردن — 4 × 25%</span><span class="en">Jordan — 4 × 25%</span></h3><span class="pill-res rounded-full px-3 py-1 text-xs font-extrabold"></span></div><b class="num text-3xl block mt-2 score"></b><div class="meter mt-2"><i></i></div><div class="marks"><span class="mark red" style="inset-inline-start:85%" title="85%"></span></div><div class="slots grid grid-cols-2 sm:grid-cols-4 gap-1.5 mt-5 text-center text-xs"></div><p class="text-xs text-slate-500 mt-3 note"></p></div>
+      <div class="card p-5 c-eg" id="rEg"><div class="flex items-center justify-between gap-3"><h3 class="font-extrabold">🇪🇬 <span class="ar">مصر — 40% معدل + 60% SAT</span><span class="en">Egypt — 40% GPA + 60% SAT</span></h3><span class="pill-res rounded-full px-3 py-1 text-xs font-extrabold"></span></div><b class="num text-3xl block mt-2 score"></b><div class="meter mt-2"><i></i></div><p class="text-xs text-slate-500 mt-3 note"></p></div>
+      <div class="card p-5 c-sa" id="rSa"><div class="flex items-center justify-between gap-3"><h3 class="font-extrabold">🇸🇦 <span class="ar">جامعة الأمير سلطان — طب (تقديري)</span><span class="en">Prince Sultan University — medicine (estimate)</span></h3><span class="pill-res rounded-full px-3 py-1 text-xs font-extrabold"></span></div><b class="num text-3xl block mt-2 score"></b><div class="meter mt-2"><i></i></div><p class="text-xs text-slate-500 mt-3 note"></p></div>
+      <div class="card p-5 c-ge" id="rGe"><div class="flex items-center justify-between gap-3"><h3 class="font-extrabold">🇬🇪 <span class="ar">جورجيا — جاهزية الملف والمقابلة</span><span class="en">Georgia — file &amp; interview readiness</span></h3><span class="pill-res rounded-full px-3 py-1 text-xs font-extrabold"></span></div><div class="checks grid grid-cols-3 gap-1.5 mt-3 text-center text-xs"></div><p class="text-xs text-slate-500 mt-3 note"></p></div>
+      <p class="text-[11px] text-slate-500 leading-relaxed"><i class="fa-solid fa-circle-info"></i> <span class="ar">أداة تخطيط عائلية. الأردن (نظام رقم 5): متوسط 4 خانات؛ الخانة 4 = SAT بمقياس الوزارة أو AP CSP بحسب المفتاح (تلقائي = الأعلى)؛ المعدل 0% بشرط النجاح؛ الخط الأحمر = 85% للترخيص. مصر: 40% معدل + 60% SAT/1600 بشرط الفيزياء وAP Bio + Chem. PSU (تقديري): الحدود الدنيا من دليل 2026–2027 (معدل 95، تحصيلي 85، قدرات 85 أو SAT 1350، إنجليزية)، والدرجة = 30% معدل + 70% متوسط (التحصيلي، الأعلى بين القدرات وSAT%) لأن توزيع الـ70% غير منشور. جورجيا: جاهزية بلا درجة رقمية. تحقّق من الجهات الرسمية في سنة التقديم.</span><span class="en">Family planning tool. Jordan (Regulation No. 5): average of 4 slots; slot 4 = SAT on the Ministry scale or AP CSP per the toggle (auto = higher); GPA 0% with passing required; red line = 85% licensing floor. Egypt: 40% GPA + 60% SAT/1600 with Physics and AP Bio + Chem required. PSU (estimate): minimums from the 2026–2027 guide (GPA 95, SAAT 85, GAT 85 or SAT 1350, English); score = 30% GPA + 70% average of (SAAT, higher of GAT and SAT%) because the 70% split is unpublished. Georgia: readiness only, no numeric score. Reverify with official bodies in the application year.</span></p>
     </div>
   </div>
 </section>
 
-<!-- ================= LEVEL 4: REGULATORY ADVISORY ================= -->
-<section id="advisory" class="mb-14">
+<!-- ================= VALIDITY ================= -->
+<section id="validity" class="mb-14">
   <div class="mb-5">
-    <p class="eyebrow"><span class="ar">المستوى 4 · الاستشارات النظامية والمسارات البديلة</span><span class="en">Level 4 · Strategic contingency &amp; regulatory advisory</span></p>
-    <h2 class="text-2xl sm:text-3xl font-extrabold mt-1"><span class="ar">إضاءات واستشارات نظامية</span><span class="en">Regulatory Insights &amp; Alternative Paths</span></h2>
+    <p class="eyebrow"><span class="ar">الصلاحيات والتوقيت</span><span class="en">Validity &amp; timing</span></p>
+    <h2 class="text-2xl sm:text-3xl font-extrabold mt-1"><span class="ar">متى يُؤخذ كل اختبار ليبقى سارياً يوم التقديم (2029)</span><span class="en">When to take each test so it is still valid on application day (2029)</span></h2>
   </div>
-
-  <!-- Verdict banner -->
-  <div class="rounded-2xl bg-navy text-white p-5 sm:p-6 mb-5 flex flex-col sm:flex-row sm:items-center gap-4">
-    <div class="w-12 h-12 shrink-0 rounded-xl bg-amber-500 text-navy grid place-items-center text-xl"><i class="fa-solid fa-key"></i></div>
-    <div class="flex-1">
-      <p class="text-xs font-extrabold tracking-widest text-amber-400 uppercase"><span class="ar">الحكم النهائي</span><span class="en">Verdict</span></p>
-      <p class="text-lg font-extrabold leading-snug"><span class="ar">نموذج 4 × 25% وفق نظام رقم (5) لسنة 2025/2026 — AP Pre-Calculus + Biology + Chemistry + خانة رابعة من Digital SAT أو AP CSP — هو المفتاح الرئيسي المضمون 100%؛ والاعتماد على معادلة الثانوية بعد التخرج الجامعي مخاطرة عالية.</span><span class="en">The 4 × 25% model under Regulation No. (5) 2025/2026 — AP Pre-Calculus + Biology + Chemistry + a 4th slot from the Digital SAT or AP CSP — is the 100% secure, guaranteed master key; relying on post-graduation secondary validation is high-risk.</span></p>
-    </div>
-    <div class="flex gap-2 shrink-0">
-      <span class="rounded-full bg-teal-600 text-white text-xs font-extrabold px-3 py-1"><i class="fa-solid fa-shield-halved"></i> <span class="ar">مضمون</span><span class="en">Guaranteed</span></span>
-      <span class="rounded-full bg-red-500 text-white text-xs font-extrabold px-3 py-1"><i class="fa-solid fa-triangle-exclamation"></i> <span class="ar">الاستثناء = مخاطرة</span><span class="en">Exception = risk</span></span>
+  <div class="card overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm min-w-[760px]">
+        <thead class="bg-slate-100 text-slate-600 text-xs uppercase tracking-wider">
+          <tr><th class="text-start"><span class="ar">الاختبار</span><span class="en">Exam</span></th><th class="text-start"><span class="ar">الصف 10</span><span class="en">Grade 10</span><br><small class="num normal-case tracking-normal">2026/27</small></th><th class="text-start"><span class="ar">الصف 11</span><span class="en">Grade 11</span><br><small class="num normal-case tracking-normal">2027/28</small></th><th class="text-start"><span class="ar">الصف 12</span><span class="en">Grade 12</span><br><small class="num normal-case tracking-normal">2028/29</small></th><th class="text-start"><span class="ar">الصلاحية</span><span class="en">Lifespan</span></th><th class="text-start"><span class="ar">يخدم</span><span class="en">Serves</span></th></tr>
+        </thead>
+        <tbody class="divide-y divide-slate-200">
+          <tr><td class="font-bold">Digital SAT</td><td><span class="cell soft"><span class="ar">تدريب</span><span class="en">Practice</span></span></td><td><span class="cell ideal">★ <span class="ar">مثالي</span><span class="en">Ideal</span></span></td><td><span class="cell warn"><span class="ar">إعادة إن لزم</span><span class="en">Retake if needed</span></span></td><td><span class="ar">5 سنوات (College Board) · الأردن: خلال الصفوف 10–12</span><span class="en">5 years (College Board) · Jordan: within Grades 10–12</span></td><td>🇯🇴 🇪🇬 🇸🇦</td></tr>
+          <tr><td class="font-bold">AP Pre-Calculus</td><td><span class="cell ok">✓</span></td><td><span class="cell ideal">★ <span class="ar">مثالي</span><span class="en">Ideal</span></span></td><td><span class="cell ok">✓</span></td><td><span class="ar">بلا انتهاء · الأردن: خلال الصفوف 10–12</span><span class="en">No expiry · Jordan: within Grades 10–12</span></td><td>🇯🇴 🇸🇦</td></tr>
+          <tr><td class="font-bold">AP Biology</td><td>—</td><td><span class="cell ideal">★ <span class="ar">مثالي</span><span class="en">Ideal</span></span></td><td><span class="cell ok">✓</span></td><td><span class="ar">بلا انتهاء</span><span class="en">No expiry</span></td><td>🇯🇴 🇪🇬 🇸🇦 🇬🇪</td></tr>
+          <tr><td class="font-bold">AP Chemistry</td><td>—</td><td><span class="cell ok">✓</span></td><td><span class="cell ideal">★ <span class="ar">مثالي</span><span class="en">Ideal</span></span></td><td><span class="ar">بلا انتهاء</span><span class="en">No expiry</span></td><td>🇯🇴 🇪🇬 🇸🇦 🇬🇪</td></tr>
+          <tr><td class="font-bold">AP CSP <small class="text-slate-500"><span class="ar">(خيار ب)</span><span class="en">(option B)</span></small></td><td>—</td><td><span class="cell ok">✓</span></td><td><span class="cell ideal">★ <span class="ar">إن كان SAT &lt; 93%</span><span class="en">If SAT &lt; 93%</span></span></td><td><span class="ar">بلا انتهاء · المشروع قبل نهاية أبريل</span><span class="en">No expiry · project by end of April</span></td><td>🇯🇴</td></tr>
+          <tr><td class="font-bold">GAT <small class="text-slate-500">(EN)</small></td><td>—</td><td><span class="cell ideal">★ <span class="ar">محاولة أولى</span><span class="en">First attempt</span></span></td><td><span class="cell ideal">★ <span class="ar">تحسين</span><span class="en">Improve</span></span></td><td><span class="ar">5 سنوات من إعلان النتائج (ETEC)</span><span class="en">5 years from results (ETEC)</span></td><td>🇸🇦</td></tr>
+          <tr><td class="font-bold">SAAT <small class="text-slate-500">(EN)</small></td><td>—</td><td>—</td><td><span class="cell ideal">★ <span class="ar">بعد مواد AP</span><span class="en">After the AP sciences</span></span></td><td><span class="ar">5 سنوات من إعلان النتائج (ETEC)</span><span class="en">5 years from results (ETEC)</span></td><td>🇸🇦</td></tr>
+          <tr><td class="font-bold">IELTS / TOEFL iBT</td><td>—</td><td><span class="cell soft"><span class="ar">لا تستعجل</span><span class="en">Not yet</span></span></td><td><span class="cell ideal">★ <span class="ar">فبراير–أبريل 2029</span><span class="en">Feb–Apr 2029</span></span></td><td><b class="text-red-600"><span class="ar">سنتان فقط</span><span class="en">2 years only</span></b> <span class="ar">→ قريباً من التقديم</span><span class="en">→ close to application</span></td><td>🇸🇦 🇬🇪</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
+</section>
 
+<!-- ================= ROADMAP ================= -->
+<section id="roadmap" class="mb-14">
+  <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <p class="eyebrow"><span class="ar">خارطة الطريق · صفاً بصف</span><span class="en">Roadmap · Grade by grade</span></p>
+      <h2 class="text-2xl sm:text-3xl font-extrabold mt-1"><span class="ar">الصف 10 ← 11 ← 12: مهام كل فصل</span><span class="en">Grade 10 → 11 → 12: tasks per term</span></h2>
+    </div>
+    <p class="text-xs text-slate-500 max-w-md"><i class="fa-solid fa-hand-pointer"></i> <span class="ar">اضغط الحالة لتبديلها: مخطط ← قيد التنفيذ ← مكتمل (تُحفظ على هذا الجهاز)</span><span class="en">Tap a status to cycle: Planned → In progress → Completed (saved on this device)</span></p>
+  </div>
+  <div id="tl" class="grid md:grid-cols-3 gap-5"></div>
+</section>
+
+<!-- ================= REGULATORY NOTES ================= -->
+<section id="notes" class="mb-14">
+  <div class="mb-5">
+    <p class="eyebrow"><span class="ar">ملاحظات نظامية</span><span class="en">Regulatory notes</span></p>
+    <h2 class="text-2xl sm:text-3xl font-extrabold mt-1"><span class="ar">ثلاث قواعد تحكم القرار</span><span class="en">Three rules that govern the decision</span></h2>
+  </div>
   <div class="space-y-3">
-    <!-- 1 Loophole vs risk -->
+    <details class="card overflow-hidden" open>
+      <summary class="flex items-center gap-3 p-5 cursor-pointer select-none">
+        <span class="w-10 h-10 shrink-0 rounded-xl bg-teal-50 text-teal-700 grid place-items-center"><i class="fa-solid fa-id-card"></i></span>
+        <span class="flex-1 min-w-0"><b class="block"><span class="ar">1 · الترخيص في الأردن يحتاج معادلة علمية ≥ 85% — في أي دولة درس</span><span class="en">1 · Licensing in Jordan needs a scientific equivalency ≥ 85% — wherever he studies</span></b><small class="text-slate-500 block"><span class="ar">تُحسم قبل التخرج من المدرسة، لا بعد التخرج من الجامعة</span><span class="en">Settled before leaving school, not after university</span></small></span>
+        <i class="fa-solid fa-chevron-down chev text-slate-400"></i>
+      </summary>
+      <div class="px-5 pb-5 text-sm text-slate-700 leading-relaxed border-t border-slate-100 pt-4"><span class="ar">نقابة الأطباء ووزارة التعليم العالي تشترطان معادلة علمية موثقة بحد أدنى 85% لمزاولة الطب. نموذج 4 × 25% بدرجات 4 (93%) يتجاوزه؛ درجات 3 فقط (86%) تبقى فوقه بهامش ضيق، فالهدف 4+.</span><span class="en">The Medical Association and MoHE require a verified scientific equivalency of at least 85% to practise. The 4 × 25% model at scores of 4 (93%) clears it; all 3s (86%) clear it only narrowly, so target 4+.</span></div>
+    </details>
     <details class="card overflow-hidden">
       <summary class="flex items-center gap-3 p-5 cursor-pointer select-none">
         <span class="w-10 h-10 shrink-0 rounded-xl bg-red-50 text-red-600 grid place-items-center"><i class="fa-solid fa-scale-balanced"></i></span>
-        <span class="flex-1 min-w-0">
-          <b class="block"><span class="ar">1 · ثغرة معادلة الثانوية بعد التخرج الجامعي: الحقيقة والمخاطر</span><span class="en">1 · Post-graduation secondary equivalency: loophole vs. real risk</span></b>
-          <small class="text-slate-500 block"><span class="ar">تسمح التعليمات بذلك، لكن بشرط «نفس الدولة» الصريح</span><span class="en">Regulations allow it, but only under the explicit same-country rule</span></small>
-        </span>
+        <span class="flex-1 min-w-0"><b class="block"><span class="ar">2 · استثناء «معادلة الثانوية بعد التخرج الجامعي» لا يُعتمد عليه</span><span class="en">2 · The “post-graduation secondary equivalency” exception is not a plan</span></b><small class="text-slate-500 block"><span class="ar">شرط «نفس الدولة» الصريح</span><span class="en">The explicit same-country rule</span></small></span>
         <span class="rounded-full bg-red-100 text-red-700 text-[11px] font-extrabold px-2 py-1 shrink-0"><span class="ar">مخاطرة عالية</span><span class="en">High risk</span></span>
         <i class="fa-solid fa-chevron-down chev text-slate-400"></i>
       </summary>
-      <div class="px-5 pb-5 text-sm text-slate-700 leading-relaxed space-y-3 border-t border-slate-100 pt-4">
-        <p><span class="ar">تسمح تعليمات وزارة التربية والتعليم الأردنية للطالب الذي يتخرج من جامعة خارج الأردن بمعادلة شهادته الثانوية بعد التخرج دون اختبارات AP. لكن النص الرسمي يشترط صراحةً أن تكون الشهادة الجامعية من <b>نفس الدولة تماماً</b> التي أُكملت فيها الدراسة الثانوية.</span><span class="en">Jordan MoE regulations allow a student who graduates from a university outside Jordan to validate the high-school diploma after graduation without AP exams. However, the official text explicitly requires the university degree to be from the <b>exact same country</b> where the secondary school was completed.</span></p>
-        <div class="grid sm:grid-cols-2 gap-3">
-          <div class="rounded-xl border border-teal-200 bg-teal-50 p-3"><b class="text-teal-800 block"><i class="fa-solid fa-check"></i> <span class="ar">ينطبق الاستثناء</span><span class="en">Exception applies</span></b><span class="ar">مدرسة في السعودية ← جامعة في السعودية فقط.</span><span class="en">KSA school → KSA university only.</span></div>
-          <div class="rounded-xl border border-red-200 bg-red-50 p-3"><b class="text-red-800 block"><i class="fa-solid fa-ban"></i> <span class="ar">لا ينطبق</span><span class="en">Does not apply</span></b><span class="ar">مدرسة في السعودية ← جامعة في مصر أو الأردن أو أي دولة أخرى.</span><span class="en">KSA school → university in Egypt, Jordan or any other country.</span></div>
-        </div>
-      </div>
+      <div class="px-5 pb-5 text-sm text-slate-700 leading-relaxed border-t border-slate-100 pt-4"><span class="ar">تسمح التعليمات بمعادلة الثانوية بعد التخرج الجامعي بلا AP فقط إذا كانت الجامعة في <b>نفس دولة</b> المدرسة الثانوية (مدرسة في السعودية ← جامعة في السعودية). لا تنطبق على مصر أو الأردن أو جورجيا، وكليات الطب تطلب AP/SAAT مسبقاً عند القبول أصلاً.</span><span class="en">Regulations allow post-graduation secondary equivalency without AP only when the university is in the <b>same country</b> as the high school (KSA school → KSA university). It does not cover Egypt, Jordan or Georgia, and medical faculties demand AP/SAAT upfront anyway.</span></div>
     </details>
-
-    <!-- 2 Admission & licensing dilemma -->
     <details class="card overflow-hidden">
       <summary class="flex items-center gap-3 p-5 cursor-pointer select-none">
-        <span class="w-10 h-10 shrink-0 rounded-xl bg-red-50 text-red-600 grid place-items-center"><i class="fa-solid fa-stethoscope"></i></span>
-        <span class="flex-1 min-w-0">
-          <b class="block"><span class="ar">2 · معضلة القبول الأولي ومزاولة المهنة</span><span class="en">2 · The admission &amp; licensing dilemma</span></b>
-          <small class="text-slate-500 block"><span class="ar">المعادلة العلمية مطلوبة في بداية الطريق وفي نهايته</span><span class="en">The scientific equivalency is needed at both ends of the road</span></small>
-        </span>
-        <span class="rounded-full bg-red-100 text-red-700 text-[11px] font-extrabold px-2 py-1 shrink-0"><span class="ar">لا يمكن تأجيله</span><span class="en">Cannot defer</span></span>
+        <span class="w-10 h-10 shrink-0 rounded-xl bg-violet-50 text-violet-700 grid place-items-center"><i class="fa-solid fa-building-columns"></i></span>
+        <span class="flex-1 min-w-0"><b class="block"><span class="ar">3 · الجامعة الأجنبية يجب أن تكون معترفاً بها لدى التعليم العالي الأردني قبل التسجيل</span><span class="en">3 · A foreign university must be on Jordan’s MoHE recognized list before enrolling</span></b><small class="text-slate-500 block"><span class="ar">يخص جورجيا ومصر والسعودية معاً</span><span class="en">Applies to Georgia, Egypt and Saudi Arabia alike</span></small></span>
         <i class="fa-solid fa-chevron-down chev text-slate-400"></i>
       </summary>
-      <div class="px-5 pb-5 text-sm text-slate-700 leading-relaxed space-y-3 border-t border-slate-100 pt-4">
-        <div class="grid sm:grid-cols-2 gap-3">
-          <div class="rounded-xl bg-slate-50 border border-slate-200 p-3"><b class="block text-navy"><i class="fa-solid fa-door-open text-teal-700"></i> <span class="ar">عند القبول</span><span class="en">At admission</span></b><span class="ar">كليات الطب المصرية وأفضل الكليات السعودية تشترط AP أو SAAT <b>مسبقاً</b> عند التقديم؛ لا يمكن تأجيلها إلى ما بعد التخرج.</span><span class="en">Egyptian and top Saudi medical faculties require AP / SAAT <b>upfront</b> for admission; they cannot be deferred to after graduation.</span></div>
-          <div class="rounded-xl bg-slate-50 border border-slate-200 p-3"><b class="block text-navy"><i class="fa-solid fa-id-card text-teal-700"></i> <span class="ar">عند الترخيص</span><span class="en">At licensing</span></b><span class="ar">تشترط نقابة الأطباء الأردنية ووزارة التعليم العالي معادلة علمية موثقة بحد أدنى <b class="num">85%</b> لترخيص مزاولة مهنة الطب.</span><span class="en">The Jordan Medical Association and the Ministry of Higher Education require a verified scientific equivalency of at least <b class="num">85%</b> to license doctors.</span></div>
-        </div>
-      </div>
-    </details>
-
-    <!-- 3 Verdict comparison -->
-    <details class="card overflow-hidden" open>
-      <summary class="flex items-center gap-3 p-5 cursor-pointer select-none">
-        <span class="w-10 h-10 shrink-0 rounded-xl bg-teal-50 text-teal-700 grid place-items-center"><i class="fa-solid fa-key"></i></span>
-        <span class="flex-1 min-w-0">
-          <b class="block"><span class="ar">3 · المقارنة: استثناء ما بعد التخرج مقابل مسار 4 × 25% المضمون</span><span class="en">3 · Comparison: the post-graduation exception vs. the guaranteed 4 × 25% path</span></b>
-          <small class="text-slate-500 block"><span class="ar">لماذا يبقى مسار 4 × 25% (الثلاثي الذهبي + الخانة الرابعة) هو الخيار الآمن</span><span class="en">Why the 4 × 25% path (Golden Trio + 4th slot) remains the safe choice</span></small>
-        </span>
-        <span class="rounded-full bg-teal-100 text-teal-800 text-[11px] font-extrabold px-2 py-1 shrink-0"><span class="ar">موصى به</span><span class="en">Recommended</span></span>
-        <i class="fa-solid fa-chevron-down chev text-slate-400"></i>
-      </summary>
-      <div class="px-5 pb-5 text-sm text-slate-700 leading-relaxed border-t border-slate-100 pt-4">
-        <div class="grid sm:grid-cols-2 gap-4">
-          <div class="rounded-xl border border-red-200 p-4">
-            <div class="flex items-center justify-between gap-2 mb-2"><b class="text-red-700"><i class="fa-solid fa-triangle-exclamation"></i> <span class="ar">استثناء ما بعد التخرج</span><span class="en">Post-graduation exception</span></b><span class="rounded-full bg-red-500 text-white text-[11px] font-extrabold px-2 py-[2px]"><span class="ar">مخاطرة عالية</span><span class="en">High risk</span></span></div>
-            <div class="meter mb-3"><i style="width:90%;background:#EF4444"></i></div>
-            <ul class="space-y-2">
-              <li class="flex gap-2"><i class="fa-solid fa-xmark text-red-500 mt-1"></i><span><span class="ar">شرط «نفس الدولة»: لا يشمل الدراسة في مصر أو الأردن بعد ثانوية سعودية.</span><span class="en">Same-country rule: excludes studying in Egypt or Jordan after a Saudi high school.</span></span></li>
-              <li class="flex gap-2"><i class="fa-solid fa-xmark text-red-500 mt-1"></i><span><span class="ar">كليات الطب تطلب AP / SAAT مسبقاً عند القبول.</span><span class="en">Medical faculties demand AP / SAAT upfront at admission.</span></span></li>
-              <li class="flex gap-2"><i class="fa-solid fa-xmark text-red-500 mt-1"></i><span><span class="ar">ترخيص الطب في الأردن يشترط معادلة علمية ≥ 85%.</span><span class="en">Medical licensing in Jordan requires a scientific equivalency ≥ 85%.</span></span></li>
-            </ul>
-          </div>
-          <div class="rounded-xl border border-teal-300 bg-teal-50/50 p-4">
-            <div class="flex items-center justify-between gap-2 mb-2"><b class="text-teal-800"><i class="fa-solid fa-key"></i> <span class="ar">مسار 4 × 25% المضمون (3 AP + الخانة الرابعة)</span><span class="en">The guaranteed 4 × 25% path (3 AP + 4th slot)</span></b><span class="rounded-full bg-teal-600 text-white text-[11px] font-extrabold px-2 py-[2px]"><span class="ar">آمن 100%</span><span class="en">100% secure</span></span></div>
-            <div class="meter mb-3"><i style="width:100%"></i></div>
-            <ul class="space-y-2">
-              <li class="flex gap-2"><i class="fa-solid fa-check text-teal-700 mt-1"></i><span><span class="ar">معادلة علمية رسمية في الأردن قبل التخرج، بلا شروط دولة وبلا وزن للمعدل المدرسي (ناجح/راسب فقط).</span><span class="en">Official scientific equivalency in Jordan before graduation, with no country condition and no GPA weight (Pass/Fail only).</span></span></li>
-              <li class="flex gap-2"><i class="fa-solid fa-check text-teal-700 mt-1"></i><span><span class="ar">قبول طب مصر تحصيل حاصل بلا اختبارات إضافية.</span><span class="en">Egypt medical admission auto-fulfilled with no extra exams.</span></span></li>
-              <li class="flex gap-2"><i class="fa-solid fa-check text-teal-700 mt-1"></i><span><span class="ar">يفتح الكليات الخاصة السعودية ويقوّي التحصيلي، ويؤمّن الترخيص لاحقاً.</span><span class="en">Opens Saudi private colleges, powers SAAT, and secures licensing later.</span></span></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </details>
-
-    <!-- 4 Grade 12 pivot -->
-    <details class="card overflow-hidden">
-      <summary class="flex items-center gap-3 p-5 cursor-pointer select-none">
-        <span class="w-10 h-10 shrink-0 rounded-xl bg-amber-50 text-amber-700 grid place-items-center"><i class="fa-solid fa-code-branch"></i></span>
-        <span class="flex-1 min-w-0">
-          <b class="block"><span class="ar">4 · مسار التحويل للثانوية الأهلية/الوطنية في الصف 12</span><span class="en">4 · Grade 12 national system pivot</span></b>
-          <small class="text-slate-500 block"><span class="ar">مرونة نظامية إذا أصبح القبول المحلي في السعودية هو الأولوية الوحيدة</span><span class="en">Legal flexibility if Saudi domestic admission becomes the sole priority</span></small>
-        </span>
-        <span class="rounded-full bg-amber-100 text-amber-800 text-[11px] font-extrabold px-2 py-1 shrink-0"><span class="ar">مرونة</span><span class="en">Flexibility</span></span>
-        <i class="fa-solid fa-chevron-down chev text-slate-400"></i>
-      </summary>
-      <div class="px-5 pb-5 text-sm text-slate-700 leading-relaxed space-y-3 border-t border-slate-100 pt-4">
-        <p><span class="ar">يمكن للطالب نظامياً التحويل إلى المسار الوطني (ثانوية عامة أهلية) حتى الصف الثاني عشر، والتركيز حصرياً على القدرات (GAT) والتحصيلي (SAAT) المتاحين بالإنجليزية، إذا أصبح القبول المحلي في السعودية هو الأولوية الوحيدة.</span><span class="en">The student can legally pivot to the domestic national track (Ahli General Secondary) as late as Grade 12, focusing solely on GAT and SAAT (both available in English), if domestic Saudi admission becomes the sole priority.</span></p>
-        <div class="rounded-xl border border-amber-200 bg-amber-50 p-3 text-amber-900 flex gap-3"><i class="fa-solid fa-lightbulb text-amber-600 mt-1"></i><p><span class="ar"><b>بوابة القرار:</b> يُتخذ هذا القرار في بداية الصف 12 بعد نتائج AP Biology وPre-Calculus وSAT، ومعه تحديد الخانة الرابعة (SAT ≥ 1410 = 93% أو تسجيل AP CSP). وعند التحويل تُعامل الشهادة لدى الأردن ومصر وفق قواعد الثانوية الوطنية لا قواعد الدبلوم الأمريكي، فيجب التحقق الرسمي قبل التحويل.</span><span class="en"><b>Decision gate:</b> take this decision at the start of Grade 12 after the AP Biology, Pre-Calculus and SAT results, and settle the 4th slot (SAT ≥ 1410 = 93%, or enrol in AP CSP). After a pivot, Jordan and Egypt evaluate the certificate under national-secondary rules rather than American Diploma rules, so verify officially before switching.</span></p></div>
-      </div>
-    </details>
-
-    <!-- 5 Strategic 4th slot -->
-    <details class="card overflow-hidden">
-      <summary class="flex items-center gap-3 p-5 cursor-pointer select-none">
-        <span class="w-10 h-10 shrink-0 rounded-xl bg-amber-50 text-amber-700 grid place-items-center"><i class="fa-solid fa-chess-knight"></i></span>
-        <span class="flex-1 min-w-0">
-          <b class="block"><span class="ar">5 · الخانة الرابعة الاستراتيجية: Digital SAT أم AP Computer Science Principles؟</span><span class="en">5 · The strategic 4th slot: Digital SAT or AP Computer Science Principles?</span></b>
-          <small class="text-slate-500 block"><span class="ar">نظام رقم (5): الخانة الرابعة (25%) تُملأ بأيهما، ومن يؤدّي الاثنين يحتسب الأعلى</span><span class="en">Regulation No. (5): the 4th slot (25%) takes either; taking both counts the higher one</span></small>
-        </span>
-        <span class="rounded-full bg-amber-100 text-amber-800 text-[11px] font-extrabold px-2 py-1 shrink-0"><span class="ar">25% استراتيجية</span><span class="en">Strategic 25%</span></span>
-        <i class="fa-solid fa-chevron-down chev text-slate-400"></i>
-      </summary>
-      <div class="px-5 pb-5 text-sm text-slate-700 leading-relaxed space-y-3 border-t border-slate-100 pt-4">
-        <div class="grid sm:grid-cols-2 gap-3">
-          <div class="rounded-xl border border-teal-200 bg-teal-50/50 p-4">
-            <b class="block text-teal-800 mb-1"><i class="fa-solid fa-laptop-code"></i> <span class="ar">الخيار (أ) · Digital SAT</span><span class="en">Option A · Digital SAT</span></b>
-            <ul class="space-y-1.5 text-xs">
-              <li class="flex gap-2"><i class="fa-solid fa-check text-teal-700 mt-0.5"></i><span><span class="ar">مطلوب أصلاً لمصر (60% من الترتيب) وللكليات الخاصة السعودية، فلا كلفة إضافية.</span><span class="en">Needed anyway for Egypt (60% of ranking) and Saudi private colleges, so no extra cost.</span></span></li>
-              <li class="flex gap-2"><i class="fa-solid fa-check text-teal-700 mt-0.5"></i><span><span class="ar">يُعاد عدة مرات في السنة؛ 1410 = 93% (يساوي AP 4) و1550 = 100%.</span><span class="en">Retakable several times a year; 1410 = 93% (equals AP 4) and 1550 = 100%.</span></span></li>
-              <li class="flex gap-2"><i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i><span><span class="ar">تحت 1050 لا يُحتسب، وبين 1050 و1350 تبقى النسبة 75–90% فقط.</span><span class="en">Below 1050 it does not count, and between 1050 and 1350 it yields only 75–90%.</span></span></li>
-            </ul>
-          </div>
-          <div class="rounded-xl border border-amber-300 bg-amber-50/60 p-4">
-            <b class="block text-amber-900 mb-1"><i class="fa-solid fa-code"></i> <span class="ar">الخيار (ب) · AP Computer Science Principles</span><span class="en">Option B · AP Computer Science Principles</span></b>
-            <ul class="space-y-1.5 text-xs">
-              <li class="flex gap-2"><i class="fa-solid fa-check text-teal-700 mt-0.5"></i><span><span class="ar">مادة AP علمية رابعة سهلة وعالية الدرجات: 70% اختيار من متعدد + 30% مشروع رقمي (Create Performance Task) يُنجز خلال السنة، وبلا أسئلة Java مقالية.</span><span class="en">An accessible, high-scoring 4th AP science subject: 70% MCQ + 30% digital project (Create Performance Task) completed during the year, with no Java FRQs.</span></span></li>
-              <li class="flex gap-2"><i class="fa-solid fa-check text-teal-700 mt-0.5"></i><span><span class="ar">درجة 4 = 93% ودرجة 5 = 100% بنفس جدول باقي مواد AP.</span><span class="en">A 4 = 93% and a 5 = 100% on the same table as the other AP subjects.</span></span></li>
-              <li class="flex gap-2"><i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i><span><span class="ar">يحتاج تسجيلاً في المادة ومواعيد College Board (المشروع قبل نهاية أبريل، الاختبار في مايو) — مرة واحدة في السنة.</span><span class="en">Requires course enrolment and College Board deadlines (project by end of April, exam in May) — once a year.</span></span></li>
-            </ul>
-          </div>
-        </div>
-        <div class="rounded-xl border border-teal-200 bg-teal-50 p-3 text-teal-900 flex gap-3"><i class="fa-solid fa-lightbulb text-teal-700 mt-1"></i><p><span class="ar"><b>التوصية:</b> SAT في الصف 11 أولاً. إن بلغ 1410+ (93%) فالخانة الرابعة مؤمَّنة؛ وإن بقي أقل، يسجَّل AP CSP في الصف 12 مع AP Chemistry كتأمين، ويُحتسب الأعلى بين الاثنين تلقائياً (جرّب ذلك في المحاكي).</span><span class="en"><b>Recommendation:</b> SAT first in Grade 11. If it reaches 1410+ (93%) the 4th slot is secured; if it stays lower, enrol in AP CSP in Grade 12 alongside AP Chemistry as insurance, and the higher of the two counts automatically (try it in the simulator).</span></p></div>
-      </div>
+      <div class="px-5 pb-5 text-sm text-slate-700 leading-relaxed border-t border-slate-100 pt-4"><span class="ar">يُتحقق من الجامعة <b>والبرنامج</b> في قائمة الاعتراف الرسمية (رابط في المصادر) عند بدء الدراسة، لا من إعلان مكتب قبول أو وكيل. في جورجيا تُسجَّل الوثائق أيضاً لدى المركز الوطني لجودة التعليم (NCEQE).</span><span class="en">Check the university <b>and the program</b> on the official recognition list (link in Sources) when study begins, not via an admissions office or agent advert. In Georgia, documents are also registered with the NCEQE.</span></div>
     </details>
   </div>
 </section>
@@ -752,72 +498,66 @@ tailwind.config = { theme: { extend: {
     <h2 class="text-xl sm:text-2xl font-extrabold mt-1"><span class="ar">تحقق دائماً من المصدر الرسمي في سنة التقديم</span><span class="en">Always reverify with the official source in the application year</span></h2>
   </div>
   <div class="flex flex-wrap gap-2 text-sm">
-    <a class="rounded-full border border-slate-300 bg-white px-3 py-2 hover:border-teal-600 hover:text-teal-800 transition" target="_blank" rel="noopener noreferrer" href="https://moe.gov.jo/sites/default/files/ss_brnmj_hsd_.pdf"><i class="fa-solid fa-file-pdf text-red-500"></i> <span class="ar">وزارة التربية والتعليم الأردنية — دليل الدبلوم الأمريكي (نظام رقم (5) لسنة 2025/2026)</span><span class="en">Jordan MoE — American Diploma guide (Regulation No. (5) 2025/2026)</span></a>
-    <a class="rounded-full border border-slate-300 bg-white px-3 py-2 hover:border-teal-600 hover:text-teal-800 transition" target="_blank" rel="noopener noreferrer" href="https://moe.gov.jo/ar/node/17183"><i class="fa-solid fa-stamp text-teal-700"></i> <span class="ar">وزارة التربية والتعليم الأردنية — بوابة معادلة الشهادات</span><span class="en">Jordan MoE — Certificate Equivalency portal</span></a>
+    <a class="rounded-full border border-slate-300 bg-white px-3 py-2 hover:border-teal-600 hover:text-teal-800 transition" target="_blank" rel="noopener noreferrer" href="https://moe.gov.jo/sites/default/files/ss_brnmj_hsd_.pdf"><i class="fa-solid fa-file-pdf text-red-500"></i> <span class="ar">وزارة التربية الأردنية — دليل الدبلوم الأمريكي (نظام رقم 5 لسنة 2025/2026)</span><span class="en">Jordan MoE — American Diploma guide (Regulation No. 5, 2025/2026)</span></a>
+    <a class="rounded-full border border-slate-300 bg-white px-3 py-2 hover:border-teal-600 hover:text-teal-800 transition" target="_blank" rel="noopener noreferrer" href="https://moe.gov.jo/ar/node/17183"><i class="fa-solid fa-stamp text-teal-700"></i> <span class="ar">وزارة التربية الأردنية — معادلة الشهادات</span><span class="en">Jordan MoE — Certificate equivalency</span></a>
     <a class="rounded-full border border-slate-300 bg-white px-3 py-2 hover:border-teal-600 hover:text-teal-800 transition" target="_blank" rel="noopener noreferrer" href="https://rce.mohe.gov.jo/RecognizedUniversities"><i class="fa-solid fa-building-columns text-teal-700"></i> <span class="ar">التعليم العالي الأردني — الجامعات المعترف بها</span><span class="en">Jordan MoHE — recognized universities</span></a>
     <a class="rounded-full border border-slate-300 bg-white px-3 py-2 hover:border-teal-600 hover:text-teal-800 transition" target="_blank" rel="noopener noreferrer" href="https://apstudents.collegeboard.org/"><i class="fa-solid fa-graduation-cap text-teal-700"></i> College Board — AP</a>
     <a class="rounded-full border border-slate-300 bg-white px-3 py-2 hover:border-teal-600 hover:text-teal-800 transition" target="_blank" rel="noopener noreferrer" href="https://apstudents.collegeboard.org/courses/ap-computer-science-principles"><i class="fa-solid fa-code text-teal-700"></i> College Board — AP Computer Science Principles</a>
     <a class="rounded-full border border-slate-300 bg-white px-3 py-2 hover:border-teal-600 hover:text-teal-800 transition" target="_blank" rel="noopener noreferrer" href="https://satsuite.collegeboard.org/"><i class="fa-solid fa-laptop-code text-teal-700"></i> College Board — Digital SAT</a>
-    <a class="rounded-full border border-slate-300 bg-white px-3 py-2 hover:border-teal-600 hover:text-teal-800 transition" target="_blank" rel="noopener noreferrer" href="https://etec.gov.sa/"><i class="fa-solid fa-kaaba text-teal-700"></i> <span class="ar">هيئة تقويم التعليم والتدريب — GAT / SAAT</span><span class="en">ETEC — GAT / SAAT</span></a>
     <a class="rounded-full border border-slate-300 bg-white px-3 py-2 hover:border-teal-600 hover:text-teal-800 transition" target="_blank" rel="noopener noreferrer" href="https://study-in-egypt.gov.eg/"><i class="fa-solid fa-star-of-life text-teal-700"></i> <span class="ar">ادرس في مصر — وزارة التعليم العالي</span><span class="en">Study in Egypt — Ministry of Higher Education</span></a>
-    <a class="rounded-full border border-slate-300 bg-white px-3 py-2 hover:border-teal-600 hover:text-teal-800 transition" target="_blank" rel="noopener noreferrer" href="https://admissions.alfaisal.edu/"><i class="fa-solid fa-hospital text-teal-700"></i> <span class="ar">جامعة الفيصل — القبول</span><span class="en">Alfaisal University — Admissions</span></a>
+    <a class="rounded-full border border-slate-300 bg-white px-3 py-2 hover:border-teal-600 hover:text-teal-800 transition" target="_blank" rel="noopener noreferrer" href="https://psu.edu.sa/en/medicine-admissions"><i class="fa-solid fa-hospital text-teal-700"></i> <span class="ar">جامعة الأمير سلطان — قبول كلية الطب</span><span class="en">Prince Sultan University — Medicine admissions</span></a>
+    <a class="rounded-full border border-slate-300 bg-white px-3 py-2 hover:border-teal-600 hover:text-teal-800 transition" target="_blank" rel="noopener noreferrer" href="https://etec.gov.sa/"><i class="fa-solid fa-kaaba text-teal-700"></i> <span class="ar">هيئة تقويم التعليم والتدريب — GAT / SAAT</span><span class="en">ETEC — GAT / SAAT</span></a>
+    <a class="rounded-full border border-slate-300 bg-white px-3 py-2 hover:border-teal-600 hover:text-teal-800 transition" target="_blank" rel="noopener noreferrer" href="https://tsmu.edu/"><i class="fa-solid fa-earth-europe text-teal-700"></i> <span class="ar">جامعة تبليسي الطبية الحكومية — قبول الطلاب الدوليين</span><span class="en">Tbilisi State Medical University — international admissions</span></a>
+    <a class="rounded-full border border-slate-300 bg-white px-3 py-2 hover:border-teal-600 hover:text-teal-800 transition" target="_blank" rel="noopener noreferrer" href="https://eqe.ge/"><i class="fa-solid fa-certificate text-teal-700"></i> <span class="ar">المركز الوطني لجودة التعليم — جورجيا (NCEQE)</span><span class="en">National Center for Educational Quality Enhancement — Georgia (NCEQE)</span></a>
   </div>
 </section>
 
 </main>
 
 <footer class="border-t border-slate-200 bg-white py-8 px-4 text-center text-xs text-slate-500">
-  <p class="max-w-3xl mx-auto leading-relaxed"><span class="ar">هذه البوابة أداة تخطيط عائلية وليست قرار معادلة أو قبول. شروط 2026 لا تضمن شروط 2029؛ يجب إعادة التحقق من وزارة التربية والتعليم الأردنية، مكتب التنسيق المصري، هيئة تقويم التعليم والتدريب، والجامعات المستهدفة في سنة التقديم.</span><span class="en">This portal is a family planning tool, not an equivalency or admission decision. 2026 rules do not guarantee 2029 rules; reverify with the Jordan MoE, the Egyptian Coordination Office, ETEC and the target universities in the application year.</span></p>
-  <p class="mt-3 text-slate-400">Hassan · Grade 10 · 2026/2027 → Medical School · <span class="ar">آخر تحديث للبيانات: أكتوبر 2026 · الأردن وفق نظام رقم (5) لسنة 2025/2026 (الجريدة الرسمية)</span><span class="en">Data last reviewed: October 2026 · Jordan per Official Gazette Regulation No. (5) 2025/2026</span></p>
+  <p class="max-w-3xl mx-auto leading-relaxed"><span class="ar">أداة تخطيط عائلية وليست قرار معادلة أو قبول. شروط 2026 لا تضمن شروط 2029؛ يُعاد التحقق من وزارة التربية الأردنية، مكتب التنسيق المصري، جامعة الأمير سلطان وهيئة تقويم التعليم، والجامعات الجورجية المستهدفة في سنة التقديم.</span><span class="en">A family planning tool, not an equivalency or admission decision. 2026 rules do not guarantee 2029 rules; reverify with the Jordan MoE, the Egyptian Coordination Office, Prince Sultan University and ETEC, and the target Georgian universities in the application year.</span></p>
+  <p class="mt-3 text-slate-400">Hassan · Grade 10 · 2026/2027 → Medical School · <span class="ar">آخر تحديث: أكتوبر 2026 · الأردن وفق نظام رقم (5) لسنة 2025/2026</span><span class="en">Last reviewed: October 2026 · Jordan per Regulation No. (5) 2025/2026</span></p>
 </footer>
 
 <!-- ================= PRINT-ONLY: A4 EXECUTIVE SUMMARY ================= -->
 <section id="printSummary" class="print-only" aria-hidden="true">
   <div class="p-head">
     <div>
-      <h1><span class="ar">دليل حسان الأكاديمي للمسار الطبي والمعادلات</span><span class="en">Hassan’s Pre-Med Academic Roadmap &amp; Strategic Equivalency Portal</span></h1>
-      <p class="p-sub">Hassan · Grade 10 · 2026/2027 → Medical School · <span class="ar">ملخص تنفيذي A4 · الأردن: نظام رقم (5) لسنة 2025/2026</span><span class="en">A4 executive summary · Jordan: Regulation No. (5) 2025/2026</span> · <span class="ar">تاريخ الطباعة</span><span class="en">Printed</span> <span id="pDate" class="num"></span> · <span class="ar">تقدم الخطة</span><span class="en">Plan progress</span> <span id="pPct" class="num">0%</span></p>
+      <h1><span class="ar">استراتيجية حسان للقبول في الطب — الأردن · مصر · السعودية (PSU) · جورجيا</span><span class="en">Hassan’s Pre-Med Admission Strategy — Jordan · Egypt · Saudi Arabia (PSU) · Georgia</span></h1>
+      <p class="p-sub">Hassan · Grade 10 · 2026/2027 → Medical School · <span class="ar">ملخص A4 · تاريخ الطباعة</span><span class="en">A4 summary · Printed</span> <span id="pDate" class="num"></span> · <span class="ar">تقدم الخطة</span><span class="en">Plan progress</span> <span id="pPct" class="num">0%</span></p>
     </div>
-    <div class="p-verdict"><span class="ar">الحكم: 4 × 25% (3 AP + الخانة 4) = المفتاح المضمون</span><span class="en">Verdict: 4 × 25% (3 AP + slot 4) = guaranteed master key</span></div>
+    <div class="p-verdict"><span class="ar">النواة: AP Bio + AP Chem + SAT 1410+</span><span class="en">Core: AP Bio + AP Chem + SAT 1410+</span></div>
   </div>
 
-  <div class="p-grid2">
-    <div class="p-box p-teal"><span class="p-lvl"><span class="ar">المستوى 1 · الأساس</span><span class="en">Level 1 · Foundation</span></span><b class="t"><span class="ar">المواد المدرسية والمعدل (10 · 11 · 12)</span><span class="en">School subjects &amp; GPA (Grades 10 · 11 · 12)</span></b><p><span class="ar">الأردن: 0% — شرط ناجح/راسب فقط · 40% من تنسيق مصر · ضمن الموزونة السعودية</span><span class="en">Jordan: 0% — Pass/Fail prerequisite only · 40% of Egypt coordination · in Saudi weighted score</span></p><p><span class="chip r"><span class="ar">الفيزياء المدرسية إلزامية (مصر)</span><span class="en">School Physics MANDATORY (Egypt)</span></span> <span class="chip a"><span class="ar">الأردن: المعدل 0%</span><span class="en">Jordan: GPA 0%</span></span></p></div>
-    <div class="p-box p-teal"><span class="p-lvl"><span class="ar">المستوى 1 · الأساس</span><span class="en">Level 1 · Foundation</span></span><b class="t">Digital SAT (College Board)</b><p><span class="chip t"><span class="ar">الخانة 4 (خيار أ): 1410 = 93% · 1550+ = 100%</span><span class="en">Slot 4 (option A): 1410 = 93% · 1550+ = 100%</span></span> <span class="chip a"><span class="ar">حد الأردن الأدنى 1050 = 75%</span><span class="en">Jordan minimum 1050 = 75%</span></span></p><p><span class="ar">60% من ترتيب القبول في مصر · معترف به في الكليات الخاصة السعودية (الفيصل)</span><span class="en">60% of Egypt ranking · recognized by Saudi private colleges (Alfaisal)</span></p></div>
+  <div class="p-grid4">
+    <div class="p-box p-jo"><span class="p-lvl">🇯🇴 <span class="ar">الأردن · نظام رقم 5 لسنة 2025/2026</span><span class="en">Jordan · Regulation No. 5, 2025/2026</span></span><b class="t"><span class="ar">4 اختبارات × 25% · المعدل 0% (ناجح/راسب)</span><span class="en">4 exams × 25% · GPA 0% (Pass/Fail)</span></b><p><span class="chip t">AP Pre-Calc</span><span class="chip t">AP Bio</span><span class="chip t">AP Chem</span><span class="chip a"><span class="ar">الخانة 4: SAT أو AP CSP</span><span class="en">Slot 4: SAT or AP CSP</span></span></p><p class="num">AP 5=100 · 4=93 · 3=86 · SAT 1050=75 · 1410=93 · 1550+=100</p><p><span class="ar">الترخيص: معادلة ≥ 85%</span><span class="en">Licensing: equivalency ≥ 85%</span></p></div>
+    <div class="p-box p-eg"><span class="p-lvl">🇪🇬 <span class="ar">مصر · تنسيق الطب</span><span class="en">Egypt · medical coordination</span></span><b class="t"><span class="ar">40% معدل + 60% Digital SAT</span><span class="en">40% GPA + 60% Digital SAT</span></b><p><span class="chip r"><span class="ar">الفيزياء المدرسية</span><span class="en">School Physics</span></span><span class="chip r">AP Bio</span><span class="chip r">AP Chem</span><span class="chip">8 <span class="ar">مواد مدرسية</span><span class="en">school subjects</span></span></p><p><span class="ar">تحصيل حاصل من مسار الأردن؛ نفس SAT يملأ الخانة 4.</span><span class="en">Auto-fulfilled by the Jordan track; the same SAT fills slot 4.</span></p></div>
+    <div class="p-box p-sa"><span class="p-lvl">🇸🇦 <span class="ar">جامعة الأمير سلطان · كلية الطب</span><span class="en">Prince Sultan University · Medicine</span></span><b class="t"><span class="ar">السنة التحضيرية: 30% معدل + 70% اختبارات</span><span class="en">Preparatory Year: 30% GPA + 70% tests</span></b><p><span class="chip a">GPA ≥ 95%</span><span class="chip a">SAAT ≥ 85</span><span class="chip a">GAT ≥ 85 <span class="ar">أو</span><span class="en">or</span> SAT ≥ 1350</span><span class="chip">IELTS 5.0 / TOEFL 50</span></p><p><span class="ar">بالإنجليزية · لا قبول مباشر في MBBS · تحقق من فئة غير السعوديين</span><span class="en">In English · no direct MBBS entry · verify non-Saudi category</span></p></div>
+    <div class="p-box p-ge"><span class="p-lvl">🇬🇪 <span class="ar">جورجيا · طب بالإنجليزية</span><span class="en">Georgia · medicine in English</span></span><b class="t"><span class="ar">HSD + إنجليزية + مقابلة (أحياء/كيمياء)</span><span class="en">HSD + English + interview (Bio/Chem)</span></b><p><span class="chip">HSD</span><span class="chip">IELTS/TOEFL B1–B2</span><span class="chip t"><span class="ar">مقابلة أونلاين</span><span class="en">Online interview</span></span><span class="chip r"><span class="ar">اعتراف التعليم العالي الأردني أولاً</span><span class="en">Jordan MoHE recognition first</span></span></p><p><span class="ar">AP Bio + Chem = كفاءة بمستوى الإعفاء للمقابلة · توثيق الوثائق لدى NCEQE</span><span class="en">AP Bio + Chem = exemption-level interview competency · documents via NCEQE</span></p></div>
   </div>
-
-  <div class="p-grid2">
-    <div class="p-box p-green"><span class="p-lvl"><span class="ar">المستوى 2 · المسار الذهبي</span><span class="en">Level 2 · Golden Pathway</span></span><b class="t"><span class="ar">معادلة الأردن العلمية (نظام رقم 5): 4 اختبارات × 25% · المعدل 0%</span><span class="en">Jordan scientific equivalency (Regulation No. 5): 4 exams × 25% · GPA 0%</span></b><p><span class="chip t">AP Pre-Calculus</span> <span class="chip t">AP Biology</span> <span class="chip t">AP Chemistry</span> <span class="chip a"><span class="ar">الخانة 4: SAT أو AP CSP (الأعلى)</span><span class="en">Slot 4: SAT or AP CSP (higher)</span></span> <span class="chip num">AP 3=86% · 4=93% · 5=100%</span></p><p><b><span class="ar">↳ مصر (تحصيل حاصل):</span><span class="en">↳ Egypt (auto-fulfilled):</span></b> <span class="ar">8 مواد مدرسية (منها الفيزياء) + AP Biology + AP Chemistry = 100% من المتطلبات بلا اختبار إضافي.</span><span class="en">8 school subjects (incl. Physics) + AP Biology + AP Chemistry = 100% of prerequisites with zero extra exams.</span></p></div>
-    <div class="p-box"><span class="p-lvl"><span class="ar">المستوى 3 · السعودية</span><span class="en">Level 3 · Saudi Arabia</span></span><b class="t"><span class="ar">القبول المحلي عبر ETEC: القدرات GAT + التحصيلي SAAT (بالإنجليزية)</span><span class="en">Domestic admission via ETEC: GAT + SAAT (in English)</span></b><p><span class="chip a">GAT</span> <span class="chip a">SAAT</span> <span class="chip">GPA</span> <span class="ar">= النسبة الموزونة</span><span class="en">= composite weighted score</span></p><p><span class="ar">AP Biology وAP Chemistry ترفعان درجات التحصيلي مباشرة، ومع SAT تفتحان الكليات الخاصة (الفيصل).</span><span class="en">AP Biology and Chemistry directly power SAAT; with the SAT they open private colleges (Alfaisal).</span></p></div>
-  </div>
-
-  <div class="p-grid3">
-    <div class="p-box"><span class="p-lvl"><span class="ar">الصلاحية · Digital SAT</span><span class="en">Validity · Digital SAT</span></span><b class="t"><span class="ar">5 سنوات (College Board) · السعودية: سنتان من التقديم</span><span class="en">5 years (College Board) · KSA: 2 years from application</span></b><p><span class="ar">الأردن: خلال الصفوف 10–12 (≥ 1050 = 75%) · مصر: دورة التخرج (2–3 سنوات) · الأفضل: الصف 11</span><span class="en">Jordan: within Grades 10–12 (≥ 1050 = 75%) · Egypt: graduation cycle (2–3 yrs) · best: Grade 11</span></p></div>
-    <div class="p-box"><span class="p-lvl"><span class="ar">الصلاحية · AP (+ CSP)</span><span class="en">Validity · AP (+ CSP)</span></span><b class="t"><span class="ar">غير محدد الصلاحية · الأردن: خلال الصفوف 10–12</span><span class="en">No expiration · Jordan: within Grades 10–12</span></b><p><span class="ar">مصر: طوال فترة التخرج · احتساب جامعي: 3–4 سنوات · AP CSP: مشروع Create قبل نهاية أبريل، الاختبار في مايو</span><span class="en">Egypt: throughout graduation period · course credit: 3–4 yrs · AP CSP: Create task by end of April, exam in May</span></p></div>
-    <div class="p-box"><span class="p-lvl"><span class="ar">الصلاحية · GAT &amp; SAAT</span><span class="en">Validity · GAT &amp; SAAT</span></span><b class="t"><span class="ar">5 سنوات من إعلان النتائج (ETEC)</span><span class="en">5 years from results announcement (ETEC)</span></b><p><span class="ar">GAT: الصف 11–12 · SAAT: الصف 12 · بالإنجليزية للمسار الطبي</span><span class="en">GAT: Grades 11–12 · SAAT: Grade 12 · in English for the medical track</span></p></div>
-  </div>
-
-  <div class="p-grid3" id="pRoadmap"></div>
 
   <table>
-    <thead><tr><th><span class="ar">المتطلب</span><span class="en">Requirement</span></th><th><span class="ar">الأردن (نظام رقم 5)</span><span class="en">Jordan (Regulation No. 5)</span></th><th><span class="ar">مصر</span><span class="en">Egypt</span></th><th><span class="ar">السعودية</span><span class="en">Saudi Arabia</span></th></tr></thead>
+    <thead><tr><th><span class="ar">المتطلب</span><span class="en">Requirement</span></th><th>🇯🇴</th><th>🇪🇬</th><th>🇸🇦 PSU</th><th>🇬🇪</th></tr></thead>
     <tbody>
-      <tr><td><span class="ar">المعدل المدرسي</span><span class="en">School GPA</span></td><td><b>0%</b> · <span class="ar">ناجح/راسب</span><span class="en">Pass/Fail</span></td><td>40%</td><td><span class="ar">ضمن الموزونة</span><span class="en">In weighted score</span></td></tr>
-      <tr><td><span class="ar">الفيزياء المدرسية</span><span class="en">School Physics</span></td><td><span class="ar">ضمن المواد (ناجح/راسب)</span><span class="en">Among subjects (Pass/Fail)</span></td><td><b><span class="ar">إلزامية</span><span class="en">Mandatory</span></b></td><td><span class="ar">تدعم التحصيلي</span><span class="en">Supports SAAT</span></td></tr>
-      <tr><td>Digital SAT</td><td><span class="ar">الخانة 4 · 25% · 1050=75% · 1410=93% · 1550+=100%</span><span class="en">Slot 4 · 25% · 1050=75% · 1410=93% · 1550+=100%</span></td><td>60%</td><td><span class="ar">الكليات الخاصة</span><span class="en">Private colleges</span></td></tr>
-      <tr><td><span class="ar">اختبارات AP</span><span class="en">AP exams</span></td><td>3 × 25% (Pre-Calc + Bio + Chem ≥ 3) <span class="ar">+ AP CSP كخيار ب للخانة 4</span><span class="en">+ AP CSP as option B for slot 4</span></td><td>Bio + Chem</td><td><span class="ar">أساس للتحصيلي</span><span class="en">Base for SAAT</span></td></tr>
-      <tr><td>GAT · SAAT</td><td>—</td><td>—</td><td><b><span class="ar">إلزامي</span><span class="en">Mandatory</span></b></td></tr>
-      <tr><td><span class="ar">اختبارات إضافية بعد الثلاثي</span><span class="en">Extra tests after the Trio</span></td><td><span class="ar">الخانة 4 فقط: SAT أو AP CSP</span><span class="en">Slot 4 only: SAT or AP CSP</span></td><td><b><span class="ar">لا — تحصيل حاصل</span><span class="en">No — auto-fulfilled</span></b></td><td>GAT + SAAT</td></tr>
-      <tr><td><span class="ar">ترخيص الطب</span><span class="en">Medical licensing</span></td><td><span class="ar">معادلة ≥ 85%</span><span class="en">Equivalency ≥ 85%</span></td><td>—</td><td>—</td></tr>
+      <tr><td><span class="ar">المعدل المدرسي</span><span class="en">School GPA</span></td><td><b>0%</b> · <span class="ar">ناجح/راسب</span><span class="en">Pass/Fail</span></td><td>40%</td><td>30% · ≥ 95%</td><td>HSD</td></tr>
+      <tr><td>Digital SAT</td><td><span class="ar">الخانة 4 · 25%</span><span class="en">Slot 4 · 25%</span></td><td>60%</td><td>≥ 1350 (<span class="ar">بديل القدرات</span><span class="en">GAT alt.</span>)</td><td><span class="ar">اختياري</span><span class="en">Optional</span></td></tr>
+      <tr><td>AP Bio + AP Chem</td><td>2 × 25%</td><td><b><span class="ar">إلزاميان</span><span class="en">Mandatory</span></b></td><td><span class="ar">أساس التحصيلي</span><span class="en">SAAT base</span></td><td><span class="ar">كفاءة المقابلة</span><span class="en">Interview</span></td></tr>
+      <tr><td>AP Pre-Calc · AP CSP</td><td>25% · <span class="ar">خيار ب</span><span class="en">option B</span></td><td>—</td><td>—</td><td>—</td></tr>
+      <tr><td><span class="ar">الفيزياء المدرسية</span><span class="en">School Physics</span></td><td><span class="ar">ناجح/راسب</span><span class="en">Pass/Fail</span></td><td><b><span class="ar">إلزامية</span><span class="en">Mandatory</span></b></td><td>—</td><td>—</td></tr>
+      <tr><td>GAT · SAAT (EN)</td><td>—</td><td>—</td><td><b>SAAT ≥ 85 · GAT ≥ 85</b></td><td>—</td></tr>
+      <tr><td><span class="ar">إنجليزية · مقابلة</span><span class="en">English · interview</span></td><td>—</td><td>—</td><td>IELTS 5.0 / TOEFL 50 (≤ 2y)</td><td>B1–B2 · <span class="ar">مقابلة</span><span class="en">interview</span></td></tr>
     </tbody>
   </table>
 
-  <div class="p-grid2">
-    <div class="p-box p-red"><span class="p-lvl"><span class="ar">المستوى 4 · استثناء ما بعد التخرج</span><span class="en">Level 4 · Post-graduation exception</span></span><b class="t"><span class="ar">مخاطرة عالية — لا يُعتمد عليه</span><span class="en">High risk — do not rely on it</span></b><ul><li><span class="ar">شرط «نفس الدولة»: مدرسة في السعودية ← جامعة في السعودية فقط.</span><span class="en">Same-country rule: KSA school → KSA university only.</span></li><li><span class="ar">كليات الطب في مصر والسعودية تطلب AP / SAAT مسبقاً عند القبول.</span><span class="en">Egyptian and Saudi medical faculties require AP / SAAT upfront at admission.</span></li><li><span class="ar">ترخيص الطب في الأردن يشترط معادلة علمية ≥ 85%.</span><span class="en">Medical licensing in Jordan requires a scientific equivalency ≥ 85%.</span></li></ul></div>
-    <div class="p-box p-green"><span class="p-lvl"><span class="ar">المستوى 4 · المسار المضمون + الخانة الرابعة</span><span class="en">Level 4 · Guaranteed path + the 4th slot</span></span><b class="t"><span class="ar">4 × 25% = المفتاح الرئيسي المضمون 100%</span><span class="en">4 × 25% = the 100% secure master key</span></b><ul><li><span class="ar">معادلة رسمية قبل التخرج بلا وزن للمعدل + مصر تحصيل حاصل + دعم التحصيلي والكليات الخاصة.</span><span class="en">Official equivalency before graduation with no GPA weight + Egypt auto-fulfilled + SAAT and private-college support.</span></li><li><span class="ar">الخانة الرابعة: SAT في الصف 11 (هدف 1410+ = 93%)؛ إن بقي أقل يُضاف AP CSP في الصف 12 ويُحتسب الأعلى. بوابة القرار: بداية الصف 12 (ومعها خيار التحويل للمسار الوطني لـ GAT + SAAT).</span><span class="en">4th slot: SAT in Grade 11 (target 1410+ = 93%); if lower, add AP CSP in Grade 12 and the higher counts. Decision gate: start of Grade 12 (with the national-track pivot option for GAT + SAAT).</span></li></ul></div>
+  <div class="p-grid3" id="pRoadmap"></div>
+
+  <div class="p-grid3">
+    <div class="p-box"><span class="p-lvl"><span class="ar">الصلاحيات</span><span class="en">Validity</span></span><p><span class="ar">SAT 5 سنوات (الأردن: خلال 10–12) · AP بلا انتهاء · GAT/SAAT 5 سنوات · IELTS/TOEFL سنتان → فبراير–أبريل 2029</span><span class="en">SAT 5 yrs (Jordan: within 10–12) · AP no expiry · GAT/SAAT 5 yrs · IELTS/TOEFL 2 yrs → Feb–Apr 2029</span></p></div>
+    <div class="p-box p-red"><span class="p-lvl"><span class="ar">قاعدتان لا تُخالفان</span><span class="en">Two rules never broken</span></span><p><span class="ar">1) ترخيص الأردن: معادلة ≥ 85% تُحسم قبل التخرج من المدرسة. 2) استثناء ما بعد التخرج الجامعي: «نفس الدولة» فقط — لا يُعتمد عليه.</span><span class="en">1) Jordan licensing: equivalency ≥ 85%, settled before leaving school. 2) Post-graduation exception: same-country only — never the plan.</span></p></div>
+    <div class="p-box"><span class="p-lvl"><span class="ar">بوابة القرار · بداية الصف 12</span><span class="en">Decision gate · start of Grade 12</span></span><p><span class="ar">SAT ≥ 1410؟ الخانة 4 مؤمَّنة، وإلا AP CSP مع Chem · التحقق من اعتراف الأردن بالجامعة الأجنبية · حجز IELTS/TOEFL وGAT/SAAT</span><span class="en">SAT ≥ 1410? slot 4 secured, else AP CSP with Chem · confirm Jordan’s recognition of the foreign university · book IELTS/TOEFL and GAT/SAAT</span></p></div>
   </div>
 
-  <p class="p-foot"><span class="ar">أداة تخطيط عائلية وليست قرار معادلة أو قبول · الأردن وفق نظام رقم (5) لسنة 2025/2026 (الجريدة الرسمية) · يُعاد التحقق من وزارة التربية والتعليم الأردنية ومكتب التنسيق المصري وهيئة تقويم التعليم والتدريب والجامعات المستهدفة في سنة التقديم · dromaia.github.io/sat</span><span class="en">Family planning tool, not an equivalency or admission decision · Jordan per Official Gazette Regulation No. (5) 2025/2026 · Reverify with the Jordan MoE, the Egyptian Coordination Office, ETEC and target universities in the application year · dromaia.github.io/sat</span></p>
+  <p class="p-foot"><span class="ar">أداة تخطيط عائلية وليست قرار معادلة أو قبول · الأردن وفق نظام رقم (5) لسنة 2025/2026 · أرقام PSU من دليل قبول الطب 2026–2027 · يُعاد التحقق من كل جهة في سنة التقديم · dromaia.github.io/sat</span><span class="en">Family planning tool, not an equivalency or admission decision · Jordan per Regulation No. (5) 2025/2026 · PSU figures from the 2026–2027 medicine admission guide · Reverify every body in the application year · dromaia.github.io/sat</span></p>
 </section>
 
 <script>
@@ -828,8 +568,8 @@ const html=document.documentElement;
 const bi=(a,e)=>'<span class="ar">'+a+'</span><span class="en">'+e+'</span>';
 
 /* ---------- Language (Arabic RTL / English LTR, persisted) ---------- */
-const TITLE_AR='دليل حسان الأكاديمي للمسار الطبي والمعادلات | Hassan’s Pre-Med Academic Roadmap & Strategic Equivalency Portal';
-const TITLE_EN='Hassan’s Pre-Med Academic Roadmap & Strategic Equivalency Portal | دليل حسان الأكاديمي للمسار الطبي والمعادلات';
+const TITLE_AR='استراتيجية حسان للقبول في الطب | Hassan’s Pre-Med Admission Strategy';
+const TITLE_EN='Hassan’s Pre-Med Admission Strategy | استراتيجية حسان للقبول في الطب';
 function setLang(l){html.lang=l;html.dir=l==='ar'?'rtl':'ltr';document.title=l==='ar'?TITLE_AR:TITLE_EN;store.set('hassan_lang',l);}
 setLang(store.get('hassan_lang')==='en'?'en':'ar');
 $('#langBtn').addEventListener('click',()=>setLang(html.lang==='ar'?'en':'ar'));
@@ -842,7 +582,16 @@ $('#printBtn2').addEventListener('click',doPrint);
 window.addEventListener('beforeprint',stampDate);
 stampDate();
 
-/* ---------- "Now" pill + dynamic countdown ---------- */
+/* ---------- Country tabs (persisted) ---------- */
+function setTab(t){
+  $$('.tab').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===t)));
+  $$('.panel').forEach(p=>{p.hidden=p.id!=='p-'+t});
+  store.set('hassan_tab',t);
+}
+$$('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+setTab(['jo','eg','sa','ge'].includes(store.get('hassan_tab'))?store.get('hassan_tab'):'jo');
+
+/* ---------- "Now" pill + countdown ---------- */
 function nowInfo(d){
   const m=d.getMonth(),ay=m>=8?d.getFullYear():d.getFullYear()-1,grade=10+(ay-2026);
   if(grade<10)return{ar:'ما قبل الصف العاشر',en:'Before Grade 10'};
@@ -858,6 +607,7 @@ const MS=[
   {d:'2028-03-01',ar:'أول محاولة Digital SAT (مارس 2028)',en:'First Digital SAT attempt (March 2028)'},
   {d:'2028-05-01',ar:'اختبارات AP Biology + Pre-Calculus (مايو 2028)',en:'AP Biology + Pre-Calculus exams (May 2028)'},
   {d:'2028-09-01',ar:'بداية الصف 12 — بوابة القرار',en:'Grade 12 begins — decision gate'},
+  {d:'2029-02-15',ar:'نافذة IELTS / TOEFL (فبراير–أبريل 2029) — PSU وجورجيا',en:'IELTS / TOEFL window (Feb–Apr 2029) — PSU and Georgia'},
   {d:'2029-05-01',ar:'اختبارا AP Chemistry (+ AP CSP) — اكتمال الخانات الأربع (مايو 2029)',en:'AP Chemistry (+ AP CSP) exams — all 4 slots complete (May 2029)'},
   {d:'2029-06-30',ar:'التخرج وملف المعادلة والتقديم',en:'Graduation, equivalency file & applications'}
 ];
@@ -876,26 +626,26 @@ tick();setInterval(tick,6e5);
 const TL=[
  {g:'10',y:'2026/2027',ar:'التأسيس',en:'Foundation',icon:'fa-seedling',terms:[
    {ar:'الفصل الأول · سبتمبر–يناير',en:'Term 1 · Sep–Jan',tasks:[
-     {id:'10a1',ar:'النجاح في كل المواد المدرسية مع معدل قوي (هدف 90%+): شرط ناجح/راسب في الأردن (وزن 0%)، و40% في مصر',en:'Pass every school subject with a strong GPA (target 90%+): Pass/Fail prerequisite in Jordan (0% weight), 40% in Egypt'},
+     {id:'10a1',ar:'النجاح في كل المواد المدرسية بمعدل 95%+ (الأردن: ناجح/راسب · مصر 40% · PSU حد أدنى 95%)',en:'Pass every school subject with a 95%+ GPA (Jordan: Pass/Fail · Egypt 40% · PSU 95% minimum)'},
      {id:'10a2',ar:'تسجيل مادة الفيزياء المدرسية والنجاح فيها (شرط مصر)',en:'Enrol in and pass school Physics (Egypt prerequisite)'},
-     {id:'10a3',ar:'برنامج إنجليزية أكاديمية: قراءة وكتابة لـ SAT وGAT',en:'Academic English program: reading & writing for the SAT and GAT'}]},
+     {id:'10a3',ar:'برنامج إنجليزية أكاديمية: قراءة وكتابة لـ SAT وGAT، وتمهيد لـ IELTS/TOEFL لاحقاً',en:'Academic English program: reading & writing for the SAT and GAT, groundwork for IELTS/TOEFL later'}]},
    {ar:'الفصل الثاني · فبراير–يونيو',en:'Term 2 · Feb–Jun',tasks:[
      {id:'10b1',ar:'أساس Pre-Calculus وقرار تقديم AP Pre-Calculus في مايو 2027 (إن كان مسجلاً بالمادة)',en:'Pre-Calculus foundation; decide on sitting AP Pre-Calculus in May 2027 (if enrolled)'},
      {id:'10b2',ar:'اختبار تشخيصي PSAT / Digital SAT تجريبي',en:'Diagnostic PSAT / Digital SAT practice test'},
      {id:'10b3',ar:'تقوية الأحياء والكيمياء تمهيداً لمواد AP',en:'Strengthen biology & chemistry ahead of the AP courses'}]},
    {ar:'صيف 2027',en:'Summer 2027',tasks:[
-     {id:'10c1',ar:'معسكر تحضير Digital SAT (هدف 1410+ = 93% بمقياس الوزارة)',en:'Digital SAT prep bootcamp (target 1410+ = 93% on the Ministry scale)'},
+     {id:'10c1',ar:'معسكر تحضير Digital SAT (هدف 1410+ = 93% في الأردن · ≥ 1350 بديل القدرات في PSU)',en:'Digital SAT prep bootcamp (target 1410+ = 93% in Jordan · ≥ 1350 GAT alternative at PSU)'},
      {id:'10c2',ar:'قراءة تمهيدية لـ AP Biology',en:'AP Biology pre-reading'},
      {id:'10c3',ar:'التعرف على شكل اختبار القدرات GAT بالإنجليزية',en:'Get familiar with the English GAT format'}]}]},
  {g:'11',y:'2027/2028',ar:'التنفيذ',en:'Execution',icon:'fa-bolt',terms:[
    {ar:'الفصل الأول · سبتمبر–يناير',en:'Term 1 · Sep–Jan',tasks:[
      {id:'11a1',ar:'مادة AP Biology (+ AP Pre-Calculus إن لم يُنجز)',en:'AP Biology course (+ AP Pre-Calculus if not yet done)'},
      {id:'11a2',ar:'تحضير مكثف لـ Digital SAT',en:'Intensive Digital SAT preparation'},
-     {id:'11a3',ar:'إبقاء كل المواد المدرسية ناجحة (شرط الأردن) وحماية المعدل لمصر والسعودية',en:'Keep every school subject passing (Jordan prerequisite) and protect the GPA for Egypt & KSA'}]},
+     {id:'11a3',ar:'إبقاء كل المواد ناجحة (شرط الأردن) والمعدل 95%+ (PSU ومصر)',en:'Keep every subject passing (Jordan prerequisite) and the GPA at 95%+ (PSU and Egypt)'}]},
    {ar:'الفصل الثاني · فبراير–يونيو',en:'Term 2 · Feb–Jun',tasks:[
      {id:'11b1',ar:'المحاولة الجدية الأولى في Digital SAT (مارس 2028)',en:'First serious Digital SAT attempt (March 2028)'},
      {id:'11b2',ar:'اختبارا AP Biology وAP Pre-Calculus (مايو 2028) — هدف 4+',en:'AP Biology & AP Pre-Calculus exams (May 2028) — target 4+'},
-     {id:'11b3',ar:'حصر الجامعات المستهدفة (الأردن، مصر، السعودية) ومراجعة شروطها الرسمية',en:'Shortlist target universities (Jordan, Egypt, KSA) and review their official rules'}]},
+     {id:'11b3',ar:'حصر الجامعات المستهدفة (الأردن، مصر، PSU، جورجيا) والتحقق من اعتراف التعليم العالي الأردني بها',en:'Shortlist target universities (Jordan, Egypt, PSU, Georgia) and check Jordan MoHE recognition for each'}]},
    {ar:'صيف 2028',en:'Summer 2028',tasks:[
      {id:'11c1',ar:'دراسة تمهيدية لـ AP Chemistry',en:'AP Chemistry pre-study'},
      {id:'11c2',ar:'إعادة Digital SAT إن كانت الدرجة أقل من 1410 (93%) (أغسطس/أكتوبر)',en:'Retake the Digital SAT if below 1410 (93%) (Aug/Oct)'},
@@ -904,14 +654,16 @@ const TL=[
    {ar:'الفصل الأول · سبتمبر–يناير',en:'Term 1 · Sep–Jan',tasks:[
      {id:'12a1',ar:'مادة AP Chemistry (+ AP Computer Science Principles إن اختير للخانة الرابعة)',en:'AP Chemistry course (+ AP Computer Science Principles if chosen for the 4th slot)'},
      {id:'12a2',ar:'محاولة Digital SAT الأخيرة لتثبيت 1410+ (93%) أو 1550+ (100%) (أكتوبر/نوفمبر)',en:'Final Digital SAT attempt to lock 1410+ (93%) or 1550+ (100%) (Oct/Nov)'},
-     {id:'12a3',ar:'اختبار القدرات GAT بالإنجليزية + بوابة القرار: الاستمرار في مسار AP (الافتراضي) أو التحويل للمسار الوطني، وتحديد الخانة الرابعة (SAT ≥ 1410 = 93% أو تسجيل AP CSP)',en:'GAT in English + decision gate: continue the AP route (default) or pivot to the national track, and settle the 4th slot (SAT ≥ 1410 = 93%, or enrol in AP CSP)'}]},
+     {id:'12a3',ar:'بوابة القرار: الخانة الرابعة (SAT ≥ 1410 أو تسجيل AP CSP) + اختبار القدرات GAT بالإنجليزية',en:'Decision gate: the 4th slot (SAT ≥ 1410 or enrol in AP CSP) + GAT in English'},
+     {id:'12a4',ar:'مراجعة دليل قبول الطب في جامعة الأمير سلطان لسنة التقديم (المعدل، التحصيلي، الإنجليزية، فئة غير السعوديين)',en:'Review PSU’s medicine admission guide for the application year (GPA, SAAT, English, non-Saudi category)'}]},
    {ar:'الفصل الثاني · فبراير–يونيو',en:'Term 2 · Feb–Jun',tasks:[
      {id:'12b1',ar:'اختبار AP Chemistry (+ AP CSP: مشروع Create قبل نهاية أبريل) — مايو 2029 — اكتمال الخانات الأربع',en:'AP Chemistry (+ AP CSP: Create task by end of April) exams — May 2029 — all 4 slots complete'},
-     {id:'12b2',ar:'اختبار التحصيلي SAAT بالإنجليزية (المسار الطبي)',en:'SAAT in English (medical track)'},
-     {id:'12b3',ar:'تجهيز ملف المعادلة: الدبلوم + كشوف الدرجات (ناجح في كل المواد) + 3 AP + الخانة الرابعة (SAT و/أو AP CSP) + التصديقات',en:'Prepare the equivalency file: diploma + transcripts (all subjects passed) + 3 AP + 4th slot (SAT and/or AP CSP) + attestations'}]},
+     {id:'12b4',ar:'IELTS / TOEFL iBT (فبراير–أبريل 2029) — صالح سنتين لـ PSU وجورجيا',en:'IELTS / TOEFL iBT (Feb–Apr 2029) — valid 2 years for PSU and Georgia'},
+     {id:'12b2',ar:'اختبار التحصيلي SAAT بالإنجليزية (هدف ≥ 85)',en:'SAAT in English (target ≥ 85)'},
+     {id:'12b3',ar:'تجهيز ملف المعادلة: الدبلوم + كشوف الدرجات (ناجح في كل المواد) + 3 AP + الخانة الرابعة + التصديقات',en:'Prepare the equivalency file: diploma + transcripts (all subjects passed) + 3 AP + 4th slot + attestations'}]},
    {ar:'صيف 2029',en:'Summer 2029',tasks:[
      {id:'12c1',ar:'التخرج وتصديق الشهادة وتقديم معادلة الأردن',en:'Graduation, attestation and Jordan equivalency submission'},
-     {id:'12c2',ar:'التقديم: الأردن ← مصر (تحصيل حاصل) ← الجامعات السعودية',en:'Apply: Jordan → Egypt (auto-fulfilled) → Saudi universities'},
+     {id:'12c2',ar:'التقديم: الأردن ← مصر (تحصيل حاصل) ← السنة التحضيرية في PSU ← مقابلة جورجيا (أحياء/كيمياء)',en:'Apply: Jordan → Egypt (auto-fulfilled) → PSU Preparatory Year → Georgia interview (Bio/Chem)'},
      {id:'12c3',ar:'إعادة التحقق من قواعد سنة التقديم لدى الجهات الرسمية',en:'Reverify application-year rules with the official bodies'}]}]}
 ];
 const ORDER=['planned','progress','completed'];
@@ -958,18 +710,7 @@ function stats(){
 }
 renderTL();
 
-/* ---------- Pathway switcher ---------- */
-const TREE_BASE='tree grid lg:grid-cols-2 gap-8 lg:gap-10 mt-5';
-function setView(v){
-  $$('.sw').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.view===v)));
-  $('#tree').className=TREE_BASE+(v==='all'?'':' view-'+v);
-  $$('#swSummary > span').forEach(s=>{s.hidden=s.dataset.view!==v});
-  store.set('hassan_view',v);
-}
-$$('.sw').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
-setView(['all','jo','sa'].includes(store.get('hassan_view'))?store.get('hassan_view'):'all');
-
-/* ---------- Equivalent score simulator ---------- */
+/* ---------- Simulator ---------- */
 // Jordan MoE — Official Gazette Regulation No. (5) 2025/2026: AP score → % (minimum accepted 3; 0 = not taken)
 const AP={0:0,1:0,2:0,3:86,4:93,5:100};
 // Ministry scale for the 4th slot (option A): Digital SAT → %. Published anchors; scores between anchors are interpolated linearly.
@@ -979,53 +720,67 @@ function satPct(s){
   for(let i=1;i<SAT_SCALE.length;i++){const [a,pa]=SAT_SCALE[i-1],[b,pb]=SAT_SCALE[i];if(s<=b)return pa+(pb-pa)*(s-a)/(b-a)}
   return 100;
 }
-const DEF={Gpa:90,Sat:1300,Pre:4,Bio:4,Chem:4,Csp:0,Gat:80,Saat:80};
+// PSU College of Medicine 2026–2027 guide: minimums and selection weighting (the 70% test split is unpublished → estimate)
+const PSU={gpaMin:95,saatMin:85,gatMin:85,satMin:1350,wGpa:.3,wTests:.7};
+const DEF={Gpa:95,Sat:1410,Pre:4,Bio:4,Chem:4,Csp:0,Gat:85,Saat:85};
+let mode=['auto','sat','csp'].includes(store.get('hassan_slot4'))?store.get('hassan_slot4'):'auto';
 const f1=x=>x.toFixed(1);
 function paint(el,score,state,noteAr,noteEn){
   const pill=el.querySelector('.pill-res'),bar=el.querySelector('.meter>i');
-  el.querySelector('.score').textContent=score.toFixed(1)+'%';
-  bar.style.width=Math.max(0,Math.min(100,score))+'%';
-  bar.style.background=state==='ok'?'linear-gradient(90deg,#0D9488,#14B8A6)':state==='warn'?'#F59E0B':'#EF4444';
+  if(bar){el.querySelector('.score').textContent=score.toFixed(1)+'%';bar.style.width=Math.max(0,Math.min(100,score))+'%';bar.style.background=state==='ok'?'linear-gradient(90deg,#0D9488,#14B8A6)':state==='warn'?'#F59E0B':'#EF4444'}
   pill.className='pill-res rounded-full px-3 py-1 text-xs font-extrabold '+(state==='ok'?'bg-teal-600 text-white':state==='warn'?'bg-amber-500 text-navy':'bg-red-500 text-white');
   pill.innerHTML=state==='ok'?bi('مؤهل','Eligible'):state==='warn'?bi('حدّي','Borderline'):bi('غير مؤهل','Not eligible');
   el.querySelector('.note').innerHTML=bi(noteAr,noteEn);
 }
+const chip=(ar,en,val,ok,hl)=>'<div class="rounded-lg p-2 '+(ok?(hl?'bg-teal-600 text-white':'bg-teal-50 text-teal-900'):'bg-red-50 text-red-800')+'"><small class="block text-[10px] opacity-80">'+bi(ar,en)+'</small><b class="num">'+val+'</b></div>';
 function calc(){
-  const v={};Object.keys(DEF).forEach(k=>{v[k]=+$('#s'+k).value;$('#v'+k).textContent=(k==='Gpa'||k==='Gat'||k==='Saat')?v[k]+'%':(k==='Csp'&&v[k]===0)?'—':v[k]});
-  const phys=$('#cPhys').checked,school=$('#cSchool').checked;
-  // Jordan — Regulation No. (5) 2025/2026: 4 exams × 25%; school GPA 0% (Pass/Fail prerequisite); 85% = licensing floor
-  const satP=satPct(v.Sat),cspP=AP[v.Csp],useCsp=cspP>satP,slot4=Math.max(satP,cspP),slot4Ok=slot4>0;
+  const v={};Object.keys(DEF).forEach(k=>{v[k]=+$('#s'+k).value;$('#v'+k).textContent=k==='Gpa'?v[k]+'%':(k==='Csp'&&v[k]===0)?'—':v[k]});
+  const phys=$('#cPhys').checked,school=$('#cSchool').checked,eng=$('#cEng').checked;
+  $$('.seg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));
+
+  // ---- Jordan — Regulation No. (5) 2025/2026: 4 exams × 25%; GPA 0% (Pass/Fail); 85% licensing floor
+  const satP=satPct(v.Sat),cspP=AP[v.Csp];
   $('#vSatPct').textContent=satP?'= '+f1(satP)+'%':'< 1050';
   $('#vCspPct').textContent=cspP?'= '+cspP+'%':'';
+  const useCsp=mode==='csp'||(mode==='auto'&&cspP>satP);
+  const slot4=useCsp?cspP:satP,slot4Ok=slot4>0,s4Name=useCsp?'AP CSP':'SAT';
   const core=[v.Pre,v.Bio,v.Chem],coreOk=core.every(a=>a>=3);
   const jo=(AP[v.Pre]+AP[v.Bio]+AP[v.Chem]+slot4)/4,joOk=coreOk&&slot4Ok&&school,lic=jo>=85;
-  const chip=(ar,en,pct,ok,hl)=>'<div class="rounded-lg p-2 '+(ok?(hl?'bg-teal-600 text-white':'bg-teal-50 text-teal-900'):'bg-red-50 text-red-800')+'"><small class="block text-[10px] opacity-80">'+bi(ar,en)+'</small><b class="num">'+(ok?f1(pct)+'%':'✖')+'</b></div>';
-  const s4Name=useCsp?'AP CSP':'SAT';
-  $('#rJo .slots').innerHTML=chip('AP Pre-Calc · 25%','AP Pre-Calc · 25%',AP[v.Pre],v.Pre>=3)+chip('AP Biology · 25%','AP Biology · 25%',AP[v.Bio],v.Bio>=3)+chip('AP Chemistry · 25%','AP Chemistry · 25%',AP[v.Chem],v.Chem>=3)+chip('الخانة 4 · '+s4Name+' · 25%','Slot 4 · '+s4Name+' · 25%',slot4,slot4Ok,true);
-  const satTxt=satP?f1(satP)+'%':'غير محتسب',satTxtEn=satP?f1(satP)+'%':'not counted';
-  const s4Ar=slot4Ok?(useCsp?'الخانة 4 = AP CSP '+v.Csp+' ('+cspP+'%) — أعلى من SAT '+v.Sat+' ('+satTxt+')':'الخانة 4 = SAT '+v.Sat+' ('+f1(satP)+'%)'+(cspP?' — AP CSP '+cspP+'% ليس أعلى':'')):'✖ الخانة 4 فارغة: يلزم SAT ≥ 1050 أو AP CSP ≥ 3';
-  const s4En=slot4Ok?(useCsp?'Slot 4 = AP CSP '+v.Csp+' ('+cspP+'%) — beats SAT '+v.Sat+' ('+satTxtEn+')':'Slot 4 = SAT '+v.Sat+' ('+f1(satP)+'%)'+(cspP?' — AP CSP '+cspP+'% is not higher':'')):'✖ Slot 4 empty: need SAT ≥ 1050 or AP CSP ≥ 3';
+  $('#rJo .slots').innerHTML=chip('AP Pre-Calc · 25%','AP Pre-Calc · 25%',v.Pre>=3?AP[v.Pre]+'%':'✖',v.Pre>=3)+chip('AP Biology · 25%','AP Biology · 25%',v.Bio>=3?AP[v.Bio]+'%':'✖',v.Bio>=3)+chip('AP Chemistry · 25%','AP Chemistry · 25%',v.Chem>=3?AP[v.Chem]+'%':'✖',v.Chem>=3)+chip('الخانة 4 · '+s4Name,'Slot 4 · '+s4Name,slot4Ok?f1(slot4)+'%':'✖',slot4Ok,true);
+  const other=useCsp?(satP?'SAT '+v.Sat+' = '+f1(satP)+'%':'SAT < 1050'):(cspP?'AP CSP '+v.Csp+' = '+cspP+'%':'');
+  const modeAr=mode==='auto'?'تلقائي (الأعلى)':mode==='sat'?'مثبّت على SAT':'مثبّت على AP CSP',modeEn=mode==='auto'?'auto (higher)':mode==='sat'?'fixed to SAT':'fixed to AP CSP';
+  const s4Ar=slot4Ok?'الخانة 4 = '+(useCsp?'AP CSP '+v.Csp+' ('+cspP+'%)':'SAT '+v.Sat+' ('+f1(satP)+'%)')+' ['+modeAr+']'+(other?' · البديل: '+other:''):'✖ الخانة 4 فارغة ['+modeAr+']: يلزم SAT ≥ 1050 أو AP CSP ≥ 3';
+  const s4En=slot4Ok?'Slot 4 = '+(useCsp?'AP CSP '+v.Csp+' ('+cspP+'%)':'SAT '+v.Sat+' ('+f1(satP)+'%)')+' ['+modeEn+']'+(other?' · alternative: '+other:''):'✖ Slot 4 empty ['+modeEn+']: need SAT ≥ 1050 or AP CSP ≥ 3';
   paint($('#rJo'),jo,joOk?(lic?'ok':'warn'):'bad',
-    (coreOk?'✔ 3 AP أساسية بدرجة 3 فأعلى':'✖ يلزم AP Pre-Calc + Biology + Chemistry بدرجة 3 فأعلى')+' · '+s4Ar+' · '+(school?'✔ المواد المدرسية ناجحة (وزن 0%)':'✖ النجاح في كل المواد المدرسية شرط أهلية')+' · '+(lic?'✔ فوق حد الترخيص 85%':'⚠ تحت حد الترخيص 85% (الخط الأحمر)'),
-    (coreOk?'✔ 3 core AP at 3+':'✖ Need AP Pre-Calc + Biology + Chemistry at 3+')+' · '+s4En+' · '+(school?'✔ school subjects passed (0% weight)':'✖ passing every school subject is an eligibility prerequisite')+' · '+(lic?'✔ above the 85% licensing floor':'⚠ below the 85% licensing floor (red line)'));
-  // Egypt: 40% GPA + 60% SAT; needs school Physics + AP Biology + AP Chemistry (auto-fulfilled by the Trio)
+    (coreOk?'✔ 3 AP أساسية ≥ 3':'✖ يلزم AP Pre-Calc + Biology + Chemistry بدرجة 3 فأعلى')+' · '+s4Ar+' · '+(school?'✔ المواد المدرسية ناجحة (0%)':'✖ النجاح في كل المواد شرط أهلية')+' · '+(lic?'✔ فوق حد الترخيص 85%':'⚠ تحت حد الترخيص 85%'),
+    (coreOk?'✔ 3 core AP at 3+':'✖ Need AP Pre-Calc + Biology + Chemistry at 3+')+' · '+s4En+' · '+(school?'✔ school subjects passed (0%)':'✖ passing every subject is an eligibility prerequisite')+' · '+(lic?'✔ above the 85% licensing floor':'⚠ below the 85% licensing floor'));
+
+  // ---- Egypt: 40% GPA + 60% SAT; school Physics + AP Biology + AP Chemistry required
   const eg=.4*v.Gpa+.6*(v.Sat/1600*100),pre=phys&&v.Bio>=3&&v.Chem>=3;
   paint($('#rEg'),eg,pre?'ok':'bad',
-    (phys?'✔ فيزياء مدرسية':'✖ الفيزياء المدرسية إلزامية')+' · '+(v.Bio>=3?'✔ AP Biology':'✖ AP Biology إلزامي')+' · '+(v.Chem>=3?'✔ AP Chemistry':'✖ مادة علمية ثانية مطلوبة')+' · درجة الترتيب = 40% معدل + 60% SAT · حدود قبول الطب تُعلن سنوياً من التنسيق',
-    (phys?'✔ School Physics':'✖ School Physics mandatory')+' · '+(v.Bio>=3?'✔ AP Biology':'✖ AP Biology mandatory')+' · '+(v.Chem>=3?'✔ AP Chemistry':'✖ second science required')+' · ranking score = 40% GPA + 60% SAT · medicine cut-offs are announced yearly by Coordination');
-  // Saudi (illustrative): 30% GPA + 30% GAT + 40% SAAT
-  const sa=.3*v.Gpa+.3*v.Gat+.4*v.Saat;
-  paint($('#rSa'),sa,sa>=85?'ok':sa>=75?'warn':'bad',
-    'صيغة توضيحية: 30% معدل + 30% قدرات + 40% تحصيلي · الطب تنافسي جداً (≈85%+ تقديرياً) · تحقق من نسب كل جامعة',
-    'Illustrative: 30% GPA + 30% GAT + 40% SAAT · medicine is highly competitive (≈85%+ estimate) · verify each university’s weights');
+    (phys?'✔ فيزياء مدرسية':'✖ الفيزياء المدرسية إلزامية')+' · '+(v.Bio>=3?'✔ AP Biology':'✖ AP Biology إلزامي')+' · '+(v.Chem>=3?'✔ AP Chemistry':'✖ AP Chemistry إلزامي')+' · SAT '+v.Sat+' يساهم بـ '+f1(.6*(v.Sat/1600*100))+' نقطة من 60 · حدود القبول تُعلن سنوياً',
+    (phys?'✔ School Physics':'✖ School Physics mandatory')+' · '+(v.Bio>=3?'✔ AP Biology':'✖ AP Biology mandatory')+' · '+(v.Chem>=3?'✔ AP Chemistry':'✖ AP Chemistry mandatory')+' · SAT '+v.Sat+' contributes '+f1(.6*(v.Sat/1600*100))+' of 60 points · cut-offs announced yearly');
+
+  // ---- PSU (estimate): minimums from the 2026–2027 guide; score = 30% GPA + 70% avg(SAAT, max(GAT, SAT%))
+  const satPsu=v.Sat/16,aptOk=v.Gat>=PSU.gatMin||v.Sat>=PSU.satMin,gpaOk=v.Gpa>=PSU.gpaMin,saatOk=v.Saat>=PSU.saatMin;
+  const sa=PSU.wGpa*v.Gpa+PSU.wTests*((v.Saat+Math.max(v.Gat,satPsu))/2),saOk=gpaOk&&saatOk&&aptOk&&eng;
+  paint($('#rSa'),sa,saOk?(sa>=85?'ok':'warn'):'bad',
+    (gpaOk?'✔ المعدل ≥ 95%':'✖ المعدل أقل من 95%')+' · '+(saatOk?'✔ التحصيلي ≥ 85':'✖ التحصيلي أقل من 85')+' · '+(aptOk?(v.Gat>=PSU.gatMin?'✔ القدرات ≥ 85':'✔ SAT ≥ 1350 بديل القدرات'):'✖ يلزم قدرات ≥ 85 أو SAT ≥ 1350')+' · '+(eng?'✔ إنجليزية (IELTS 5.0 / TOEFL 50)':'✖ إنجليزية: برنامج مكثف أولاً')+' · درجة تقديرية: 30% معدل + 70% اختبارات · القبول عبر السنة التحضيرية والمفاضلة على المقاعد',
+    (gpaOk?'✔ GPA ≥ 95%':'✖ GPA below 95%')+' · '+(saatOk?'✔ SAAT ≥ 85':'✖ SAAT below 85')+' · '+(aptOk?(v.Gat>=PSU.gatMin?'✔ GAT ≥ 85':'✔ SAT ≥ 1350 as GAT alternative'):'✖ need GAT ≥ 85 or SAT ≥ 1350')+' · '+(eng?'✔ English (IELTS 5.0 / TOEFL 50)':'✖ English: Intensive program first')+' · estimated score: 30% GPA + 70% tests · entry via the Preparatory Year, ranked for seats');
+
+  // ---- Georgia: readiness checklist (HSD + Bio/Chem competency + English)
+  const geBio=v.Bio>=3,geChem=v.Chem>=3,geOk=school&&geBio&&geChem&&eng;
+  $('#rGe .checks').innerHTML=chip('HSD','HSD',school?'✔':'✖',school)+chip('أحياء + كيمياء (AP)','Bio + Chem (AP)',geBio&&geChem?'✔':'✖',geBio&&geChem)+chip('إنجليزية','English',eng?'✔':'✖',eng);
+  paint($('#rGe'),0,geOk?'ok':'bad',
+    (school?'✔ شهادة ثانوية مصدّقة':'✖ يلزم إكمال الثانوية بنجاح')+' · '+(geBio&&geChem?'✔ AP Bio + Chem = كفاءة بمستوى الإعفاء للمقابلة':'✖ المقابلة تدور حول الأحياء والكيمياء — يلزم AP Bio + Chem ≥ 3')+' · '+(eng?'✔ إنجليزية B1–B2':'✖ يلزم IELTS/TOEFL أو معادلة مدرسية')+' · قبل التسجيل: اعتراف التعليم العالي الأردني بالجامعة والبرنامج',
+    (school?'✔ Attested HSD':'✖ High school must be completed and passed')+' · '+(geBio&&geChem?'✔ AP Bio + Chem = exemption-level interview competency':'✖ The interview covers biology and chemistry — need AP Bio + Chem ≥ 3')+' · '+(eng?'✔ English B1–B2':'✖ Need IELTS/TOEFL or school equivalency')+' · before enrolling: Jordan MoHE recognition of the university and program');
 }
 Object.keys(DEF).forEach(k=>$('#s'+k).addEventListener('input',calc));
-$('#cPhys').addEventListener('change',calc);
-$('#cSchool').addEventListener('change',calc);
-$('#resetCalc').addEventListener('click',()=>{Object.keys(DEF).forEach(k=>$('#s'+k).value=DEF[k]);$('#cPhys').checked=true;$('#cSchool').checked=true;calc()});
+['cPhys','cSchool','cEng'].forEach(id=>$('#'+id).addEventListener('change',calc));
+$$('.seg button').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;store.set('hassan_slot4',mode);calc()}));
+$('#resetCalc').addEventListener('click',()=>{Object.keys(DEF).forEach(k=>$('#s'+k).value=DEF[k]);['cPhys','cSchool','cEng'].forEach(id=>$('#'+id).checked=true);mode='auto';store.set('hassan_slot4',mode);calc()});
 calc();
 })();
 </script>
 </body>
 </html>
-
