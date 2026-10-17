@@ -380,15 +380,15 @@ if(window.tailwind){tailwind.config = { theme: { extend: {
   </div>
   <div class="grid lg:grid-cols-2 gap-6">
     <div class="card p-5 sm:p-6 space-y-5">
-      <div><div class="flex justify-between gap-2 mb-1"><label for="sGpa" class="font-bold"><span class="ar">المعدل المدرسي</span><span class="en">School GPA</span> <span class="text-xs text-slate-500 font-normal"><span class="ar">(مصر 40% · PSU 30% · الأردن 0%)</span><span class="en">(Egypt 40% · PSU 30% · Jordan 0%)</span></span></label><span class="inline-flex items-center gap-1 shrink-0"><input id="nGpa" class="numin num" type="text" inputmode="decimal" dir="ltr" autocomplete="off" spellcheck="false" value="95" aria-label="School GPA %"><b class="text-teal-700">%</b></span></div><input id="sGpa" type="range" min="60" max="100" step="0.1" value="95"></div>
-      <div><div class="flex justify-between gap-2 mb-1"><label for="sSat" class="font-bold">Digital SAT</label><span class="inline-flex items-center gap-1.5 shrink-0"><input id="nSat" class="numin num" type="text" inputmode="decimal" dir="ltr" autocomplete="off" spellcheck="false" value="1410" aria-label="Digital SAT"> <small class="num text-slate-500" id="vSatPct"></small></span></div><input id="sSat" type="range" min="400" max="1600" step="10" value="1410"></div>
+      <div><div class="flex justify-between gap-2 mb-1"><label for="sGpa" class="font-bold"><span class="ar">المعدل المدرسي</span><span class="en">School GPA</span> <span class="text-xs text-slate-500 font-normal"><span class="ar">(مصر 40% · PSU 30% · الأردن 0%)</span><span class="en">(Egypt 40% · PSU 30% · Jordan 0%)</span></span></label><span class="inline-flex items-center gap-1 shrink-0"><input id="nGpa" class="numin num" type="text" inputmode="decimal" dir="ltr" autocomplete="off" spellcheck="false" value="98.3" aria-label="School GPA %"><b class="text-teal-700">%</b></span></div><input id="sGpa" type="range" min="60" max="100" step="0.1" value="98.3"></div>
+      <div><div class="flex justify-between gap-2 mb-1"><label for="sSat" class="font-bold">Digital SAT</label><span class="inline-flex items-center gap-1.5 shrink-0"><input id="nSat" class="numin num" type="text" inputmode="decimal" dir="ltr" autocomplete="off" spellcheck="false" value="1400" aria-label="Digital SAT"> <small class="num text-slate-500" id="vSatPct"></small></span></div><input id="sSat" type="range" min="400" max="1600" step="10" value="1400"></div>
       <div>
         <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"><span class="ar">درجات AP (1–5)</span><span class="en">AP scores (1–5)</span></p>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div><div class="flex justify-between mb-1 text-xs"><label for="sPre" class="font-bold">AP Pre-Calc</label><input id="nPre" class="numin num sm" type="text" inputmode="decimal" dir="ltr" autocomplete="off" spellcheck="false" value="4" aria-label="AP Pre-Calculus"></div><input id="sPre" type="range" min="1" max="5" value="4"></div>
           <div><div class="flex justify-between mb-1 text-xs"><label for="sBio" class="font-bold">AP Biology</label><input id="nBio" class="numin num sm" type="text" inputmode="decimal" dir="ltr" autocomplete="off" spellcheck="false" value="4" aria-label="AP Biology"></div><input id="sBio" type="range" min="1" max="5" value="4"></div>
           <div><div class="flex justify-between mb-1 text-xs"><label for="sChem" class="font-bold">AP Chem</label><input id="nChem" class="numin num sm" type="text" inputmode="decimal" dir="ltr" autocomplete="off" spellcheck="false" value="4" aria-label="AP Chemistry"></div><input id="sChem" type="range" min="1" max="5" value="4"></div>
-          <div><div class="flex justify-between mb-1 text-xs"><label for="sCsp" class="font-bold">AP CSP</label><input id="nCsp" class="numin num sm" type="text" inputmode="decimal" dir="ltr" autocomplete="off" spellcheck="false" value="0" aria-label="AP Computer Science Principles"></div><input id="sCsp" type="range" min="0" max="5" value="0"><small class="block text-[10px] text-slate-500 mt-1"><span class="ar">0 = لم يُؤخذ</span><span class="en">0 = not taken</span> <span class="num font-bold text-teal-700" id="vCspPct"></span></small></div>
+          <div><div class="flex justify-between mb-1 text-xs"><label for="sCsp" class="font-bold">AP CSP</label><input id="nCsp" class="numin num sm" type="text" inputmode="decimal" dir="ltr" autocomplete="off" spellcheck="false" value="3" aria-label="AP Computer Science Principles"></div><input id="sCsp" type="range" min="0" max="5" value="3"><small class="block text-[10px] text-slate-500 mt-1"><span class="ar">0 = لم يُؤخذ</span><span class="en">0 = not taken</span> <span class="num font-bold text-teal-700" id="vCspPct"></span></small></div>
         </div>
       </div>
       <div class="rounded-xl border border-amber-200 bg-amber-50 p-3 flex flex-wrap items-center justify-between gap-3">
@@ -400,8 +400,8 @@ if(window.tailwind){tailwind.config = { theme: { extend: {
         </div>
       </div>
       <div class="grid grid-cols-2 gap-3">
-        <div><div class="flex justify-between mb-1"><label for="sGat" class="font-bold">GAT <span class="text-slate-500 font-normal text-xs"><span class="ar">القدرات</span><span class="en">aptitude</span></span></label><input id="nGat" class="numin num" type="text" inputmode="decimal" dir="ltr" autocomplete="off" spellcheck="false" value="85" aria-label="GAT"></div><input id="sGat" type="range" min="0" max="100" value="85"></div>
-        <div><div class="flex justify-between mb-1"><label for="sSaat" class="font-bold">SAAT <span class="text-slate-500 font-normal text-xs"><span class="ar">التحصيلي</span><span class="en">achievement</span></span></label><input id="nSaat" class="numin num" type="text" inputmode="decimal" dir="ltr" autocomplete="off" spellcheck="false" value="85" aria-label="SAAT"></div><input id="sSaat" type="range" min="0" max="100" value="85"></div>
+        <div><div class="flex justify-between mb-1"><label for="sGat" class="font-bold">GAT <span class="text-slate-500 font-normal text-xs"><span class="ar">القدرات</span><span class="en">aptitude</span></span></label><input id="nGat" class="numin num" type="text" inputmode="decimal" dir="ltr" autocomplete="off" spellcheck="false" value="98" aria-label="GAT"></div><input id="sGat" type="range" min="0" max="100" value="98"></div>
+        <div><div class="flex justify-between mb-1"><label for="sSaat" class="font-bold">SAAT <span class="text-slate-500 font-normal text-xs"><span class="ar">التحصيلي</span><span class="en">achievement</span></span></label><input id="nSaat" class="numin num" type="text" inputmode="decimal" dir="ltr" autocomplete="off" spellcheck="false" value="98" aria-label="SAAT"></div><input id="sSaat" type="range" min="0" max="100" value="98"></div>
       </div>
       <div class="flex flex-wrap items-start justify-between gap-3">
         <div class="flex flex-col gap-2 text-sm text-slate-700">
@@ -727,7 +727,7 @@ function satPct(s){
 }
 // PSU College of Medicine 2026–2027 guide: minimums and selection weighting (the 70% test split is unpublished → estimate)
 const PSU={gpaMin:95,saatMin:85,gatMin:85,satMin:1350,wGpa:.3,wTests:.7};
-const DEF={Gpa:95,Sat:1410,Pre:4,Bio:4,Chem:4,Csp:0,Gat:85,Saat:85};
+const DEF={Gpa:98.3,Sat:1400,Pre:4,Bio:4,Chem:4,Csp:3,Gat:98,Saat:98};
 let mode=['auto','sat','csp'].includes(store.get('hassan_slot4'))?store.get('hassan_slot4'):'auto';
 const f1=x=>x.toFixed(1);
 function paint(el,score,state,noteAr,noteEn){
