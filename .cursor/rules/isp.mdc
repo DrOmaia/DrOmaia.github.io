@@ -65,6 +65,10 @@ section, lets her adjust it by drag and drop, and produces an Excel file for reg
 - Nothing is uploaded anywhere: files are read in the browser; work is kept in `localStorage` and in a saved
   project file (`.json`). It is a training / simulation tool; results are unofficial drafts.
 - The interface is Arabic (default) and English; all file contents (Excel, email) are English.
+- **Installable app, works offline**: it is a PWA. On a phone (Android/iPhone) or on Windows (Edge/Chrome →
+  "Install app") it can be added to the home screen / desktop and opened in its own window, and it keeps working
+  without internet after the first visit. The **Install app** button in the header appears where the browser allows
+  it (iPhone shows a short how-to). Files still stay in the browser — installing changes nothing about that.
 
 > **Editing this tool with an AI or by hand? Read [`CLAUDE.md`](CLAUDE.md) first** (rules and checklist), then this file.
 > The history of every change is in [`CHANGELOG.md`](CHANGELOG.md).
@@ -82,6 +86,9 @@ section, lets her adjust it by drag and drop, and produces an Excel file for reg
 | `export.js` | Excel workbook builder (ExcelJS): clean timetable tab, detailed sheet with live formulas, Is Reg, Time requests, notes. `window.ISPExport`. |
 | `app.js` | The interface: state, the 5 steps, rendering, drag and drop, menus, change list / email, settings file, save / open. |
 | `styles.css` | All styles, including print rules (`@media print`). |
+| `manifest.webmanifest` | PWA manifest (name, icons, standalone) so the tool installs as an app. Bump its `?v=` tag with the rest. |
+| `sw.js` | Service worker: caches the app shell for offline use. Network-first (the `?v=` cache tag still wins online), cached copy when offline. Bump `TAG` with the cache tag. |
+| `icons/` | App icons built from the department logo (`icon-192.png`, `icon-512.png`, `icon-maskable.png`, `icon.svg`, `apple-touch-icon.png`). |
 | `vendor/` | `exceljs.min.js`, `jszip.min.js` (+ licences). Do not edit. |
 | `tests/` | Browser tests on **synthetic** sample files. See [`tests/README.md`](tests/README.md). |
 

@@ -114,6 +114,14 @@ the check table and Is Reg.
     Sun–Wed, no Is Reg sheet). Propose again redistributes; **↺ My timetable** puts it back. Test `20_manual_table.js`.
     (2026-10-11 c)
 
+35. **Install as an app (phone and Windows) + works offline**: the tool is now an installable web app (PWA). On the
+    phone (Android/iPhone) and on Windows (Edge/Chrome → "Install app") it can be added to the home screen / desktop
+    and opened like any app, in its own window, and it keeps working without internet after the first visit. A new
+    **Install app** button appears in the header where the browser allows it (on iPhone it shows a short how-to). Added
+    `manifest.webmanifest`, `sw.js` (service worker: network-first so the `?v=` cache tag still wins online, cached
+    copy offline), and app icons in `icons/` (192 / 512 / maskable, built from the department logo). Nothing is
+    uploaded; files still stay in the browser. Test `21_pwa.js`. (2026-10-31 a)
+
 Testing: Chromium (Playwright) with synthetic files in the male-file layout (male and female projects);
 LibreOffice recalculation 0 formula errors. Not yet tested with the real `262 sechd/male/` files.
-Cache tag ?v=20261011c.
+Cache tag ?v=20261031a.

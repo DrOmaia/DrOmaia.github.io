@@ -2,6 +2,8 @@
 window.ISPText = {
   ar: {
     appName: 'جدول التدريس', dept: 'قسم نظم المعلومات', save: 'حفظ المشروع', open: 'فتح مشروع محفوظ', lang: 'English',
+    install: 'تثبيت التطبيق', installDone: 'تم تثبيت التطبيق على جهازك.',
+    installHint: 'لتثبيته كتطبيق: من قائمة المتصفّح اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية». يعمل بعدها بدون إنترنت.',
     male: 'رجال', female: 'نساء', term: 'الفصل',
     steps: ['البداية', 'الملفات', 'الإعدادات', 'الجدول المقترح', 'التنزيل'],
     back: 'السابق', next: 'التالي',
@@ -170,6 +172,8 @@ window.ISPText = {
   },
   en: {
     appName: 'Teaching Timetable', dept: 'Information Systems Department', save: 'Save project', open: 'Open a saved project', lang: 'Arabic',
+    install: 'Install app', installDone: 'The app is installed on your device.',
+    installHint: 'To install as an app: from your browser menu choose "Install app" or "Add to Home Screen". It then works offline.',
     male: 'Male', female: 'Female', term: 'Term',
     steps: ['Start', 'Files', 'Settings', 'Proposal', 'Download'],
     back: 'Back', next: 'Next',

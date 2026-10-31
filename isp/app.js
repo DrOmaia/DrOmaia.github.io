@@ -1767,6 +1767,25 @@
   $('#langBtn').addEventListener('click', () => { S.lang = S.lang === 'ar' ? 'en' : 'ar'; $('#toast').classList.remove('on'); persist(); render(); });
   $('#saveBtn').addEventListener('click', saveProject);
 
+  // ---------------- install as an app (phone / Windows) ----------------
+  // Progressive: works without any of this; the button only appears where the browser can install.
+  (function () {
+    const btn = $('#installBtn'); if (!btn) return;
+    let deferred = null;
+    const show = (on) => { btn.hidden = !on; };
+    const standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferred = e; if (!standalone) show(true); });
+    window.addEventListener('appinstalled', () => { deferred = null; show(false); toast(t('installDone')); });
+    btn.addEventListener('click', async () => {
+      if (deferred) { deferred.prompt(); try { await deferred.userChoice; } catch (e) { /* dismissed */ } deferred = null; show(false); }
+      else { toast(t('installHint')); }  // iOS / browsers with no install prompt: tell her where it is
+    });
+    // iOS Safari has no beforeinstallprompt — offer the button with a hint instead
+    const ua = window.navigator.userAgent || '';
+    const iOS = /iphone|ipad|ipod/i.test(ua) || (/\bMacintosh\b/.test(ua) && 'ontouchend' in document);
+    if (!standalone && iOS) show(true);
+  })();
+
   // expose for testing
   window.ISPApp = { get state() { return S; }, get runtime() { return R; }, snapshot, render };
 
