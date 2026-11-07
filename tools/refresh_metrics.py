@@ -21,6 +21,7 @@ Usage:  python3 tools/refresh_metrics.py            (fetch + write + inject)
 from __future__ import annotations
 
 import datetime as dt
+import html as html_entities
 import json
 import pathlib
 import re
@@ -115,9 +116,11 @@ def crossref(doi: str):
         return None
     msg = data.get("message", {})
     parts = ((msg.get("issued") or {}).get("date-parts") or [[None]])[0]
+    venue = (msg.get("container-title") or [None])[0]
     return {
         "cited": msg.get("is-referenced-by-count"),
-        "venue": (msg.get("container-title") or [None])[0],
+        # Crossref titles may carry entities ("&amp;"); store plain text so esc() does not double-escape.
+        "venue": html_entities.unescape(venue) if venue else None,
         "date": "-".join(f"{p:02d}" if i else str(p) for i, p in enumerate(parts) if p is not None) or None,
     }
 

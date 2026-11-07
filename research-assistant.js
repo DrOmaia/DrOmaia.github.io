@@ -3,6 +3,33 @@
   if (!portfolio?.works?.length) return;
 
   const works = portfolio.works;
+
+  /* Portfolio statistics derived from the data, so the assistant never goes stale. */
+  const total = works.length;
+  const typeCount = (type) => works.filter((work) => work.type === type).length;
+  const journalCount = typeCount("Journal article");
+  const conferenceCount = typeCount("Conference paper");
+  const chapterCount = typeCount("Book chapter");
+  const allYears = [...new Set(works.map((work) => work.year))].sort();
+  const latestYear = allYears[allYears.length - 1];
+  const recentCount = works.filter((work) => work.year >= 2024).length;
+  const peakYear = allYears.reduce(
+    (best, candidate) =>
+      works.filter((w) => w.year === candidate).length > works.filter((w) => w.year === best).length ? candidate : best,
+    allYears[0],
+  );
+  const peakCount = works.filter((work) => work.year === peakYear).length;
+  const yearPattern = new RegExp(`\\b(${allYears.join("|")})\\b`);
+  const MONTHS_AR = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+  const cutoffEn = portfolio.meta?.verificationCutoffDisplay || portfolio.meta?.verificationCutoff || "";
+  const cutoffAr = (() => {
+    const iso = portfolio.meta?.verificationCutoff || "";
+    const parts = iso.split("-").map(Number);
+    return parts.length === 3 && parts.every(Number.isFinite)
+      ? `${parts[2]} ${MONTHS_AR[parts[1] - 1]} ${parts[0]}`
+      : cutoffEn;
+  })();
+
   const isArabic = (text = "") => /[\u0600-\u06ff]/.test(text);
   const normalize = (value = "") =>
     value
@@ -72,7 +99,7 @@
       <span class="assistant-badge">OA</span>
       <span>
         <strong>Research Assistant</strong>
-        <small>Grounded in 37 verified works · cutoff 24 July 2026</small>
+        <small>Grounded in ${total} verified works · cutoff ${cutoffEn}</small>
       </span>
       <button class="assistant-close" type="button" aria-label="Close">×</button>
     </div>
@@ -98,8 +125,8 @@
       ? "اسأل عن أبحاثي"
       : "Ask about my research";
     panel.querySelector(".assistant-header small").textContent = ar
-      ? "موثق في 37 عملاً · تاريخ القطع 24 يوليو 2026"
-      : "Grounded in 37 verified works · cutoff 24 July 2026";
+      ? `موثق في ${total} عملاً · تاريخ القطع ${cutoffAr}`
+      : `Grounded in ${total} verified works · cutoff ${cutoffEn}`;
     input.placeholder = ar
       ? "اسأل عن مجال أو منهجية أو سنة أو بحث…"
       : "Ask about a theme, method, year, or paper…";
@@ -184,8 +211,8 @@
     const source = document.createElement("span");
     source.className = "assistant-citation";
     source.textContent = options.arabic
-      ? "المصدر: محفظة الأعمال الموثقة، تاريخ القطع 24 يوليو 2026."
-      : "Source: verified portfolio corpus, cutoff 24 July 2026.";
+      ? `المصدر: محفظة الأعمال الموثقة، تاريخ القطع ${cutoffAr}.`
+      : `Source: verified portfolio corpus, cutoff ${cutoffEn}.`;
     box.append(source);
     messages.scrollTop = messages.scrollHeight;
   }
@@ -194,8 +221,8 @@
     const ar = document.documentElement.lang === "ar";
     const box = addTextMessage(
       ar
-        ? "اسأل عن الأعمال الموثقة الـ37، أو الموضوعات البحثية الستة، أو المنهجيات، أو المسار الزمني، أو مراجع APA، أو روابط DOI. أجيب من المحفظة الموثقة فقط."
-        : "Ask about the 37 verified works, six research themes, methodologies, timeline, APA references, or DOI links. I answer only from the curated portfolio.",
+        ? `اسأل عن الأعمال الموثقة الـ${total}، أو الموضوعات البحثية الستة، أو المنهجيات، أو المسار الزمني، أو مراجع APA، أو روابط DOI. أجيب من المحفظة الموثقة فقط.`
+        : `Ask about the ${total} verified works, six research themes, methodologies, timeline, APA references, or DOI links. I answer only from the curated portfolio.`,
     );
     const quick = document.createElement("div");
     quick.className = "assistant-quick";
@@ -248,8 +275,8 @@
     if (/(how many|count|total|كم|عدد)/.test(query)) {
       addAnswer(
         ar
-          ? "تضم المحفظة 37 عملاً موثقاً: 20 مقالة دورية، و13 ورقة مؤتمر، و4 فصول كتب. نُشر 25 عملاً خلال 2024-2026، منها 17 عملاً في 2025."
-          : "The portfolio contains 37 verified works: 20 journal articles, 13 conference papers, and 4 book chapters. Twenty-five works appeared during 2024-2026, including 17 in 2025.",
+          ? `تضم المحفظة ${total} عملاً موثقاً: ${journalCount} مقالة دورية، و${conferenceCount} ورقة مؤتمر، و${chapterCount} فصول كتب. نُشر ${recentCount} عملاً خلال 2024-${latestYear}، منها ${peakCount} عملاً في ${peakYear}.`
+          : `The portfolio contains ${total} verified works: ${journalCount} journal articles, ${conferenceCount} conference papers, and ${chapterCount} book chapters. ${recentCount} works appeared during 2024-${latestYear}, including ${peakCount} in ${peakYear}.`,
         [],
         { arabic: ar },
       );
@@ -279,7 +306,7 @@
     }
 
     let candidates = works;
-    const yearMatch = question.match(/\b(2011|2014|2017|2018|2019|2020|2023|2024|2025|2026)\b/);
+    const yearMatch = question.match(yearPattern);
     if (yearMatch) {
       candidates = candidates.filter((work) => String(work.year) === yearMatch[1]);
     } else if (/(latest|newest|recent|احدث|الأحدث)/.test(query)) {

@@ -82,14 +82,33 @@ def rewrite_relative_urls(source: str) -> str:
     return URL_RE.sub(swap, source)
 
 
+MONTHS_AR = {
+    "January": "يناير", "February": "فبراير", "March": "مارس", "April": "أبريل",
+    "May": "مايو", "June": "يونيو", "July": "يوليو", "August": "أغسطس",
+    "September": "سبتمبر", "October": "أكتوبر", "November": "نوفمبر", "December": "ديسمبر",
+}
+LD_DESCRIPTION_RE = re.compile(
+    r'"description":"A searchable portfolio of (\d+) verified works, '
+    r'with a verification cutoff of (\d+) ([A-Za-z]+) (\d{4})\."'
+)
+
+
 def fix_structured_data(source: str, canonical_en: str, canonical_ar: str) -> str:
-    """Point the page-level JSON-LD entity at the Arabic URL and language."""
+    """Point the page-level JSON-LD entity at the Arabic URL and language, and arabize its description."""
     for spaced in (f'"url": "{canonical_en}"', f'"url":"{canonical_en}"'):
         if spaced in source:
             source = source.replace(spaced, spaced.replace(canonical_en, canonical_ar), 1)
             break
     source = source.replace('"inLanguage": "en"', '"inLanguage": "ar"').replace('"inLanguage":"en"', '"inLanguage":"ar"')
-    return source
+
+    def arabize(match: re.Match) -> str:
+        count, day, month, year = match.groups()
+        month_ar = MONTHS_AR.get(month)
+        if not month_ar:
+            return match.group(0)
+        return f'"description":"محفظة قابلة للبحث تضم {count} عملاً موثقاً، مع تحقق حتى {day} {month_ar} {year}."'
+
+    return LD_DESCRIPTION_RE.sub(arabize, source, count=1)
 
 
 def build(page: str, spec: dict) -> None:
