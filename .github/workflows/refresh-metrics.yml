@@ -1,0 +1,38 @@
+name: Refresh publication metrics
+
+# Weekly: ask Crossref / OpenAlex / ORCID for citation counts and new DOIs,
+# write data/metrics.json, inject the numbers into index.html / publications.html,
+# rebuild the Arabic pages, and commit the result (tools/refresh_metrics.py).
+# A failed source keeps last week's values, so a bad week never breaks the site.
+
+on:
+  schedule:
+    - cron: "47 3 * * 5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Refresh metrics and inject them into the pages
+        run: python3 tools/refresh_metrics.py
+
+      - name: Rebuild the Arabic pages
+        run: python3 tools/build-arabic.py
+
+      - name: Commit and push if anything changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/metrics.json index.html publications.html ar/
+          if git diff --cached --quiet; then
+            echo "No changes this week."
+            exit 0
+          fi
+          git commit -m "Weekly publication metrics refresh"
+          git push
