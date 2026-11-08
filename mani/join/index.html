@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Mani · دعوة للعائلة</title>
+<style>
+  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:16px;
+    background:#f7f4ee; color:#2b2a27; font-family:system-ui,"Noto Sans Arabic",sans-serif; text-align:center; }
+  .card { max-width:420px; width:100%; background:#fffdf9; border-radius:20px; padding:26px 20px; }
+  h1 { margin:0 0 8px; font-size:26px; }
+  p { color:#6f6a62; line-height:1.7; }
+  .btn { display:block; background:#4f7f76; color:#fff; text-decoration:none; padding:16px; border-radius:14px; font-size:20px; font-weight:700; margin-top:14px; }
+  .btn.alt { background:#ece6da; color:#2b2a27; font-size:17px; }
+  .msg { display:none; margin-top:14px; font-size:14px; color:#6f6a62; }
+</style>
+</head>
+<body>
+<main class="card">
+  <h1>دعوة للعائلة 👨‍👩‍👧</h1>
+  <p id="intro">عم نفتح التطبيق مع الدعوة…</p>
+  <a class="btn" id="open" href="#">📱 افتحي التطبيق</a>
+  <a class="btn alt" href="https://dromaia.github.io/mani/">⬇️ ما عندي التطبيق، حمّليه</a>
+  <p class="msg" id="msg">إذا ما انفتح التطبيق، اضغطي «افتحي التطبيق». وإذا ما انفتح، حمّليه أولاً ثم ارجعي للرابط.</p>
+</main>
+<script>
+(function () {
+  // the code is in the link: ?c=CODE. Only letters and digits are accepted.
+  var c = new URLSearchParams(location.search).get('c') || '';
+  if (!/^[A-Za-z0-9]{12,}$/.test(c)) {
+    document.getElementById('intro').textContent = 'الرابط ناقص أو غلط. اطلبي رابط دعوة جديد من الأم.';
+    document.getElementById('open').style.display = 'none';
+    return;
+  }
+  // Android: opens the app with the code (mani://join/CODE), or the download page if the app is not installed
+  var intent = 'intent://join/' + c + '#Intent;scheme=mani;package=io.github.dromaia.mani;' +
+               'S.browser_fallback_url=' + encodeURIComponent('https://dromaia.github.io/mani/') + ';end';
+  document.getElementById('open').href = intent;
+  document.getElementById('msg').style.display = 'block';
+  if (/Android/i.test(navigator.userAgent)) setTimeout(function () { location.href = intent; }, 300);
+})();
+</script>
+</body>
+</html>
