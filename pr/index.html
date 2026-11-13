@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#00562B">
+<link rel="canonical" href="https://dromaia.github.io/pr/">
+<title>عداد الإقامة | Residency Counter</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:#F3F6F4;color:#1C2421;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Arabic",Tahoma,sans-serif;line-height:1.6}
+  html[lang="ar"] .en,html[lang="en"] .ar{display:none!important}
+  main{max-width:460px;margin:0 auto;padding:20px 16px 40px}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  h1{font-size:22px;margin:0}
+  .lang{border:0;background:none;color:#0B7A46;font:inherit;font-weight:700;font-size:16px;padding:8px 4px;cursor:pointer}
+  p{margin:0 0 16px}
+  .card{background:linear-gradient(135deg,#0E8A50,#00562B);color:#fff;border-radius:22px;padding:14px 18px;margin-bottom:18px}
+  .card .top{display:flex;justify-content:space-between;font-size:13px;font-weight:700}
+  .card .top span:first-child{color:#D5EBDF}
+  .card .mid{display:flex;align-items:center;gap:10px;margin:8px 0}
+  .card .n{font-size:44px;font-weight:800;line-height:1}
+  .card .grow{flex:1}
+  .card .done{text-align:end;font-weight:700;font-size:17px;line-height:1.3}
+  .card .done bdi{display:block}
+  .card small{display:block;font-size:12px;font-weight:400;color:#D5EBDF}
+  .bar{height:5px;border-radius:3px;background:rgba(255,255,255,.25);overflow:hidden}
+  .bar i{display:block;height:100%;width:53%;background:#fff;border-radius:3px}
+  .card .dates{display:flex;justify-content:space-between;font-weight:700;font-size:15px}
+  .dl{display:block;text-align:center;text-decoration:none;background:#0B7A46;color:#fff;font-weight:800;font-size:19px;padding:16px;border-radius:14px}
+  .dl:active{background:#00562B}
+  .ver{text-align:center;color:#66736D;font-size:13px;margin:8px 0 22px;min-height:20px}
+  h2{font-size:16px;margin:0 0 8px}
+  ol{margin:0 0 18px;padding-inline-start:22px}
+  li{margin-bottom:6px}
+  .note{color:#66736D;font-size:14px}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1><span class="ar">عداد الإقامة</span><span class="en">Residency Counter</span></h1>
+    <button class="lang" id="lang" type="button"><span class="ar">English</span><span class="en">العربية</span></button>
+  </header>
+
+  <p>
+    <span class="ar">تطبيق أندرويد مع ودجت على الشاشة الرئيسية، يحسب أيام إقامتك في السعودية نحو الـ900 يوم المطلوبة للتقديم على الإقامة الدائمة، ويعرض تاريخ التقديم المتوقع بالميلادي والهجري.</span>
+    <span class="en">An Android app with a home-screen widget that counts your days in Saudi Arabia towards the 900 days needed to apply for Permanent Residency, and shows the expected application date in Gregorian and Hijri.</span>
+  </p>
+
+  <div class="card" aria-hidden="true">
+    <div class="top">
+      <span><span class="ar">الإقامة الدائمة</span><span class="en">Permanent Residency</span></span>
+      <span><span class="ar">● داخل السعودية</span><span class="en">● In Saudi Arabia</span></span>
+    </div>
+    <div class="mid">
+      <span class="n">423</span>
+      <span class="grow"><span class="ar">يوم متبقي</span><span class="en">days left</span></span>
+      <span class="done"><bdi dir="ltr">477 / 900</bdi><small><span class="ar">يوم منجز</span><span class="en">days done</span></small></span>
+    </div>
+    <div class="bar"><i></i></div>
+    <small style="margin-top:8px"><span class="ar">تاريخ التقديم المتوقع</span><span class="en">Expected application date</span></small>
+    <div class="dates">
+      <span><span class="ar">10 يناير 2028</span><span class="en">10 January 2028</span></span>
+      <span><span class="ar">13 شعبان 1449 هـ</span><span class="en">13 Sha'ban 1449 AH</span></span>
+    </div>
+  </div>
+
+  <a class="dl" id="dl" href="../residency/residency-counter.apk" download="residency-counter.apk">
+    <span class="ar">تحميل التطبيق</span><span class="en">Download the app</span>
+  </a>
+  <div class="ver" id="ver"></div>
+
+  <h2><span class="ar">التثبيت</span><span class="en">Install</span></h2>
+  <ol class="ar">
+    <li>اضغط «تحميل التطبيق» ثم افتح الملف بعد اكتمال التحميل.</li>
+    <li>إذا طلب الجوال، اسمح بالتثبيت من هذا المصدر.</li>
+    <li>افتح التطبيق وأدخل تاريخ الإقامة المميزة وسفراتك.</li>
+    <li>اضغط مطولًا على الشاشة الرئيسية ← الودجت ← «عداد الإقامة».</li>
+  </ol>
+  <ol class="en">
+    <li>Tap “Download the app”, then open the file when the download finishes.</li>
+    <li>If the phone asks, allow installing from this source.</li>
+    <li>Open the app and enter the Premium Residency date and your trips.</li>
+    <li>Long-press the home screen → Widgets → “Residency Counter”.</li>
+  </ol>
+
+  <p class="note">
+    <span class="ar">التواريخ تُحفظ في جوالك فقط. التحديثات القادمة تُثبَّت من داخل التطبيق.</span>
+    <span class="en">Your dates stay on your phone only. Later updates install from inside the app.</span>
+  </p>
+</main>
+<script>
+(function () {
+  var html = document.documentElement, version = '';
+  function show() {
+    document.getElementById('ver').textContent = version ? (html.lang === 'ar' ? 'الإصدار ' : 'Version ') + version : '';
+  }
+  function setLang(l) {
+    html.lang = l;
+    html.dir = l === 'ar' ? 'rtl' : 'ltr';
+    try { localStorage.setItem('pr-lang', l); } catch (e) {}
+    show();
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('pr-lang'); } catch (e) {}
+  setLang(saved === 'en' || saved === 'ar' ? saved : ((navigator.language || 'ar').indexOf('ar') === 0 ? 'ar' : 'en'));
+  document.getElementById('lang').addEventListener('click', function () { setLang(html.lang === 'ar' ? 'en' : 'ar'); });
+  fetch('../residency/version.json?t=' + Date.now()).then(function (r) { return r.json(); }).then(function (v) {
+    version = v.versionName || '';
+    document.getElementById('dl').href = '../residency/residency-counter.apk?v=' + v.versionCode;
+    show();
+  }).catch(function () {});
+})();
+</script>
+</body>
+</html>
