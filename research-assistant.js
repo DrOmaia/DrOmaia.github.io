@@ -72,7 +72,7 @@
       <span class="assistant-badge">OA</span>
       <span>
         <strong>Research Assistant</strong>
-        <small>Grounded in 37 verified works · cutoff 24 July 2026</small>
+        <small>Grounded in 40 verified works · cutoff 21 November 2026</small>
       </span>
       <button class="assistant-close" type="button" aria-label="Close">×</button>
     </div>
@@ -98,8 +98,8 @@
       ? "اسأل عن أبحاثي"
       : "Ask about my research";
     panel.querySelector(".assistant-header small").textContent = ar
-      ? "موثق في 37 عملاً · تاريخ القطع 24 يوليو 2026"
-      : "Grounded in 37 verified works · cutoff 24 July 2026";
+      ? "موثق في 40 عملاً · تاريخ القطع 21 نوفمبر 2026"
+      : "Grounded in 40 verified works · cutoff 21 November 2026";
     input.placeholder = ar
       ? "اسأل عن مجال أو منهجية أو سنة أو بحث…"
       : "Ask about a theme, method, year, or paper…";
@@ -184,8 +184,8 @@
     const source = document.createElement("span");
     source.className = "assistant-citation";
     source.textContent = options.arabic
-      ? "المصدر: محفظة الأعمال الموثقة، تاريخ القطع 24 يوليو 2026."
-      : "Source: verified portfolio corpus, cutoff 24 July 2026.";
+      ? "المصدر: محفظة الأعمال الموثقة، تاريخ القطع 21 نوفمبر 2026."
+      : "Source: verified portfolio corpus, cutoff 21 November 2026.";
     box.append(source);
     messages.scrollTop = messages.scrollHeight;
   }
@@ -194,8 +194,8 @@
     const ar = document.documentElement.lang === "ar";
     const box = addTextMessage(
       ar
-        ? "اسأل عن الأعمال الموثقة الـ37، أو الموضوعات البحثية الستة، أو المنهجيات، أو المسار الزمني، أو مراجع APA، أو روابط DOI. أجيب من المحفظة الموثقة فقط."
-        : "Ask about the 37 verified works, six research themes, methodologies, timeline, APA references, or DOI links. I answer only from the curated portfolio.",
+        ? "اسأل عن الأعمال الموثقة الـ40، أو الموضوعات البحثية الستة، أو المنهجيات، أو المسار الزمني، أو مراجع APA، أو روابط DOI. أجيب من المحفظة الموثقة فقط."
+        : "Ask about the 40 verified works, six research themes, methodologies, timeline, APA references, or DOI links. I answer only from the curated portfolio.",
     );
     const quick = document.createElement("div");
     quick.className = "assistant-quick";
@@ -248,8 +248,8 @@
     if (/(how many|count|total|كم|عدد)/.test(query)) {
       addAnswer(
         ar
-          ? "تضم المحفظة 37 عملاً موثقاً: 20 مقالة دورية، و13 ورقة مؤتمر، و4 فصول كتب. نُشر 25 عملاً خلال 2024-2026، منها 17 عملاً في 2025."
-          : "The portfolio contains 37 verified works: 20 journal articles, 13 conference papers, and 4 book chapters. Twenty-five works appeared during 2024-2026, including 17 in 2025.",
+          ? "تضم المحفظة 40 عملاً موثقاً: 23 مقالة دورية، و13 ورقة مؤتمر، و4 فصول كتب. نُشر 28 عملاً خلال 2024-2026، منها 17 عملاً في 2025."
+          : "The portfolio contains 40 verified works: 23 journal articles, 13 conference papers, and 4 book chapters. Twenty-eight works appeared during 2024-2026, including 17 in 2025.",
         [],
         { arabic: ar },
       );
@@ -322,8 +322,8 @@
     if (!scored.length) {
       addAnswer(
         ar
-          ? "لم أجد تطابقاً موثوقاً في الأعمال الـ37. جرّب اسماً محدداً للمنهجية مثل SHAP أو YOLOv8، أو سنة، أو موضوعاً بحثياً."
-          : "I could not find a reliable match in the 37-work corpus. Try a specific method such as SHAP or YOLOv8, a year, or one of the six research themes.",
+          ? "لم أجد تطابقاً موثوقاً في الأعمال الـ40. جرّب اسماً محدداً للمنهجية مثل SHAP أو YOLOv8، أو سنة، أو موضوعاً بحثياً."
+          : "I could not find a reliable match in the 40-work corpus. Try a specific method such as SHAP or YOLOv8, a year, or one of the six research themes.",
         [],
         { arabic: ar },
       );

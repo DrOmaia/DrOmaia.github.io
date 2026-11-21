@@ -1,6 +1,6 @@
 {
  "checked": "2026-09-26T09:16:54Z",
- "works_verified": 37,
+ "works_verified": 40,
  "openalex": {
   "cited_by_total": 174,
   "h_index": 6,
@@ -13,25 +13,25 @@
  },
  "latest": [
   {
-   "id": "P36",
-   "title": "Towards Trustworthy Defense AI: Real-Time Military Asset Detection with On-Demand Explainable YOLOv8",
+   "id": "P40",
+   "title": "From Generation to Verification: A Reproducible Empirical Study of Verification-Guided LLM Workflows for Software Engineering",
    "year": 2026,
-   "doi": "10.48084/etasr.17259",
-   "venue": "Engineering, Technology &amp; Applied Science Research"
+   "doi": "10.3390/computers15110825",
+   "venue": "Computers"
   },
   {
-   "id": "P37",
-   "title": "Phishing Detection Using CNN-RNN with Sparrow Search Optimization Algorithm",
+   "id": "P39",
+   "title": "Hybrid Deep Feature Fusion Framework with Maximum Entropy Based Selection for Accurate Diabetic Foot Ulcer Diagnosis from Enhanced and Segmented Medical Images",
    "year": 2026,
-   "doi": "10.1142/s1756973726400214",
-   "venue": "Journal of Multiscale Modelling"
+   "doi": "10.1038/s41598-026-74375-w",
+   "venue": "Scientific Reports"
   },
   {
-   "id": "P35",
-   "title": "XAI-Driven Decision Aid for Chronic Disease Progression",
-   "year": 2025,
-   "doi": "10.1109/dasa68193.2025.11498906",
-   "venue": "2025 International Conference on Decision Aid Sciences and Applications (DASA)"
+   "id": "P38",
+   "title": "Agentic Artificial Intelligence in Software Engineering: Integration Points, Architectural Frameworks, Empirical Evaluation, and Governance",
+   "year": 2026,
+   "doi": "10.14716/ijtech.v17i4.8380",
+   "venue": "International Journal of Technology"
   }
  ],
  "orcid_new": [
