@@ -18,6 +18,9 @@ images/icons. `/sat/` and `/isp/` are separate tools kept out of search engines 
 `/isp/` (IS Teaching Timetable) has its own documentation: [`isp/README.md`](isp/README.md), rules for editing it in
 [`isp/CLAUDE.md`](isp/CLAUDE.md), and its history in [`isp/CHANGELOG.md`](isp/CHANGELOG.md).
 
+`/admin/` is the owner's private dashboard for editing the site from the browser: see [`admin/README.md`](admin/README.md).
+Blocks marked `<!-- dash:NAME -->` in the two pages are rewritten by it; keep the markers when editing by hand.
+
 ## How the two languages work
 
 The English files are the source of truth. Arabic text lives next to the English text as attributes:

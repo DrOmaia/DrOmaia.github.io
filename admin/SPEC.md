@@ -48,6 +48,21 @@ strip numbers, latest block + `data/metrics.json` (`latest`, `works_verified`), 
 JSON-LD `dateModified`, `sitemap.xml` lastmod, then both Arabic pages.
 All user text is HTML-escaped on write and unescaped on read.
 
+Notes from the implementation (additions, nothing above changed):
+- `model.warnings` (Arabic) lists what `read` could not find (missing file or marker); `texts[]` items also carry `tag`.
+- A work may carry an optional `venue` (shown in the latest block; `fromCrossref` returns it too). It is stored in
+  `research-data.js` only when given. `doi` may be typed bare (`10.x/…`), as `doi:…` or as a link: `build` stores
+  `https://doi.org/…` (`DashLib.normalizeDoi`). Another address (a publisher PDF) is kept and shown as a plain link.
+- `FONTS` weights are arrays of numbers (`[400, 600, 700]`). `DashLib.counts(works)` gives the totals `build` uses.
+- Cards: a work that did not change keeps its existing card markup byte for byte; only new or edited works are
+  rendered from the template (35 of the 40 hand-checked cards equal the template exactly; the rest differ by layout or
+  by a note that lives only in the page). Citation text comes from `data/metrics.json` (`per_work`); a DOI with no row
+  there shows "Cited by 0 · Crossref".
+- Dates (cutoff phrases, "Profile last updated", JSON-LD `dateModified`, `sitemap.xml`) move only when works change.
+  Count phrases and numbers are matched with `\d+`, so a page that is out of step with the catalogue is repaired by the
+  next build; a phrase or marker that is not found gives an Arabic warning, never an exception.
+- `research-assistant.js` no longer holds numbers: it computes them from `window.RESEARCH_PORTFOLIO` at run time.
+
 ## Interface
 Tabs: الأبحاث · الأرقام والمستجدات · اللجان والأدوار · النصوص · المظهر · النشر.
 Repository `DrOmaia/DrOmaia.github.io`, branch `main`. Token: `localStorage['dash.token']` (or session only).

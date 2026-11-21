@@ -3,6 +3,55 @@
   if (!portfolio?.works?.length) return;
 
   const works = portfolio.works;
+
+  // Every count and the cutoff date are read from the catalogue (research-data.js), so they never fall out of step with it.
+  const meta = portfolio.meta || {};
+  const monthsEn = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const monthsAr = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+  const countType = (type) => works.filter((work) => work.type === type).length;
+  const countYears = (from, to) => works.filter((work) => work.year >= from && work.year <= to).length;
+  const stats = {
+    total: works.length,
+    journals: countType("Journal article"),
+    conferences: countType("Conference paper"),
+    chapters: countType("Book chapter"),
+    recent: countYears(2024, 2026),
+    in2025: countYears(2025, 2025),
+  };
+  const cutoff = (() => {
+    const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(meta.verificationCutoff || "");
+    const en = meta.verificationCutoffDisplay || (iso ? `${Number(iso[3])} ${monthsEn[Number(iso[2]) - 1]} ${iso[1]}` : "");
+    const ar = iso ? `${Number(iso[3])} ${monthsAr[Number(iso[2]) - 1]} ${iso[1]}` : en;
+    return { en, ar };
+  })();
+  const knownYears = [...new Set(works.map((work) => work.year))].sort((a, b) => a - b);
+  const latestYear = knownYears[knownYears.length - 1];
+  // A number written out for the start of an English sentence; digits above 99.
+  const numberWord = (n) => {
+    const small = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve",
+      "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+    const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+    if (!Number.isInteger(n) || n < 0 || n > 99) return String(n);
+    if (n < 20) return small[n];
+    return n % 10 ? `${tens[Math.floor(n / 10)]}-${small[n % 10].toLowerCase()}` : tens[Math.floor(n / 10)];
+  };
+  const text = {
+    header: (ar) => (ar
+      ? `موثق في ${stats.total} عملاً · تاريخ القطع ${cutoff.ar}`
+      : `Grounded in ${stats.total} verified works · cutoff ${cutoff.en}`),
+    source: (ar) => (ar
+      ? `المصدر: محفظة الأعمال الموثقة، تاريخ القطع ${cutoff.ar}.`
+      : `Source: verified portfolio corpus, cutoff ${cutoff.en}.`),
+    welcome: (ar) => (ar
+      ? `اسأل عن الأعمال الموثقة الـ${stats.total}، أو الموضوعات البحثية الستة، أو المنهجيات، أو المسار الزمني، أو مراجع APA، أو روابط DOI. أجيب من المحفظة الموثقة فقط.`
+      : `Ask about the ${stats.total} verified works, six research themes, methodologies, timeline, APA references, or DOI links. I answer only from the curated portfolio.`),
+    totals: (ar) => (ar
+      ? `تضم المحفظة ${stats.total} عملاً موثقاً: ${stats.journals} مقالة دورية، و${stats.conferences} ورقة مؤتمر، و${stats.chapters} فصول كتب. نُشر ${stats.recent} عملاً خلال 2024-2026، منها ${stats.in2025} عملاً في 2025.`
+      : `The portfolio contains ${stats.total} verified works: ${stats.journals} journal articles, ${stats.conferences} conference papers, and ${stats.chapters} book chapters. ${numberWord(stats.recent)} works appeared during 2024-2026, including ${stats.in2025} in 2025.`),
+    noMatch: (ar) => (ar
+      ? `لم أجد تطابقاً موثوقاً في الأعمال الـ${stats.total}. جرّب اسماً محدداً للمنهجية مثل SHAP أو YOLOv8، أو سنة، أو موضوعاً بحثياً.`
+      : `I could not find a reliable match in the ${stats.total}-work corpus. Try a specific method such as SHAP or YOLOv8, a year, or one of the six research themes.`),
+  };
   const isArabic = (text = "") => /[\u0600-\u06ff]/.test(text);
   const normalize = (value = "") =>
     value
@@ -72,7 +121,7 @@
       <span class="assistant-badge">OA</span>
       <span>
         <strong>Research Assistant</strong>
-        <small>Grounded in 40 verified works · cutoff 21 November 2026</small>
+        <small></small>
       </span>
       <button class="assistant-close" type="button" aria-label="Close">×</button>
     </div>
@@ -97,9 +146,7 @@
     panel.querySelector(".assistant-header strong").textContent = ar
       ? "اسأل عن أبحاثي"
       : "Ask about my research";
-    panel.querySelector(".assistant-header small").textContent = ar
-      ? "موثق في 40 عملاً · تاريخ القطع 21 نوفمبر 2026"
-      : "Grounded in 40 verified works · cutoff 21 November 2026";
+    panel.querySelector(".assistant-header small").textContent = text.header(ar);
     input.placeholder = ar
       ? "اسأل عن مجال أو منهجية أو سنة أو بحث…"
       : "Ask about a theme, method, year, or paper…";
@@ -183,25 +230,19 @@
 
     const source = document.createElement("span");
     source.className = "assistant-citation";
-    source.textContent = options.arabic
-      ? "المصدر: محفظة الأعمال الموثقة، تاريخ القطع 21 نوفمبر 2026."
-      : "Source: verified portfolio corpus, cutoff 21 November 2026.";
+    source.textContent = text.source(Boolean(options.arabic));
     box.append(source);
     messages.scrollTop = messages.scrollHeight;
   }
 
   function welcome() {
     const ar = document.documentElement.lang === "ar";
-    const box = addTextMessage(
-      ar
-        ? "اسأل عن الأعمال الموثقة الـ40، أو الموضوعات البحثية الستة، أو المنهجيات، أو المسار الزمني، أو مراجع APA، أو روابط DOI. أجيب من المحفظة الموثقة فقط."
-        : "Ask about the 40 verified works, six research themes, methodologies, timeline, APA references, or DOI links. I answer only from the curated portfolio.",
-    );
+    const box = addTextMessage(text.welcome(ar));
     const quick = document.createElement("div");
     quick.className = "assistant-quick";
     const prompts = ar
-      ? ["الموضوعات البحثية", "دراسات تستخدم SHAP", "أبحاث الذكاء الاصطناعي الصحي", "منشورات 2026"]
-      : ["Research themes", "Studies using SHAP", "Healthcare AI works", "2026 publications"];
+      ? ["الموضوعات البحثية", "دراسات تستخدم SHAP", "أبحاث الذكاء الاصطناعي الصحي", `منشورات ${latestYear}`]
+      : ["Research themes", "Studies using SHAP", "Healthcare AI works", `${latestYear} publications`];
     prompts.forEach((label) => {
       const button = document.createElement("button");
       button.type = "button";
@@ -246,13 +287,7 @@
     const wantsReference = /(apa|reference|citation|doi|مرجع|توثيق|استشهاد)/i.test(question);
 
     if (/(how many|count|total|كم|عدد)/.test(query)) {
-      addAnswer(
-        ar
-          ? "تضم المحفظة 40 عملاً موثقاً: 23 مقالة دورية، و13 ورقة مؤتمر، و4 فصول كتب. نُشر 28 عملاً خلال 2024-2026، منها 17 عملاً في 2025."
-          : "The portfolio contains 40 verified works: 23 journal articles, 13 conference papers, and 4 book chapters. Twenty-eight works appeared during 2024-2026, including 17 in 2025.",
-        [],
-        { arabic: ar },
-      );
+      addAnswer(text.totals(ar), [], { arabic: ar });
       return;
     }
 
@@ -279,7 +314,7 @@
     }
 
     let candidates = works;
-    const yearMatch = question.match(/\b(2011|2014|2017|2018|2019|2020|2023|2024|2025|2026)\b/);
+    const yearMatch = question.match(new RegExp(`\\b(${knownYears.join("|")})\\b`));
     if (yearMatch) {
       candidates = candidates.filter((work) => String(work.year) === yearMatch[1]);
     } else if (/(latest|newest|recent|احدث|الأحدث)/.test(query)) {
@@ -320,13 +355,7 @@
       .map(({ work }) => work);
 
     if (!scored.length) {
-      addAnswer(
-        ar
-          ? "لم أجد تطابقاً موثوقاً في الأعمال الـ40. جرّب اسماً محدداً للمنهجية مثل SHAP أو YOLOv8، أو سنة، أو موضوعاً بحثياً."
-          : "I could not find a reliable match in the 40-work corpus. Try a specific method such as SHAP or YOLOv8, a year, or one of the six research themes.",
-        [],
-        { arabic: ar },
-      );
+      addAnswer(text.noMatch(ar), [], { arabic: ar });
       return;
     }
 
