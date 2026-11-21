@@ -88,6 +88,13 @@
       <p>A free academic English course for Arabic speakers. Works offline, no account.</p>
       <span class="go">Open course →</span>
     </a>
+    <a class="card" href="/JavaPath/">
+      <span class="tag">2 levels · Java</span>
+      <h3>JavaPath</h3>
+      <div class="ar-line" lang="ar">تعلّم جافا: CS101 و CS102</div>
+      <p>Learn Java in two levels, CS101 and CS102: lessons, self-checking exercises, and a real Java compiler in the browser.</p>
+      <span class="go">Open course →</span>
+    </a>
   </div>
 
   <h2 class="sec">Dr. Omaia's site <span class="ar" lang="ar">الموقع الشخصي</span></h2>
@@ -102,14 +109,38 @@
 
 <script>
 (function () {
+  // dir: true means the rest of the typed path is kept after the corrected folder name.
   var KNOWN = [
-    { slug: "AI12", href: "/AI12/", label: "AI12 — AI for university teaching" },
-    { slug: "PYthon", href: "/PYthon/", label: "Py30 — Learn Python in 30 days", alias: ["py30", "python"] },
-    { slug: "JavaScript", href: "/JavaScript/", label: "JS30 — Learn JavaScript in 30 days", alias: ["js30", "js", "javascript"] },
-    { slug: "ENG30", href: "/ENG30/", label: "English in 30 Days", alias: ["eng", "english"] },
+    { slug: "AI12", href: "/AI12/", dir: true, label: "AI12 — AI for university teaching" },
+    { slug: "PYthon", href: "/PYthon/", dir: true, label: "Py30 — Learn Python in 30 days", alias: ["py30", "python"] },
+    { slug: "JavaScript", href: "/JavaScript/", dir: true, label: "JS30 — Learn JavaScript in 30 days", alias: ["js30", "js", "javascript"] },
+    { slug: "ENG30", href: "/ENG30/", dir: true, label: "English in 30 Days", alias: ["eng", "english"] },
+    { slug: "JavaPath", href: "/JavaPath/", dir: true, label: "JavaPath — Learn Java, CS101 & CS102", alias: ["java", "java-path"] },
     { slug: "publications", href: "/publications.html", label: "Publications / المنشورات", alias: ["publication", "papers"] },
-    { slug: "ar", href: "/ar/", label: "العربية" }
+    { slug: "ar", href: "/ar/", dir: true, label: "العربية" }
   ];
+
+  // GitHub Pages paths are case-sensitive (/python/ is a 404, /PYthon/ works).
+  // If the first folder matches a known name or alias in any letter case, go straight there.
+  // The target is only used when it differs from the current path, so a missing page
+  // inside a correct folder (e.g. /PYthon/nothing) shows this page instead of looping.
+  var segs = location.pathname.split("/");
+  var head = "";
+  try { head = decodeURIComponent(segs[1] || ""); } catch (e) { head = segs[1] || ""; }
+  head = head.replace(/\.html$/i, "").toLowerCase();
+  if (head) {
+    for (var i = 0; i < KNOWN.length; i++) {
+      var k = KNOWN[i];
+      var names = [k.slug].concat(k.alias || []).map(function (n) { return n.toLowerCase(); });
+      if (names.indexOf(head) === -1) continue;
+      var target = k.dir ? k.href + segs.slice(2).join("/") : k.href;
+      if (target !== location.pathname) {
+        location.replace(target + location.search + location.hash);
+        return;
+      }
+      break;
+    }
+  }
   function lev(a, b) {
     var m = [], i, j;
     for (i = 0; i <= a.length; i++) m[i] = [i];
