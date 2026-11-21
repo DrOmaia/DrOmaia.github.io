@@ -5,22 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <meta name="referrer" content="no-referrer">
-    <!-- The page may talk only to GitHub and Crossref, and runs no inline script. -->
+    <!-- The page may talk only to GitHub, Crossref and its own folder, and runs no inline script.
+         One directive per line so a single one is easy to adjust (worker-src is for the same-origin pdf.js worker). -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://dromaia.github.io; font-src https://fonts.gstatic.com https://dromaia.github.io; img-src 'self' data: https://dromaia.github.io; connect-src https://api.github.com https://api.crossref.org; frame-src 'self' about:; base-uri https://dromaia.github.io; form-action 'none'"
+      content="
+        default-src 'none';
+        script-src 'self';
+        worker-src 'self';
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://dromaia.github.io;
+        font-src https://fonts.gstatic.com https://dromaia.github.io;
+        img-src 'self' data: https://dromaia.github.io;
+        connect-src 'self' https://api.github.com https://api.crossref.org;
+        frame-src 'self' about:;
+        base-uri https://dromaia.github.io;
+        form-action 'none'
+      "
     >
     <title>لوحة التحكم بالموقع</title>
     <link rel="icon" href="../site-icon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="admin.css?v=20261121a">
+    <link rel="stylesheet" href="admin.css?v=20261121b">
   </head>
   <body>
     <div id="app">
-      <noscript><p class="boot">لوحة التحكم تحتاج JavaScript.</p></noscript>
-      <p class="boot">جارٍ التحميل…</p>
+      <noscript><p class="boot">لوحة التحكم تحتاج JavaScript. · The dashboard needs JavaScript.</p></noscript>
+      <p class="boot">…</p>
     </div>
-    <script src="lib.js?v=20261121a"></script>
-    <script src="github.js?v=20261121a"></script>
-    <script src="app.js?v=20261121a"></script>
+    <!-- cv.js before lib.js (the library calls it); cv.js and cvimport.js may be absent: their features are then hidden. -->
+    <script src="cv.js?v=20261121b"></script>
+    <script src="lib.js?v=20261121b"></script>
+    <script src="cvimport.js?v=20261121b"></script>
+    <script src="github.js?v=20261121b"></script>
+    <script src="app.js?v=20261121b"></script>
   </body>
 </html>

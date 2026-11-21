@@ -120,6 +120,26 @@ Custom sections are rendered entirely by the library inside their own `dash:sect
 classes (`wrap`, `section-head`, `kicker`, `grid3`, `card`) so they can be parsed back; Arabic via `data-ar`.
 Round trip on the current files must still return `files: {}`.
 
+**Library notes (as built; nothing in the contract above changed, these fill its gaps):**
+- `FONTS.head` ends with `{name:"body", system:true, same:true, label:{ar,en}}` = "same as the body text"
+  (`--font-head-en` then carries the English font). `fonts.head` missing in an old draft = keep the current one.
+- `model.theme` on read always carries the five main colours of both modes (of the palette in use), so a custom edit can
+  start from them. Custom: a `dark` equal to the site's own dark colours, or left out, writes no dark rule.
+  `DashLib.themeWarnings(theme)` gives the contrast warnings for a live preview; `build` adds them when the theme changes.
+- Sections: a custom section may come without `id` (the library assigns `custom-N`; `DashLib.nextSectionId(sections)`).
+  Leaving a custom section out of `model.sections` deletes it; a built-in one left out is kept. `model.nav[i].hidden` means
+  "hide this link although its section shows"; link text of a built-in section = its nav item (or a changed `section.title`).
+  Card `link`: `https://…`, a relative path such as `files/x.pdf`, `#id` or `mailto:`; other schemes are refused.
+- Also read (read-only helpers): `model.degrees = [{year,title,institution}]`, `model.theses = [text]`.
+- `model.citations` has one entry per work with a DOI (0 when unknown). Changed numbers are written as Crossref counts;
+  `data/metrics.json` Crossref totals and `checked` are recomputed.
+- `parseAchievements` returns the array of items; the same array carries `.items`, `.askMe`, `.numbers`, `.total`.
+  Each item also has `evidence`, `confidence` and `suggestKind` (`website | cv | both | skip | ""`).
+- CV module: `DashCV.build(model, cvHtml, {today, lang})` gets the model re-read from the files as they will be after
+  the build (plus `model.cv` from the dashboard and `model.today`). No `cv.html` among the files, or no module: skipped.
+- Optional: if `publications.html` gets a `<!-- dash:nav -->` block (one link per line), its links follow the home page
+  as `index.html#id`. Today it has none, so its header links do not change when sections are hidden or added.
+
 ## CV module (admin/cv.js, `window.DashCV` / module.exports) – owned by the CV agent
 ```js
 DashCV.read(cvHtml)  -> model.cv = { profile:{en}, pillars:[{title, text}], accepted:[{year, text}], selected:number (how many newest works to list, default 17),

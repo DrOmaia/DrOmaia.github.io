@@ -1,5 +1,6 @@
 /* Tests for admin/lib.js and for the run-time counts of research-assistant.js.
    Run from anywhere:  node admin/tests/lib.test.js      (plain Node, no packages; exit code 1 on failure)
+   DASH_CV=off node admin/tests/lib.test.js   runs the CV-module section as if admin/cv.js were not there.
    The tests read the real site files of this repository and never write to them. */
 "use strict";
 const fs = require("fs");
@@ -11,6 +12,10 @@ const { execFileSync } = require("child_process");
 const ROOT = path.resolve(__dirname, "..", "..");
 const L = require(path.join(ROOT, "admin", "lib.js"));
 const I = L._internal;
+// The CV page is another module (admin/cv.js). Everything below runs with it switched off, so the results do not
+// depend on it; the section "CV module" then tests the wiring with a stand-in and, when admin/cv.js and cv.html
+// exist, with the real module.
+I.setCV(null);
 
 let failed = 0, passed = 0, current = "";
 function section(name) { current = name; console.log("\n# " + name); }
@@ -33,7 +38,8 @@ function firstDiff(a, b) {
   return "at " + i + ": " + JSON.stringify(a.slice(Math.max(0, i - 60), i + 80)) + " <> " + JSON.stringify(b.slice(Math.max(0, i - 60), i + 80));
 }
 const read = (p) => fs.readFileSync(path.join(ROOT, p), "utf8");
-const loadFiles = () => { const f = {}; L.FILES.forEach((p) => { f[p] = read(p); }); return f; };
+// cv.html is written by the CV agent; the library must work with and without it
+const loadFiles = () => { const f = {}; L.FILES.forEach((p) => { if (fs.existsSync(path.join(ROOT, p))) f[p] = read(p); }); return f; };
 const overlay = (files, out) => Object.assign({}, files, out.files);
 const inner = (html, name) => I.findBlock(html, name).inner;
 const cardsOf = (html) => I.splitCards(inner(html, "dash:cards"));
@@ -59,11 +65,11 @@ const NEW_WORK = {
 
 /* ------------------------------------------------------------------ */
 section("API shape");
-eq(L.FILES, ["index.html", "publications.html", "research-data.js", "data/metrics.json", "sitemap.xml"], "FILES");
+eq(L.FILES, ["index.html", "publications.html", "research-data.js", "data/metrics.json", "sitemap.xml", "cv.html"], "FILES");
 eq(L.THEMES.length, 6, "six themes");
 eq(L.TYPES.map((t) => t.en), ["Journal article", "Conference paper", "Book chapter"], "types");
-eq(L.FONTS.ar.map((f) => f.name), ["Noto Naskh Arabic", "IBM Plex Sans Arabic", "Tajawal", "Cairo", "Noto Kufi Arabic", "Almarai", "Readex Pro", "Amiri"], "Arabic fonts");
-eq(L.FONTS.en.map((f) => f.name), ["Manrope", "Inter", "IBM Plex Sans", "Source Sans 3"], "English fonts");
+eq(L.FONTS.ar.slice(0, 8).map((f) => f.name), ["Noto Naskh Arabic", "IBM Plex Sans Arabic", "Tajawal", "Cairo", "Noto Kufi Arabic", "Almarai", "Readex Pro", "Amiri"], "the first eight Arabic fonts are the version 1 ones");
+eq(L.FONTS.en.slice(0, 4).map((f) => f.name), ["Manrope", "Inter", "IBM Plex Sans", "Source Sans 3"], "the first four English fonts are the version 1 ones");
 eq(L.FONTS.ar[2].weights, [400, 500, 700], "Tajawal weights");
 ["read", "build", "validate", "nextId", "fromCrossref", "buildArabic"].forEach((fn) => ok(typeof L[fn] === "function", fn + " is a function"));
 {
@@ -99,7 +105,7 @@ eq(model.metrics[0].auto, null, "other tiles are manual");
 ok(model.news.length >= 3 && /^\d{4}$/.test(model.news[0].year) && model.news[0].en && model.news[0].ar, "news items");
 ok(model.roles.some((r) => r.org === "Shaqra University" && r.orgAr === "جامعة شقراء"), "role with an Arabic organisation name");
 ok(model.roles.some((r) => r.org === "PSU" && r.orgAr === ""), "role without an Arabic organisation name");
-eq(model.fonts, { ar: "IBM Plex Sans Arabic", en: "Manrope" }, "fonts");
+eq(model.fonts, { ar: "IBM Plex Sans Arabic", en: "Manrope", head: "Georgia" }, "fonts");
 ok(model.texts.length > 100, "free texts listed (" + model.texts.length + ")");
 ok(model.texts.every((t) => t.id && (t.page === "index.html" || t.page === "publications.html")), "texts have id and page");
 eq(new Set(model.texts.map((t) => t.id)).size, model.texts.length, "text ids are unique");
@@ -358,16 +364,16 @@ section("news, roles and tiles change only the home page");
 section("fonts change both pages");
 {
   const m = JSON.parse(JSON.stringify(model));
-  m.fonts = { ar: "Tajawal", en: "Source Sans 3" };
+  m.fonts = { ar: "Tajawal", en: "Source Sans 3" }; // a version 1 draft: no heading font, the current one is kept
   const out = L.build(files, m, { today: TODAY });
   eq(sorted(Object.keys(out.files)), ["ar/index.html", "ar/publications.html", "index.html", "publications.html"], "changed files");
   const expected = '\n    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap">' +
-    '\n    <style>:root{--font-en:"Source Sans 3";--font-ar:"Tajawal";}</style>\n    ';
+    '\n    <style>:root{--font-en:"Source Sans 3";--font-ar:"Tajawal";--font-head-en:"Georgia";}</style>\n    ';
   eq(inner(out.files["index.html"], "dash:fonts"), expected, "fonts block (index.html)");
   eq(inner(out.files["publications.html"], "dash:fonts"), expected, "fonts block (publications.html)");
   ok(out.files["ar/index.html"].indexOf('--font-ar:"Tajawal"') > 0 && out.files["ar/publications.html"].indexOf('--font-ar:"Tajawal"') > 0, "Arabic pages carry the fonts");
   eq(out.files["index.html"].replace(expected, ""), files["index.html"].replace(inner(files["index.html"], "dash:fonts"), ""), "nothing else changed in index.html");
-  eq(L.read(overlay(files, out)).fonts, m.fonts, "fonts read back");
+  eq(L.read(overlay(files, out)).fonts, { ar: "Tajawal", en: "Source Sans 3", head: "Georgia" }, "fonts read back");
   ok(out.summary.length === 1 && out.summary[0].indexOf("Tajawal") > 0, "summary");
   eq(L.validate(Object.assign({}, m, { fonts: { ar: "Comic Sans", en: "Manrope" } })).length, 1, "an unknown font is rejected");
 }
@@ -612,6 +618,819 @@ section("research-assistant.js computes its numbers from the catalogue");
   const none = run(next, "en", "zzzzqqq");
   ok(none.text.indexOf("I could not find a reliable match in the 41-work corpus.") >= 0, "no-match sentence follows the count");
   ok(en.html.indexOf("<small></small>") > 0, "the panel template carries no number");
+}
+
+/* ================================================================== version 2 */
+const copy = (value) => JSON.parse(JSON.stringify(value));
+const changed = (out) => sorted(Object.keys(out.files));
+const HOME_ONLY = ["ar/index.html", "index.html"];
+const BOTH_PAGES = ["ar/index.html", "ar/publications.html", "index.html", "publications.html"];
+const noArabic = (list) => list.every((line) => !/[؀-ۿ]/.test(line.replace(/«[^»]*»|“[^”]*”/g, "")));
+function pythonArabic(index, pubs) {
+  // run tools/build-arabic.py on a temporary copy (never on the repository) and return its two pages, or null without python3
+  try { execFileSync("python3", ["--version"], { stdio: "ignore" }); } catch (e) { return null; }
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "dash2-"));
+  fs.mkdirSync(path.join(tmp, "tools"));
+  fs.copyFileSync(path.join(ROOT, "tools", "build-arabic.py"), path.join(tmp, "tools", "build-arabic.py"));
+  fs.writeFileSync(path.join(tmp, "index.html"), index);
+  fs.writeFileSync(path.join(tmp, "publications.html"), pubs);
+  execFileSync("python3", [path.join(tmp, "tools", "build-arabic.py")], { stdio: "ignore" });
+  const res = { index: fs.readFileSync(path.join(tmp, "ar", "index.html"), "utf8"), pubs: fs.readFileSync(path.join(tmp, "ar", "publications.html"), "utf8") };
+  fs.rmSync(tmp, { recursive: true, force: true });
+  return res;
+}
+
+section("v2: API shape");
+ok(L.FONTS.ar.length >= 16, "at least 16 Arabic fonts (" + L.FONTS.ar.length + ")");
+ok(L.FONTS.en.length >= 12, "at least 12 English fonts (" + L.FONTS.en.length + ")");
+eq(L.FONTS.head.map((f) => f.name), ["Georgia", "Playfair Display", "Merriweather", "Lora", "Source Serif 4", "body"], "heading fonts");
+ok(L.FONTS.head[0].system === true && L.FONTS.head[5].system === true && L.FONTS.head[5].same === true && L.FONTS.head[5].label.ar && L.FONTS.head[5].label.en, "Georgia and 'same as body' are system entries");
+["ar", "en", "head"].forEach((kind) => {
+  const names = L.FONTS[kind].map((f) => f.name);
+  eq(new Set(names).size, names.length, "font names are unique (" + kind + ")");
+  ok(L.FONTS[kind].every((f) => Array.isArray(f.weights) && (f.system || (f.weights.length > 0 && f.weights.every((w) => w >= 100 && w <= 900 && w % 100 === 0)))), "weights are listed (" + kind + ")");
+  ok(L.FONTS[kind].every((f) => /^[A-Za-z0-9 ]+$/.test(f.name)), "plain family names (" + kind + ")");
+});
+eq(L.PALETTES.map((p) => p.id), ["default", "sage", "slate", "rose", "ink", "teal"], "six palettes");
+ok(L.PALETTES.every((p) => p.ar && p.en && ["light", "dark"].every((m) => ["bg", "surface", "surface2", "text", "muted", "line", "accent", "link", "green"].every((k) => typeof p[m][k] === "string" && p[m][k]))), "each palette has every colour for both modes");
+["setLang", "contrast", "parseAchievements", "themeWarnings", "nextSectionId"].forEach((fn) => ok(typeof L[fn] === "function", fn + " is a function"));
+eq(Object.keys(model).filter((k) => ["theme", "sections", "nav", "flagship", "courses", "timeline", "timelineEarlier", "photoVersion", "citations", "degrees", "theses"].indexOf(k) >= 0).length, 11, "read() returns the version 2 parts");
+eq(L.validate(model), [], "the model read from the site is valid");
+ok(!("cv" in model), "no model.cv while the CV module is off");
+
+section("v2: fonts with a heading font");
+{
+  const m = copy(model);
+  m.fonts = { ar: "Cairo", en: "Poppins", head: "Playfair Display" };
+  const out = L.build(files, m, { today: TODAY });
+  eq(changed(out), BOTH_PAGES, "changed files");
+  const expected = '\n    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Cairo:wght@400;600;700&family=Playfair+Display:wght@400;700&display=swap">' +
+    '\n    <style>:root{--font-en:"Poppins";--font-ar:"Cairo";--font-head-en:"Playfair Display";}</style>\n    ';
+  eq(inner(out.files["index.html"], "dash:fonts"), expected, "fonts block (index.html)");
+  eq(inner(out.files["publications.html"], "dash:fonts"), expected, "fonts block (publications.html)");
+  eq(L.read(overlay(files, out)).fonts, m.fonts, "fonts read back");
+  ok(out.summary.length === 1 && out.summary[0].indexOf("Playfair Display") > 0 && out.summary[0].indexOf("Cairo") > 0, "summary names the three fonts");
+  eq(changed(L.build(overlay(files, out), L.read(overlay(files, out)), { today: TODAY })), [], "stable after reading back");
+  // same as the body text: the variable carries the English font and nothing extra is requested
+  const m2 = copy(model);
+  m2.fonts = { ar: "Vazirmatn", en: "DM Sans", head: "body" };
+  const out2 = L.build(files, m2, { today: TODAY });
+  eq(inner(out2.files["index.html"], "dash:fonts"), '\n    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Vazirmatn:wght@400;600;700&display=swap">' +
+    '\n    <style>:root{--font-en:"DM Sans";--font-ar:"Vazirmatn";--font-head-en:"DM Sans";}</style>\n    ', "'same as body' block");
+  eq(L.read(overlay(files, out2)).fonts, m2.fonts, "'same as body' reads back as body");
+  ok(out2.summary[0].indexOf("مثل خط النص") > 0, "summary names 'same as body'");
+  // Georgia is a system font: it is never requested
+  ok(inner(files["index.html"], "dash:fonts").indexOf("Georgia:") < 0 && I.renderFonts({ ar: "Amiri", en: "Lato", head: "Georgia" }).indexOf("family=Georgia") < 0, "system fonts are not requested from Google Fonts");
+  eq(I.renderFonts({ ar: "Amiri", en: "Lato", head: "Georgia" }).indexOf("family=Lato:wght@400;700&family=Amiri:wght@400;700&display=swap") > 0, true, "weights follow each family");
+  eq(L.validate(Object.assign({}, m, { fonts: { ar: "Cairo", en: "Poppins", head: "Papyrus" } })).length, 1, "an unknown heading font is rejected");
+  eq(L.validate(Object.assign({}, m, { fonts: { ar: "Cairo", en: "Poppins" } })), [], "a draft without a heading font is still valid");
+  L.FONTS.ar.concat(L.FONTS.en).forEach((f) => {
+    const kind = L.FONTS.ar.indexOf(f) >= 0 ? "ar" : "en";
+    const block = I.renderFonts(kind === "ar" ? { ar: f.name, en: "Manrope", head: "Georgia" } : { ar: "Cairo", en: f.name, head: "Georgia" });
+    ok(block.indexOf("family=" + f.name.replace(/ /g, "+") + ":wght@" + f.weights.join(";")) > 0, "link for " + f.name);
+  });
+}
+
+section("v2: colours");
+{
+  eq(L.contrast("#000000", "#ffffff"), 21, "contrast black on white");
+  eq(L.contrast("#fff", "#FFFFFF"), 1, "contrast of equal colours, short and long hex");
+  ok(Math.abs(L.contrast("#777777", "#ffffff") - 4.48) < 0.01, "contrast of #777 on white");
+  ok(isNaN(L.contrast("red", "#fff")), "contrast of an invalid colour is NaN");
+  eq(model.theme, { palette: "default", light: { bg: "#f6f3ec", surface: "#fffdf8", text: "#22303b", accent: "#7a5a12", link: "#2c6aa6" },
+    dark: { bg: "#111a24", surface: "#18232f", text: "#dfe5ea", accent: "#d8b45b", link: "#68a9ff" } }, "default theme read from the empty block");
+  ["index.html", "publications.html"].forEach((page) => ok(I.renderTheme(I.parseTheme(files[page])) === inner(files[page], "dash:theme"), "theme block reproduced (" + page + ")"));
+  L.PALETTES.forEach((p) => {
+    eq(L.themeWarnings({ palette: p.id }), [], "palette " + p.id + " has no contrast warning");
+    ["light", "dark"].forEach((mode) => ok(L.contrast(p[mode].text, p[mode].bg) >= 7 && L.contrast(p[mode].accent, p[mode].bg) >= 4.5 && L.contrast(p[mode].link, p[mode].bg) >= 4.5 && L.contrast(p[mode].muted, p[mode].bg) >= 4.5, "palette " + p.id + " is readable in " + mode + " mode"));
+  });
+  // a preset palette
+  const m = copy(model);
+  m.theme = { palette: "sage" };
+  const out = L.build(files, m, { today: TODAY });
+  eq(changed(out), BOTH_PAGES, "a palette changes both pages");
+  eq(out.warnings, [], "no warnings");
+  ok(out.summary.length === 1 && out.summary[0].indexOf("أخضر زيتي") > 0, "summary names the palette");
+  const block = inner(out.files["index.html"], "dash:theme");
+  eq(inner(out.files["publications.html"], "dash:theme"), block, "the same block text on both pages");
+  const sage = L.PALETTES[1];
+  ok(block.indexOf('\n    <style>/*dash-theme:{"palette":"sage"}*/html:root[data-theme="light"]{--bg:' + sage.light.bg + ";--surface:" + sage.light.surface + ";--surface2:" + sage.light.surface2 + ";--surface-2:" + sage.light.surface2 + ";--text:" + sage.light.text) === 0, "light rule starts the block, with both surface names");
+  ok(block.indexOf("--gold:" + sage.light.accent + ";--accent:" + sage.light.accent + ";--accent-strong:" + sage.light.accent + ";--amber:" + sage.light.accent + ";--accent-text:#ffffff;--blue:" + sage.light.link + ";--green:" + sage.light.green + ";}") > 0, "accent under every name the two pages use");
+  ok(block.indexOf('html:root[data-theme="dark"]{--bg:' + sage.dark.bg) > 0 && block.indexOf("--accent-text:#10151a;") > 0, "dark rule with dark text on the accent");
+  ok(/<\/style>\n    $/.test(block) && (block.match(/<style>/g) || []).length === 1, "one <style> element");
+  eq(out.files["index.html"].replace(block, ""), files["index.html"].replace(inner(files["index.html"], "dash:theme"), ""), "nothing else changed in index.html");
+  eq(out.files["publications.html"].replace(block, ""), files["publications.html"].replace(inner(files["publications.html"], "dash:theme"), ""), "nothing else changed in publications.html");
+  ok(out.files["ar/index.html"].indexOf(block) > 0 && out.files["ar/publications.html"].indexOf(block) > 0, "Arabic pages carry the block");
+  const back = L.read(overlay(files, out));
+  eq(back.theme, { palette: "sage", light: { bg: sage.light.bg, surface: sage.light.surface, text: sage.light.text, accent: sage.light.accent, link: sage.light.link },
+    dark: { bg: sage.dark.bg, surface: sage.dark.surface, text: sage.dark.text, accent: sage.dark.accent, link: sage.dark.link } }, "palette reads back with its five main colours");
+  eq(changed(L.build(overlay(files, out), back, { today: TODAY })), [], "stable after reading back");
+  const reset = L.build(overlay(files, out), Object.assign(copy(back), { theme: { palette: "default" } }), { today: TODAY });
+  ok(reset.files["index.html"] === files["index.html"] && reset.files["publications.html"] === files["publications.html"], "back to the default palette restores the pages byte for byte");
+  // custom colours, light only
+  const c1 = copy(model);
+  c1.theme = { palette: "custom", light: { bg: "#FFFFFF", surface: "#fff", text: "#222", accent: "#0A5C36", link: "#0b57d0" } };
+  const outC = L.build(files, c1, { today: TODAY });
+  const blockC = inner(outC.files["index.html"], "dash:theme");
+  ok(blockC.indexOf('/*dash-theme:{"palette":"custom","light":{"bg":"#ffffff","surface":"#ffffff","text":"#222222","accent":"#0a5c36","link":"#0b57d0"}}*/') > 0, "custom colours are normalised and recorded");
+  ok(blockC.indexOf('html:root[data-theme="light"]{--bg:#ffffff;--surface:#ffffff;--surface2:') > 0 && blockC.indexOf("--line:rgba(34, 34, 34, 0.13);") > 0 && /--muted:#[0-9a-f]{6};/.test(blockC), "the remaining variables are derived");
+  ok(blockC.indexOf('data-theme="dark"') < 0, "no dark rule when no dark colours are given");
+  eq(outC.warnings, [], "readable custom colours give no warning");
+  ok(outC.summary[0].indexOf("ألوان خاصة") > 0, "summary says custom colours");
+  const backC = L.read(overlay(files, outC));
+  eq(backC.theme, { palette: "custom", light: { bg: "#ffffff", surface: "#ffffff", text: "#222222", accent: "#0a5c36", link: "#0b57d0" }, dark: model.theme.dark }, "custom theme reads back (dark = the site's own)");
+  eq(changed(L.build(overlay(files, outC), backC, { today: TODAY })), [], "custom theme is stable after reading back");
+  // custom colours for both modes
+  const c2 = copy(model);
+  c2.theme = { palette: "custom", light: c1.theme.light, dark: { bg: "#101010", surface: "#1a1a1a", text: "#eeeeee", accent: "#ffd166", link: "#8ecae6" } };
+  const outD = L.build(files, c2, { today: TODAY });
+  const blockD = inner(outD.files["publications.html"], "dash:theme");
+  ok(blockD.indexOf('html:root[data-theme="dark"]{--bg:#101010;--surface:#1a1a1a;') > 0 && blockD.indexOf("--accent:#ffd166;") > 0 && blockD.indexOf("--line:rgba(238, 238, 238, 0.1);") > 0, "dark rule from the owner's dark colours");
+  eq(L.read(overlay(files, outD)).theme.dark, c2.theme.dark, "dark colours read back");
+  eq(changed(L.build(overlay(files, outD), L.read(overlay(files, outD)), { today: TODAY })), [], "stable after reading back (both modes)");
+  // low contrast
+  const c3 = copy(model);
+  c3.theme = { palette: "custom", light: { bg: "#ffffff", surface: "#ffffff", text: "#9a9a9a", accent: "#f2c94c", link: "#0b57d0" } };
+  const outL = L.build(files, c3, { today: TODAY });
+  eq(outL.warnings.length, 3, "three contrast warnings: text, accent, button text");
+  ok(outL.warnings.every((w) => w.indexOf("4.5") > 0 && w.indexOf("الوضع الفاتح") > 0), "warnings name the mode and the 4.5 threshold");
+  eq(L.themeWarnings(c3.theme), outL.warnings, "themeWarnings gives the same list for a live preview");
+  eq(changed(outL), BOTH_PAGES, "low contrast warns but still builds");
+  // validation
+  eq(L.validate(Object.assign(copy(model), { theme: { palette: "custom", light: { bg: "white", text: "#12" } } })).length, 2, "invalid colours are rejected");
+  eq(L.validate(Object.assign(copy(model), { theme: { palette: "neon" } })).length, 1, "an unknown palette is rejected");
+  eq(L.validate(Object.assign(copy(model), { theme: { palette: "custom", light: { bg: "#abc" }, dark: {} } })), [], "partial custom colours are valid");
+  // a missing block is reported, never thrown
+  const noBlock = Object.assign({}, files, { "publications.html": files["publications.html"].replace("<!-- dash:theme -->", "<!-- x -->") });
+  const outN = L.build(noBlock, m, { today: TODAY });
+  ok(outN.warnings.some((w) => w.indexOf("dash:theme") > 0 && w.indexOf("publications.html") > 0) && outN.files["index.html"] && !outN.files["publications.html"], "missing theme marker: warning, other page still updated");
+}
+
+section("v2: sections and navigation");
+{
+  const idx = files["index.html"];
+  eq(model.sections.map((s) => s.id), ["leadership", "research", "teaching", "experience", "contact"], "sections in page order");
+  ok(model.sections.every((s) => s.hidden === false && s.custom === false && s.title.en && s.title.ar), "built-in sections: shown, not custom, titled");
+  eq(model.sections[3].title, { en: "Career", ar: "المسيرة" }, "a section's title is its navigation label");
+  eq(model.nav.map((n) => n.href), ["#leadership", "#research", "publications.html", "#teaching", "#experience", "#contact"], "nav links");
+  ok(I.renderNav(model.nav) === inner(idx, "dash:nav"), "nav block reproduced");
+  ok(I.renderNav(I.composeNav(model.sections, model.nav, model.sections)) === inner(idx, "dash:nav"), "nav composed from the sections equals the block");
+  const texts0 = model.texts.length;
+
+  // hide
+  const m = copy(model);
+  m.sections[2].hidden = true; // teaching
+  const out = L.build(files, m, { today: TODAY });
+  eq(changed(out), BOTH_PAGES, "hiding a section changes the home page and the catalogue header");
+  eq(out.warnings, [], "no warnings");
+  const h = out.files["index.html"];
+  ok(h.indexOf('<!-- dash:section teaching -->\n<section id="teaching" hidden>\n') > 0, "the section carries the hidden attribute");
+  ok(inner(h, "dash:nav").indexOf('<a data-ar="التدريس" href="#teaching" hidden>Teaching</a>') > 0, "its link is hidden too");
+  eq(h.replace('<section id="teaching" hidden>', '<section id="teaching">').replace('href="#teaching" hidden>', 'href="#teaching">'), idx, "nothing else changed: the section's markup is all there");
+  ok(out.files["ar/index.html"].indexOf('<section id="teaching" hidden>') > 0 && out.files["ar/index.html"].indexOf('<a href="#teaching" hidden>التدريس</a>') > 0, "Arabic page hides both");
+  ok(out.summary.some((s) => s.indexOf("أُخفي قسم") === 0 && s.indexOf("التدريس") > 0), "summary: section hidden");
+  const backH = L.read(overlay(files, out));
+  eq(backH.sections[2], { id: "teaching", title: { en: "Teaching", ar: "التدريس" }, hidden: true, custom: false }, "hidden section reads back");
+  eq(backH.nav[3].hidden, false, "the link is not marked hidden on its own account");
+  eq(backH.texts.length, texts0, "texts of a hidden section stay editable");
+  eq(changed(L.build(overlay(files, out), backH, { today: TODAY })), [], "stable after reading back");
+  const shown = copy(backH);
+  shown.sections[2].hidden = false;
+  const outS = L.build(overlay(files, out), shown, { today: TODAY });
+  ok(outS.files["index.html"] === idx, "showing it again restores the page byte for byte");
+  ok(outS.summary.some((s) => s.indexOf("أُظهر قسم") === 0), "summary: section shown");
+  // a hidden section that the page still links to
+  const mL = copy(model);
+  mL.sections[0].hidden = true;
+  const outLd = L.build(files, mL, { today: TODAY });
+  ok(outLd.warnings.length === 1 && outLd.warnings[0].indexOf("القيادة") > 0, "warning: a button still points to the hidden section");
+
+  // reorder
+  const r = copy(model);
+  r.sections = [r.sections[3], r.sections[1], r.sections[2], r.sections[4], r.sections[0]]; // experience, research, teaching, contact, leadership
+  const outR = L.build(files, r, { today: TODAY });
+  eq(changed(outR), BOTH_PAGES, "reordering changes the home page and the catalogue header");
+  const ri = outR.files["index.html"];
+  eq(I.sectionUnits(ri).map((u) => u.id), ["experience", "research", "teaching", "contact", "leadership"], "sections in the new order");
+  const unitsBefore = {}, unitsAfter = {};
+  I.sectionUnits(idx).forEach((u) => { unitsBefore[u.id] = u.text; });
+  I.sectionUnits(ri).forEach((u) => { unitsAfter[u.id] = u.text; });
+  ok(Object.keys(unitsBefore).length === 5 && Object.keys(unitsBefore).every((id) => unitsAfter[id] === unitsBefore[id]), "every section's markup is unchanged");
+  eq(ri.length, idx.length, "the page has the same length");
+  ok(ri.indexOf("</section><!-- dash:section experience -->\n<section id=\"experience\">") > 0 && ri.indexOf("<!-- /dash:section leadership -->\n</main>") > 0, "the block of sections sits where it was");
+  eq(I.parseNavLines(I.blockLines(ri, "dash:nav")).map((n) => n.href), ["#experience", "#research", "publications.html", "#teaching", "#contact", "#leadership"], "nav follows the sections; Publications keeps its slot");
+  ok(outR.summary.some((s) => s.indexOf("ترتيب الأقسام") > 0), "summary: order changed");
+  const backR = L.read(overlay(files, outR));
+  eq(backR.sections.map((s) => s.id), ["experience", "research", "teaching", "contact", "leadership"], "order reads back");
+  eq(changed(L.build(overlay(files, outR), backR, { today: TODAY })), [], "stable after reading back");
+  const restore = copy(backR);
+  restore.sections = ["leadership", "research", "teaching", "experience", "contact"].map((id) => restore.sections.filter((s) => s.id === id)[0]);
+  ok(L.build(overlay(files, outR), restore, { today: TODAY }).files["index.html"] === idx, "the original order restores the page byte for byte");
+  const py = pythonArabic(ri, files["publications.html"]);
+  if (py) ok(py.index === outR.files["ar/index.html"], "python builds the same Arabic page for the reordered site");
+
+  // nav only
+  const n = copy(model);
+  n.nav[2].hidden = true;           // hide Publications
+  n.nav[0].en = "Lead"; n.nav[0].ar = "قيادة";
+  const outN = L.build(files, n, { today: TODAY });
+  const navN = I.blockLines(outN.files["index.html"], "dash:nav");
+  eq(navN[0], '<a data-ar="قيادة" href="#leadership">Lead</a>', "nav text edited");
+  eq(navN[2], '<a data-ar="المنشورات" href="publications.html" hidden>Publications</a>', "a link hidden on its own");
+  eq(I.sectionUnits(outN.files["index.html"]).map((u) => u.text).join(""), I.sectionUnits(idx).map((u) => u.text).join(""), "sections untouched");
+  const backN = L.read(overlay(files, outN));
+  ok(backN.nav[2].hidden === true && backN.sections[0].title.en === "Lead" && backN.sections[0].title.ar === "قيادة", "nav edits read back");
+  eq(out.summary.length >= 1 && outN.summary, ["حُدّثت روابط التنقل."], "summary: navigation updated");
+  // retitle a built-in section through its title
+  const t = copy(model);
+  t.sections[1].title = { en: "Studies", ar: "دراسات" };
+  eq(I.blockLines(L.build(files, t, { today: TODAY }).files["index.html"], "dash:nav")[1], '<a data-ar="دراسات" href="#research">Studies</a>', "a section title edits its link");
+  // a model that forgets a built-in section, or names an unknown one
+  const f = copy(model);
+  f.sections = f.sections.filter((s) => s.id !== "research").concat([{ id: "ghost", hidden: false }]);
+  const outF = L.build(files, f, { today: TODAY });
+  eq(I.sectionUnits(outF.files["index.html"]).map((u) => u.id), ["leadership", "teaching", "experience", "contact", "research"], "a built-in section missing from the model is kept (at the end)");
+  ok(outF.files["index.html"].indexOf('<section id="research">') > 0 && outF.warnings.some((w) => w.indexOf("ghost") > 0), "nothing deleted; unknown id reported");
+}
+
+section("v2: the catalogue page's own navigation (optional dash:nav block)");
+{
+  const marked = files;
+  ok(!!I.findBlock(files["publications.html"], "dash:nav"), "publications.html has its dash:nav block");
+  // the same page without the block (as it was before): its header links are left alone
+  const navLine = /(<nav aria-label="Primary navigation"[^>]*>)([\s\S]*?)(<\/nav>)/.exec(files["publications.html"]);
+  const links = navLine[2].match(/<a [^>]*>[^<]*<\/a>/g);
+  eq(links.length, 6, "(six links in its header)");
+  const plain = Object.assign({}, files, { "publications.html": files["publications.html"].replace(navLine[0], navLine[1] + links.join("") + navLine[3]) });
+  const mp = copy(L.read(plain));
+  mp.sections[2].hidden = true;
+  eq(changed(L.build(plain, mp, { today: TODAY })), HOME_ONLY, "without the block the catalogue page is not touched");
+  eq(changed(L.build(marked, L.read(marked), { today: TODAY })), [], "with the block: an unchanged model changes nothing");
+  const m2 = copy(L.read(marked));
+  m2.sections[2].hidden = true;
+  m2.sections.splice(1, 0, { custom: true, title: { en: "Awards", ar: "الجوائز" }, cards: [] });
+  const out = L.build(marked, m2, { today: TODAY });
+  eq(changed(out), BOTH_PAGES, "with the block: both pages follow");
+  eq(I.blockLines(out.files["publications.html"], "dash:nav"), [
+    '<a data-ar="القيادة" href="index.html#leadership">Leadership</a>',
+    '<a data-ar="الجوائز" href="index.html#custom-1">Awards</a>',
+    '<a aria-current="page" class="active" data-ar="المنشورات" href="publications.html">Publications</a>',
+    '<a data-ar="البحث" href="index.html#research">Research</a>',
+    '<a data-ar="التدريس" href="index.html#teaching" hidden>Teaching</a>',
+    '<a data-ar="المسيرة" href="index.html#experience">Career</a>',
+    '<a data-ar="تواصل" href="index.html#contact">Contact</a>',
+  ], "catalogue links: index.html#id, the active link keeps its attributes");
+  ok(out.files["ar/publications.html"].indexOf('<a href="index.html#custom-1">الجوائز</a>') > 0, "Arabic catalogue page follows");
+  const site = overlay(marked, out);
+  eq(changed(L.build(site, L.read(site), { today: TODAY })), [], "stable after reading back");
+}
+
+section("v2: custom sections");
+{
+  const idx = files["index.html"];
+  const custom = {
+    custom: true, hidden: false,
+    title: { en: 'Awards & "Honours"', ar: "الجوائز" }, kicker: { en: "Recognition", ar: "تقدير" }, intro: { en: "Selected <awards>.", ar: "جوائز مختارة." },
+    cards: [
+      { title: { en: "Best Paper", ar: "أفضل ورقة" }, text: { en: "DASA 2025", ar: "" }, link: "https://example.org/a?b=1&c=2" },
+      { title: { en: "Certificate", ar: "" }, text: { en: "", ar: "" }, link: "files/cert.pdf" },
+      { title: { en: "Plain card", ar: "بطاقة" }, text: { en: "No link here", ar: "بلا رابط" }, link: "" },
+    ],
+  };
+  const m = copy(model);
+  m.sections.splice(2, 0, copy(custom)); // after research
+  eq(L.validate(m), [], "valid model");
+  const out = L.build(files, m, { today: TODAY });
+  eq(changed(out), BOTH_PAGES, "a custom section changes the home page and the catalogue header");
+  eq(out.warnings, [], "no warnings");
+  const h = out.files["index.html"];
+  const expected = [
+    "<!-- dash:section custom-1 -->",
+    '<section id="custom-1" class="custom-section">',
+    '<div class="wrap">',
+    '<div class="section-head"><div><span class="kicker" data-ar="تقدير">Recognition</span><h2 data-ar="الجوائز">Awards &amp; "Honours"</h2></div>',
+    '<p data-ar="جوائز مختارة.">Selected &lt;awards&gt;.</p></div>',
+    '<div class="grid3">',
+    '<article class="card"><h3 data-ar="أفضل ورقة">Best Paper</h3><p>DASA 2025</p><a class="featured-link" data-ar="المزيد ↗" href="https://example.org/a?b=1&amp;c=2" target="_blank" rel="noopener">More ↗</a></article>',
+    '<article class="card"><h3>Certificate</h3><a class="featured-link" data-ar="المزيد ↗" href="files/cert.pdf">More ↗</a></article>',
+    '<article class="card"><h3 data-ar="بطاقة">Plain card</h3><p data-ar="بلا رابط">No link here</p></article>',
+    "</div>", "</div>", "</section>", "<!-- /dash:section custom-1 -->",
+  ].join("\n");
+  eq(I.sectionUnits(h).map((u) => u.id), ["leadership", "research", "custom-1", "teaching", "experience", "contact"], "placed after research with the id custom-1");
+  eq(I.sectionUnits(h)[2].text, expected, "custom section markup");
+  ok(h.indexOf("<!-- /dash:section research -->\n<!-- dash:section custom-1 -->") > 0 && h.indexOf("<!-- /dash:section custom-1 -->\n<!-- dash:section teaching -->") > 0, "one line break between sections");
+  eq(I.blockLines(h, "dash:nav")[3], '<a data-ar="الجوائز" href="#custom-1">Awards &amp; "Honours"</a>', "nav link added after Publications");
+  eq(I.parseNavLines(I.blockLines(h, "dash:nav")).map((n) => n.href), ["#leadership", "#research", "publications.html", "#custom-1", "#teaching", "#experience", "#contact"], "nav order");
+  const ar = out.files["ar/index.html"];
+  ok(ar.indexOf('<h2>الجوائز</h2>') > 0 && ar.indexOf('<p>جوائز مختارة.</p>') > 0 && ar.indexOf('href="../files/cert.pdf">المزيد ↗</a>') > 0 && ar.indexOf('<a href="#custom-1">الجوائز</a>') > 0, "Arabic page: Arabic texts, relative link one folder up");
+  ok(ar === L.buildArabic("index.html", h), "Arabic page rebuilt from the new page");
+  const py = pythonArabic(h, files["publications.html"]);
+  if (py) ok(py.index === ar, "python builds the same Arabic page");
+  ok(out.summary.some((s) => s.indexOf("أُضيف قسم جديد") === 0 && s.indexOf("الجوائز") > 0), "summary: new section");
+  const back = L.read(overlay(files, out));
+  eq(back.sections[2], Object.assign({ id: "custom-1" }, { title: custom.title, hidden: false, custom: true, kicker: custom.kicker, intro: custom.intro, cards: custom.cards }), "custom section reads back");
+  eq(back.nav[3], { href: "#custom-1", en: 'Awards & "Honours"', ar: "الجوائز", hidden: false }, "its nav link reads back");
+  eq(back.texts.length, model.texts.length, "texts of a custom section are not listed as free texts");
+  eq(back.warnings, [], "no read warnings");
+  eq(changed(L.build(overlay(files, out), back, { today: TODAY })), [], "stable after reading back");
+  // edit, hide, second section, delete
+  const site1 = overlay(files, out);
+  const e = copy(back);
+  e.sections[2].cards[0].text.en = "DASA 2025, Bahrain";
+  e.sections[2].hidden = true;
+  e.sections.push({ custom: true, title: { en: "Projects", ar: "" }, cards: [] });
+  const outE = L.build(site1, e, { today: TODAY });
+  const he = outE.files["index.html"];
+  ok(he.indexOf('<section id="custom-1" class="custom-section" hidden>') > 0 && he.indexOf("<p>DASA 2025, Bahrain</p>") > 0, "edited and hidden");
+  ok(he.indexOf('<a data-ar="الجوائز" href="#custom-1" hidden>') > 0, "hidden custom section hides its link");
+  eq(I.sectionUnits(he).map((u) => u.id).slice(-2), ["contact", "custom-2"], "the second custom section gets custom-2");
+  ok(I.sectionUnits(he)[6].text.indexOf('<div class="section-head"><div><h2>Projects</h2></div></div>\n<div class="grid3">\n</div>') > 0, "a section with only a title");
+  ok(outE.summary.some((s) => s.indexOf("عُدّل القسم") === 0) && outE.summary.some((s) => s.indexOf("أُخفي قسم") === 0) && outE.summary.some((s) => s.indexOf("أُضيف قسم جديد") === 0), "summary: edited, hidden, added");
+  const backE = L.read(overlay(site1, outE));
+  ok(backE.sections[2].hidden === true && backE.sections[2].cards[0].text.en === "DASA 2025, Bahrain" && backE.sections[6].id === "custom-2" && backE.sections[6].title.en === "Projects" && backE.sections[6].cards.length === 0, "reads back");
+  eq(L.nextSectionId(backE.sections), "custom-3", "nextSectionId");
+  eq(changed(L.build(overlay(site1, outE), backE, { today: TODAY })), [], "stable after reading back");
+  const d = copy(backE);
+  d.sections = d.sections.filter((s) => !s.custom);
+  const outD = L.build(overlay(site1, outE), d, { today: TODAY });
+  ok(outD.files["index.html"] === idx, "deleting the custom sections restores the page byte for byte");
+  eq(outD.summary.filter((s) => s.indexOf("حُذف القسم") === 0).length, 2, "summary: two sections deleted");
+  // links are checked
+  const bad = copy(model);
+  bad.sections.push({ custom: true, title: { en: "X", ar: "" }, cards: [{ title: { en: "Y", ar: "" }, text: { en: "", ar: "" }, link: "javascript:alert(1)" }, { title: { en: "", ar: "" }, link: "a b" }] });
+  eq(L.validate(bad).length, 3, "validate: script link, missing card title, link with a space");
+  ok(L.build(files, bad, { today: TODAY }).files["index.html"].indexOf("javascript:") < 0, "a script link is never written");
+  eq(L.validate(Object.assign(copy(model), { sections: model.sections.concat([{ custom: true, title: { en: "", ar: "عنوان" }, cards: [] }]) })).length, 1, "validate: a custom section needs an English title");
+  // a custom section someone edited by hand is kept as it is
+  const hand = Object.assign({}, site1, { "index.html": h.replace('<div class="grid3">\n<article class="card"><h3 data-ar="أفضل ورقة">', '<div class="grid3">\n<p>hand-written</p>\n<article class="card"><h3 data-ar="أفضل ورقة">') });
+  const backHand = L.read(hand);
+  ok(backHand.sections[2].id === "custom-1" && backHand.sections[2].custom === false && backHand.warnings.length === 1, "hand-edited custom section: read as a plain section, with a warning");
+  eq(changed(L.build(hand, backHand, { today: TODAY })), [], "and left untouched");
+}
+
+section("v2: lists (courses and career)");
+{
+  const idx = files["index.html"];
+  I.LISTS.forEach((list) => ok(list.render(model[list.key]) === inner(idx, list.block), list.key + " block reproduced"));
+  eq([model.flagship.length, model.courses.length, model.timeline.length, model.timelineEarlier.length], [4, 8, 5, 3], "items read");
+  eq(model.flagship[0], { code: "IS453", en: "Technology Trends in Digital Transformation", ar: "اتجاهات التقنية في التحول الرقمي" }, "flagship course");
+  eq(model.timeline[0].time, "2026 — Present", "the 'Present' span reads as plain text");
+  eq(model.timeline[2].time, "2014 — 2024", "a closed period");
+  ok(model.timeline[0].title.en.indexOf("Chair, Information Systems Department") === 0 && model.timeline[0].title.ar && model.timeline[0].text.en && model.timeline[0].text.ar, "timeline item texts");
+  const m = copy(model);
+  m.courses.push({ code: "IS555", en: "AI & Society", ar: "الذكاء والمجتمع" });
+  m.flagship.unshift({ code: "IS555", en: "AI & Society", ar: "" });
+  m.flagship.pop();
+  m.timeline.unshift({ time: "2027 — Present", title: { en: "Dean <CCIS>", ar: "عميد الكلية" }, text: { en: 'Leads "CCIS".', ar: "يقود الكلية." } });
+  m.timelineEarlier.push({ time: "2005", title: { en: "Intern", ar: "" }, text: { en: "", ar: "" } });
+  eq(L.validate(m), [], "valid model");
+  const out = L.build(files, m, { today: TODAY });
+  eq(changed(out), HOME_ONLY, "lists change only the home page");
+  eq(out.warnings, [], "no warnings");
+  eq(out.summary.length, 4, "one summary line per list");
+  const h = out.files["index.html"];
+  eq(I.blockLines(h, "dash:courses").slice(-1)[0], '<article class="course-item"><span class="course-code">IS555</span><strong data-ar="الذكاء والمجتمع">AI &amp; Society</strong></article>', "course line");
+  eq(I.blockLines(h, "dash:courses-flagship")[0], '<article class="flagship-course"><span>IS555</span><strong>AI &amp; Society</strong></article>', "flagship line without Arabic");
+  eq(I.blockLines(h, "dash:courses-flagship").length, 4, "flagship count");
+  eq(I.blockLines(h, "dash:timeline")[0], '<article class="role"><time>2027 — <span data-ar="حتى الآن">Present</span></time><div><h3 data-ar="عميد الكلية">Dean &lt;CCIS&gt;</h3><p data-ar="يقود الكلية.">Leads "CCIS".</p></div></article>', "timeline line with the Present span");
+  eq(I.blockLines(h, "dash:timeline-earlier").slice(-1)[0], '<article class="role"><time>2005</time><div><h3>Intern</h3><p></p></div></article>', "earlier role with a plain year");
+  ok(out.files["ar/index.html"].indexOf("<time>2027 — <span>حتى الآن</span></time><div><h3>عميد الكلية</h3><p>يقود الكلية.</p>") > 0, "Arabic page shows the Arabic texts");
+  const back = L.read(overlay(files, out));
+  eq([back.courses, back.flagship, back.timeline, back.timelineEarlier], [m.courses, m.flagship, m.timeline, m.timelineEarlier], "lists read back");
+  eq(back.warnings, [], "no read warnings");
+  eq(changed(L.build(overlay(files, out), back, { today: TODAY })), [], "stable after reading back");
+  // only the four blocks moved
+  let rest = h, base = idx;
+  I.LISTS.forEach((list) => { rest = rest.replace(inner(h, list.block), ""); base = base.replace(inner(idx, list.block), ""); });
+  eq(rest, base, "nothing else changed in index.html");
+  const bad = copy(model);
+  bad.courses.push({ code: "", en: "", ar: "" });
+  bad.timeline.push({ time: "", title: { en: "", ar: "" }, text: { en: "", ar: "" } });
+  bad.timelineEarlier.push({ time: "<b>", title: { en: "T", ar: "" } });
+  eq(L.validate(bad).length, 5, "validate: code, name, period, title, forbidden character");
+  const broken = Object.assign({}, files, { "index.html": idx.replace('<article class="course-item"><span class="course-code">IS101</span>', '<article class="course-item odd"><span class="course-code">IS101</span>') });
+  eq(L.read(broken).warnings.length, 1, "an unreadable line is reported on read");
+  eq(L.read(broken).courses.length, 7, "and skipped");
+}
+
+section("v2: portrait version");
+{
+  const idx = files["index.html"];
+  eq(model.photoVersion, "", "no version yet");
+  const m = copy(model);
+  m.photoVersion = "202701051230";
+  const out = L.build(files, m, { today: TODAY });
+  eq(changed(out), HOME_ONLY, "changed files");
+  const h = out.files["index.html"];
+  ok(h.indexOf('<link rel="preload" href="PhotoDrOmaia.webp?v=202701051230" as="image" type="image/webp" fetchpriority="high" >') > 0, "preload link carries the version");
+  ok(h.indexOf('id="portraitImage" src="PhotoDrOmaia.webp?v=202701051230" width="1127"/>') > 0, "portrait image carries the version");
+  ok(h.indexOf('"image": "https://dromaia.github.io/PhotoDrOmaia.webp",') > 0, "the JSON-LD image address is left alone");
+  eq(h.split("PhotoDrOmaia.webp?v=202701051230").join("PhotoDrOmaia.webp"), idx, "nothing else changed");
+  ok(out.files["ar/index.html"].split('"../PhotoDrOmaia.webp?v=202701051230"').length === 3, "Arabic page: both addresses one folder up, with the version");
+  eq(out.summary, ["تغيّرت الصورة الشخصية."], "summary");
+  const back = L.read(overlay(files, out));
+  eq(back.photoVersion, "202701051230", "version reads back");
+  eq(changed(L.build(overlay(files, out), back, { today: TODAY })), [], "stable after reading back");
+  const again = L.build(overlay(files, out), Object.assign(copy(back), { photoVersion: "202702020800" }), { today: TODAY });
+  ok(again.files["index.html"].split("PhotoDrOmaia.webp?v=202702020800").length === 3 && again.files["index.html"].indexOf("202701051230") < 0, "a new upload replaces the version");
+  ok(L.build(overlay(files, out), Object.assign(copy(back), { photoVersion: "" }), { today: TODAY }).files["index.html"] === idx, "an empty version restores the page");
+  eq(L.validate(Object.assign(copy(model), { photoVersion: "2027-01?x" })).length, 1, "validate: version characters");
+}
+
+section("v2: citations");
+{
+  const pubs = files["publications.html"];
+  const metrics0 = JSON.parse(files["data/metrics.json"]);
+  const withDoi = model.works.filter((w) => /doi\.org\/10\./.test(w.doi || ""));
+  eq(Object.keys(model.citations).length, withDoi.length, "one number per work that has a DOI");
+  ok(Object.keys(model.citations).every((k) => k === k.toLowerCase() && /^10\./.test(k)), "keys are bare lower-case DOIs");
+  eq(model.citations["10.62754/joe.v3i8.5781"], 23, "number from data/metrics.json");
+  eq(model.citations["10.3390/computers15110825"], 0, "a work without a metrics row reads as 0");
+  ok(!metrics0.per_work.some((r) => r.id === "P40"), "(P40 has no metrics row yet)");
+  const m = copy(model);
+  m.citations["10.62754/joe.v3i8.5781"] = 30;          // existing row
+  m.citations["10.3390/computers15110825"] = 2;        // no row yet
+  m.citations["10.1038/s41598-026-74375-w"] = 0;       // no row, still 0: nothing to do
+  m.citations["https://doi.org/10.1142/S1756973726400214"] = 1; // a full address in another letter case
+  const out = L.build(files, m, { today: TODAY });
+  eq(changed(out), ["ar/publications.html", "data/metrics.json", "publications.html"], "changed files");
+  eq(out.warnings, [], "no warnings");
+  eq(out.summary, ["حُدّثت أعداد الاستشهادات لـ 3 بحثاً."], "summary");
+  const before = cardsOf(pubs), after = cardsOf(out.files["publications.html"]);
+  eq(after.order, before.order, "same cards, same order");
+  ok(after.map.P25.indexOf('<span class="pub-cites" data-doi="10.62754/joe.v3i8.5781" data-ar="30 استشهاداً · Crossref">Cited by 30 · Crossref</span>') > 0, "P25 card (kept verbatim otherwise) shows 30");
+  eq(after.map.P25.replace('data-ar="30 استشهاداً · Crossref">Cited by 30 ·', 'data-ar="23 استشهاداً · Crossref">Cited by 23 ·'), before.map.P25, "only the number moved on P25");
+  ok(after.map.P40.indexOf('<span class="pub-cites" data-doi="10.3390/computers15110825" data-ar="استشهادان · Crossref">Cited by 2 · Crossref</span>') > 0, "P40 card shows 2 (Arabic dual)");
+  ok(after.map.P37.indexOf('data-ar="استشهاد واحد · Crossref">Cited by 1 · Crossref</span>') > 0, "P37 card shows 1 (Arabic singular)");
+  eq(after.order.filter((id) => after.map[id] !== before.map[id]), ["P40", "P37", "P25"], "no other card changed");
+  ok(out.files["ar/publications.html"] === L.buildArabic("publications.html", out.files["publications.html"]) && out.files["ar/publications.html"].indexOf("30 استشهاداً · Crossref</span>") > 0, "Arabic page shows the Arabic form");
+  const metrics1 = JSON.parse(out.files["data/metrics.json"]);
+  eq(metrics1.per_work.filter((r) => r.id === "P25")[0].crossref, 30, "metrics.json: existing row updated");
+  eq(metrics1.per_work.filter((r) => r.id === "P40")[0], { id: "P40", title: model.works.filter((w) => w.id === "P40")[0].title, year: 2026, doi: "10.3390/computers15110825", crossref: 2, openalex: null, date: null, venue: null }, "metrics.json: new row in the tool's shape");
+  eq(metrics1.per_work.length, metrics0.per_work.length + 1, "one row added (nothing for the work that stays at 0)");
+  eq(metrics1.crossref, { cited_by_total: metrics0.crossref.cited_by_total + 7 + 2 + 1, h_index: metrics1.crossref.h_index, matched: metrics0.crossref.matched + 1 }, "Crossref totals recomputed");
+  ok(metrics1.crossref.h_index >= metrics0.crossref.h_index, "h-index recomputed");
+  eq(metrics1.checked, TODAY + "T00:00:00Z", "checked date");
+  eq([metrics1.latest, metrics1.works_verified, metrics1.openalex, metrics1.orcid_new], [metrics0.latest, metrics0.works_verified, metrics0.openalex, metrics0.orcid_new], "the rest of metrics.json is untouched");
+  ok(/\n$/.test(out.files["data/metrics.json"]) && out.files["data/metrics.json"] === JSON.stringify(metrics1, null, 1) + "\n", "metrics.json keeps its formatting");
+  const back = L.read(overlay(files, out));
+  eq([back.citations["10.62754/joe.v3i8.5781"], back.citations["10.3390/computers15110825"], back.citations["10.1142/s1756973726400214"]], [30, 2, 1], "numbers read back");
+  eq(changed(L.build(overlay(files, out), back, { today: TODAY })), [], "stable after reading back");
+  // thousands separator, and a works change in the same build
+  const big = copy(model);
+  big.citations["10.62754/joe.v3i8.5781"] = 1234;
+  big.works = big.works.concat([NEW_WORK]);
+  const outB = L.build(files, big, { today: TODAY });
+  const cardsB = cardsOf(outB.files["publications.html"]);
+  ok(cardsB.map.P25.indexOf('data-ar="1234 استشهاداً · Crossref">Cited by 1,234 · Crossref</span>') > 0, "thousands separator, in a build that also adds a work");
+  ok(cardsB.map.P41 && cardsB.map.P25.replace('data-ar="1234 استشهاداً · Crossref">Cited by 1,234 ·', 'data-ar="23 استشهاداً · Crossref">Cited by 23 ·') === before.map.P25, "the kept card is otherwise verbatim");
+  // bad values and unknown works are ignored
+  const odd = copy(model);
+  odd.citations["10.62754/joe.v3i8.5781"] = "many";
+  odd.citations["10.9999/not-in-the-catalogue"] = 5;
+  eq(L.validate(odd).length, 1, "validate: a number is required");
+  eq(changed(L.build(files, odd, { today: TODAY })), [], "bad values and unknown DOIs change nothing");
+  // without metrics.json the numbers cannot be saved
+  const noMetrics = Object.assign({}, files); delete noMetrics["data/metrics.json"];
+  const outM = L.build(noMetrics, m, { today: TODAY });
+  ok(changed(outM).length === 0 && outM.warnings.length === 1 && outM.warnings[0].indexOf("metrics.json") > 0, "no metrics.json: warning, nothing written");
+}
+
+section("v2: degrees and thesis titles (read only)");
+eq(model.degrees, [
+  { year: "2021", title: "PhD in Computer Science (AI)", institution: "The National University of Malaysia (UKM)" },
+  { year: "2009", title: "MSc in IT and Computer Sciences", institution: "Yarmouk University · Jordan" },
+  { year: "2006", title: "BSc in IT and Computer Sciences", institution: "Yarmouk University · Jordan" },
+], "degrees");
+eq(model.theses, ["Noun Verb Extraction and Hybrid Krill Herd as Feature Selection for Document Classification", "Evaluation of the Effect of Stemming on Clustering of Arabic Documents"], "thesis titles");
+{
+  const m = copy(model);
+  m.degrees = []; m.theses = [];
+  eq(changed(L.build(files, m, { today: TODAY })), [], "they are helpers: changing them in the model changes nothing");
+}
+
+section("v2: everything at once, and the Python generator");
+{
+  const m = copy(model);
+  m.fonts = { ar: "Tajawal", en: "Inter", head: "Lora" };
+  m.theme = { palette: "teal" };
+  m.sections[1].hidden = true;
+  m.sections = [m.sections[4], m.sections[0], m.sections[1], m.sections[2], m.sections[3]];
+  m.sections.push({ custom: true, title: { en: "Awards", ar: "الجوائز" }, kicker: { en: "", ar: "" }, intro: { en: "", ar: "" }, cards: [{ title: { en: "A", ar: "أ" }, text: { en: "B", ar: "ب" }, link: "" }] });
+  m.courses.push({ code: "IS600", en: "Seminar", ar: "حلقة بحث" });
+  m.timeline[0].text.en = "Updated.";
+  m.photoVersion = "202701050900";
+  m.citations["10.62754/joe.v3i8.5781"] = 31;
+  m.news.unshift({ year: "2027", en: "News", ar: "خبر" });
+  m.texts[5].en = m.texts[5].en + " (edited)";
+  m.works = m.works.concat([NEW_WORK]);
+  eq(L.validate(m), [], "valid model");
+  const out = L.build(files, m, { today: TODAY });
+  eq(changed(out), ["ar/index.html", "ar/publications.html", "data/metrics.json", "index.html", "publications.html", "research-data.js", "sitemap.xml"], "changed files");
+  eq(out.warnings, [], "no warnings");
+  const site = overlay(files, out);
+  const back = L.read(site);
+  eq(back.warnings, [], "the result reads without warnings");
+  eq([back.fonts, back.theme.palette, back.sections.map((s) => s.id + (s.hidden ? "*" : "")), back.photoVersion, back.citations["10.62754/joe.v3i8.5781"], back.works.length, back.news[0].en, back.courses.slice(-1)[0].code, back.timeline[0].text.en],
+    [m.fonts, "teal", ["contact", "leadership", "research*", "teaching", "experience", "custom-1"], "202701050900", 31, N + 1, "News", "IS600", "Updated."], "every change reads back");
+  eq(changed(L.build(site, back, { today: TODAY })), [], "stable after reading back");
+  const py = pythonArabic(out.files["index.html"], out.files["publications.html"]);
+  if (!py) console.log("  (python3 not available: skipped)");
+  else {
+    ok(py.index === out.files["ar/index.html"], "ar/index.html (python) equals the JavaScript output");
+    ok(py.pubs === out.files["ar/publications.html"], "ar/publications.html (python) equals the JavaScript output");
+  }
+}
+
+section("v2: messages in English and Arabic");
+{
+  const m = copy(model);
+  m.works = m.works.concat([Object.assign({}, NEW_WORK, { title: "", type: "", theme: "", methods: [], contribution: "", reference: "", year: "20" })]);
+  m.metrics[0].value = ""; m.news[0].year = "x"; m.roles[0].org = "";
+  m.fonts = { ar: "Nope", en: "Nope", head: "Nope" };
+  m.theme = { palette: "custom", light: { bg: "blue" } };
+  m.sections.push({ custom: true, title: { en: "", ar: "" }, cards: [{ title: { en: "", ar: "" }, link: "javascript:x" }] });
+  m.nav.push({ href: "", en: "", ar: "" });
+  m.courses.push({ code: "", en: "" }); m.timeline.push({ time: "", title: { en: "", ar: "" } });
+  m.photoVersion = "a b"; m.citations["10.62754/joe.v3i8.5781"] = -1;
+  const arErrors = L.validate(m);
+  ok(arErrors.length >= 20 && arErrors.every((e) => /[؀-ۿ]/.test(e)), "validate speaks Arabic by default (" + arErrors.length + " messages)");
+  eq(L.setLang("en"), "en", "setLang('en')");
+  const enErrors = L.validate(m);
+  eq(enErrors.length, arErrors.length, "the same number of messages in English");
+  ok(noArabic(enErrors), "validate messages are English");
+  // build: summary and warnings
+  const b = copy(model);
+  b.works = b.works.concat([NEW_WORK]);
+  b.works[0] = Object.assign({}, b.works[0], { contribution: b.works[0].contribution + " Edited." });
+  b.works = b.works.filter((w) => w.id !== "P02");
+  b.news.pop(); b.roles.pop(); b.metrics[0].value = "19+";
+  b.fonts = { ar: "Cairo", en: "Inter", head: "body" };
+  b.theme = { palette: "custom", light: { bg: "#ffffff", surface: "#ffffff", text: "#aaaaaa", accent: "#eeee00", link: "#99ccff" } };
+  b.sections[0].hidden = true; b.sections[2].hidden = true;
+  b.sections = [b.sections[1], b.sections[0], b.sections[2], b.sections[3], b.sections[4], { custom: true, title: { en: "Awards", ar: "الجوائز" }, cards: [] }, { id: "ghost" }];
+  b.courses.pop(); b.flagship.pop(); b.timeline.pop(); b.timelineEarlier.pop();
+  b.photoVersion = "1"; b.citations["10.62754/joe.v3i8.5781"] = 40; b.texts[3].ar = b.texts[3].ar + "!";
+  const en = L.build(files, b, { today: TODAY });
+  ok(en.summary.length >= 18 && noArabic(en.summary), "summary is English (" + en.summary.length + " lines)");
+  ok(en.warnings.length >= 5 && noArabic(en.warnings), "warnings are English (" + en.warnings.length + " lines)");
+  ok(en.summary.some((s) => s === "Section hidden: Leadership") && en.summary.some((s) => s === "New section added: Awards") && en.summary.some((s) => s === "Section order changed.") && en.summary.some((s) => s === "Added work P41: " + NEW_WORK.title) && en.summary.some((s) => s === "Portrait changed."), "English wording");
+  const missing = L.build({ "index.html": "<html></html>", "publications.html": "<html></html>" }, { metrics: [], news: [], roles: [], fonts: b.fonts, theme: b.theme, sections: [], nav: [], courses: [], works: [NEW_WORK] }, { today: TODAY });
+  ok(missing.warnings.length >= 8 && noArabic(missing.warnings), "missing markers are reported in English");
+  ok(noArabic(L.read({}).warnings) && L.read({}).warnings.length > 0, "read warnings are English");
+  eq(L.setLang("fr"), "ar", "an unknown language falls back to Arabic");
+  const arBuild = L.build(files, b, { today: TODAY });
+  eq([arBuild.summary.length, arBuild.warnings.length], [en.summary.length, en.warnings.length], "Arabic and English builds say the same number of things");
+  ok(arBuild.summary.every((s) => /[؀-ۿ]/.test(s)) && arBuild.warnings.every((s) => /[؀-ۿ]/.test(s)), "and Arabic is back");
+  eq(en.files, arBuild.files, "the language of the messages never changes the files");
+}
+
+section("v2: the ChatGPT achievements list");
+{
+  const SAMPLE = `Review period: 1 June–21 November 2026
+Sources: Connected Gmail, relevant email attachments, and IS department notes.
+Duplicate check: Based on the website entries you supplied. The two July publications below are verified, but the list does not identify all 40 existing entries.
+
+ITEM 1
+Category: Conferences and academic service
+Title (English): Technical Program Committee Member, ICDSIC 2027
+Title (Arabic): عضو اللجنة الفنية للمؤتمر الدولي الثالث للمجتمع الرقمي والحوسبة الذكية
+Organisation: ICDSIC 2027 Organizing Committee, hosted by Chengyi College, Jimei University
+My role: Technical Program Committee member
+Date: 19 November 2026 (appointment confirmed)
+Evidence: ICDSIC 2027 Organizing Committee (Guangzhou KEO) | “Invitation-TPC Member: The 3rd International Conference on Digital Society and Intelligent Computing (ICDSIC 2027)” | confirmation reply, 19 November 2026
+Public link: https://www.icdsic.net/
+Confidence: High
+Suggest: CV
+Why: The organizer acknowledged your acceptance and said it would add your profile to the conference website.
+
+ITEM 2
+Category: Recognition
+Title (English): Certificate of Appreciation for Judging the AI Hackathon for People with Disabilities, ICDR 2026
+Title (Arabic): شهادة شكر وتقدير عن تحكيم هاكاثون الذكاء الاصطناعي للأشخاص ذوي الإعاقة ضمن المؤتمر الدولي السابع للإعاقة والتأهيل
+Organisation: King Salman Center for Disability Research
+My role: Judging panel member and certificate recipient
+Date: 27 October 2026 (certificate received)
+Evidence: King Salman Center for Disability Research | “شهادة شكر وتقدير | Certificate of Appreciation” | 27 October 2026, with a certificate issued in your name
+Public link: none
+Confidence: High
+Suggest: Both
+Why: Add the certificate to the existing judging entry as new recognition from the organizer.
+
+ITEM 3
+Category: Leadership and accreditation
+Title (English): BSc Information Systems Program Granted Full ABET Accreditation Through 2031
+Title (Arabic): حصول برنامج بكالوريوس نظم المعلومات على الاعتماد الكامل من ABET حتى عام 2031
+Organisation: Prince Sultan University, College of Computer and Information Sciences
+My role: Chair, Information Systems Department, at the time of the announcement
+Date: 30 August 2026
+Evidence: PSU CCIS Dean’s Office | “Celebrating Full ABET Accreditation – CS & IS Programs” | 30 August 2026
+Public link: none
+Confidence: High
+Suggest: CV
+Why: This is a confirmed program milestone you can mention under your chair appointment as a team achievement.
+
+ITEM 4
+Category: Research — published journal article
+Title (English): Agentic Artificial Intelligence in Software Engineering: Integration Points, Architectural Frameworks, Empirical Evaluation, and Governance
+Title (Arabic): الذكاء الاصطناعي الوكيلي في هندسة البرمجيات: نقاط التكامل والأطر المعمارية والتقييم التجريبي والحوكمة
+Organisation: International Journal of Technology, 17(4)
+My role: Co-author
+Date: July 2026
+Evidence: International Journal of Technology Editorial Office | “[IJTech] Your manuscript is published at Volume 17 Issue 4, Jul 2026” | 31 July 2026
+Public link: https://ijtech.eng.ui.ac.id/issue/108
+Confidence: High
+Suggest: CV
+Why: The journal confirmed publication. Check for an existing entry before adding it.
+
+ITEM 5
+Category: Research — published journal article
+Title (English): Phishing Detection Using CNN–RNN with Sparrow Search Optimization Algorithm
+Title (Arabic): كشف التصيد الاحتيالي باستخدام شبكات CNN–RNN وخوارزمية تحسين البحث عن العصافير
+Organisation: Journal of Multiscale Modelling, 17(1), article 2640021
+My role: Co-author
+Date: July 2026 (publication notice)
+Evidence: World Scientific Publishing | “JMM Vol: 17 Iss: 01 pp(2640021) Phishing Detection Using CNN–RNN with Sparrow Search Optimization Algorithm” | 6 July 2026
+Public link: https://doi.org/10.1142/S1756973726400214
+Confidence: High
+Suggest: CV
+Why: The publisher supplied the DOI and issue details. Check for an existing entry before adding it.
+
+ITEM 6
+Category: Research — accepted conference paper
+Title (English): Explainable AI-Based Classification of Environmental, Technical, and Cyber Anomalies in Solar PV Systems Under UAE Desert Conditions
+Title (Arabic): تصنيف الحالات الشاذة البيئية والتقنية والسيبرانية في الأنظمة الكهروضوئية الشمسية في ظروف صحراء الإمارات باستخدام الذكاء الاصطناعي القابل للتفسير
+Organisation: ICAMAC 2026, hosted by Rochester Institute of Technology Dubai
+My role: Co-author of a paper accepted for oral presentation
+Date: 15 October 2026 (Riyadh date of the acceptance email)
+Evidence: ICAMAC 2026 Organizing Committee | “ICAMAC 2026 – Paper Acceptance, Registration and Camera-Ready Submission” | 15 October 2026, Riyadh time
+Public link: none
+Confidence: High
+Suggest: CV
+Why: The committee confirmed acceptance for oral presentation. Registration and presentation remain unverified.
+
+ITEM 7
+Category: Research — accepted journal manuscript
+Title (English): Harnessing Artificial Intelligence and Emerging Technologies for Environmental Protection: Legal, Ethical, and Policy Perspectives
+Title (Arabic): توظيف الذكاء الاصطناعي والتقنيات الناشئة لحماية البيئة: رؤى قانونية وأخلاقية وسياساتيّة
+Organisation: International Journal of Artificial Intelligence and Machine Learning
+My role: Co-author
+Date: 26 September 2026
+Evidence: International Journal of Artificial Intelligence and Machine Learning Editorial Office | “Acceptance of Manuscript: International Journal of Artificial Intelligence and Machine Learning” | 26 September 2026, with a formal acceptance letter
+Public link: none
+Confidence: High
+Suggest: CV
+Why: The letter confirms acceptance for publication. A publication date and DOI remain unverified.
+
+ITEM 8
+Category: Professional development
+Title (English): Certificate of Attendance, CCIS Research and Innovation Seminar
+Title (Arabic): شهادة حضور ندوة البحث والابتكار بكلية علوم الحاسب والمعلومات
+Organisation: Prince Sultan University, College of Computer and Information Sciences
+My role: Attendee and certificate recipient
+Date: 26 October 2026
+Evidence: PSU CCIS | “Your certificate of attendance - CCIS Research and Innovation Seminar” | 26 October 2026, with a personalized certificate
+Public link: none
+Confidence: High
+Suggest: CV
+Why: CCIS documented your attendance with a named certificate.
+
+ASK ME
+- Was your nominated senior project publicly showcased or awarded at CCIS EXPO 261 on 15 November? The 12 November email confirms your supervision and the nomination.
+- Has the comprehensive IS program review received final approval, and may the milestone be shared publicly? The latest thread shows the external-review package was sent for review on 20 November.
+- Does your ICEGOV 2026 entry describe a Track Chair appointment or a delivered event? UNU-EGOV confirmed on 25 August that the Riyadh event would not proceed on its original dates and thanked you for your programme contributions.
+- Did Mesopotamian Academic Press issue a corrected Babylonian Journal of Networking certificate? The 3 September email confirmed the appointment, but its attachment bears a different recipient’s name.
+
+NUMBERS
+- 3 senior project examinations coordinated for CCIS EXPO 261. Source: PSU final-report and examiner email threads, 10–16 November 2026. One of those threads independently names you as supervisor through the selection results.
+- ResearchGate reported 14 citations for the week in its 26 August 2026 email and 3 for the week in its 16 September 2026 email. These are weekly figures.
+- Full ABET accreditation through 2031 for the BSc Information Systems program. Source: PSU CCIS Dean’s announcement, 30 August 2026.
+- No newer verified figures surfaced for cumulative citations, h-index, total publications, or volunteer hours.
+
+Total items: 8
+`;
+  const res = L.parseAchievements(SAMPLE);
+  ok(Array.isArray(res) && res.items === res.items && res.length === 8 && res.items.length === 8, "eight items, as an array that also carries .items");
+  eq(res.map((it) => it.n), [1, 2, 3, 4, 5, 6, 7, 8], "item numbers");
+  eq(res[0], {
+    n: 1, category: "Conferences and academic service", titleEn: "Technical Program Committee Member, ICDSIC 2027",
+    titleAr: "عضو اللجنة الفنية للمؤتمر الدولي الثالث للمجتمع الرقمي والحوسبة الذكية",
+    organisation: "ICDSIC 2027 Organizing Committee, hosted by Chengyi College, Jimei University", role: "Technical Program Committee member",
+    date: "19 November 2026 (appointment confirmed)", year: 2026,
+    evidence: "ICDSIC 2027 Organizing Committee (Guangzhou KEO) | “Invitation-TPC Member: The 3rd International Conference on Digital Society and Intelligent Computing (ICDSIC 2027)” | confirmation reply, 19 November 2026",
+    link: "https://www.icdsic.net/", confidence: "High", suggest: "CV",
+    why: "The organizer acknowledged your acceptance and said it would add your profile to the conference website.", suggestKind: "cv",
+  }, "first item, every field");
+  eq(res.map((it) => it.link), ["https://www.icdsic.net/", null, null, "https://ijtech.eng.ui.ac.id/issue/108", "https://doi.org/10.1142/S1756973726400214", null, null, null], "'none' links are null");
+  eq(res.map((it) => it.suggestKind), ["cv", "both", "cv", "cv", "cv", "cv", "cv", "cv"], "suggestions");
+  ok(res.every((it) => it.year === 2026 && it.titleEn && it.titleAr && it.category && it.organisation && it.role && it.why && it.evidence), "every item is complete");
+  eq(res[3].titleEn, "Agentic Artificial Intelligence in Software Engineering: Integration Points, Architectural Frameworks, Empirical Evaluation, and Governance", "a title that contains a colon");
+  eq(res[4].date, "July 2026 (publication notice)", "a date without a day");
+  eq(res.askMe.length, 4, "four questions");
+  ok(res.askMe[0].indexOf("Was your nominated senior project") === 0 && res.askMe[3].indexOf("Did Mesopotamian Academic Press") === 0, "questions without the bullet");
+  eq(res.numbers.length, 4, "four numbers lines");
+  ok(res.numbers[2].indexOf("Full ABET accreditation through 2031") === 0, "numbers text");
+  eq(res.total, 8, "total");
+  eq(JSON.parse(JSON.stringify(res)).length, 8, "the result serialises as the list of items");
+  // looser formatting, as other tools write it
+  const loose = L.parseAchievements("```\n**ITEM 3**\n- **Category:** Recognition\n- **Title (EN):** Best Reviewer\n- **Title (AR):** أفضل محكّم\n- **Organization:** IEEE\n- **Role:** Reviewer\n- **Date:** May 2025\n- **Public link:** (https://example.org/x).\n- **Suggestion:** Website\n- **Why:** It is public\n  and verified.\n\n## ASK ME\n1. First?\n2. Second?\n\n## NUMBERS:\n* 12 reviews\n```");
+  eq([loose.length, loose[0].n, loose[0].category, loose[0].titleEn, loose[0].titleAr, loose[0].organisation, loose[0].role, loose[0].year, loose[0].link, loose[0].suggestKind, loose[0].why],
+    [1, 3, "Recognition", "Best Reviewer", "أفضل محكّم", "IEEE", "Reviewer", 2025, "https://example.org/x", "website", "It is public and verified."], "markdown, American spelling, wrapped lines");
+  eq([loose.askMe, loose.numbers, loose.total], [["First?", "Second?"], ["12 reviews"], null], "numbered and starred lists");
+  const empty = L.parseAchievements("");
+  eq([empty.length, empty.askMe, empty.numbers, empty.total], [0, [], [], null], "empty text");
+  eq(L.parseAchievements(null).length, 0, "null does not throw");
+  eq(L.parseAchievements("Hello, nothing to report.").length, 0, "text without items");
+}
+
+section("v2: CV module wiring");
+{
+  // 1. a stand-in module: records what it is given, writes a few facts into the page
+  const calls = [];
+  const stub = {
+    read(html) { const m = /<!-- cv:profile -->([\s\S]*?)<!-- \/cv:profile -->/.exec(html); return { profile: { en: m ? m[1] : "" }, selected: 17 }; },
+    build(m, html, options) {
+      calls.push({ model: m, options });
+      const facts = [m.works.length, m.courses.length, m.timeline.length, m.roles.length, m.degrees.length, m.theses.length, m.today].join("|");
+      return html.replace(/<!-- cv:profile -->[\s\S]*?<!-- \/cv:profile -->/, "<!-- cv:profile -->" + m.cv.profile.en + "<!-- /cv:profile -->")
+        .replace(/<!-- cv:auto -->[\s\S]*?<!-- \/cv:auto -->/, "<!-- cv:auto -->" + facts.replace(/\|[^|]*$/, "") + "<!-- /cv:auto -->");
+    },
+  };
+  const cvPage = "<html><!-- cv:profile -->Profile text<!-- /cv:profile --><!-- cv:auto -->" + [N, 8, 5, model.roles.length, 3, 2].join("|") + "<!-- /cv:auto --></html>";
+  const withCv = Object.assign({}, files, { "cv.html": cvPage });
+  I.setCV(stub);
+  const m0 = L.read(withCv);
+  eq(m0.cv, { profile: { en: "Profile text" }, selected: 17 }, "read() adds model.cv from the module");
+  const same = L.build(withCv, m0, { today: TODAY });
+  eq(changed(same), [], "an unchanged model changes nothing, cv.html included");
+  ok(calls.length === 1 && calls[0].model.today === TODAY && calls[0].options.today === TODAY, "the module is given the build date");
+  ok(calls[0].model.works.length === N && calls[0].model.degrees.length === 3 && calls[0].model.sections.length === 5 && calls[0].model.cv.profile.en === "Profile text", "and the whole model");
+  // a works change reaches the CV
+  const m1 = copy(m0);
+  m1.works = m1.works.concat([NEW_WORK]);
+  m1.courses.push({ code: "IS700", en: "New course", ar: "" });
+  m1.cv.profile.en = "New profile";
+  const out = L.build(withCv, m1, { today: TODAY });
+  ok(changed(out).indexOf("cv.html") >= 0, "cv.html is among the changed files");
+  ok(out.files["cv.html"].indexOf("<!-- cv:profile -->New profile<!-- /cv:profile -->") > 0, "the owner's CV text is passed through");
+  ok(out.files["cv.html"].indexOf("<!-- cv:auto -->" + [N + 1, 9, 5, model.roles.length, 3, 2].join("|") + "<!-- /cv:auto -->") > 0, "the CV is built from the site as it will be after this build");
+  ok(out.summary.some((s) => s === "حُدّثت صفحة السيرة الذاتية."), "summary line");
+  eq(calls[calls.length - 1].model.works[N].id, "P41", "works reach the module normalised and in order");
+  // only the CV text changes
+  const m2 = copy(m0);
+  m2.cv.profile.en = "Only the CV";
+  eq(changed(L.build(withCv, m2, { today: TODAY })), ["cv.html"], "a CV-only edit changes only cv.html");
+  // a draft without model.cv keeps the page's own content
+  const m3 = copy(m0); delete m3.cv;
+  eq(changed(L.build(withCv, m3, { today: TODAY })), [], "a model without cv keeps the CV as it is");
+  // no cv.html in the files: skipped
+  const before = calls.length;
+  const noCv = Object.assign({}, files); delete noCv["cv.html"];
+  eq(changed(L.build(noCv, m1, { today: TODAY })).indexOf("cv.html"), -1, "no cv.html among the files: the module is not called");
+  ok(!("cv" in L.read(noCv)), "and read() gives no model.cv");
+  eq(calls.length, before, "(not called)");
+  // a module that fails must not break the build
+  I.setCV({ read() { throw new Error("boom"); }, build() { throw new Error("boom"); } });
+  const r = L.read(withCv);
+  ok(!("cv" in r) && r.warnings.length === 1 && r.warnings[0].indexOf("cv.html") > 0, "read: a failing module gives a warning, not an exception");
+  const o = L.build(withCv, m1, { today: TODAY });
+  ok(changed(o).indexOf("cv.html") < 0 && changed(o).indexOf("index.html") >= 0 && o.warnings.some((w) => w.indexOf("cv.html") > 0), "build: a failing module gives a warning; the rest is built");
+  // in the browser the module is window.DashCV
+  const sandbox = { self: { DashCV: stub } };
+  vm.createContext(sandbox);
+  vm.runInContext(read("admin/lib.js"), sandbox);
+  eq(JSON.parse(JSON.stringify(sandbox.self.DashLib.read(withCv).cv)), { profile: { en: "Profile text" }, selected: 17 }, "browser: window.DashCV is used");
+  // 2. the real module, when the CV agent's files are there
+  I.setCV(undefined);
+  // DASH_CV=off runs the "without" case even when the CV agent's files are present
+  const off = process.env.DASH_CV === "off";
+  const hasModule = !off && fs.existsSync(path.join(ROOT, "admin", "cv.js")), hasPage = fs.existsSync(path.join(ROOT, "cv.html"));
+  if (off) I.setCV(null);
+  if (!hasModule || !hasPage) {
+    console.log("  CASE RUN: without the real CV module (admin/cv.js " + (hasModule ? "present" : "missing") + ", cv.html " + (hasPage ? "present" : "missing") + ")");
+    eq(changed(L.build(files, L.read(files), { today: TODAY })), [], "round trip without the CV module");
+    const bare = Object.assign({}, files); delete bare["cv.html"];
+    eq(changed(L.build(bare, L.read(bare), { today: TODAY })), [], "round trip without cv.html among the files");
+    ok(!("cv" in L.read(files)), "no model.cv without the module");
+  } else if (!I.getCV()) {
+    console.log("  CASE RUN: admin/cv.js is present but could not be loaded (the library skips it)");
+    eq(changed(L.build(files, L.read(files), { today: TODAY })), [], "round trip with an unloadable CV module");
+  } else {
+    console.log("  CASE RUN: with the real CV module (admin/cv.js + cv.html)");
+    const real = loadFiles();
+    const rm = L.read(real);
+    ok(rm.cv && typeof rm.cv === "object", "real module: read() returns model.cv");
+    const rt = L.build(real, rm, { today: TODAY });
+    eq(changed(rt), [], "real module: an unchanged model changes nothing");
+    eq(rt.warnings, [], "real module: no warnings");
+    const add = copy(rm);
+    add.works = add.works.concat([NEW_WORK]);
+    const ro = L.build(real, add, { today: TODAY });
+    ok(typeof ro.files["cv.html"] === "string" && ro.files["cv.html"] !== real["cv.html"], "real module: a new work reaches cv.html");
+    const site = overlay(real, ro);
+    eq(changed(L.build(site, L.read(site), { today: TODAY })), [], "real module: stable after reading back");
+  }
+  I.setCV(null);
 }
 
 /* ------------------------------------------------------------------ */
