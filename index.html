@@ -136,10 +136,10 @@
     <link rel="stylesheet" href="research-assistant.css" >
     <style>
       :root {
-        --bg: #07111d;
-        --surface: #0d1a28;
+        --bg: #111a24;
+        --surface: #18232f;
         --surface2: #122234;
-        --text: #e9eef4;
+        --text: #dfe5ea;
         --muted: #9cafc1;
         --line: rgba(255, 255, 255, 0.1);
         --gold: #d8b45b;
@@ -150,16 +150,16 @@
         --header: 76px;
       }
       [data-theme="light"] {
-        --bg: #f4f7fa;
-        --surface: #fff;
-        --surface2: #eaf0f5;
-        --text: #0b1b2a;
-        --muted: #53687b;
-        --line: rgba(10, 31, 49, 0.12);
-        --gold: #835d05;
-        --blue: #1769c2;
-        --green: #087f65;
-        --shadow: 0 20px 65px rgba(25, 52, 75, 0.12);
+        --bg: #f6f3ec;
+        --surface: #fffdf8;
+        --surface2: #eeeae0;
+        --text: #22303b;
+        --muted: #5f6c76;
+        --line: rgba(60, 50, 30, 0.13);
+        --gold: #7a5a12;
+        --blue: #2c6aa6;
+        --green: #1f7a63;
+        --shadow: 0 14px 40px rgba(70, 55, 25, 0.08);
       }
       * {
         box-sizing: border-box;
@@ -175,7 +175,7 @@
         font-family:
           Manrope, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
           Arial, sans-serif;
-        line-height: 1.65;
+        line-height: 1.8;
         overflow-x: hidden;
       }
       html[lang="ar"] body {
@@ -239,7 +239,7 @@
       }
       .brand {
         text-decoration: none;
-        font-weight: 800;
+        font-weight: 700;
         letter-spacing: -0.04em;
       }
       .brand span {
@@ -337,7 +337,7 @@
         gap: 10px;
         color: var(--gold);
         font-size: 0.82rem;
-        font-weight: 800;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.13em;
       }
@@ -407,7 +407,7 @@
         border: 1px solid var(--line);
         border-radius: 14px;
         text-decoration: none;
-        font-weight: 800;
+        font-weight: 700;
         font-size: 0.9rem;
         background: var(--surface);
         cursor: pointer;
@@ -469,7 +469,7 @@
         text-align: center;
         color: var(--muted);
         font-size: 0.82rem;
-        font-weight: 800;
+        font-weight: 700;
         border-inline-end: 1px solid var(--line);
       }
       .strip a:last-child {
@@ -525,7 +525,7 @@
         background: color-mix(in srgb, var(--surface) 88%, transparent);
         color: var(--gold);
         font-size: 0.78rem;
-        font-weight: 800;
+        font-weight: 700;
         letter-spacing: 0.16em;
         line-height: 1;
       }
@@ -540,7 +540,7 @@
         font-size: 0.78rem;
         text-transform: uppercase;
         letter-spacing: 0.14em;
-        font-weight: 800;
+        font-weight: 700;
       }
       .section-head h2 {
         font-size: clamp(1.9rem, 3vw, 2.9rem);
@@ -575,7 +575,7 @@
         background: var(--surface);
         color: var(--muted);
         font-size: 0.76rem;
-        font-weight: 800;
+        font-weight: 700;
       }
       .research-direction {
         margin-top: 18px;
@@ -618,7 +618,7 @@
       .num {
         font-size: 3rem;
         line-height: 1;
-        font-weight: 800;
+        font-weight: 700;
         color: var(--gold);
       }
       .card h3 {
@@ -646,7 +646,7 @@
       .degree-year {
         color: var(--gold);
         font-size: 1.55rem;
-        font-weight: 800;
+        font-weight: 700;
         letter-spacing: -0.04em;
       }
       .degree-kind {
@@ -655,7 +655,7 @@
         border-radius: 999px;
         color: var(--muted);
         font-size: 0.7rem;
-        font-weight: 800;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.08em;
       }
@@ -667,7 +667,7 @@
       }
       .degree-institution {
         color: var(--gold);
-        font-weight: 800;
+        font-weight: 700;
       }
       .ranking-link {
         position: relative;
@@ -679,7 +679,7 @@
         margin-top: 8px;
         color: var(--gold);
         font-size: 0.76rem;
-        font-weight: 800;
+        font-weight: 700;
         text-decoration: none;
       }
       .ranking-link:hover {
@@ -698,7 +698,7 @@
         margin-bottom: 7px;
         color: var(--muted);
         font-size: 0.69rem;
-        font-weight: 800;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.09em;
       }
@@ -720,7 +720,7 @@
         border-radius: 999px;
         color: var(--blue);
         font-size: 0.73rem;
-        font-weight: 800;
+        font-weight: 700;
         cursor: pointer;
         list-style: none;
       }
@@ -758,7 +758,7 @@
       }
       .role time {
         color: var(--gold);
-        font-weight: 800;
+        font-weight: 700;
       }
       .role h3 {
         margin: 0 0 5px;
@@ -775,7 +775,7 @@
         min-height: 28px;
         color: var(--gold);
         font-size: 0.7rem;
-        font-weight: 800;
+        font-weight: 700;
         margin-top: 10px;
         text-decoration: none;
       }
@@ -813,7 +813,7 @@
       .source-link {
         color: var(--blue);
         font-size: 0.74rem;
-        font-weight: 800;
+        font-weight: 700;
         text-decoration: none;
       }
       .source-link:hover {
@@ -842,7 +842,7 @@
         color: var(--gold);
         background: var(--bg);
         font-size: 0.72rem;
-        font-weight: 800;
+        font-weight: 700;
         text-align: center;
       }
       .course-item strong {
@@ -866,7 +866,7 @@
       .society-org {
         color: var(--gold);
         font-size: 0.72rem;
-        font-weight: 800;
+        font-weight: 700;
       }
       .society-role {
         font-size: 0.84rem;
@@ -1073,7 +1073,7 @@
           font-size: 0.66rem;
           text-decoration: none;
           color: var(--muted);
-          font-weight: 800;
+          font-weight: 700;
           text-align: center;
         }
         .bottom-nav b {
@@ -1104,7 +1104,7 @@
         display: block;
         color: var(--muted);
         font-size: 0.67rem;
-        font-weight: 800;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.08em;
         margin-bottom: 3px;
@@ -1452,14 +1452,14 @@
       .featured-label {
         color: var(--gold);
         font-size: 0.68rem;
-        font-weight: 800;
+        font-weight: 700;
         letter-spacing: 0.08em;
         text-transform: uppercase;
       }
       .featured-top time {
         color: var(--muted);
         font-size: 0.74rem;
-        font-weight: 800;
+        font-weight: 700;
       }
       .featured-work h3 {
         margin: 14px 0 8px;
@@ -1482,7 +1482,7 @@
         padding-top: 14px;
         color: var(--gold);
         font-size: 0.78rem;
-        font-weight: 800;
+        font-weight: 700;
         text-decoration: none;
       }
       .featured-link:hover {
@@ -1571,18 +1571,18 @@
       .latest-heading { margin: 22px 0 10px; font-size: 1.05rem; }
       .latest-works { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 8px; }
       .latest-works li { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; padding: 12px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); font-size: .9rem; }
-      .latest-works time { color: var(--gold); font-weight: 800; font-size: .78rem; }
+      .latest-works time { color: var(--gold); font-weight: 700; font-size: .78rem; }
       .latest-title a { color: var(--text); text-decoration: none; }
       .latest-title a:hover { text-decoration: underline; text-underline-offset: 4px; }
       .latest-venue { color: var(--muted); font-size: .78rem; }
-      .latest-new { margin-inline-start: auto; padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--gold) 18%, transparent); color: var(--gold); font-size: .68rem; font-weight: 800; }
+      .latest-new { margin-inline-start: auto; padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--gold) 18%, transparent); color: var(--gold); font-size: .68rem; font-weight: 700; }
       .latest-note { margin: 0 0 18px; color: var(--muted); font-size: .76rem; }
       html[dir="rtl"] .latest-title { direction: ltr; text-align: left; }
       .lead-card { margin-bottom: 16px; }
       .lead-card ul { margin: 12px 0 0; padding-inline-start: 22px; color: var(--muted); }
       .lead-card li + li { margin-top: 6px; }
       #leadership .card a { color: var(--gold); }
-      #leadership .volunteer-highlight { color: var(--gold); font-size: clamp(1.7rem, 2.2vw, 2.2rem); font-weight: 800; line-height: 1.25; }
+      #leadership .volunteer-highlight { color: var(--gold); font-size: clamp(1.7rem, 2.2vw, 2.2rem); font-weight: 700; line-height: 1.25; }
       .metric {
         display: block;
         padding: 18px 20px;
@@ -1605,7 +1605,7 @@
         margin-top: 7px;
         color: var(--muted);
         font-size: 0.69rem;
-        font-weight: 800;
+        font-weight: 700;
         letter-spacing: 0.06em;
         text-transform: uppercase;
       }
@@ -1636,7 +1636,7 @@
         border-inline-end: 1px solid var(--line);
         color: var(--muted);
         font-size: 0.77rem;
-        font-weight: 800;
+        font-weight: 700;
         text-align: center;
         text-decoration: none;
       }
@@ -1664,7 +1664,7 @@
       .research-card .research-label {
         color: var(--gold);
         font-size: 0.71rem;
-        font-weight: 800;
+        font-weight: 700;
         letter-spacing: 0.1em;
         text-transform: uppercase;
       }
@@ -1677,7 +1677,7 @@
         margin: 0 0 15px;
         color: var(--text);
         font-size: 0.76rem;
-        font-weight: 800;
+        font-weight: 700;
       }
       .research-card p {
         margin: 0;
@@ -1789,7 +1789,7 @@
         border-radius: 18px;
         background: var(--surface);
       }
-      .flagship-course span { color: var(--gold); font-size: 0.74rem; font-weight: 800; }
+      .flagship-course span { color: var(--gold); font-size: 0.74rem; font-weight: 700; }
       .flagship-course strong { display: block; margin-top: 22px; font-size: 0.9rem; line-height: 1.5; }
       .compact-details {
         margin-top: 14px;
@@ -1801,7 +1801,7 @@
         padding: 15px 18px;
         color: var(--blue);
         font-size: 0.78rem;
-        font-weight: 800;
+        font-weight: 700;
         cursor: pointer;
       }
       .compact-details .course-grid,
@@ -1828,7 +1828,7 @@
         margin-bottom: 4px;
         color: var(--gold);
         font-size: 0.69rem;
-        font-weight: 800;
+        font-weight: 700;
         letter-spacing: 0.08em;
         text-transform: uppercase;
       }
@@ -1926,9 +1926,9 @@
       }
 
       .recent { display: flex; flex-wrap: wrap; gap: 8px 22px; padding: 0; margin: 18px 0 0; list-style: none; font-size: .82rem; color: var(--muted); }
-      .recent time { color: var(--gold); font-weight: 800; }
+      .recent time { color: var(--gold); font-weight: 700; }
       .theme-strip { display: flex; flex-wrap: wrap; gap: 9px; padding: 0; margin: 0 0 22px; list-style: none; }
-      .theme-strip a { display: block; padding: 8px 13px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted); font-size: .76rem; font-weight: 800; text-decoration: none; }
+      .theme-strip a { display: block; padding: 8px 13px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted); font-size: .76rem; font-weight: 700; text-decoration: none; }
       .theme-strip a:hover { color: var(--gold); }
       .degree-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 22px; }
       .degree-row .degree-card { padding: 20px; border-radius: 18px; }
@@ -1957,7 +1957,7 @@
       .timeline .role p, .case-study p { max-width: 68ch; }
       .card, .featured-work, .degree-card, .flagship-course,
       .compact-details, .timeline .role, .research-snapshot, .case-study { border-radius: 20px; }
-      .card .tag { color: var(--gold); font-size: .78rem; font-weight: 800; }
+      .card .tag { color: var(--gold); font-size: .78rem; font-weight: 700; }
       .progress { position: fixed; top: 0; inset-inline-start: 0; width: 0; height: 2px; z-index: 100; background: var(--gold); pointer-events: none; }
       .reveal { opacity: 0; transform: translateY(12px); transition: opacity .45s ease, transform .45s ease; }
       .reveal.in { opacity: 1; transform: none; }
