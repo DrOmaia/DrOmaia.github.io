@@ -69,3 +69,82 @@ Repository `DrOmaia/DrOmaia.github.io`, branch `main`. Token: `localStorage['das
 Draft kept in `localStorage['dash.draft']`. Publish = Git Data API (tree → commit → update ref), message starts with
 `Dashboard:`. Undo = new commit restoring the tree of the commit before the last `Dashboard:` commit (only if it is HEAD).
 Preview = iframe `srcdoc` of the built page with `<base href="https://dromaia.github.io/">`.
+
+---
+
+# Version 2 (contract for the three agents)
+
+Owner's decisions: dashboard in Arabic and English; more fonts; colour palettes + custom colours; show / hide /
+reorder the home-page sections, edit the items inside them, and add his own sections; every change is reflected in a
+**live CV page** (`cv.html`, with a "Save as PDF" button); refresh citations with one button; import the result of
+his ChatGPT achievements prompt; upload a new portrait and files; a tab with a prompt that explains the site to any AI tool.
+
+## New markers (already in the site files)
+- `index.html`: `<!-- dash:section ID -->` … `<!-- /dash:section ID -->` around each `<section id="ID">` after the hero
+  (leadership, research, teaching, experience, contact); `<!-- dash:nav -->` (the six nav links, one per line);
+  `<!-- dash:courses-flagship -->`, `<!-- dash:courses -->`, `<!-- dash:timeline -->`, `<!-- dash:timeline-earlier -->`.
+- Both pages `<head>`: fonts block now `:root{--font-en:"…";--font-ar:"…";--font-head-en:"…";}` (Georgia and other
+  system fonts are not requested from Google Fonts), followed by `<!-- dash:theme -->` holding one `<style>`; empty = the
+  default calm palette. Overrides are written as `html:root[data-theme="light"]{…}` and `html:root[data-theme="dark"]{…}`.
+  Variable names differ per page: index.html uses `--bg --surface --surface2 --text --muted --line --gold --blue --green`;
+  publications.css uses `--bg --surface --surface-2 --text --muted --line --accent --accent-strong --amber --blue`.
+  Write both sets in the block so one block text serves both pages.
+- CV links in index.html now point to `cv.html` (`data-ar-href="../cv.html"`).
+- Portrait: `PhotoDrOmaia.webp` (1127×1396) in `<img id="portraitImage">` and one `<link rel="preload">`; after an upload
+  add or bump a `?v=YYYYMMDDHHMM` on both.
+
+## Library (admin/lib.js) – additions
+```js
+DashLib.setLang('ar' | 'en')         // language of warnings / summary / validate messages (default 'ar')
+DashLib.FILES                        // + 'cv.html'
+DashLib.FONTS                        // {ar:[…16+], en:[…12+], head:[…]} each {name, weights, system?:true}
+DashLib.PALETTES                     // [{id, ar, en, light:{bg,surface,surface2,text,muted,line,accent,link,green}, dark:{…}}]  six calm presets; id 'default' = empty block
+DashLib.contrast(hexA, hexB)         // WCAG ratio (number)
+// model additions (read) and their handling (build):
+model.fonts      = {ar, en, head}
+model.theme      = {palette:'default'|id|'custom', light:{bg,surface,text,accent,link}, dark:{…}}   // custom: owner's colours; the rest is derived
+model.sections   = [{id, title:{en,ar}, hidden:boolean, custom:boolean,
+                     // custom sections only:
+                     kicker:{en,ar}, intro:{en,ar}, cards:[{title:{en,ar}, text:{en,ar}, link}]}]   // order = page order; hero and footer are fixed
+model.nav        = [{href, en, ar, hidden}]      // follows sections: hidden section => its link hidden; custom section => link added
+model.flagship   = [{code, en, ar}];  model.courses = [{code, en, ar}]
+model.timeline   = [{time, title:{en,ar}, text:{en,ar}}];  model.timelineEarlier = same shape
+model.photoVersion = '' | 'YYYYMMDDHHMM'         // set by the UI after a portrait upload
+model.citations  = {doi(lowercase): number}      // from data/metrics.json per_work; the UI may replace values, build writes them
+                                                 // into metrics.json and into the cite span of every card (unchanged cards included)
+model.cv         = see "CV module"
+DashLib.parseAchievements(text)      // the ChatGPT "ITEM n" format -> [{n, category, titleEn, titleAr, organisation, role, date, year, link, suggest, why}] + {askMe:[], numbers:[]}
+```
+Hidden section = the `hidden` attribute on its `<section>` and on its nav link (never delete its markup).
+Custom sections are rendered entirely by the library inside their own `dash:section custom-N` markers using the existing
+classes (`wrap`, `section-head`, `kicker`, `grid3`, `card`) so they can be parsed back; Arabic via `data-ar`.
+Round trip on the current files must still return `files: {}`.
+
+## CV module (admin/cv.js, `window.DashCV` / module.exports) – owned by the CV agent
+```js
+DashCV.read(cvHtml)  -> model.cv = { profile:{en}, pillars:[{title, text}], accepted:[{year, text}], selected:number (how many newest works to list, default 17),
+                                     community:[{title, text}], development:[{title, text}], languages, openTo, extraService:[{title, org, date, text}] }
+DashCV.build(model, cvHtml) -> new cv.html text   // called by DashLib.build; must be byte-identical when nothing changed
+```
+`cv.html` (repository root) is a normal web page in the site's calm style, English, A4/Letter print stylesheet, a
+"Save as PDF" button (`window.print()`), `noindex` off (it is public). It contains `<!-- cv:NAME -->` blocks:
+- auto blocks, rebuilt on every publish from the rest of the model: `cv:header` (name, titles, links), `cv:appointments`
+  (from model.timeline + timelineEarlier), `cv:education` (degree cards + theses read from index.html), `cv:publications`
+  (the newest `selected` works: authors/title/venue from each work's APA reference, DOI link), `cv:teaching` (courses),
+  `cv:service` (model.roles + extraService), `cv:updated` (month and year of the build);
+- owner blocks, edited in the dashboard and kept as they are otherwise: `cv:profile`, `cv:pillars`, `cv:accepted`,
+  `cv:community`, `cv:development`, `cv:languages`.
+Initial content: everything now in `tools/cv-source.html` (the current three-page CV).
+
+## Interface – additions
+- Language switch (العربية / English) for the whole dashboard, remembered in localStorage; RTL/LTR flips.
+- Tabs: الأبحاث · الأرقام والمستجدات · الأقسام (sections: show/hide/reorder/custom; inside it the lists: courses,
+  flagship courses, career timeline, earlier roles, committees and roles) · النصوص · المظهر (fonts incl. heading font,
+  palettes, custom colours with contrast warning, portrait upload) · السيرة (owner blocks of the CV + preview of cv.html) ·
+  استيراد (paste the ChatGPT result → accept each item as a news line, a role, a CV service entry, or skip) ·
+  الملفات (upload PDF/images to `files/`, copy link) · مساعد AI (the guide prompt from `admin/ai-guide.md`, copy button) · النشر.
+- Citations: a button in الأبحاث that reads `is-referenced-by-count` from Crossref for every DOI (sequential, progress,
+  tolerant of failures) and stores the numbers in `model.citations`.
+- Binary uploads: `GH.commit` accepts `{path: {base64}}` entries next to text entries (blob API, then tree by sha).
+  Portrait: chosen image is centre-cropped to 1127:1396, scaled to 1127×1396, encoded as WebP in the browser, shown
+  for confirmation, published as `PhotoDrOmaia.webp`. Files: max 5 MB each, safe ASCII file names.

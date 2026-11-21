@@ -227,7 +227,7 @@ p {
 h1 {
   max-width: 850px;
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-head-en, Georgia), "Times New Roman", serif;
   font-size: clamp(2.2rem, 4.5vw, 3.6rem);
   line-height: 0.98;
   letter-spacing: -0.045em;
@@ -314,7 +314,7 @@ h1 {
 .summary-card strong {
   display: block;
   color: var(--accent);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-head-en, Georgia), "Times New Roman", serif;
   font-size: 2.6rem;
   line-height: 1;
 }
@@ -342,7 +342,7 @@ h1 {
 .catalog-heading h2 {
   max-width: 760px;
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-head-en, Georgia), "Times New Roman", serif;
   font-size: clamp(1.9rem, 3vw, 2.9rem);
   line-height: 1.05;
   letter-spacing: -0.035em;
@@ -489,7 +489,7 @@ h1 {
 
 .publication-card h3 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-head-en, Georgia), "Times New Roman", serif;
   font-size: clamp(1.25rem, 2vw, 1.65rem);
   line-height: 1.18;
 }
@@ -549,7 +549,7 @@ h1 {
   padding-left: 1.25rem;
   text-indent: -1.25rem;
   color: var(--text);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-head-en, Georgia), "Times New Roman", serif;
   font-size: 0.88rem;
   line-height: 1.65;
 }
@@ -680,7 +680,7 @@ html[dir="rtl"] .apa-label {
     margin-inline: auto;
     padding: 13px 18px;
     color: var(--text);
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--font-head-en, Georgia), "Times New Roman", serif;
     font-size: clamp(1.25rem, 5vw, 2rem);
     text-align: center;
   }
@@ -772,7 +772,7 @@ html[lang="ar"] .pub-contribution,
 html[lang="ar"] .method-list {
   direction: ltr;
   text-align: left;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-head-en, Georgia), "Times New Roman", serif;
 }
 
 html[lang="ar"] .pub-contribution,

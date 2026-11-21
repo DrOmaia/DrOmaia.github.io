@@ -80,8 +80,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin >
     <!-- dash:fonts -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap">
-    <style>:root{--font-en:"Manrope";--font-ar:"IBM Plex Sans Arabic";}</style>
+    <style>:root{--font-en:"Manrope";--font-ar:"IBM Plex Sans Arabic";--font-head-en:"Georgia";}</style>
     <!-- /dash:fonts -->
+    <!-- dash:theme -->
+    <style></style>
+    <!-- /dash:theme -->
     <link rel="preload" href="../PhotoDrOmaia.webp" as="image" type="image/webp" fetchpriority="high" >
     <title>د. أمية العمري | الذكاء الاصطناعي ونظم المعلومات</title>
     <script type="application/ld+json">
@@ -187,7 +190,7 @@
       h2,
       .section-head h2,
       .contact h2 {
-        font-family: Georgia, "Times New Roman", serif;
+        font-family: var(--font-head-en, Georgia), "Times New Roman", serif;
         font-weight: 700;
       }
       html[lang="ar"] h1,
@@ -1860,7 +1863,7 @@
           margin-inline: auto;
           padding: 13px 18px;
           color: var(--text);
-          font-family: Georgia, "Times New Roman", serif;
+          font-family: var(--font-head-en, Georgia), "Times New Roman", serif;
           font-size: clamp(1.25rem, 5vw, 2rem);
           text-align: center;
         }
@@ -1986,7 +1989,14 @@
           ><b>د. أمية</b>
           <span>العمري</span></a
         >
-        <nav aria-label="التنقل الرئيسي" class="nav" id="nav"><a href="#leadership">القيادة</a><a href="#research">البحث</a><a href="publications.html">المنشورات</a><a href="#teaching">التدريس</a><a href="#experience">المسيرة</a><a href="#contact">تواصل</a></nav>
+        <nav aria-label="التنقل الرئيسي" class="nav" id="nav"><!-- dash:nav -->
+<a href="#leadership">القيادة</a>
+<a href="#research">البحث</a>
+<a href="publications.html">المنشورات</a>
+<a href="#teaching">التدريس</a>
+<a href="#experience">المسيرة</a>
+<a href="#contact">تواصل</a>
+<!-- /dash:nav --></nav>
         <div class="controls">
           <a
             class="icon-btn lang-link"
@@ -2050,7 +2060,7 @@
 <h2>رئيس قسم نظم المعلومات · أستاذ مساعد في الذكاء الاصطناعي ونظم المعلومات</h2>
 <p class="lead">أرأس قسم نظم المعلومات في جامعة الأمير سلطان بالرياض، وأبني أنظمة ذكاء اصطناعي قابلة للتفسير في الرعاية الصحية والأمن السيبراني والرؤية الحاسوبية.</p>
 <div class="actions">
-<a class="btn primary" href="#leadership">القيادة</a><a class="btn secondary" href="publications.html">استعراض المنشورات</a><a class="btn textual" href="../Dr-Omaia-Al-Omari-Concise-Academic-CV.pdf" rel="noopener" target="_blank">عرض السيرة الأكاديمية · PDF · 3 صفحات ↗</a>
+<a class="btn primary" href="#leadership">القيادة</a><a class="btn secondary" href="publications.html">استعراض المنشورات</a><a class="btn textual" href="../cv.html" rel="noopener" target="_blank">عرض السيرة الأكاديمية ↗</a>
 </div><p class="availability-note">متاح للتعاون البحثي والمحاضرات المدعوة.</p>
 <div id="metricsBar" class="metrics-bar" role="group" aria-label="أبرز مؤشرات الملف الأكاديمي">
 <!-- dash:metrics -->
@@ -2079,7 +2089,8 @@
 <a href="https://facultyportal.psu.edu.sa/ViewProfile.aspx?instructorID=1345" rel="noopener" target="_blank">الملف في جامعة الأمير سلطان ↗</a>
 </div>
 </div>
-</section><section id="leadership"><span id="service"></span>
+</section><!-- dash:section leadership -->
+<section id="leadership"><span id="service"></span>
 <div class="wrap">
 <div class="section-head"><div><span class="kicker">القيادة</span><h2>كيف أقود.</h2></div>
 <p>أرأس قسم نظم المعلومات في جامعة الأمير سلطان، وأشارك في لجان المناهج والاختبارات بالكلية، وأرأس معرض CCIS EXPO 2026، وعُيّنت رئيس مسار في مؤتمر ICEGOV 2026 (مؤجَّل).</p></div>
@@ -2108,7 +2119,10 @@
 <article class="society-item"><span class="society-org">ICEGOV 2026</span><span class="society-role">رئيس مسار (تعيين) في المؤتمر الدولي لنظرية وممارسة الحوكمة الإلكترونية · المؤتمر مؤجَّل</span></article>
 <article class="society-item"><span class="society-org">PSU</span><span class="society-role">رئيس معرض كلية علوم الحاسب والمعلومات 2026</span></article>
 <!-- /dash:roles -->
-</div></details></div></section><section id="research">
+</div></details></div></section>
+<!-- /dash:section leadership -->
+<!-- dash:section research -->
+<section id="research">
 <div class="wrap">
 <div class="section-head">
 <div>
@@ -2159,7 +2173,10 @@
 </div>
 </div>
 </div>
-</section><section id="teaching">
+</section>
+<!-- /dash:section research -->
+<!-- dash:section teaching -->
+<section id="teaching">
 <div class="wrap">
 <div class="section-head">
 <div>
@@ -2183,14 +2200,17 @@
 </div>
 </article>
 <div aria-label="المقررات الرئيسية" class="flagship-courses" id="flagshipCourses" role="group">
+<!-- dash:courses-flagship -->
 <article class="flagship-course"><span>IS453</span><strong>اتجاهات التقنية في التحول الرقمي</strong></article>
 <article class="flagship-course"><span>IS452</span><strong>إدارة التغيير للتحول الرقمي</strong></article>
 <article class="flagship-course"><span>IS321</span><strong>هندسة المؤسسات</strong></article>
 <article class="flagship-course"><span>IS499</span><strong>مشروع التخرج</strong></article>
+<!-- /dash:courses-flagship -->
 </div>
 <details class="compact-details">
 <summary>عرض المقررات الثمانية الحديثة</summary>
 <div class="course-grid">
+<!-- dash:courses -->
 <article class="course-item"><span class="course-code">IS101</span><strong>مقدمة في تقنية المعلومات</strong></article>
 <article class="course-item"><span class="course-code">IS201</span><strong>مقدمة في نظم المعلومات</strong></article>
 <article class="course-item"><span class="course-code">IS231</span><strong>تحليل وتصميم النظم</strong></article>
@@ -2199,11 +2219,15 @@
 <article class="course-item"><span class="course-code">IS453</span><strong>اتجاهات التقنية في التحول الرقمي</strong></article>
 <article class="course-item"><span class="course-code">IS492</span><strong>التدريب التعاوني</strong></article>
 <article class="course-item"><span class="course-code">IS499</span><strong>مشروع التخرج</strong></article>
+<!-- /dash:courses -->
 </div>
 </details>
 <a class="verified" href="https://facultyportal.psu.edu.sa/ViewProfile.aspx?instructorID=1345" rel="noopener" target="_blank">قائمة المقررات من بوابة أعضاء هيئة التدريس ↗</a>
 </div>
-</section><section id="experience">
+</section>
+<!-- /dash:section teaching -->
+<!-- dash:section experience -->
+<section id="experience">
 <div class="wrap">
 <div class="section-head">
 <div>
@@ -2213,18 +2237,22 @@
 <p>تمتد مسيرتي لأكثر من 18 عاماً بين الأردن وماليزيا والسعودية: تدريس وبحث وضمان جودة، ومنذ 2026 قيادة القسم.</p>
 </div>
 <div class="timeline">
+<!-- dash:timeline -->
 <article class="role"><time>2026 — <span>حتى الآن</span></time><div><h3>رئيس قسم نظم المعلومات · جامعة الأمير سلطان</h3><p>القيادة الأكاديمية لقسم نظم المعلومات في كلية علوم الحاسب والمعلومات، إلى جانب التدريس والبحث والإرشاد والمناهج والخدمة المؤسسية.</p></div></article>
 <article class="role"><time>2024 — <span>حتى الآن</span></time><div><h3>أستاذ مساعد · جامعة الأمير سلطان</h3><p>قسم نظم المعلومات، كلية علوم الحاسب والمعلومات · التدريس والبحث والإرشاد والمناهج والخدمة المؤسسية.</p></div></article>
 <article class="role"><time>2014 — 2024</time><div><h3>محاضر / عضو هيئة تدريس · جامعة شقراء</h3><p>التدريس في برامج الحوسبة مع قيادة أعمال الإرشاد الأكاديمي والأنشطة الطلابية والخدمة المجتمعية وضمان الجودة.</p></div></article>
 <article class="role"><time>2013 — 2014</time><div><h3>مساعد باحث للدراسات العليا · UKM</h3><p>دعم بحثي في تحليل بيانات الأسماء المركبة باللغة الماليزية وإعدادها.</p></div></article>
 <article class="role"><time>2009 — 2012</time><div><h3>محاضر · جامعة حائل</h3><p>تدريس بروتوكولات الإنترنت ونظم قواعد البيانات وتطوير تطبيقات الويب.</p></div></article>
+<!-- /dash:timeline -->
 </div>
 <details class="compact-details">
 <summary>الأدوار الأكاديمية السابقة</summary>
 <div class="timeline">
+<!-- dash:timeline-earlier -->
 <article class="role"><time>2009</time><div><h3>مدرس · جامعة جرش الخاصة</h3><p>تحليل النظم ومفاهيم البرمجة ومقدمة في الحوسبة.</p></div></article>
 <article class="role"><time>2007 — 2009</time><div><h3>مدرس حاسوب · مدرسة كفر أسد الثانوية</h3><p>مقررات ومختبرات الحاسوب للصفوف من السابع إلى الثاني عشر.</p></div></article>
 <article class="role"><time>2006 — 2007</time><div><h3>مساعد تدريس · جامعة اليرموك</h3><p>المساعدة في تدريس نظم الوسائط المتعددة والتقييم.</p></div></article>
+<!-- /dash:timeline-earlier -->
 </div>
 </details>
 <div class="degree-row"><article class="degree-card">
@@ -2243,7 +2271,10 @@
 <h3>بكالوريوس تقنية المعلومات وعلوم الحاسب</h3>
 <div class="degree-institution">جامعة اليرموك · الأردن</div>
 </article></div><details class="compact-details"><summary>عناوين الرسائل</summary><div class="degree-detail"><small>عنوان الرسالة</small><p>استخراج الأسماء والأفعال وخوارزمية قطيع الكريل الهجينة لاختيار السمات في تصنيف الوثائق</p></div><div class="degree-detail"><small>عنوان الرسالة</small><p>تقييم أثر التجذير في عنقدة الوثائق العربية</p></div></details></div>
-</section><section id="contact">
+</section>
+<!-- /dash:section experience -->
+<!-- dash:section contact -->
+<section id="contact">
 <div class="wrap">
 <div class="contact">
 <div>
@@ -2258,13 +2289,15 @@
 <a class="contact-path" href="https://linkedin.com/in/omaiaomari" rel="noopener" target="_blank"><span class="contact-label">LinkedIn</span><strong>الملف المهني ↗</strong><span>التواصل والتحديثات المهنية</span></a>
 </div>
 <div class="contact-links">
-<a class="btn primary" href="../Dr-Omaia-Al-Omari-Concise-Academic-CV.pdf" rel="noopener" target="_blank">عرض السيرة الأكاديمية · PDF · 3 صفحات ↗</a>
+<a class="btn primary" href="../cv.html" rel="noopener" target="_blank">عرض السيرة الأكاديمية ↗</a>
 <a class="btn" href="https://facultyportal.psu.edu.sa/ViewProfile.aspx?instructorID=1345" rel="noopener" target="_blank">الملف الرسمي في جامعة الأمير سلطان ↗</a>
 <a class="btn" href="https://orcid.org/0000-0002-1638-1771" rel="noopener" target="_blank">ORCID ↗</a>
 </div>
 </div>
 </div>
-</section></main>
+</section>
+<!-- /dash:section contact -->
+</main>
     <footer class="footer">
       <div class="wrap">
         <span>© <span id="year"></span> Dr. Omaia Al-Omari.</span
