@@ -1,0 +1,56 @@
+# Site dashboard (`/admin/`) – contract between the library and the interface
+
+Private control panel for https://dromaia.github.io/. Browser-only, no build step, no CDN, no frameworks.
+The owner signs in with his own GitHub fine-grained token (kept in his browser only); the page reads the site
+files from the repository, lets him edit, shows a preview, and publishes one commit to `main`.
+Source of truth = the site files themselves (no separate database), so edits made by hand stay in sync.
+
+## Files
+| File | Owner | What |
+| --- | --- | --- |
+| `admin/lib.js` | library | Pure functions, no DOM, no network. `window.DashLib` in the browser, `module.exports` in Node. |
+| `admin/tests/lib.test.js` | library | Node tests (`node admin/tests/lib.test.js`). |
+| `admin/index.html`, `admin/app.js`, `admin/github.js`, `admin/admin.css` | interface | UI (Arabic, RTL, phone first), GitHub API, Crossref lookup. |
+| `admin/tests/ui_test.py` | interface | Playwright test with a mocked GitHub API. |
+
+## Markers in the site files (already in place)
+- `index.html` and `publications.html` `<head>`: `<!-- dash:fonts -->` … `<!-- /dash:fonts -->` (one `<link>` to Google Fonts
+  + `<style>:root{--font-en:"…";--font-ar:"…";}</style>`).
+- `index.html`: `<!-- dash:metrics -->` (the tiles), `<!-- dash:news -->` (the `<li>` lines), `<!-- dash:roles -->`
+  (`<article class="society-item">` lines), `<!-- dash:themes -->` (theme strip `<li>`), `<!-- metrics:latest -->`
+  (latest works, same markup as `tools/refresh_metrics.py: latest_markup`).
+- `publications.html`: `<!-- dash:cards -->` (all cards, newest id first), `<!-- dash:years -->` (year `<option>`s),
+  `<strong data-count="works|journal|conference|chapter">`, one JSON-LD `ItemList`.
+Every block has a closing `<!-- /dash:NAME -->`. Line formats inside blocks must be reproduced exactly (see the files).
+
+## Library API
+```js
+DashLib.FILES   // paths read: index.html, publications.html, research-data.js, data/metrics.json, sitemap.xml
+DashLib.THEMES  // [{en, ar}] the six themes;  DashLib.TYPES // [{en, ar}] Journal article / Conference paper / Book chapter
+DashLib.FONTS   // {ar:[{name, weights}], en:[{name, weights}]}
+model = DashLib.read(files)            // files: {path: text}
+// model = { works:[{id,title,year,type,theme,methods:[],contribution,reference,doi,verificationNote}],
+//           metrics:[{value,en,ar,href,auto}]   (auto:'works' = value follows the number of works),
+//           news:[{year,en,ar}], roles:[{org,orgAr,en,ar}], fonts:{ar,en},
+//           texts:[{id,page,en,ar}]   (every other text-only element that has data-ar; id is stable for this load) }
+out = DashLib.build(files, model, {today:'YYYY-MM-DD'})
+// out = { files:{path:text}  only files whose content changed (incl. ar/index.html, ar/publications.html),
+//         warnings:[arabic strings], summary:[arabic strings, one per kind of change] }
+DashLib.validate(model)                // [arabic error strings]; empty = ok
+DashLib.nextId(works)                  // 'P41'
+DashLib.fromCrossref(message)          // Crossref "message" object -> partial work {title,year,type,reference,doi}
+DashLib.buildArabic(page, html)        // port of tools/build-arabic.py, byte-identical output
+```
+`build` with an unchanged model must return `files: {}` (round trip is the main test).
+What `build` regenerates when works change: `research-data.js` (works, meta.total, cutoff = today), the cards block,
+year options, data-count numbers, JSON-LD list, count phrases (EN + `data-ar`) in both pages, cutoff phrases, theme
+strip numbers, latest block + `data/metrics.json` (`latest`, `works_verified`), "Profile last updated" month,
+JSON-LD `dateModified`, `sitemap.xml` lastmod, then both Arabic pages.
+All user text is HTML-escaped on write and unescaped on read.
+
+## Interface
+Tabs: الأبحاث · الأرقام والمستجدات · اللجان والأدوار · النصوص · المظهر · النشر.
+Repository `DrOmaia/DrOmaia.github.io`, branch `main`. Token: `localStorage['dash.token']` (or session only).
+Draft kept in `localStorage['dash.draft']`. Publish = Git Data API (tree → commit → update ref), message starts with
+`Dashboard:`. Undo = new commit restoring the tree of the commit before the last `Dashboard:` commit (only if it is HEAD).
+Preview = iframe `srcdoc` of the built page with `<base href="https://dromaia.github.io/">`.

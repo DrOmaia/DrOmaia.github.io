@@ -43,10 +43,10 @@
     <link rel="apple-touch-icon" href="../apple-touch-icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Noto+Naskh+Arabic:wght@400;700&display=swap"
-    >
+    <!-- dash:fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap">
+    <style>:root{--font-en:"Manrope";--font-ar:"IBM Plex Sans Arabic";}</style>
+    <!-- /dash:fonts -->
     <meta property="og:type" content="website">
     <meta property="og:locale" content="ar_SA">
     <meta property="og:title" content="المنشورات الموثقة | د. أمية العمري">
@@ -147,10 +147,10 @@
           >هذا الفهرس نسخة مرجعية منسّقة من الأعمال المنشورة، رُوجعت مقابل سجلات الناشرين وCrossref حتى 21 نوفمبر 2026، وهو مرجع للموقع وليس منشوراً محكّماً.</p>
         </div>
         <aside class="summary-card" aria-label="Portfolio summary">
-          <div><strong>40</strong><span>عملاً موثقاً</span></div>
-          <div><strong>23</strong><span>مقالة دورية</span></div>
-          <div><strong>13</strong><span>ورقة مؤتمر</span></div>
-          <div><strong>4</strong><span>فصول كتب</span></div>
+          <div><strong data-count="works">40</strong><span>عملاً موثقاً</span></div>
+          <div><strong data-count="journal">23</strong><span>مقالة دورية</span></div>
+          <div><strong data-count="conference">13</strong><span>ورقة مؤتمر</span></div>
+          <div><strong data-count="chapter">4</strong><span>فصول كتب</span></div>
           <p>ستة موضوعات بحثية رئيسية</p>
         </aside>
       </section>
@@ -198,7 +198,8 @@
             <span>السنة</span>
             <select id="yearFilter">
               <option value="">جميع السنوات</option>
-              <option value="2026">2026</option>
+              <!-- dash:years -->
+<option value="2026">2026</option>
 <option value="2025">2025</option>
 <option value="2024">2024</option>
 <option value="2023">2023</option>
@@ -208,6 +209,7 @@
 <option value="2017">2017</option>
 <option value="2014">2014</option>
 <option value="2011">2011</option>
+<!-- /dash:years -->
             </select>
           </label>
           <label>
@@ -231,6 +233,7 @@
         </form>
 
         <div class="publication-list" id="publicationList">
+<!-- dash:cards -->
 
           <article
             id="p40"
@@ -1841,6 +1844,7 @@
               </div>
             </div>
           </article>
+<!-- /dash:cards -->
         </div>
         <div class="empty-state" id="emptyState" hidden>
           <h3>لا توجد أعمال مطابقة</h3>

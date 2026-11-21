@@ -78,10 +78,10 @@
     <link rel="apple-touch-icon" href="../apple-touch-icon.png" >
     <link rel="preconnect" href="https://fonts.googleapis.com" >
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin >
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Noto+Naskh+Arabic:wght@400;700&display=swap"
-    >
+    <!-- dash:fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap">
+    <style>:root{--font-en:"Manrope";--font-ar:"IBM Plex Sans Arabic";}</style>
+    <!-- /dash:fonts -->
     <link rel="preload" href="../PhotoDrOmaia.webp" as="image" type="image/webp" fetchpriority="high" >
     <title>د. أمية العمري | الذكاء الاصطناعي ونظم المعلومات</title>
     <script type="application/ld+json">
@@ -137,10 +137,10 @@
     <link rel="stylesheet" href="../research-assistant.css" >
     <style>
       :root {
-        --bg: #07111d;
-        --surface: #0d1a28;
+        --bg: #111a24;
+        --surface: #18232f;
         --surface2: #122234;
-        --text: #e9eef4;
+        --text: #dfe5ea;
         --muted: #9cafc1;
         --line: rgba(255, 255, 255, 0.1);
         --gold: #d8b45b;
@@ -151,16 +151,16 @@
         --header: 76px;
       }
       [data-theme="light"] {
-        --bg: #f4f7fa;
-        --surface: #fff;
-        --surface2: #eaf0f5;
-        --text: #0b1b2a;
-        --muted: #53687b;
-        --line: rgba(10, 31, 49, 0.12);
-        --gold: #835d05;
-        --blue: #1769c2;
-        --green: #087f65;
-        --shadow: 0 20px 65px rgba(25, 52, 75, 0.12);
+        --bg: #f6f3ec;
+        --surface: #fffdf8;
+        --surface2: #eeeae0;
+        --text: #22303b;
+        --muted: #5f6c76;
+        --line: rgba(60, 50, 30, 0.13);
+        --gold: #7a5a12;
+        --blue: #2c6aa6;
+        --green: #1f7a63;
+        --shadow: 0 14px 40px rgba(70, 55, 25, 0.08);
       }
       * {
         box-sizing: border-box;
@@ -174,13 +174,13 @@
         background: var(--bg);
         color: var(--text);
         font-family:
-          Manrope, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          var(--font-en, Manrope), ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
           Arial, sans-serif;
-        line-height: 1.65;
+        line-height: 1.8;
         overflow-x: hidden;
       }
       html[lang="ar"] body {
-        font-family: "Noto Naskh Arabic", Tahoma, Arial, sans-serif;
+        font-family: var(--font-ar, "Noto Naskh Arabic"), Tahoma, Arial, sans-serif;
         font-size: 1.04rem;
       }
       h1,
@@ -194,7 +194,7 @@
       html[lang="ar"] h2,
       html[lang="ar"] .section-head h2,
       html[lang="ar"] .contact h2 {
-        font-family: "Noto Naskh Arabic", Tahoma, serif;
+        font-family: var(--font-ar, "Noto Naskh Arabic"), Tahoma, serif;
       }
       a {
         color: inherit;
@@ -240,7 +240,7 @@
       }
       .brand {
         text-decoration: none;
-        font-weight: 800;
+        font-weight: 700;
         letter-spacing: -0.04em;
       }
       .brand span {
@@ -338,7 +338,7 @@
         gap: 10px;
         color: var(--gold);
         font-size: 0.82rem;
-        font-weight: 800;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.13em;
       }
@@ -408,7 +408,7 @@
         border: 1px solid var(--line);
         border-radius: 14px;
         text-decoration: none;
-        font-weight: 800;
+        font-weight: 700;
         font-size: 0.9rem;
         background: var(--surface);
         cursor: pointer;
@@ -470,7 +470,7 @@
         text-align: center;
         color: var(--muted);
         font-size: 0.82rem;
-        font-weight: 800;
+        font-weight: 700;
         border-inline-end: 1px solid var(--line);
       }
       .strip a:last-child {
@@ -526,7 +526,7 @@
         background: color-mix(in srgb, var(--surface) 88%, transparent);
         color: var(--gold);
         font-size: 0.78rem;
-        font-weight: 800;
+        font-weight: 700;
         letter-spacing: 0.16em;
         line-height: 1;
       }
@@ -541,7 +541,7 @@
         font-size: 0.78rem;
         text-transform: uppercase;
         letter-spacing: 0.14em;
-        font-weight: 800;
+        font-weight: 700;
       }
       .section-head h2 {
         font-size: clamp(1.9rem, 3vw, 2.9rem);
@@ -576,7 +576,7 @@
         background: var(--surface);
         color: var(--muted);
         font-size: 0.76rem;
-        font-weight: 800;
+        font-weight: 700;
       }
       .research-direction {
         margin-top: 18px;
@@ -619,7 +619,7 @@
       .num {
         font-size: 3rem;
         line-height: 1;
-        font-weight: 800;
+        font-weight: 700;
         color: var(--gold);
       }
       .card h3 {
@@ -647,7 +647,7 @@
       .degree-year {
         color: var(--gold);
         font-size: 1.55rem;
-        font-weight: 800;
+        font-weight: 700;
         letter-spacing: -0.04em;
       }
       .degree-kind {
@@ -656,7 +656,7 @@
         border-radius: 999px;
         color: var(--muted);
         font-size: 0.7rem;
-        font-weight: 800;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.08em;
       }
@@ -668,7 +668,7 @@
       }
       .degree-institution {
         color: var(--gold);
-        font-weight: 800;
+        font-weight: 700;
       }
       .ranking-link {
         position: relative;
@@ -680,7 +680,7 @@
         margin-top: 8px;
         color: var(--gold);
         font-size: 0.76rem;
-        font-weight: 800;
+        font-weight: 700;
         text-decoration: none;
       }
       .ranking-link:hover {
@@ -699,7 +699,7 @@
         margin-bottom: 7px;
         color: var(--muted);
         font-size: 0.69rem;
-        font-weight: 800;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.09em;
       }
@@ -721,7 +721,7 @@
         border-radius: 999px;
         color: var(--blue);
         font-size: 0.73rem;
-        font-weight: 800;
+        font-weight: 700;
         cursor: pointer;
         list-style: none;
       }
@@ -759,7 +759,7 @@
       }
       .role time {
         color: var(--gold);
-        font-weight: 800;
+        font-weight: 700;
       }
       .role h3 {
         margin: 0 0 5px;
@@ -776,7 +776,7 @@
         min-height: 28px;
         color: var(--gold);
         font-size: 0.7rem;
-        font-weight: 800;
+        font-weight: 700;
         margin-top: 10px;
         text-decoration: none;
       }
@@ -814,7 +814,7 @@
       .source-link {
         color: var(--blue);
         font-size: 0.74rem;
-        font-weight: 800;
+        font-weight: 700;
         text-decoration: none;
       }
       .source-link:hover {
@@ -843,7 +843,7 @@
         color: var(--gold);
         background: var(--bg);
         font-size: 0.72rem;
-        font-weight: 800;
+        font-weight: 700;
         text-align: center;
       }
       .course-item strong {
@@ -867,7 +867,7 @@
       .society-org {
         color: var(--gold);
         font-size: 0.72rem;
-        font-weight: 800;
+        font-weight: 700;
       }
       .society-role {
         font-size: 0.84rem;
@@ -1074,7 +1074,7 @@
           font-size: 0.66rem;
           text-decoration: none;
           color: var(--muted);
-          font-weight: 800;
+          font-weight: 700;
           text-align: center;
         }
         .bottom-nav b {
@@ -1105,7 +1105,7 @@
         display: block;
         color: var(--muted);
         font-size: 0.67rem;
-        font-weight: 800;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.08em;
         margin-bottom: 3px;
@@ -1453,14 +1453,14 @@
       .featured-label {
         color: var(--gold);
         font-size: 0.68rem;
-        font-weight: 800;
+        font-weight: 700;
         letter-spacing: 0.08em;
         text-transform: uppercase;
       }
       .featured-top time {
         color: var(--muted);
         font-size: 0.74rem;
-        font-weight: 800;
+        font-weight: 700;
       }
       .featured-work h3 {
         margin: 14px 0 8px;
@@ -1483,7 +1483,7 @@
         padding-top: 14px;
         color: var(--gold);
         font-size: 0.78rem;
-        font-weight: 800;
+        font-weight: 700;
         text-decoration: none;
       }
       .featured-link:hover {
@@ -1526,12 +1526,12 @@
       }
       .hero h2 {
         max-width: 820px;
-        font-family: Manrope, ui-sans-serif, sans-serif;
+        font-family: var(--font-en, Manrope), ui-sans-serif, sans-serif;
         font-size: clamp(1.15rem, 2vw, 1.55rem);
         letter-spacing: -0.025em;
       }
       html[lang="ar"] .hero h2 {
-        font-family: "Noto Naskh Arabic", Tahoma, sans-serif;
+        font-family: var(--font-ar, "Noto Naskh Arabic"), Tahoma, sans-serif;
         letter-spacing: 0;
       }
       .lead {
@@ -1572,18 +1572,18 @@
       .latest-heading { margin: 22px 0 10px; font-size: 1.05rem; }
       .latest-works { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 8px; }
       .latest-works li { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; padding: 12px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); font-size: .9rem; }
-      .latest-works time { color: var(--gold); font-weight: 800; font-size: .78rem; }
+      .latest-works time { color: var(--gold); font-weight: 700; font-size: .78rem; }
       .latest-title a { color: var(--text); text-decoration: none; }
       .latest-title a:hover { text-decoration: underline; text-underline-offset: 4px; }
       .latest-venue { color: var(--muted); font-size: .78rem; }
-      .latest-new { margin-inline-start: auto; padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--gold) 18%, transparent); color: var(--gold); font-size: .68rem; font-weight: 800; }
+      .latest-new { margin-inline-start: auto; padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--gold) 18%, transparent); color: var(--gold); font-size: .68rem; font-weight: 700; }
       .latest-note { margin: 0 0 18px; color: var(--muted); font-size: .76rem; }
       html[dir="rtl"] .latest-title { direction: ltr; text-align: left; }
       .lead-card { margin-bottom: 16px; }
       .lead-card ul { margin: 12px 0 0; padding-inline-start: 22px; color: var(--muted); }
       .lead-card li + li { margin-top: 6px; }
       #leadership .card a { color: var(--gold); }
-      #leadership .volunteer-highlight { color: var(--gold); font-size: clamp(1.7rem, 2.2vw, 2.2rem); font-weight: 800; line-height: 1.25; }
+      #leadership .volunteer-highlight { color: var(--gold); font-size: clamp(1.7rem, 2.2vw, 2.2rem); font-weight: 700; line-height: 1.25; }
       .metric {
         display: block;
         padding: 18px 20px;
@@ -1606,7 +1606,7 @@
         margin-top: 7px;
         color: var(--muted);
         font-size: 0.69rem;
-        font-weight: 800;
+        font-weight: 700;
         letter-spacing: 0.06em;
         text-transform: uppercase;
       }
@@ -1637,7 +1637,7 @@
         border-inline-end: 1px solid var(--line);
         color: var(--muted);
         font-size: 0.77rem;
-        font-weight: 800;
+        font-weight: 700;
         text-align: center;
         text-decoration: none;
       }
@@ -1665,7 +1665,7 @@
       .research-card .research-label {
         color: var(--gold);
         font-size: 0.71rem;
-        font-weight: 800;
+        font-weight: 700;
         letter-spacing: 0.1em;
         text-transform: uppercase;
       }
@@ -1678,7 +1678,7 @@
         margin: 0 0 15px;
         color: var(--text);
         font-size: 0.76rem;
-        font-weight: 800;
+        font-weight: 700;
       }
       .research-card p {
         margin: 0;
@@ -1790,7 +1790,7 @@
         border-radius: 18px;
         background: var(--surface);
       }
-      .flagship-course span { color: var(--gold); font-size: 0.74rem; font-weight: 800; }
+      .flagship-course span { color: var(--gold); font-size: 0.74rem; font-weight: 700; }
       .flagship-course strong { display: block; margin-top: 22px; font-size: 0.9rem; line-height: 1.5; }
       .compact-details {
         margin-top: 14px;
@@ -1802,7 +1802,7 @@
         padding: 15px 18px;
         color: var(--blue);
         font-size: 0.78rem;
-        font-weight: 800;
+        font-weight: 700;
         cursor: pointer;
       }
       .compact-details .course-grid,
@@ -1829,7 +1829,7 @@
         margin-bottom: 4px;
         color: var(--gold);
         font-size: 0.69rem;
-        font-weight: 800;
+        font-weight: 700;
         letter-spacing: 0.08em;
         text-transform: uppercase;
       }
@@ -1864,7 +1864,7 @@
           font-size: clamp(1.25rem, 5vw, 2rem);
           text-align: center;
         }
-        html[lang="ar"] .nav a { font-family: "Noto Naskh Arabic", Tahoma, serif; }
+        html[lang="ar"] .nav a { font-family: var(--font-ar, "Noto Naskh Arabic"), Tahoma, serif; }
         .hero-grid { grid-template-columns: 1fr; }
         .portrait { width: min(370px, 76%); }
         .metrics-bar { grid-template-columns: repeat(4, 1fr); }
@@ -1927,9 +1927,9 @@
       }
 
       .recent { display: flex; flex-wrap: wrap; gap: 8px 22px; padding: 0; margin: 18px 0 0; list-style: none; font-size: .82rem; color: var(--muted); }
-      .recent time { color: var(--gold); font-weight: 800; }
+      .recent time { color: var(--gold); font-weight: 700; }
       .theme-strip { display: flex; flex-wrap: wrap; gap: 9px; padding: 0; margin: 0 0 22px; list-style: none; }
-      .theme-strip a { display: block; padding: 8px 13px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted); font-size: .76rem; font-weight: 800; text-decoration: none; }
+      .theme-strip a { display: block; padding: 8px 13px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted); font-size: .76rem; font-weight: 700; text-decoration: none; }
       .theme-strip a:hover { color: var(--gold); }
       .degree-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 22px; }
       .degree-row .degree-card { padding: 20px; border-radius: 18px; }
@@ -1958,7 +1958,7 @@
       .timeline .role p, .case-study p { max-width: 68ch; }
       .card, .featured-work, .degree-card, .flagship-course,
       .compact-details, .timeline .role, .research-snapshot, .case-study { border-radius: 20px; }
-      .card .tag { color: var(--gold); font-size: .78rem; font-weight: 800; }
+      .card .tag { color: var(--gold); font-size: .78rem; font-weight: 700; }
       .progress { position: fixed; top: 0; inset-inline-start: 0; width: 0; height: 2px; z-index: 100; background: var(--gold); pointer-events: none; }
       .reveal { opacity: 0; transform: translateY(12px); transition: opacity .45s ease, transform .45s ease; }
       .reveal.in { opacity: 1; transform: none; }
@@ -2053,12 +2053,20 @@
 <a class="btn primary" href="#leadership">القيادة</a><a class="btn secondary" href="publications.html">استعراض المنشورات</a><a class="btn textual" href="../Dr-Omaia-Al-Omari-Concise-Academic-CV.pdf" rel="noopener" target="_blank">عرض السيرة الأكاديمية · PDF · 3 صفحات ↗</a>
 </div><p class="availability-note">متاح للتعاون البحثي والمحاضرات المدعوة.</p>
 <div id="metricsBar" class="metrics-bar" role="group" aria-label="أبرز مؤشرات الملف الأكاديمي">
+<!-- dash:metrics -->
   <div class="metric"><strong>18+</strong><span>عاماً من الخبرة</span></div>
   <div class="metric"><strong>500+</strong><span>استشهاد · Google Scholar</span></div>
   <div class="metric"><strong>14</strong><span>مؤشر h · Google Scholar</span></div>
   <a class="metric" href="publications.html"><strong>40</strong><span>عملاً موثقاً</span></a>
+<!-- /dash:metrics -->
 </div>
-<ul aria-label="المستجدات" class="recent"><li><time datetime="2026">2026</time> — <span>رئيس قسم نظم المعلومات، جامعة الأمير سلطان</span></li><li><time datetime="2026">2026</time> — <span>مقالة جديدة في مجلة Computers عن سير عمل النماذج اللغوية الموجَّه بالتحقق في هندسة البرمجيات</span></li><li><time datetime="2026">2026</time> — <span>عضو لجنة تحكيم هاكاثون الذكاء الاصطناعي للأشخاص ذوي الإعاقة، ICDR 2026</span></li><li><time datetime="2026">2026</time> — <span>مقالتان جديدتان: YOLOv8 قابل للتفسير للتطبيقات الدفاعية (ETASR) وكشف التصيد الاحتيالي (J. Multiscale Modelling)</span></li><li><time datetime="2026">2026</time> — <span>عضو هيئة تحرير المجلة البابلية للشبكات</span></li></ul>
+<ul aria-label="المستجدات" class="recent"><!-- dash:news -->
+<li><time datetime="2026">2026</time> — <span>رئيس قسم نظم المعلومات، جامعة الأمير سلطان</span></li>
+<li><time datetime="2026">2026</time> — <span>مقالة جديدة في مجلة Computers عن سير عمل النماذج اللغوية الموجَّه بالتحقق في هندسة البرمجيات</span></li>
+<li><time datetime="2026">2026</time> — <span>عضو لجنة تحكيم هاكاثون الذكاء الاصطناعي للأشخاص ذوي الإعاقة، ICDR 2026</span></li>
+<li><time datetime="2026">2026</time> — <span>مقالتان جديدتان: YOLOv8 قابل للتفسير للتطبيقات الدفاعية (ETASR) وكشف التصيد الاحتيالي (J. Multiscale Modelling)</span></li>
+<li><time datetime="2026">2026</time> — <span>عضو هيئة تحرير المجلة البابلية للشبكات</span></li>
+<!-- /dash:news --></ul>
 </div>
 <div class="portrait">
 <img alt="صورة مهنية للدكتور أمية العمري" fetchpriority="high" height="1396" id="portraitImage" src="../PhotoDrOmaia.webp" width="1127"/>
@@ -2088,6 +2096,7 @@
 </div>
 <details class="compact-details"><summary>مزيد من اللجان والأدوار</summary>
 <div class="society-grid">
+<!-- dash:roles -->
 <article class="society-item"><span class="society-org">PSU</span><span class="society-role">مسؤول موقع كلية علوم الحاسب والمعلومات</span></article>
 <article class="society-item"><span class="society-org">PSU</span><span class="society-role">اللجنة المشتركة بين الكليات</span></article>
 <article class="society-item"><span class="society-org">PSU</span><span class="society-role">لجنة تنسيق الاختبارات 2026</span></article>
@@ -2097,6 +2106,7 @@
 <article class="society-item"><span class="society-org">ICDR 2026</span><span class="society-role">عضو لجنة تحكيم هاكاثون الذكاء الاصطناعي للأشخاص ذوي الإعاقة، ضمن المؤتمر الدولي السابع للإعاقة والتأهيل (مركز الملك سلمان لأبحاث الإعاقة، الرياض، 11–13 أكتوبر 2026)</span></article>
 <article class="society-item"><span class="society-org">ICEGOV 2026</span><span class="society-role">رئيس مسار في المؤتمر الدولي لنظرية وممارسة الحوكمة الإلكترونية</span></article>
 <article class="society-item"><span class="society-org">PSU</span><span class="society-role">رئيس معرض كلية علوم الحاسب والمعلومات 2026</span></article>
+<!-- /dash:roles -->
 </div></details></div></section><section id="research">
 <div class="wrap">
 <div class="section-head">
@@ -2106,7 +2116,14 @@
 </div>
 <p>تغطي أبحاثي ستة موضوعات و40 عملاً محكّماً، وأركز على نماذج يمكن للناس الوثوق بها وتفسيرها.</p>
 </div>
-<ul class="theme-strip"><li><a href="publications.html?theme=Cybersecurity%2C%20IoT%2C%20and%20cloud%20infrastructure">الأمن السيبراني وإنترنت الأشياء والسحابة · 9 أعمال</a></li><li><a href="publications.html?theme=NLP%2C%20education%2C%20and%20knowledge%20systems">معالجة اللغة والتعليم ونظم المعرفة · 8</a></li><li><a href="publications.html?theme=Healthcare%20and%20clinical%20decision%20support">الرعاية الصحية ودعم القرار السريري · 7</a></li><li><a href="publications.html?theme=Decision%20analytics%20and%20intelligent%20systems">تحليلات القرار والأنظمة الذكية · 6</a></li><li><a href="publications.html?theme=Computer%20vision%20and%20environmental%20intelligence">الرؤية الحاسوبية والذكاء البيئي · 5</a></li><li><a href="publications.html?theme=Responsible%20AI%2C%20governance%2C%20and%20society">الذكاء الاصطناعي المسؤول والحوكمة والمجتمع · 5</a></li></ul>
+<ul class="theme-strip"><!-- dash:themes -->
+<li><a href="publications.html?theme=Cybersecurity%2C%20IoT%2C%20and%20cloud%20infrastructure">الأمن السيبراني وإنترنت الأشياء والسحابة · 9 أعمال</a></li>
+<li><a href="publications.html?theme=NLP%2C%20education%2C%20and%20knowledge%20systems">معالجة اللغة والتعليم ونظم المعرفة · 8</a></li>
+<li><a href="publications.html?theme=Healthcare%20and%20clinical%20decision%20support">الرعاية الصحية ودعم القرار السريري · 7</a></li>
+<li><a href="publications.html?theme=Decision%20analytics%20and%20intelligent%20systems">تحليلات القرار والأنظمة الذكية · 6</a></li>
+<li><a href="publications.html?theme=Computer%20vision%20and%20environmental%20intelligence">الرؤية الحاسوبية والذكاء البيئي · 5</a></li>
+<li><a href="publications.html?theme=Responsible%20AI%2C%20governance%2C%20and%20society">الذكاء الاصطناعي المسؤول والحوكمة والمجتمع · 5</a></li>
+<!-- /dash:themes --></ul>
 <h3 class="latest-heading">أحدث المنشورات</h3>
 <ul class="latest-works" aria-label="أحدث المنشورات"><!-- metrics:latest -->
 <li><time datetime="2026">2026</time> <span class="latest-title" lang="en" dir="ltr"><a href="https://doi.org/10.3390/computers15110825" target="_blank" rel="noopener">From Generation to Verification: A Reproducible Empirical Study of Verification-Guided LLM Workflows for Software Engineering</a></span> <span class="latest-venue" lang="en">Computers</span></li>

@@ -1,6 +1,6 @@
 :root {
   color-scheme: dark;
-  --bg: #07111d;
+  --bg: #111a24;
   --surface: #0d1a28;
   --surface-2: #122234;
   --text: #f4f7fa;
@@ -18,18 +18,18 @@
 
 html[data-theme="light"] {
   color-scheme: light;
-  --bg: #f4f7fa;
-  --surface: #ffffff;
-  --surface-2: #eaf0f5;
-  --text: #0b1b2a;
-  --muted: #53687b;
-  --line: rgba(10, 31, 49, 0.12);
+  --bg: #f6f3ec;
+  --surface: #fffdf8;
+  --surface-2: #eeeae0;
+  --text: #22303b;
+  --muted: #5f6c76;
+  --line: rgba(60, 50, 30, 0.13);
   --accent: #7a5405;
   --accent-strong: #835d05;
   --accent-text: #ffffff;
-  --blue: #1769c2;
+  --blue: #2c6aa6;
   --amber: #835d05;
-  --shadow: 0 20px 65px rgba(25, 52, 75, 0.12);
+  --shadow: 0 14px 40px rgba(70, 55, 25, 0.08);
 }
 
 * {
@@ -46,7 +46,7 @@ body {
     radial-gradient(circle at 82% 2%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 30rem),
     var(--bg);
   color: var(--text);
-  font-family: Manrope, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  font-family: var(--font-en, Manrope), ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
   line-height: 1.6;
 }
 
@@ -686,7 +686,7 @@ html[dir="rtl"] .apa-label {
   }
 
   html[lang="ar"] .nav a {
-    font-family: "Noto Naskh Arabic", Tahoma, serif;
+    font-family: var(--font-ar, "Noto Naskh Arabic"), Tahoma, serif;
   }
 
   .menu {
@@ -759,7 +759,7 @@ html[dir="rtl"] .apa-label {
 html[lang="ar"] body,
 html[lang="ar"] h1,
 html[lang="ar"] h2 {
-  font-family: "Noto Naskh Arabic", Tahoma, Arial, sans-serif;
+  font-family: var(--font-ar, "Noto Naskh Arabic"), Tahoma, Arial, sans-serif;
 }
 
 html[lang="ar"] h1 {
@@ -777,7 +777,7 @@ html[lang="ar"] .method-list {
 
 html[lang="ar"] .pub-contribution,
 html[lang="ar"] .method-list {
-  font-family: Manrope, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  font-family: var(--font-en, Manrope), ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
 }
 
 html[lang="ar"] .pub-index strong,

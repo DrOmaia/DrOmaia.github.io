@@ -8,7 +8,7 @@ Personal academic website of Dr. Omaia Al-Omari — https://dromaia.github.io/
 | --- | --- | --- |
 | `/` | `index.html` | English home page (single page: education, research, teaching, experience, service, contact) |
 | `/ar/` | `ar/index.html` | Arabic home page — **generated**, do not edit by hand |
-| `/publications.html` | `publications.html` | Searchable catalogue of the 40 verified works |
+| `/publications.html` | `publications.html` | Searchable catalogue of the verified works |
 | `/ar/publications.html` | `ar/publications.html` | Arabic catalogue — **generated**, do not edit by hand |
 
 Shared files: `site.js` (theme, language link, mobile menu), `research-data.js` (the publication records used by the
