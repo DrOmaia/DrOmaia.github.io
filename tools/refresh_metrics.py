@@ -38,6 +38,8 @@ PUBS = ROOT / "publications.html"
 
 ORCID = "0000-0002-1638-1771"
 MAILTO = "oalomari@psu.edu.sa"  # polite-pool contact for Crossref / OpenAlex
+# ORCID records that are not papers (e.g. a proceedings front-matter title): never listed as "new on ORCID".
+ORCID_IGNORE = {"10.1109/cdma61895.2025.00005"}
 UA = f"dromaia-site-metrics/1.0 (https://dromaia.github.io; mailto:{MAILTO})"
 PAUSE = 0.25  # seconds between requests
 LATEST_COUNT = 3
@@ -185,7 +187,7 @@ def build_metrics(previous: dict | None) -> dict:
 
     verified_dois = {r["doi"] for r in per_work if r["doi"]}
     orcid_list = orcid_works()
-    new_on_orcid = [w for w in orcid_list if w["doi"] and w["doi"] not in verified_dois]
+    new_on_orcid = [w for w in orcid_list if w["doi"] and w["doi"] not in verified_dois and w["doi"] not in ORCID_IGNORE]
     new_on_orcid.sort(key=lambda w: (w["year"] or "0"), reverse=True)
     if not orcid_list and previous:
         new_on_orcid = previous.get("orcid_new", [])

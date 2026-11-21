@@ -34,18 +34,7 @@
    "venue": "International Journal of Technology"
   }
  ],
- "orcid_new": [
-  {
-   "title": "Governance and Ethical Frameworks for AI Integration in Higher Education: Enhancing Personalized Learning and Legal Compliance",
-   "year": "2025",
-   "doi": "10.62754/joe.v3i8.5781"
-  },
-  {
-   "title": "8th International Conference on Data Science and Machine Learning Applications (CDMA2025)",
-   "year": "2025",
-   "doi": "10.1109/cdma61895.2025.00005"
-  }
- ],
+ "orcid_new": [],
  "per_work": [
   {
    "id": "P01",
@@ -291,7 +280,7 @@
    "id": "P25",
    "title": "Governance and Ethical Frameworks for AI Integration in Higher Education",
    "year": 2025,
-   "doi": "10.62754/joe.v4i2.5781",
+   "doi": "10.62754/joe.v3i8.5781",
    "crossref": 23,
    "openalex": 23,
    "date": "2025-01-10",
