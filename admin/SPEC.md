@@ -168,3 +168,48 @@ Initial content: everything now in `tools/cv-source.html` (the current three-pag
 - Binary uploads: `GH.commit` accepts `{path: {base64}}` entries next to text entries (blob API, then tree by sha).
   Portrait: chosen image is centre-cropped to 1127:1396, scaled to 1127×1396, encoded as WebP in the browser, shown
   for confirmation, published as `PhotoDrOmaia.webp`. Files: max 5 MB each, safe ASCII file names.
+
+## Version 3
+
+### New markers in `index.html` (one item per line, reproduced exactly)
+| Marker | Line format | Model |
+| --- | --- | --- |
+| `dash:lead-bullets` | `<li data-ar="AR">EN</li>` | `leadBullets: [{en, ar}]` |
+| `dash:lead-cards` | `<article class="card"><span class="tag" data-ar>TAG</span><h3 [class] data-ar>TITLE</h3><p data-ar>TEXT</p></article>` | `leadCards: [{tag:{en,ar}, title:{en,ar}, text:{en,ar}, rich, titleClass?, ref?}]` |
+| `dash:contacts` | `<a class="contact-path[ phone]" [data-ar-href] href [rel target]><span class="contact-label" data-ar>LABEL</span><strong [data-ar]>VALUE</strong><span data-ar>HINT</span></a>` | `contacts: [{label:{en,ar}, value, valueAr, hint:{en,ar}, href, hrefAr, phone}]` |
+| `dash:contact-links` | `<a class="btn[ primary]" data-ar="AR" href [data-ar-href] [rel target]>EN</a>` | `contactLinks: [{en, ar, href, hrefAr, primary}]` |
+| `dash:degrees` | one `<article class="degree-card">…</article>` per line | `degreeCards: [{year, title:{en,ar}, institution:{en,ar}, link: {en, ar, href} or null}]` |
+| `dash:theses` | `<div class="degree-detail"><small data-ar>LABEL</small><p data-ar>TITLE</p></div>` | `thesisItems: [{label:{en,ar}, text:{en,ar}}]` |
+
+- `data-ar` is written only when the Arabic text is not empty; `rel="noopener" target="_blank"` only for http(s) links.
+- **Rich card**: a leadership card whose paragraph holds links or other elements is `rich: true`. Its line is kept
+  verbatim (`ref` = its line number in the block when read), it can be moved or deleted but not edited as a card, and
+  its texts stay in `model.texts` (the texts tab). New cards are plain.
+- `model.degrees` (`[{year, title, institution}]`, strings) and `model.theses` (`[string]`) keep their types and stay
+  read only (the CV module uses them); they follow `degreeCards` / `thesisItems` after a build.
+- Texts that are now list items are no longer in `model.texts`, so text ids on the home page changed.
+- `validate()` checks the required English fields and every link (`javascript:` and broken addresses are refused).
+- All six lists are in `DashLib.LISTS` and appear as editors in the الأقسام tab.
+
+### Page modules
+- `DashLib.FILES` gains `portfolio.html`; `DashLib.OPTIONAL_FILES = ["cv.html", "portfolio.html"]` (a missing file is
+  loaded as `""` and its module is not called). `DashLib.PAGES` gains `cv.html → ar/cv.html`.
+- Before calling the modules, `build()` re-reads the merged files once, so a module sees the site as it will be, plus
+  `model.today`, `model.meta = {verificationCutoff, verificationCutoffDisplay, total}`, `model.cutoff`, `model.cutoffDisplay`.
+- **Arabic CV**: when the built `cv.html` contains `data-ar`, `build()` also returns
+  `ar/cv.html = buildArabic("cv.html", html)` — only when `cv.html` changed, or when the caller supplied
+  `files["ar/cv.html"]` and it is out of step. `ar/cv.html` is output only (not in `FILES`); it is byte-identical to
+  `tools/build-arabic.py`. Arabic CV fields are siblings named `xAr` in `model.cv` (missing Arabic → English).
+- **Portfolio** (`admin/portfolio.js`, `window.DashPortfolio`, optional): `read()` sets
+  `model.portfolio = DashPortfolio.read(html)`; `build()` calls `DashPortfolio.buildDetailed(model, html)` (or `build`),
+  writes `portfolio.html` when it changed and appends the module's warnings. A failing module is a warning, never a
+  broken publish. Tests: `_internal.setPortfolio(null | stub | undefined)`, same as `setCV`.
+
+### Interface
+- الأقسام: editors for the six lists above (a rich card is shown locked, with a note pointing to the texts tab).
+- السيرة: an Arabic field next to each English owner field (shown when `model.cv` carries an `…Ar` key or
+  `DashCV.ARABIC === true`); the CV preview has "عربي / English"; a "ملف الأبحاث / Portfolio" box edits
+  `model.portfolio.trajectory` (add / delete / move lines) with a preview of `portfolio.html` and its public link.
+- The publish preview can show `portfolio.html` and the Arabic CV. The dashboard page loads `portfolio.js` (the
+  dashboard works without it). Cache tag `?v=20261121c`.
+- No visitor statistics: nothing about analytics is in the code, the pages or the model.

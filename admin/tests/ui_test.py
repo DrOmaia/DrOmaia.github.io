@@ -315,6 +315,8 @@ class FakeGitHub:
             if rel == "files":
                 return send(200, [{"name": n, "path": "files/" + n, "size": s, "type": "file"} for n, s in sorted(self.files_dir.items())])
             f = ROOT / rel
+            if rel in getattr(self, "missing", ()):
+                return send(404, {"message": "Not Found"})
             if "raw" not in req.headers.get("accept", "") or not f.is_file():
                 return send(404, {"message": "Not Found"})
             return send(200, raw=f.read_bytes())
@@ -416,6 +418,7 @@ def new_context(browser, width, height, gh):
     if USE_MOCK:
         ctx.route("**/admin/lib.js*", lambda r: r.fulfill(status=200, headers=JS, body=MOCK_JS))
         ctx.route("**/admin/cv.js*", lambda r: r.fulfill(status=200, headers=JS, body="/* stand-in CV module is inside mock_lib.js */"))
+        ctx.route("**/admin/portfolio.js*", lambda r: r.fulfill(status=200, headers=JS, body="/* stand-in portfolio module is inside mock_lib.js */"))
     if MOCK_IMPORT:
         ctx.route("**/admin/cvimport.js*", lambda r: r.fulfill(status=200, headers=JS, body=IMPORT_STANDIN))
     return ctx
@@ -1205,6 +1208,198 @@ def narrow(browser, base):
     ctx.close()
 
 
+def v3(browser, base, shots):
+    """Version 3: leadership / contact / degree editors, the portfolio editor, Arabic CV fields, optional page modules."""
+    gh = FakeGitHub()
+    ctx = new_context(browser, 390, 844, gh)
+    page = ctx.new_page()
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    sign_in(page, base)
+
+    def tab(name):
+        page.click('.tab[data-tab="%s"]' % name)
+        expect(page.locator('.tab[data-tab="%s"]' % name)).to_have_attribute("aria-selected", "true")
+
+    def open_fold(key):
+        loc = page.locator('details[data-editor="%s"]' % key)
+        if loc.get_attribute("open") is None:
+            loc.locator("> summary").click()
+        expect(loc).to_have_attribute("open", "")
+        return loc
+
+    def no_hscroll(where):
+        over = page.evaluate("document.documentElement.scrollWidth - window.innerWidth")
+        assert over <= 0, "horizontal scroll at %s (%dpx)" % (where, over)
+
+    def item(key, i):
+        return page.locator('#list-%s article[data-i="%d"]' % (key, i))
+
+    info = page.evaluate("({pf: !!(window.DashPortfolio), cvAr: !!(window.DashCV && window.DashCV.ARABIC === true), pages: Object.keys((window.DashLib || {}).PAGES || {}), optional: (window.DashLib || {}).OPTIONAL_FILES || []})")
+    assert "cv.html" in info["pages"] and "portfolio.html" in info["optional"], info
+
+    # ---------- sections tab: the six new lists
+    tab("sections")
+    for key in ["leadBullets", "leadCards", "contacts", "contactLinks", "degreeCards", "thesisItems"]:
+        expect(page.locator('details[data-editor="%s"]' % key)).to_have_count(1)
+    open_fold("leadBullets")
+    n0 = page.locator("#list-leadBullets article").count()
+    assert n0 == 5, n0
+    page.click("#add-leadBullets")
+    item("leadBullets", n0).locator('[data-k="en"]').fill('New bullet <b> & "more"')
+    item("leadBullets", n0).locator('[data-k="ar"]').fill("نقطة جديدة")
+    open_fold("leadCards")
+    expect(page.locator("#list-leadCards [data-locked]")).to_have_count(1)
+    rich = page.locator("#list-leadCards article", has=page.locator("[data-locked]"))
+    expect(rich.locator("input, textarea")).to_have_count(0)
+    expect(rich.locator("[data-locked]")).to_contain_text("البابلية")
+    rich.locator('[data-move="up"]').click()          # the rich card moves to the top and keeps its markup
+    expect(item("leadCards", 0).locator("[data-locked]")).to_have_count(1)
+    page.click("#add-leadCards")
+    last = page.locator("#list-leadCards article").count() - 1
+    item("leadCards", last).locator('[data-k="tag.en"]').fill("New tag")
+    item("leadCards", last).locator('[data-k="title.en"]').fill("A plain test card")
+    item("leadCards", last).locator('[data-k="title.ar"]').fill("بطاقة اختبار")
+    item("leadCards", last).locator('[data-k="text.en"]').fill("Card text here.")
+    open_fold("contacts")
+    expect(item("contacts", 2).locator('[data-k="phone"]')).to_be_checked()
+    expect(item("contacts", 0).locator('[data-k="phone"]')).not_to_be_checked()
+    item("contacts", 2).locator('[data-k="value"]').fill("+966 50 000 0000")
+    item("contacts", 2).locator('[data-k="href"]').fill("tel:+966500000000")
+    open_fold("contactLinks")
+    page.click("#add-contactLinks")
+    last = page.locator("#list-contactLinks article").count() - 1
+    item("contactLinks", last).locator('[data-k="en"]').fill("Scholar profile ↗")
+    item("contactLinks", last).locator('[data-k="href"]').fill("https://scholar.google.com/citations?user=TJnHJX8AAAAJ")
+    open_fold("degreeCards")
+    expect(page.locator("#list-degreeCards article")).to_have_count(3)
+    item("degreeCards", 1).locator('[data-k="link.en"]').fill("University page ↗")
+    item("degreeCards", 1).locator('[data-k="link.href"]').fill("https://www.yu.edu.jo/")
+    open_fold("thesisItems")
+    item("thesisItems", 1).locator('[data-k="text.en"]').fill("Evaluation of Stemming (edited)")
+    no_hscroll("sections lists (v3)")
+    left = page.evaluate(LEFT_ENGLISH)
+    assert not left, "English interface text in the Arabic sections tab: %r" % left
+    if shots:
+        page.screenshot(path=str(SHOTS / "390_ar_14_v3_lists.png"), full_page=True)
+    # a bad link is reported by validate and blocks publishing
+    if not USE_MOCK:  # the stand-in library does not validate links
+        item("contactLinks", last).locator('[data-k="href"]').fill("javascript:alert(1)")
+        tab("publish")
+        expect(page.locator("#publishBtn")).to_be_disabled()
+        tab("sections")
+        open_fold("contactLinks")
+        item("contactLinks", last).locator('[data-k="href"]').fill("https://scholar.google.com/citations?user=TJnHJX8AAAAJ")
+
+    # ---------- CV tab: Arabic fields only when the CV module carries Arabic; portfolio editor when the module is there
+    tab("cv")
+    has_ar = page.locator("#cvProfileAr").count() == 1
+    expected_ar = page.evaluate("""(() => { const cv = window.__dashState ? null : null; return !!(window.DashCV && window.DashCV.ARABIC === true); })()""")
+    if expected_ar:
+        assert has_ar, "the CV module says it carries Arabic but the Arabic fields are hidden"
+    if has_ar:
+        page.fill("#cvProfileAr", "نبذة عربية تجريبية للوحة.")
+        expect(page.locator("#cvLanguagesAr")).to_have_count(1)
+    has_pf = page.locator("#pfBox").count() == 1
+    assert has_pf == bool(info["pf"]), "portfolio editor shown=%s, module present=%s" % (has_pf, info["pf"])
+    if has_pf:
+        open_fold("pf-trajectory")
+        lines0 = page.locator("#list-pf-trajectory article").count()
+        assert lines0 >= 1
+        page.click("#add-pf-trajectory")
+        page.locator('#list-pf-trajectory article[data-i="%d"] [data-k="line"]' % lines0).fill("2027: a test line & <more>.")
+        page.click("#pfPreviewBtn")
+        doc = page.locator("#pfPreview").get_attribute("srcdoc")
+        assert doc and "2027: a test line &amp; &lt;more&gt;." in doc and '<base href="https://dromaia.github.io/">' in doc, "portfolio preview does not show the edit"
+        expect(page.locator('[data-link="portfolio"] a')).to_have_attribute("href", "https://dromaia.github.io/portfolio.html")
+    no_hscroll("cv tab (v3)")
+    left = page.evaluate(LEFT_ENGLISH)
+    assert not left, "English interface text in the Arabic CV tab: %r" % left
+    if shots:
+        page.screenshot(path=str(SHOTS / "390_ar_15_v3_cv.png"), full_page=True)
+
+    # ---------- publish tab: files, previews, one commit
+    tab("publish")
+    expect(page.locator("#summary li").first).to_be_visible()
+    expect(page.locator("#publishBtn")).to_be_enabled()
+    if has_pf:
+        page.click('[data-pv="portfolio.html"]')
+        doc = page.locator("#preview").get_attribute("srcdoc")
+        assert doc and "2027: a test line" in doc
+    page.click('[data-pv="cv.html"]')
+    cv_doc = page.locator("#preview").get_attribute("srcdoc") or ""
+    assert cv_doc, "CV preview is empty"
+    if page.locator('[data-cvlang="ar"]').count():
+        page.click('[data-cvlang="ar"]')
+        ar_doc = page.locator("#preview").get_attribute("srcdoc") or ""
+        assert ar_doc and ar_doc != cv_doc and '<base href="https://dromaia.github.io/ar/">' in ar_doc and " data-ar=" not in ar_doc, "Arabic CV preview is not the Arabic page"
+        page.click('[data-cvlang="en"]')
+    page.click('[data-pv="index.html"]')
+    page.click("#publishBtn")
+    page.click("#publishYes")
+    expect(page.locator("#pubMsg")).to_contain_text("تم النشر")
+    assert len(gh.trees) == 1 and len(gh.new_commits) == 1, (len(gh.trees), len(gh.new_commits))
+    entries = {e["path"]: e.get("content", "") for e in gh.trees[0]["tree"]}
+    assert "index.html" in entries and "ar/index.html" in entries, sorted(entries)
+    if has_pf:
+        assert "portfolio.html" in entries and "2027: a test line &amp; &lt;more&gt;." in entries["portfolio.html"], sorted(entries)
+    if has_ar:
+        assert "cv.html" in entries, sorted(entries)
+        if " data-ar=" in entries["cv.html"]:
+            assert "ar/cv.html" in entries and " data-ar=" not in entries["ar/cv.html"], sorted(entries)
+    idx = entries["index.html"]
+    assert 'New bullet &lt;b&gt; &amp; "more"</li>' in idx or "New bullet &lt;b&gt; &amp; &quot;more&quot;</li>" in idx, "new bullet missing or not escaped"
+    assert "<b> &" not in idx
+    cards = idx[idx.index("<!-- dash:lead-cards -->"):idx.index("<!-- /dash:lead-cards -->")].strip().split("\n")[1:]
+    assert len(cards) == 4 and "Babylonian Journal of Networking" in cards[0] and 'class="verified"' in cards[0], "the rich card lost its place or markup"
+    assert "A plain test card" in cards[3] and "Card text here." in cards[3]
+    assert 'href="tel:+966500000000"' in idx and "+966 50 000 0000" in idx
+    assert 'href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ" rel="noopener" target="_blank">Scholar profile ↗</a>' in idx
+    assert 'href="https://www.yu.edu.jo/" rel="noopener" target="_blank">University page ↗</a>' in idx
+    assert "Evaluation of Stemming (edited)" in idx
+    assert "نقطة جديدة" in entries["ar/index.html"] and "بطاقة اختبار" in entries["ar/index.html"]
+    assert gh.new_commits[0]["message"].startswith("Dashboard:")
+    for word in ["leadership", "contact", "education"]:
+        assert word in gh.new_commits[0]["message"], gh.new_commits[0]["message"]
+
+    # ---------- English: the new editors carry no Arabic interface text
+    page.click('[data-lang="en"]')
+    tab("sections")
+    for key in ["leadBullets", "leadCards", "contacts", "contactLinks", "degreeCards", "thesisItems"]:
+        open_fold(key)
+    left = [x for x in page.evaluate(LEFT_ARABIC) if x]
+    assert not left, "Arabic interface text in the English sections tab: %r" % left
+    tab("cv")
+    if has_pf:
+        open_fold("pf-trajectory")
+    left = [x for x in page.evaluate(LEFT_ARABIC) if x]
+    assert not left, "Arabic interface text in the English CV tab: %r" % left
+    no_hscroll("english v3")
+    if shots:
+        page.screenshot(path=str(SHOTS / "390_en_11_v3_cv.png"), full_page=True)
+    assert not errors, errors
+    ctx.close()
+    return {"portfolio": bool(has_pf), "arabic_cv_fields": bool(has_ar)}
+
+
+def optional_files(browser, base):
+    """portfolio.html and cv.html may be missing on main: sign-in still works and their editors are hidden."""
+    gh = FakeGitHub()
+    gh.missing = {"portfolio.html", "cv.html"}
+    ctx = new_context(browser, 390, 844, gh)
+    page = ctx.new_page()
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    sign_in(page, base)
+    page.click('.tab[data-tab="cv"]')
+    expect(page.locator("#pfBox")).to_have_count(0)
+    page.click('.tab[data-tab="publish"]')
+    expect(page.locator('[data-pv="portfolio.html"]')).to_have_count(0)
+    expect(page.locator("#publishBtn")).to_be_disabled()
+    assert not errors, errors
+    ctx.close()
+
+
 def main():
     SHOTS.mkdir(parents=True, exist_ok=True)
     httpd = serve()
@@ -1214,10 +1409,13 @@ def main():
         results = [run(browser, base, 390, 844, True), run(browser, base, 1280, 800, False)]
         english(browser, base, True)
         narrow(browser, base)
+        v3info = v3(browser, base, True)
+        optional_files(browser, base)
         browser.close()
     httpd.shutdown()
     for r in results:
         print("ok", r)
+    print("v3 ok", v3info)
     print("ui_test: all passed (library: %s, CV import: %s)" % ("stand-in" if USE_MOCK else "real", "stand-in" if MOCK_IMPORT else "real"))
 
 

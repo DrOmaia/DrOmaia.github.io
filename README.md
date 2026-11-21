@@ -10,6 +10,8 @@ Personal academic website of Dr. Omaia Al-Omari — https://dromaia.github.io/
 | `/ar/` | `ar/index.html` | Arabic home page — **generated**, do not edit by hand |
 | `/publications.html` | `publications.html` | Searchable catalogue of the verified works |
 | `/ar/publications.html` | `ar/publications.html` | Arabic catalogue — **generated**, do not edit by hand |
+| `/cv.html`, `/ar/cv.html` | `cv.html`, `ar/cv.html` | Live CV (short and full); the Arabic one is **generated** |
+| `/portfolio.html` | `portfolio.html` | Live research portfolio built from `research-data.js` |
 
 Shared files: `site.js` (theme, language link, mobile menu), `research-data.js` (the publication records used by the
 Research Assistant), `research-assistant.js/.css` (the on-page assistant), `publications.js/.css`, the two PDFs, and the

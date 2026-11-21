@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Generate the static Arabic pages (ar/index.html, ar/publications.html) from the English pages.
+"""Generate the static Arabic pages (ar/index.html, ar/publications.html, ar/cv.html) from the English pages.
 
 How translations are stored (in the English HTML files):
   data-ar="..."            Arabic text for the element's content
   data-ar-<attribute>="..." Arabic value for an attribute (aria-label, content, href, placeholder, alt, lang, dir, ...)
 
-Run from the repository root after editing index.html or publications.html:
-  python3 tools/build-arabic.py
+Run from the repository root after editing index.html, publications.html or cv.html:
+  python3 tools/build-arabic.py              (every page)
+  python3 tools/build-arabic.py cv.html      (only the pages named)
 Then commit the regenerated files in ar/ together with your change.
 No third-party packages are needed.
 """
@@ -26,6 +27,11 @@ PAGES = {
         "out": "ar/publications.html",
         "canonical_en": "https://dromaia.github.io/publications.html",
         "canonical_ar": "https://dromaia.github.io/ar/publications.html",
+    },
+    "cv.html": {
+        "out": "ar/cv.html",
+        "canonical_en": "https://dromaia.github.io/cv.html",
+        "canonical_ar": "https://dromaia.github.io/ar/cv.html",
     },
 }
 
@@ -109,7 +115,11 @@ def build(page: str, spec: dict) -> None:
 
 
 if __name__ == "__main__":
-    for page, spec in PAGES.items():
-        build(page, spec)
+    wanted = sys.argv[1:] or list(PAGES)
+    unknown = [page for page in wanted if page not in PAGES]
+    if unknown:
+        sys.exit("unknown page(s): " + ", ".join(unknown) + " (known: " + ", ".join(PAGES) + ")")
+    for page in wanted:
+        build(page, PAGES[page])
     sys.exit(0)
 

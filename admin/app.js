@@ -10,9 +10,10 @@
   var SITE = "https://dromaia.github.io/";
   var PHOTO = "PhotoDrOmaia.webp", PHOTO_W = 1127, PHOTO_H = 1396;
   var MAX_FILE = 5 * 1024 * 1024, MAX_PHOTO_SOURCE = 25 * 1024 * 1024;
-  var ASSET_TAG = "20261121b";
+  var ASSET_TAG = "20261121c";
   /* Parts of the model that count as "a change" (nav follows sections; binary uploads are counted apart). */
-  var KEYS = ["works", "metrics", "news", "roles", "texts", "fonts", "theme", "sections", "flagship", "courses", "timeline", "timelineEarlier", "citations", "cv", "photoVersion"];
+  var KEYS = ["works", "metrics", "news", "roles", "texts", "fonts", "theme", "sections", "flagship", "courses", "timeline", "timelineEarlier", "citations", "cv", "photoVersion",
+    "leadBullets", "leadCards", "contacts", "contactLinks", "degreeCards", "thesisItems", "portfolio"];
   var TABS = ["works", "numbers", "sections", "texts", "look", "cv", "import", "files", "ai", "publish"];
   var FILE_TYPES = { pdf: "application/pdf", png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", webp: "image/webp", gif: "image/gif" };
 
@@ -87,6 +88,23 @@
       cards: "البطاقات", addCard: "＋ بطاقة", cardTitleEn: "عنوان البطاقة بالإنجليزية", cardTitleAr: "عنوان البطاقة بالعربية",
       cardTextEn: "نص البطاقة بالإنجليزية", cardTextAr: "نص البطاقة بالعربية", cardLink: "رابط (اختياري)",
       listsTitle: "القوائم داخل الأقسام", listsHint: "افتح القائمة لتضيف أو تحذف أو ترتب عناصرها.",
+      list_leadBullets: "نقاط بطاقة القيادة", list_leadCards: "بطاقات القيادة", list_contacts: "وسائل التواصل", list_contactLinks: "أزرار التواصل",
+      list_degreeCards: "الشهادات العلمية", list_thesisItems: "عناوين الرسائل",
+      textEn: "النص بالإنجليزية", textAr: "النص بالعربية", tagEn: "الوسم بالإنجليزية", tagAr: "الوسم بالعربية",
+      leadCardsHint: "البطاقات الثلاث تحت بطاقة رئاسة القسم. البطاقة التي فيها روابط تبقى كما هي وتُعدَّل نصوصها من تبويب النصوص.",
+      richCard: "هذه البطاقة فيها روابط داخل النص، فتُعدَّل نصوصها من تبويب «النصوص». تستطيع هنا ترتيبها أو حذفها فقط.",
+      contactsHint: "بطاقات التواصل في آخر الصفحة. الرابط يبدأ بـ mailto: للبريد و tel: للهاتف و https:// للمواقع.",
+      labelEn: "الاسم بالإنجليزية", labelAr: "الاسم بالعربية", contactValue: "القيمة الظاهرة", contactValueAr: "القيمة بالعربية (اختياري)",
+      hintEn: "السطر الصغير بالإنجليزية", hintAr: "السطر الصغير بالعربية", linkHref: "الرابط", linkHrefAr: "رابط الصفحة العربية (اختياري)",
+      isPhone: "رقم هاتف (يظهر بأرقام كبيرة)", isPrimary: "زر رئيسي ملوّن",
+      degreesHint: "بطاقات الشهادات في قسم المسيرة، وتظهر كذلك في السيرة الذاتية.",
+      degreeEn: "اسم الشهادة بالإنجليزية", degreeAr: "اسم الشهادة بالعربية", instEn: "الجامعة بالإنجليزية", instAr: "الجامعة بالعربية",
+      linkTextEn: "نص الرابط بالإنجليزية (اختياري)", linkTextAr: "نص الرابط بالعربية", thesisEn: "عنوان الرسالة بالإنجليزية", thesisAr: "عنوان الرسالة بالعربية",
+      cvLang: "لغة السيرة", cvProfileAr: "النبذة المهنية بالعربية", cvArHint: "إن تركت الحقل العربي فارغًا يظهر النص الإنجليزي في السيرة العربية.",
+      cvLanguagesAr: "اللغات بالعربية", cvOpenToAr: "«منفتح على» بالعربية", cvTitleAr: "العنوان بالعربية", cvTextAr: "النص بالعربية",
+      cvLinesAr: "السطور بالعربية (سطر لكل عنصر)", cvBulletsAr: "النقاط بالعربية (سطر لكل نقطة)",
+      pvPf: "ملف الأبحاث", pfTitle: "ملف الأبحاث الحيّ", pfHint: "صفحة ملف الأبحاث تُبنى من فهرس الأبحاث مع كل نشر. الجزء الوحيد الذي تكتبه أنت هو «المسار المنهجي».",
+      pfLink: "رابط الصفحة:", pfPreview: "معاينة ملف الأبحاث", pfPreviewTitle: "معاينة ملف الأبحاث", pfTrajectory: "المسار المنهجي", pfLine: "السطر (بالإنجليزية)",
       list_flagship: "المقررات المميزة", list_courses: "كل المقررات", list_timeline: "المسيرة المهنية",
       list_timelineEarlier: "أدوار سابقة", list_roles: "اللجان والأدوار", addItem: "＋ عنصر جديد", count: "({n})",
       code: "رمز المقرر", nameEn: "الاسم بالإنجليزية", nameAr: "الاسم بالعربية", period: "الفترة",
@@ -244,6 +262,23 @@
       cards: "Cards", addCard: "＋ Card", cardTitleEn: "Card title in English", cardTitleAr: "Card title in Arabic",
       cardTextEn: "Card text in English", cardTextAr: "Card text in Arabic", cardLink: "Link (optional)",
       listsTitle: "Lists inside the sections", listsHint: "Open a list to add, delete or reorder its items.",
+      list_leadBullets: "Leadership bullet points", list_leadCards: "Leadership cards", list_contacts: "Contact paths", list_contactLinks: "Contact buttons",
+      list_degreeCards: "Degrees", list_thesisItems: "Thesis titles",
+      textEn: "Text in English", textAr: "Text in Arabic", tagEn: "Tag in English", tagAr: "Tag in Arabic",
+      leadCardsHint: "The three cards under the department-chair card. A card with links inside it stays as it is; edit its texts from the Texts tab.",
+      richCard: "This card has links inside its text, so its texts are edited from the Texts tab. Here you can only move or delete it.",
+      contactsHint: "The contact cards at the end of the page. A link starts with mailto: for email, tel: for a phone and https:// for a website.",
+      labelEn: "Label in English", labelAr: "Label in Arabic", contactValue: "Value shown", contactValueAr: "Value in Arabic (optional)",
+      hintEn: "Small line in English", hintAr: "Small line in Arabic", linkHref: "Link", linkHrefAr: "Link on the Arabic page (optional)",
+      isPhone: "Phone number (shown in large digits)", isPrimary: "Main coloured button",
+      degreesHint: "The degree cards in the Career section; they also appear in the CV.",
+      degreeEn: "Degree in English", degreeAr: "Degree in Arabic", instEn: "University in English", instAr: "University in Arabic",
+      linkTextEn: "Link text in English (optional)", linkTextAr: "Link text in Arabic", thesisEn: "Thesis title in English", thesisAr: "Thesis title in Arabic",
+      cvLang: "CV language", cvProfileAr: "Professional profile in Arabic", cvArHint: "If an Arabic field is left empty, the English text is shown in the Arabic CV.",
+      cvLanguagesAr: "Languages in Arabic", cvOpenToAr: "“Open to” in Arabic", cvTitleAr: "Title in Arabic", cvTextAr: "Text in Arabic",
+      cvLinesAr: "Lines in Arabic (one per item)", cvBulletsAr: "Bullet points in Arabic (one per line)",
+      pvPf: "Portfolio", pfTitle: "Live research portfolio", pfHint: "The portfolio page is rebuilt from the publication catalogue on every publish. The only part you write is the “Methodological trajectory”.",
+      pfLink: "Page link:", pfPreview: "Preview the portfolio", pfPreviewTitle: "Portfolio preview", pfTrajectory: "Methodological trajectory", pfLine: "Line (in English)",
       list_flagship: "Flagship courses", list_courses: "All courses", list_timeline: "Career timeline",
       list_timelineEarlier: "Earlier roles", list_roles: "Committees and roles", addItem: "＋ New item", count: "({n})",
       code: "Course code", nameEn: "Name in English", nameAr: "Name in Arabic", period: "Period",
@@ -339,7 +374,7 @@
     return { q: "", form: null, confirm: "", tq: "", pv: { page: "index.html", lang: "ar" }, pub: null, last: null, lastState: "", busy: "", draft: null, signErr: null,
       fontsLoaded: {}, doiBusy: false, open: { ar: true }, cites: null, photo: null, cvPreview: false, imp: { text: "", items: null, askMe: [], numbers: [], done: {} },
       fileErr: [], dir: null, dirState: "", uploaded: [], guide: null, guideState: "", copied: "", restoreNote: "", toTop: false,
-      cvMode: "short", cvi: null, ver: { state: "", list: [], headTree: "", name: "", msg: null } };
+      cvMode: "short", cvLang: "en", pfPreview: false, cvi: null, ver: { state: "", list: [], headTree: "", name: "", msg: null } };
   }
 
   /* ---------- language ---------- */
@@ -689,8 +724,14 @@
   function listEditor(o) {
     var list = o.get() || [];
     var items = el("div", { class: "list", id: "list-" + o.key }, list.map(function (it, i) {
-      var controls = o.fields.map(function (f) {
+      var locked = o.readonly ? o.readonly(it) : "";
+      var controls = locked ? [el("div", { class: "locked", "data-locked": "1" }, [
+        el("strong", { dir: "auto", text: o.title ? o.title(it) : "" }), el("p", { class: "muted small", text: locked })])] : o.fields.map(function (f) {
         var props = { dir: f.dir || "auto", "data-k": f.p };
+        if (f.bool) {
+          return el("label", { class: "check" }, [el("input", { type: "checkbox", checked: !!getp(it, f.p), "data-k": f.p,
+            onchange: function (e) { setp(it, f.p, !!e.target.checked); touch(); } }), el("span", { text: t(f.label) })]);
+        }
         if (f.mode) props.inputmode = f.mode;
         var onin = function (v) { setp(it, f.p, v); touch(); };
         if (f.lines) {
@@ -707,7 +748,7 @@
         return field(t(f.label), f.long ? area(getp(it, f.p), onin, props) : input(getp(it, f.p), onin, props));
       });
       return el("article", { class: "item", "data-list": o.key, "data-i": String(i) }, [
-        el("div", { class: o.grid || "grid2" }, controls),
+        el("div", { class: locked ? "grid1" : (o.grid || "grid2") }, controls),
         el("div", { class: "row" }, [moveBtns(list, i), confirmBtn(o.key + "-" + i, t("del"), t("yesDelete"), function () { list.splice(i, 1); touch(); render(); }, "danger sm")])
       ]);
     }));
@@ -1047,6 +1088,28 @@
       { key: "roles", top: true, hint: t("rolesHint"), blank: function () { return { org: "", orgAr: "", en: "", ar: "" }; },
         fields: [{ p: "org", label: "org", dir: "ltr" }, { p: "orgAr", label: "orgAr", dir: "rtl" }, { p: "en", label: "roleEn", dir: "ltr", long: true }, { p: "ar", label: "roleAr", dir: "rtl", long: true }] }
     ];
+    var two = function (base, en, ar, long) {
+      return [{ p: base + ".en", label: en, dir: "ltr", long: long }, { p: base + ".ar", label: ar, dir: "rtl", long: long }];
+    };
+    lists = lists.concat([
+      { key: "leadBullets", blank: function () { return { en: "", ar: "" }; },
+        fields: [{ p: "en", label: "textEn", dir: "ltr", long: true }, { p: "ar", label: "textAr", dir: "rtl", long: true }] },
+      { key: "leadCards", hint: t("leadCardsHint"), blank: function () { return { tag: { en: "", ar: "" }, title: { en: "", ar: "" }, text: { en: "", ar: "" }, rich: false }; },
+        readonly: function (it) { return it && it.rich ? t("richCard") : ""; },
+        title: function (it) { return lbl((it || {}).title) || lbl((it || {}).tag); },
+        fields: two("tag", "tagEn", "tagAr").concat(two("title", "titleEn", "titleAr"), two("text", "cardTextEn", "cardTextAr", true)) },
+      { key: "contacts", hint: t("contactsHint"), blank: function () { return { label: { en: "", ar: "" }, value: "", valueAr: "", hint: { en: "", ar: "" }, href: "", hrefAr: "", phone: false }; },
+        fields: two("label", "labelEn", "labelAr").concat([{ p: "value", label: "contactValue", dir: "ltr" }, { p: "valueAr", label: "contactValueAr", dir: "rtl" }],
+          two("hint", "hintEn", "hintAr"), [{ p: "href", label: "linkHref", dir: "ltr" }, { p: "hrefAr", label: "linkHrefAr", dir: "ltr" }, { p: "phone", label: "isPhone", bool: true }]) },
+      { key: "contactLinks", blank: function () { return { en: "", ar: "", href: "", hrefAr: "", primary: false }; },
+        fields: [{ p: "en", label: "textEn", dir: "ltr" }, { p: "ar", label: "textAr", dir: "rtl" }, { p: "href", label: "linkHref", dir: "ltr" },
+          { p: "hrefAr", label: "linkHrefAr", dir: "ltr" }, { p: "primary", label: "isPrimary", bool: true }] },
+      { key: "degreeCards", top: true, hint: t("degreesHint"), blank: function () { return { year: String(new Date().getFullYear()), title: { en: "", ar: "" }, institution: { en: "", ar: "" }, link: null }; },
+        fields: [{ p: "year", label: "fYear", dir: "ltr", mode: "numeric" }].concat(two("title", "degreeEn", "degreeAr"), two("institution", "instEn", "instAr"),
+          [{ p: "link.en", label: "linkTextEn", dir: "ltr" }, { p: "link.ar", label: "linkTextAr", dir: "rtl" }, { p: "link.href", label: "linkHref", dir: "ltr" }]) },
+      { key: "thesisItems", blank: function () { return { label: { en: "Thesis", ar: "عنوان الرسالة" }, text: { en: "", ar: "" } }; },
+        fields: two("label", "labelEn", "labelAr").concat(two("text", "thesisEn", "thesisAr", true)) }
+    ]);
     lists.forEach(function (o) {
       if (!Array.isArray(m[o.key])) return;
       var ml = modelList(o.key);
@@ -1289,8 +1352,28 @@
 
   /* ---------- tab: cv ---------- */
   /* The preview iframe runs no scripts, so the short / full switch is done by the class the CV page uses. */
+  /* The CV has an Arabic page when cv.html carries data-ar texts (or the CV module says so). */
+  function cvHasArabic(html) {
+    return !!(window.DashCV && window.DashCV.ARABIC === true) || /\sdata-ar(?:-[a-zA-Z-]+)?="/.test(String(html || S.files["cv.html"] || ""));
+  }
+  function cvArabicFields() {
+    var cv = (S.model || {}).cv;
+    if (window.DashCV && window.DashCV.ARABIC === true) return true;
+    var found = false;
+    (function walk(o) {
+      if (found || !o || typeof o !== "object") return;
+      Object.keys(o).forEach(function (k) { if (/Ar$/.test(k) || (k === "ar" && o === cv.profile)) found = true; else walk(o[k]); });
+    })(cv);
+    return found;
+  }
+  function cvLangSwitch() {
+    return el("div", { class: "seg-wrap", role: "group", "aria-label": t("cvLang") }, [
+      seg([["en", t("pvEn")], ["ar", t("pvAr")]], S.ui.cvLang === "ar" ? "ar" : "en", function (v) { S.ui.cvLang = v; render(); }, "data-cvlang")
+    ]);
+  }
   function cvDoc(html) {
-    var doc = withBase(html, SITE);
+    var arabic = S.ui.cvLang === "ar" && cvHasArabic(html) && L.PAGES && L.PAGES["cv.html"];
+    var doc = arabic ? withBase(L.buildArabic("cv.html", html), SITE + "ar/") : withBase(html, SITE);
     if (S.ui.cvMode !== "full") return doc;
     var cls = String((window.DashCV && window.DashCV.MODE_CLASS) || "cv-full").replace(/[^A-Za-z0-9_-]/g, "");
     return doc.replace(/<html\b([^>]*)>/i, function (m, attrs) {
@@ -1388,14 +1471,52 @@
     }
     return fold("cv-import", t("cviTitle"), kids);
   }
+  /* --- the live research portfolio page (portfolio.html): its only owner text is the trajectory --- */
+  function portfolioBox() {
+    var pf = S.model.portfolio;
+    if (!pf || typeof pf !== "object") return null;
+    if (!Array.isArray(pf.trajectory)) pf.trajectory = [];
+    var url = SITE + "portfolio.html";
+    var kids = [
+      el("h2", { text: t("pfTitle") }),
+      el("p", { class: "muted small", text: t("pfHint") }),
+      el("p", { class: "small linkrow", "data-link": "portfolio" }, [el("span", { text: t("pfLink") + " " }),
+        el("a", { href: url, target: "_blank", rel: "noopener noreferrer", dir: "ltr", text: url, "data-content": "" }), " ", copyBtn(url, "pf:link", t("copyLink"))]),
+      el("div", { class: "row" }, [btn(S.ui.pfPreview ? t("cvPreviewHide") : t("pfPreview"), function () { S.ui.pfPreview = !S.ui.pfPreview; render(); }, "ghost",
+        { id: "pfPreviewBtn", "aria-pressed": S.ui.pfPreview ? "true" : "false" })])
+    ];
+    if (S.ui.pfPreview) {
+      var html = (compute().files || {})["portfolio.html"] || S.files["portfolio.html"] || "";
+      if (html) {
+        var frame = el("iframe", { id: "pfPreview", class: "preview", title: t("pfPreviewTitle"), sandbox: "", referrerpolicy: "no-referrer" });
+        try { frame.srcdoc = withBase(html, SITE); } catch (e) { frame.srcdoc = ""; }
+        kids.push(frame);
+        kids.push(el("p", { class: "muted small", text: t("pvStatic") }));
+      }
+    }
+    var lines = pf.trajectory.map(function (line, i) {
+      return el("article", { class: "item", "data-list": "pf-trajectory", "data-i": String(i) }, [
+        field(t("pfLine"), area(line, function (v) { pf.trajectory[i] = v.replace(/\s*\n\s*/g, " "); touch(); }, { dir: "ltr", rows: "2", "data-k": "line" })),
+        el("div", { class: "row" }, [moveBtns(pf.trajectory, i), confirmBtn("pf-trajectory-" + i, t("del"), t("yesDelete"), function () { pf.trajectory.splice(i, 1); touch(); render(); }, "danger sm")])
+      ]);
+    });
+    kids.push(fold("pf-trajectory", t("pfTrajectory") + " " + t("count", { n: pf.trajectory.length }), [
+      el("div", { class: "row" }, [btn(t("addItem"), function () { pf.trajectory.push(""); touch(); render(); }, "primary sm", { id: "add-pf-trajectory" })]),
+      el("div", { class: "list", id: "list-pf-trajectory" }, lines)
+    ]));
+    return el("section", { class: "pfbox", id: "pfBox" }, kids);
+  }
   function viewCv() {
     var cv = S.model.cv;
-    if (!cv || typeof cv !== "object") return el("div", null, [el("h2", { text: t("cvTitle") }), el("p", { class: "msg info", id: "needLib", text: t("needLib") })]);
+    if (!cv || typeof cv !== "object") return el("div", null, [el("h2", { text: t("cvTitle") }), el("p", { class: "msg info", id: "needLib", text: t("needLib") }), portfolioBox()]);
     var cvList = function (key, fields, blank, grid) {
       return listEditor({ key: "cv-" + key, fields: fields, blank: blank, grid: grid, get: function () { return cv[key]; }, set: function (a) { cv[key] = a; } });
     };
-    var pair = [{ p: "title", label: "fTitle", dir: "ltr" }, { p: "text", label: "cvText", dir: "ltr", long: true }];
-    var blankPair = function () { return { title: "", text: "" }; };
+    var withAr = cvArabicFields();
+    var arF = function (fields) { return withAr ? fields : []; };
+    var pair = [{ p: "title", label: "fTitle", dir: "ltr" }].concat(arF([{ p: "titleAr", label: "cvTitleAr", dir: "rtl" }]),
+      [{ p: "text", label: "cvText", dir: "ltr", long: true }], arF([{ p: "textAr", label: "cvTextAr", dir: "rtl", long: true }]));
+    var blankPair = function () { return withAr ? { title: "", text: "", titleAr: "", textAr: "" } : { title: "", text: "" }; };
     var n = function (key) { return " " + t("count", { n: (cv[key] || []).length }); };
     var link = function (label, url, key) {
       return el("p", { class: "small linkrow", "data-link": key }, [el("span", { text: label + " " }),
@@ -1407,7 +1528,8 @@
       el("div", { id: "cvLinks" }, [link(t("cvLinkShort"), SITE + "cv.html", "short"), link(t("cvLinkFull"), SITE + "cv.html#full", "full")]),
       el("div", { class: "row" }, [
         btn(S.ui.cvPreview ? t("cvPreviewHide") : t("cvPreview"), function () { S.ui.cvPreview = !S.ui.cvPreview; render(); }, "ghost", { id: "cvPreviewBtn", "aria-pressed": S.ui.cvPreview ? "true" : "false" }),
-        S.ui.cvPreview ? cvModeSwitch() : null
+        S.ui.cvPreview ? cvModeSwitch() : null,
+        S.ui.cvPreview && cvHasArabic((compute().files || {})["cv.html"]) ? cvLangSwitch() : null
       ])
     ];
     if (S.ui.cvPreview) {
@@ -1422,26 +1544,30 @@
     kids.push(cvImportBox());
     kids.push(el("section", { class: "card" }, [
       field(t("cvProfile"), area((cv.profile || {}).en, function (v) { cv.profile = cv.profile || {}; cv.profile.en = v; touch(); }, { id: "cvProfile", dir: "ltr", rows: "5" })),
+      withAr ? field(t("cvProfileAr"), area((cv.profile || {}).ar, function (v) { cv.profile = cv.profile || {}; cv.profile.ar = v; touch(); }, { id: "cvProfileAr", dir: "rtl", rows: "5" }), t("cvArHint")) : null,
       el("div", { class: "grid2" }, [
         field(t("cvLanguages"), area(cv.languages, function (v) { cv.languages = v; touch(); }, { id: "cvLanguages", dir: "ltr" })),
-        field(t("cvOpenTo"), area(cv.openTo, function (v) { cv.openTo = v; touch(); }, { id: "cvOpenTo", dir: "ltr" }))
+        withAr ? field(t("cvLanguagesAr"), area(cv.languagesAr, function (v) { cv.languagesAr = v; touch(); }, { id: "cvLanguagesAr", dir: "rtl" })) : null,
+        field(t("cvOpenTo"), area(cv.openTo, function (v) { cv.openTo = v; touch(); }, { id: "cvOpenTo", dir: "ltr" })),
+        withAr ? field(t("cvOpenToAr"), area(cv.openToAr, function (v) { cv.openToAr = v; touch(); }, { id: "cvOpenToAr", dir: "rtl" })) : null
       ]),
       field(t("cvSelected"), input(cv.selected, function (v) { var x = parseInt(v, 10); if (x >= 1 && x <= 200) { cv.selected = x; touch(); } }, { id: "cvSelected", dir: "ltr", inputmode: "numeric", maxlength: "3" }))
     ]));
-    kids.push(fold("cv-accepted", t("cvAccepted") + n("accepted"), [cvList("accepted", [{ p: "year", label: "fYear", dir: "ltr", mode: "numeric" }, { p: "text", label: "cvText", dir: "ltr", long: true }], function () { return { year: String(new Date().getFullYear()), text: "" }; })]));
-    kids.push(fold("cv-extraService", t("cvService") + n("extraService"), [cvList("extraService", [{ p: "title", label: "fTitle", dir: "ltr" }, { p: "org", label: "org", dir: "ltr" }, { p: "date", label: "cvDate", dir: "ltr" }, { p: "text", label: "cvText", dir: "ltr", long: true }], function () { return { title: "", org: "", date: "", text: "" }; })]));
+    kids.push(fold("cv-accepted", t("cvAccepted") + n("accepted"), [cvList("accepted", [{ p: "year", label: "fYear", dir: "ltr", mode: "numeric" }, { p: "text", label: "cvText", dir: "ltr", long: true }].concat(arF([{ p: "textAr", label: "cvTextAr", dir: "rtl", long: true }])), function () { return { year: String(new Date().getFullYear()), text: "" }; })]));
+    kids.push(fold("cv-extraService", t("cvService") + n("extraService"), [cvList("extraService", [{ p: "title", label: "fTitle", dir: "ltr" }, { p: "org", label: "org", dir: "ltr" }, { p: "date", label: "cvDate", dir: "ltr" }, { p: "text", label: "cvText", dir: "ltr", long: true }].concat(arF([{ p: "titleAr", label: "cvTitleAr", dir: "rtl" }, { p: "orgAr", label: "orgAr", dir: "rtl" }, { p: "textAr", label: "cvTextAr", dir: "rtl", long: true }])), function () { return { title: "", org: "", date: "", text: "" }; })]));
     kids.push(fold("cv-fullExtra", t("cvFullExtra") + n("fullExtra"), [
       el("p", { class: "muted small", text: t("cvFullExtraHint") }),
-      cvList("fullExtra", [{ p: "title", label: "fTitle", dir: "ltr" }, { p: "items", label: "cvLines", dir: "ltr", lines: true }], function () { return { title: "", items: [] }; }, "grid1")
+      cvList("fullExtra", [{ p: "title", label: "fTitle", dir: "ltr" }, { p: "items", label: "cvLines", dir: "ltr", lines: true }].concat(arF([{ p: "titleAr", label: "cvTitleAr", dir: "rtl" }, { p: "itemsAr", label: "cvLinesAr", dir: "rtl", lines: true }])), function () { return { title: "", items: [] }; }, "grid1")
     ]));
     kids.push(fold("cv-appointmentDetails", t("cvAppt") + n("appointmentDetails"), [
       el("p", { class: "muted small", text: t("cvApptHint") }),
-      cvList("appointmentDetails", [{ p: "match", label: "cvApptPick", options: appointmentOptions }, { p: "bullets", label: "cvBullets", dir: "ltr", lines: true }],
+      cvList("appointmentDetails", [{ p: "match", label: "cvApptPick", options: appointmentOptions }, { p: "bullets", label: "cvBullets", dir: "ltr", lines: true }].concat(arF([{ p: "bulletsAr", label: "cvBulletsAr", dir: "rtl", lines: true }])),
         function () { var o = appointmentOptions()[0]; return { match: o ? o[0] : "", bullets: [] }; }, "grid1")
     ]));
     kids.push(fold("cv-pillars", t("cvPillars") + n("pillars"), [cvList("pillars", pair, blankPair)]));
     kids.push(fold("cv-community", t("cvCommunity") + n("community"), [cvList("community", pair, blankPair)]));
     kids.push(fold("cv-development", t("cvDevelopment") + n("development"), [cvList("development", pair, blankPair)]));
+    kids.push(portfolioBox());
     return el("div", null, kids);
   }
 
@@ -1635,6 +1761,10 @@
     [["metrics", "numbers"], ["news", "news"], ["roles", "roles"], ["texts", "texts"], ["fonts", "fonts"], ["theme", "colours"], ["sections", "sections"]].forEach(function (x) { if (has(x[0])) parts.push(x[1]); });
     if (has("flagship") || has("courses")) parts.push("courses");
     if (has("timeline") || has("timelineEarlier")) parts.push("career");
+    if (has("leadBullets") || has("leadCards")) parts.push("leadership");
+    if (has("contacts") || has("contactLinks")) parts.push("contact");
+    if (has("degreeCards") || has("thesisItems")) parts.push("education");
+    if (has("portfolio")) parts.push("portfolio");
     if (has("citations")) parts.push("citations");
     if (has("cv")) parts.push("cv");
     if (has("photoVersion")) parts.push("portrait");
@@ -1648,6 +1778,7 @@
   function previewHtml(out) {
     var page = S.ui.pv.page, html = out.files[page] || S.files[page] || "";
     if (page === "cv.html") return html ? cvDoc(html) : "";
+    if (page === "portfolio.html") return html ? withBase(html, SITE) : "";
     if (S.ui.pv.lang === "ar") return withBase(out.files["ar/" + page] || L.buildArabic(page, html), SITE + "ar/");
     return withBase(html, SITE);
   }
@@ -1729,10 +1860,11 @@
     ]));
 
     box.appendChild(el("h2", { text: t("preview") }));
-    var isCv = S.ui.pv.page === "cv.html";
+    var isCv = S.ui.pv.page === "cv.html", isPf = S.ui.pv.page === "portfolio.html";
     box.appendChild(el("div", { class: "row" }, [
-      seg([["index.html", t("pvHome")], ["publications.html", t("pvPubs")], ["cv.html", t("pvCv")]], S.ui.pv.page, function (v) { S.ui.pv.page = v; render(); }, "data-pv"),
-      isCv ? cvModeSwitch() : seg([["ar", t("pvAr")], ["en", t("pvEn")]], S.ui.pv.lang, function (v) { S.ui.pv.lang = v; render(); }, "data-pv")
+      seg([["index.html", t("pvHome")], ["publications.html", t("pvPubs")], ["cv.html", t("pvCv")]].concat(S.files["portfolio.html"] ? [["portfolio.html", t("pvPf")]] : []), S.ui.pv.page, function (v) { S.ui.pv.page = v; render(); }, "data-pv"),
+      isCv ? cvModeSwitch() : isPf ? null : seg([["ar", t("pvAr")], ["en", t("pvEn")]], S.ui.pv.lang, function (v) { S.ui.pv.lang = v; render(); }, "data-pv"),
+      isCv && cvHasArabic(out.files["cv.html"]) ? cvLangSwitch() : null
     ]));
     var doc = "";
     try { doc = previewHtml(out); } catch (e) { doc = ""; }

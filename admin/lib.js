@@ -8,7 +8,8 @@
   "use strict";
 
   /* ------------------------------------------------------------------ constants */
-  var FILES = ["index.html", "publications.html", "research-data.js", "data/metrics.json", "sitemap.xml", "cv.html"];
+  var FILES = ["index.html", "publications.html", "research-data.js", "data/metrics.json", "sitemap.xml", "cv.html", "portfolio.html"];
+  var OPTIONAL_FILES = ["cv.html", "portfolio.html"]; // a missing one is read as an empty string
   var PAGES = {
     "index.html": { out: "ar/index.html", en: "https://dromaia.github.io/", ar: "https://dromaia.github.io/ar/" },
     "publications.html": {
@@ -16,6 +17,7 @@
       en: "https://dromaia.github.io/publications.html",
       ar: "https://dromaia.github.io/ar/publications.html",
     },
+    "cv.html": { out: "ar/cv.html", en: "https://dromaia.github.io/cv.html", ar: "https://dromaia.github.io/ar/cv.html" },
   };
   var THEMES = [
     { en: "Cybersecurity, IoT, and cloud infrastructure", ar: "الأمن السيبراني وإنترنت الأشياء والبنية السحابية" },
@@ -755,6 +757,183 @@
       render: function (items) { return renderTimeline(items); } },
   ];
 
+  /* ------------------------------------------------------------------ version 3 lists: leadership, contact, degrees */
+  function arAttr(ar) { return ar ? ' data-ar="' + escAttr(ar) + '"' : ""; }
+  function optAr(value) { return value != null ? unesc(value) : ""; }
+
+  var LEAD_BULLET_RE = /^\s*<li(?: data-ar="([^"]*)")?>([^<]*)<\/li>\s*$/;
+  function parseLeadBullets(lines, problems, label) {
+    var items = [];
+    (lines || []).forEach(function (line) {
+      var m = LEAD_BULLET_RE.exec(line);
+      if (!m) { if (problems) problems.push(unreadLine(label)); return; }
+      items.push({ en: unesc(m[2]), ar: optAr(m[1]) });
+    });
+    return items;
+  }
+  function renderLeadBullets(items) {
+    return "\n" + (items || []).map(function (it) { return "<li" + arAttr(str(it.ar)) + ">" + escText(str(it.en)) + "</li>"; }).join("\n") + "\n";
+  }
+
+  /* leadership cards: a plain card is tag + title + one text paragraph; anything richer is kept verbatim (rich: true) */
+  var LEAD_CARD_RE = /^\s*<article class="card"><span class="tag"(?: data-ar="([^"]*)")?>([^<]*)<\/span><h3(?: class="([^"]*)")?(?: data-ar="([^"]*)")?>([^<]*)<\/h3><p(?: data-ar="([^"]*)")?>([^<]*)<\/p><\/article>\s*$/;
+  var LEAD_CARD_ANY_RE = /^\s*<article class="card">[\s\S]*<\/article>\s*$/;
+  var LEAD_CARD_HEAD_RE = /<span class="tag"(?: data-ar="([^"]*)")?>([^<]*)<\/span><h3(?: class="[^"]*")?(?: data-ar="([^"]*)")?>([^<]*)<\/h3>/;
+  function parseLeadCards(lines, problems, label) {
+    var items = [];
+    (lines || []).forEach(function (line, i) {
+      var m = LEAD_CARD_RE.exec(line);
+      if (m) {
+        var card = { tag: { en: unesc(m[2]), ar: optAr(m[1]) }, title: { en: unesc(m[5]), ar: optAr(m[4]) }, text: { en: unesc(m[7]), ar: optAr(m[6]) }, rich: false };
+        if (m[3]) card.titleClass = unesc(m[3]);
+        items.push(card);
+        return;
+      }
+      if (LEAD_CARD_ANY_RE.test(line)) {
+        var h = LEAD_CARD_HEAD_RE.exec(line);
+        items.push({
+          tag: h ? { en: unesc(h[2]), ar: optAr(h[1]) } : { en: "", ar: "" },
+          title: h ? { en: unesc(h[4]), ar: optAr(h[3]) } : { en: "", ar: "" },
+          text: { en: "", ar: "" }, rich: true, ref: i,
+        });
+        return;
+      }
+      if (problems) problems.push(unreadLine(label));
+    });
+    return items;
+  }
+  function renderLeadCards(items, currentLines) {
+    var lines = currentLines || [];
+    var out = [];
+    (items || []).forEach(function (it) {
+      if (it && it.rich) {
+        // a rich card keeps its own markup (edited from the texts tab); it is looked up by its line in the block
+        var line = typeof it.ref === "number" ? lines[it.ref] : null;
+        if (line && LEAD_CARD_ANY_RE.test(line) && !LEAD_CARD_RE.test(line)) out.push(line.trim());
+        return;
+      }
+      var tag = pair(it.tag), title = pair(it.title), text = pair(it.text);
+      var cls = str(it.titleClass).replace(/[^A-Za-z0-9_ -]/g, "");
+      out.push('<article class="card"><span class="tag"' + arAttr(tag.ar) + ">" + escText(tag.en) + "</span><h3" + (cls ? ' class="' + cls + '"' : "") +
+        arAttr(title.ar) + ">" + escText(title.en) + "</h3><p" + arAttr(text.ar) + ">" + escText(text.en) + "</p></article>");
+    });
+    return "\n" + out.join("\n") + "\n";
+  }
+
+  var CONTACT_RE = /^\s*<a class="contact-path( phone)?"(?: data-ar-href="([^"]*)")? href="([^"]*)"(?: rel="noopener" target="_blank")?><span class="contact-label"(?: data-ar="([^"]*)")?>([^<]*)<\/span><strong(?: data-ar="([^"]*)")?>([^<]*)<\/strong><span(?: data-ar="([^"]*)")?>([^<]*)<\/span><\/a>\s*$/;
+  function parseContacts(lines, problems, label) {
+    var items = [];
+    (lines || []).forEach(function (line) {
+      var m = CONTACT_RE.exec(line);
+      if (!m) { if (problems) problems.push(unreadLine(label)); return; }
+      items.push({
+        label: { en: unesc(m[5]), ar: optAr(m[4]) }, value: unesc(m[7]), valueAr: optAr(m[6]), hint: { en: unesc(m[9]), ar: optAr(m[8]) },
+        href: unesc(m[3]), hrefAr: optAr(m[2]), phone: !!m[1],
+      });
+    });
+    return items;
+  }
+  function renderContacts(items) {
+    return "\n" + (items || []).map(function (it) {
+      var label = pair(it.label), hint = pair(it.hint), href = str(it.href), hrefAr = str(it.hrefAr);
+      return '<a class="contact-path' + (it.phone ? " phone" : "") + '"' + (hrefAr ? ' data-ar-href="' + escAttr(hrefAr) + '"' : "") + ' href="' + escAttr(href) + '"' +
+        (/^https?:\/\//i.test(href) ? ' rel="noopener" target="_blank"' : "") + '><span class="contact-label"' + arAttr(label.ar) + ">" + escText(label.en) +
+        "</span><strong" + arAttr(str(it.valueAr)) + ">" + escText(str(it.value)) + "</strong><span" + arAttr(hint.ar) + ">" + escText(hint.en) + "</span></a>";
+    }).join("\n") + "\n";
+  }
+
+  var CONTACT_LINK_RE = /^\s*<a class="btn( primary)?"(?: data-ar="([^"]*)")? href="([^"]*)"(?: data-ar-href="([^"]*)")? rel="noopener" target="_blank">([^<]*)<\/a>\s*$/;
+  function parseContactLinks(lines, problems, label) {
+    var items = [];
+    (lines || []).forEach(function (line) {
+      var m = CONTACT_LINK_RE.exec(line);
+      if (!m) { if (problems) problems.push(unreadLine(label)); return; }
+      items.push({ en: unesc(m[5]), ar: optAr(m[2]), href: unesc(m[3]), hrefAr: optAr(m[4]), primary: !!m[1] });
+    });
+    return items;
+  }
+  function renderContactLinks(items) {
+    return "\n" + (items || []).map(function (it) {
+      var hrefAr = str(it.hrefAr);
+      return '<a class="btn' + (it.primary ? " primary" : "") + '"' + arAttr(str(it.ar)) + ' href="' + escAttr(str(it.href)) + '"' +
+        (hrefAr ? ' data-ar-href="' + escAttr(hrefAr) + '"' : "") + ' rel="noopener" target="_blank">' + escText(str(it.en)) + "</a>";
+    }).join("\n") + "\n";
+  }
+
+  var DEGREE_RE = /^\s*<article class="degree-card"><div class="degree-top"><span class="degree-year">([^<]*)<\/span><\/div><h3(?: data-ar="([^"]*)")?>([^<]*)<\/h3><div class="degree-institution"(?: data-ar="([^"]*)")?>([^<]*)<\/div>(?:<a class="ranking-link"(?: data-ar="([^"]*)")? href="([^"]*)" rel="noopener" target="_blank">([^<]*)<\/a>)?<\/article>\s*$/;
+  function parseDegreeCards(lines, problems, label) {
+    var items = [];
+    (lines || []).forEach(function (line) {
+      var m = DEGREE_RE.exec(line);
+      if (!m) { if (problems) problems.push(unreadLine(label)); return; }
+      items.push({
+        year: unesc(m[1]), title: { en: unesc(m[3]), ar: optAr(m[2]) }, institution: { en: unesc(m[5]), ar: optAr(m[4]) },
+        link: m[7] != null ? { en: unesc(m[8]), ar: optAr(m[6]), href: unesc(m[7]) } : null,
+      });
+    });
+    return items;
+  }
+  function renderDegreeCards(items) {
+    return "\n" + (items || []).map(function (it) {
+      var title = pair(it.title), inst = pair(it.institution);
+      var link = it.link && typeof it.link === "object" && str(it.link.href) ? it.link : null;
+      return '<article class="degree-card"><div class="degree-top"><span class="degree-year">' + escText(str(it.year)) + "</span></div><h3" + arAttr(title.ar) + ">" +
+        escText(title.en) + '</h3><div class="degree-institution"' + arAttr(inst.ar) + ">" + escText(inst.en) + "</div>" +
+        (link ? '<a class="ranking-link"' + arAttr(str(link.ar)) + ' href="' + escAttr(str(link.href)) + '" rel="noopener" target="_blank">' + escText(str(link.en)) + "</a>" : "") +
+        "</article>";
+    }).join("\n") + "\n";
+  }
+
+  var THESIS_RE = /^\s*<div class="degree-detail"><small(?: data-ar="([^"]*)")?>([^<]*)<\/small><p(?: data-ar="([^"]*)")?>([^<]*)<\/p><\/div>\s*$/;
+  function parseThesisItems(lines, problems, label) {
+    var items = [];
+    (lines || []).forEach(function (line) {
+      var m = THESIS_RE.exec(line);
+      if (!m) { if (problems) problems.push(unreadLine(label)); return; }
+      items.push({ label: { en: unesc(m[2]), ar: optAr(m[1]) }, text: { en: unesc(m[4]), ar: optAr(m[3]) } });
+    });
+    return items;
+  }
+  function renderThesisItems(items) {
+    return "\n" + (items || []).map(function (it) {
+      var label = pair(it.label), text = pair(it.text);
+      return '<div class="degree-detail"><small' + arAttr(label.ar) + ">" + escText(label.en) + "</small><p" + arAttr(text.ar) + ">" + escText(text.en) + "</p></div>";
+    }).join("\n") + "\n";
+  }
+
+  var LISTS_V3 = [
+    { key: "leadBullets", block: "dash:lead-bullets", label: { ar: "نقاط بطاقة القيادة", en: "leadership bullet points" }, parse: parseLeadBullets, render: renderLeadBullets },
+    { key: "leadCards", block: "dash:lead-cards", label: { ar: "بطاقات القيادة", en: "leadership cards" }, parse: parseLeadCards, render: renderLeadCards },
+    { key: "contacts", block: "dash:contacts", label: { ar: "وسائل التواصل", en: "contact paths" }, parse: parseContacts, render: renderContacts },
+    { key: "contactLinks", block: "dash:contact-links", label: { ar: "أزرار التواصل", en: "contact buttons" }, parse: parseContactLinks, render: renderContactLinks },
+    { key: "degreeCards", block: "dash:degrees", label: { ar: "الشهادات العلمية", en: "degrees" }, parse: parseDegreeCards, render: renderDegreeCards },
+    { key: "thesisItems", block: "dash:theses", label: { ar: "عناوين الرسائل", en: "thesis titles" }, parse: parseThesisItems, render: renderThesisItems },
+  ];
+  LISTS_V3.forEach(function (list) {
+    var parse = list.parse, label = list.label;
+    list.parse = function (lines, problems) { return parse(lines, problems, label); };
+    LISTS.push(list);
+  });
+  var V3_KEYS = LISTS_V3.map(function (list) { return list.key; });
+
+  /* ------------------------------------------------------------------ the portfolio module (admin/portfolio.js), when it is there */
+  var pfModule; // undefined = not looked up yet, null = not available
+  function getPortfolio() {
+    var g = typeof self !== "undefined" ? self : typeof globalThis !== "undefined" ? globalThis : null;
+    if (g && g.DashPortfolio && typeof g.DashPortfolio.build === "function") return g.DashPortfolio;
+    if (pfModule !== undefined) return pfModule;
+    pfModule = null;
+    if (typeof module === "object" && module.exports && typeof require === "function") {
+      try {
+        var loaded = require("./portfolio.js");
+        if (loaded && typeof loaded.build === "function" && typeof loaded.read === "function") pfModule = loaded;
+      } catch (e) { pfModule = null; }
+    }
+    return pfModule;
+  }
+  function setPortfolio(mod) { pfModule = mod === undefined ? undefined : mod; }
+  var HAS_AR_RE = /\sdata-ar(?:-[a-zA-Z-]+)?="/;
+
   /* degrees and thesis titles (read only; used by the CV page) */
   function parseDegrees(html) {
     var list = [], re = /<article class="degree-card">([\s\S]*?)<\/article>/g, m;
@@ -1266,7 +1445,14 @@
       var close = "<!-- /" + m[1] + " -->";
       var end = html.indexOf(close, m.index);
       if (end < 0) continue;
-      ranges.push([m.index, end + close.length]);
+      if (m[1] === "dash:lead-cards") {
+        // plain cards are edited as a list; a rich card (links inside its paragraph) keeps its texts in the texts tab
+        var innerAt = m.index + m[0].length, pos = innerAt;
+        html.slice(innerAt, end).split("\n").forEach(function (line) {
+          if (LEAD_CARD_RE.test(line)) ranges.push([pos, pos + line.length]);
+          pos += line.length + 1;
+        });
+      } else ranges.push([m.index, end + close.length]);
       re.lastIndex = end + close.length;
     }
     sectionUnits(html).forEach(function (u) { if (isCustomId(u.id)) ranges.push([u.start, u.end]); });
@@ -1422,7 +1608,8 @@
       }
     } else problems.push(tr("ملف الأبحاث research-data.js غير موجود.", "The publications file research-data.js is missing."));
     ["dash:fonts", "dash:theme", "dash:metrics", "dash:news", "dash:roles", "dash:themes", "dash:nav", "dash:courses-flagship", "dash:courses",
-      "dash:timeline", "dash:timeline-earlier", "metrics:latest"].forEach(function (name) {
+      "dash:timeline", "dash:timeline-earlier", "dash:lead-bullets", "dash:lead-cards", "dash:contacts", "dash:contact-links", "dash:degrees", "dash:theses",
+      "metrics:latest"].forEach(function (name) {
       if (index && !findBlock(index, name)) problems.push(missingMarker(name, "index.html"));
     });
     ["dash:fonts", "dash:theme", "dash:cards", "dash:years"].forEach(function (name) {
@@ -1445,11 +1632,16 @@
       try { cv = cvMod.read(files["cv.html"]); }
       catch (e) { problems.push(tr("تعذّرت قراءة صفحة السيرة cv.html.", "The CV page cv.html could not be read.")); }
     }
+    var portfolio = null, pfMod = getPortfolio();
+    if (pfMod && typeof files["portfolio.html"] === "string" && files["portfolio.html"] !== "") {
+      try { portfolio = pfMod.read(files["portfolio.html"]); }
+      catch (e) { problems.push(tr("تعذّرت قراءة صفحة ملف الأبحاث portfolio.html.", "The portfolio page portfolio.html could not be read.")); }
+    }
     var texts = listTexts("index.html", index).concat(listTexts("publications.html", pubs));
     return {
       works: works, metrics: metrics, news: news, roles: roles, fonts: fonts, theme: theme, lists: lists, sections: sn.sections, nav: sn.nav,
       units: sn.units, photoVersion: readPhotoVersion(index), citations: readCitations(works, metricsJson), degrees: parseDegrees(index),
-      theses: parseTheses(index), cv: cv, texts: texts, problems: problems, parsed: parsed,
+      theses: parseTheses(index), cv: cv, portfolio: portfolio, texts: texts, problems: problems, parsed: parsed,
     };
   }
   function read(files) {
@@ -1474,7 +1666,9 @@
       texts: r.texts.map(function (t) { return { id: t.id, page: t.page, tag: t.tag, en: t.en, ar: t.ar }; }),
       warnings: r.problems,
     };
+    V3_KEYS.forEach(function (key) { model[key] = r.lists[key]; });
     if (r.cv) model.cv = r.cv;
+    if (r.portfolio) model.portfolio = r.portfolio;
     return model;
   }
 
@@ -1574,6 +1768,41 @@
         if (!pair(it.title).en) errors.push(list[1] + " (" + (i + 1) + ")" + tr(": المسمى بالإنجليزية مطلوب.", ": the English title is required."));
       });
     });
+    var linkBad = function (href) { var v = str(href); return !v || !safeLink(v) || /[\s"<>]/.test(v); };
+    var v3name = function (key, i) { var list = LISTS.filter(function (x) { return x.key === key; })[0]; return (list ? tr(list.label.ar, list.label.en) : key) + " (" + (i + 1) + ")"; };
+    (m.leadBullets || []).forEach(function (it, i) {
+      if (!str(it && it.en)) errors.push(v3name("leadBullets", i) + tr(": النص بالإنجليزية مطلوب.", ": the English text is required."));
+    });
+    (m.leadCards || []).forEach(function (it, i) {
+      if (it && it.rich) return;
+      if (!pair(it && it.title).en) errors.push(v3name("leadCards", i) + tr(": العنوان بالإنجليزية مطلوب.", ": the English title is required."));
+    });
+    (m.contacts || []).forEach(function (it, i) {
+      if (!pair(it && it.label).en) errors.push(v3name("contacts", i) + tr(": الاسم بالإنجليزية مطلوب.", ": the English label is required."));
+      if (!str(it && it.value)) errors.push(v3name("contacts", i) + tr(": القيمة مطلوبة.", ": the value is required."));
+      if (linkBad(it && it.href)) errors.push(v3name("contacts", i) + tr(": الرابط غير صحيح.", ": the link is not valid."));
+      if (str(it && it.hrefAr) && linkBad(it.hrefAr)) errors.push(v3name("contacts", i) + tr(": الرابط العربي غير صحيح.", ": the Arabic link is not valid."));
+    });
+    (m.contactLinks || []).forEach(function (it, i) {
+      if (!str(it && it.en)) errors.push(v3name("contactLinks", i) + tr(": النص بالإنجليزية مطلوب.", ": the English text is required."));
+      if (linkBad(it && it.href)) errors.push(v3name("contactLinks", i) + tr(": الرابط غير صحيح.", ": the link is not valid."));
+      if (str(it && it.hrefAr) && linkBad(it.hrefAr)) errors.push(v3name("contactLinks", i) + tr(": الرابط العربي غير صحيح.", ": the Arabic link is not valid."));
+    });
+    (m.degreeCards || []).forEach(function (it, i) {
+      if (!str(it && it.year)) errors.push(v3name("degreeCards", i) + tr(": السنة مطلوبة.", ": the year is required."));
+      if (!pair(it && it.title).en) errors.push(v3name("degreeCards", i) + tr(": اسم الشهادة بالإنجليزية مطلوب.", ": the English degree title is required."));
+      var link = it && it.link;
+      if (link && (str(link.href) || str(link.en))) {
+        if (linkBad(link.href)) errors.push(v3name("degreeCards", i) + tr(": الرابط غير صحيح.", ": the link is not valid."));
+        if (!str(link.en)) errors.push(v3name("degreeCards", i) + tr(": نص الرابط بالإنجليزية مطلوب.", ": the English link text is required."));
+      }
+    });
+    (m.thesisItems || []).forEach(function (it, i) {
+      if (!pair(it && it.text).en) errors.push(v3name("thesisItems", i) + tr(": العنوان بالإنجليزية مطلوب.", ": the English title is required."));
+    });
+    if (m.portfolio && m.portfolio.trajectory != null && !Array.isArray(m.portfolio.trajectory)) {
+      errors.push(tr("ملف الأبحاث: المسار المنهجي يجب أن يكون قائمة أسطر.", "Portfolio: the trajectory must be a list of lines."));
+    }
     if (m.photoVersion != null && str(m.photoVersion) !== "" && !/^[0-9A-Za-z]{1,20}$/.test(str(m.photoVersion))) {
       errors.push(tr("رقم نسخة الصورة غير صحيح.", "The portrait version is not valid."));
     }
@@ -1791,8 +2020,9 @@
           warnings.push(missingMarker(list.block, "index.html", tr("فلم يُحدَّث قسم " + list.label.ar, "so the " + list.label.en + " were not updated")));
           return;
         }
-        var nextList = list.render(items);
-        if (nextList !== list.render(list.parse(blockLines(index, list.block)))) {
+        var listLines = blockLines(index, list.block);
+        var nextList = list.render(items, listLines);
+        if (nextList !== list.render(list.parse(listLines), listLines)) {
           index = setBlock(index, list.block, nextList);
           summary.push(tr("حُدّث قسم " + list.label.ar + ".", "Updated: " + list.label.en + "."));
         }
@@ -1932,25 +2162,66 @@
       var sitemap = touchSitemap(files["sitemap.xml"], locs, today);
       if (sitemap !== files["sitemap.xml"]) out["sitemap.xml"] = sitemap;
     }
-    /* --- cv.html: rebuilt by the CV module from what the site will say after this build */
-    var cvMod = getCV();
-    if (cvMod && typeof files["cv.html"] === "string") {
+    /* --- pages built by their own modules from what the site will say after this build */
+    var cvMod = getCV(), pfMod = getPortfolio();
+    var wantCv = cvMod && typeof files["cv.html"] === "string";
+    var wantPf = pfMod && typeof files["portfolio.html"] === "string" && files["portfolio.html"] !== "";
+    var effective = null;
+    if (wantCv || wantPf) {
       try {
         var merged = {};
         Object.keys(files).forEach(function (path) { merged[path] = files[path]; });
         Object.keys(out).forEach(function (path) { merged[path] = out[path]; });
-        var effective = read(merged);
-        effective.cv = model.cv || orig.cv || effective.cv;
+        effective = read(merged);
         effective.today = today;
+        // the catalogue's own header (cutoff date, total) as it will be after this build
+        try {
+          var metaNow = parseData(merged["research-data.js"]).data.meta || {};
+          effective.meta = { verificationCutoff: metaNow.verificationCutoff, verificationCutoffDisplay: metaNow.verificationCutoffDisplay, total: metaNow.total };
+          effective.cutoff = metaNow.verificationCutoff;
+          effective.cutoffDisplay = metaNow.verificationCutoffDisplay;
+        } catch (e) { /* no catalogue header: the modules keep the date on their page */ }
+      } catch (e) { effective = null; }
+    }
+    /* cv.html (and its Arabic page when the CV carries data-ar) */
+    var cvNow = files["cv.html"];
+    if (wantCv && effective) {
+      try {
+        effective.cv = model.cv || orig.cv || effective.cv;
         var nextCv = cvMod.build(effective, files["cv.html"], { today: today, lang: LANG });
         if (typeof nextCv === "string" && nextCv !== files["cv.html"]) {
           out["cv.html"] = nextCv;
+          cvNow = nextCv;
           summary.push(tr("حُدّثت صفحة السيرة الذاتية.", "CV page updated."));
         }
       } catch (e) {
         warnings.push(tr("تعذّر تحديث صفحة السيرة cv.html، فبقيت كما هي.", "The CV page cv.html could not be updated, so it was left as it is."));
       }
+    } else if (wantCv) warnings.push(tr("تعذّر تحديث صفحة السيرة cv.html، فبقيت كما هي.", "The CV page cv.html could not be updated, so it was left as it is."));
+    // ar/cv.html is an output only: written when cv.html changed, or when the caller supplied it and it is out of step
+    if (typeof cvNow === "string" && HAS_AR_RE.test(cvNow) && (out["cv.html"] || typeof files["ar/cv.html"] === "string")) {
+      try {
+        var arCv = buildArabic("cv.html", cvNow);
+        if (arCv !== files["ar/cv.html"]) out["ar/cv.html"] = arCv;
+      } catch (e) {
+        warnings.push(tr("تعذّر بناء النسخة العربية من السيرة ar/cv.html.", "The Arabic CV page ar/cv.html could not be built."));
+      }
     }
+    /* portfolio.html */
+    if (wantPf && effective) {
+      try {
+        effective.portfolio = model.portfolio || orig.portfolio || effective.portfolio;
+        var pfOut = typeof pfMod.buildDetailed === "function" ? pfMod.buildDetailed(effective, files["portfolio.html"])
+          : { html: pfMod.build(effective, files["portfolio.html"]), warnings: [] };
+        (pfOut.warnings || []).forEach(function (w) { warnings.push(String(w)); });
+        if (typeof pfOut.html === "string" && pfOut.html !== files["portfolio.html"]) {
+          out["portfolio.html"] = pfOut.html;
+          summary.push(tr("حُدّثت صفحة ملف الأبحاث.", "Portfolio page updated."));
+        }
+      } catch (e) {
+        warnings.push(tr("تعذّر تحديث صفحة ملف الأبحاث portfolio.html، فبقيت كما هي.", "The portfolio page portfolio.html could not be updated, so it was left as it is."));
+      }
+    } else if (wantPf) warnings.push(tr("تعذّر تحديث صفحة ملف الأبحاث portfolio.html، فبقيت كما هي.", "The portfolio page portfolio.html could not be updated, so it was left as it is."));
     // drop generated files that equal what the caller already has
     Object.keys(out).forEach(function (path) { if (files[path] === out[path]) delete out[path]; });
     if (!summary.length && Object.keys(out).length) summary.push(tr("حُدّثت الأعداد والتواريخ لتطابق فهرس الأبحاث.", "Counts and dates updated to match the catalogue."));
@@ -2048,6 +2319,8 @@
   /* ------------------------------------------------------------------ public API */
   return {
     FILES: FILES,
+    OPTIONAL_FILES: OPTIONAL_FILES,
+    PAGES: PAGES,
     THEMES: THEMES.map(function (t) { return { en: t.en, ar: t.ar }; }),
     TYPES: TYPES.map(function (t) { return { en: t.en, ar: t.ar }; }),
     FONTS: FONTS,
@@ -2067,7 +2340,7 @@
     normalizeDoi: normalizeDoi,
     counts: counts,
     _internal: {
-      setCV: setCV, getCV: getCV, renderTheme: renderTheme, parseTheme: parseTheme, deriveMode: deriveMode, modeCss: modeCss, hexNorm: hexNorm,
+      setCV: setCV, getCV: getCV, setPortfolio: setPortfolio, getPortfolio: getPortfolio, LISTS_V3: LISTS_V3, renderTheme: renderTheme, parseTheme: parseTheme, deriveMode: deriveMode, modeCss: modeCss, hexNorm: hexNorm,
       LISTS: LISTS, renderNav: renderNav, renderPageNav: renderPageNav, parseNavLines: parseNavLines, sectionUnits: sectionUnits, renderCustomSection: renderCustomSection,
       parseCustomSection: parseCustomSection, readSectionsNav: readSectionsNav, composeNav: composeNav, readPhotoVersion: readPhotoVersion,
       applyPhotoVersion: applyPhotoVersion, readCitations: readCitations, parseDegrees: parseDegrees, parseTheses: parseTheses, blockLines: blockLines,

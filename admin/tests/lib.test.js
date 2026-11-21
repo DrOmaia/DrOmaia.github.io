@@ -16,6 +16,8 @@ const I = L._internal;
 // depend on it; the section "CV module" then tests the wiring with a stand-in and, when admin/cv.js and cv.html
 // exist, with the real module.
 I.setCV(null);
+// The same holds for the portfolio page module (admin/portfolio.js): off here, tested in "v3: page modules".
+I.setPortfolio(null);
 
 let failed = 0, passed = 0, current = "";
 function section(name) { current = name; console.log("\n# " + name); }
@@ -46,6 +48,13 @@ const cardsOf = (html) => I.splitCards(inner(html, "dash:cards"));
 const ldOf = (html) => JSON.parse(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(html)[1]);
 const dataOf = (js) => JSON.parse(js.slice(js.indexOf("{"), js.lastIndexOf("}") + 1));
 const sorted = (list) => list.slice().sort();
+// tools/build-arabic.py may also list cv.html (the Arabic CV): give the temp copy that page too, so the script can run
+const PY_LISTS_CV = /["']cv\.html["']/.test(fs.readFileSync(path.join(ROOT, "tools", "build-arabic.py"), "utf8"));
+function pythonNeeds(tmp, cvHtml) {
+  if (!PY_LISTS_CV) return;
+  const cv = typeof cvHtml === "string" ? cvHtml : (fs.existsSync(path.join(ROOT, "cv.html")) ? read("cv.html") : "<!DOCTYPE html>\n<html lang=\"en\"><head></head><body></body></html>\n");
+  fs.writeFileSync(path.join(tmp, "cv.html"), cv);
+}
 
 const files = loadFiles();
 const TODAY = "2027-01-05";
@@ -65,7 +74,8 @@ const NEW_WORK = {
 
 /* ------------------------------------------------------------------ */
 section("API shape");
-eq(L.FILES, ["index.html", "publications.html", "research-data.js", "data/metrics.json", "sitemap.xml", "cv.html"], "FILES");
+eq(L.FILES, ["index.html", "publications.html", "research-data.js", "data/metrics.json", "sitemap.xml", "cv.html", "portfolio.html"], "FILES");
+eq(L.OPTIONAL_FILES, ["cv.html", "portfolio.html"], "files that may be missing on main");
 eq(L.THEMES.length, 6, "six themes");
 eq(L.TYPES.map((t) => t.en), ["Journal article", "Conference paper", "Book chapter"], "types");
 eq(L.FONTS.ar.slice(0, 8).map((f) => f.name), ["Noto Naskh Arabic", "IBM Plex Sans Arabic", "Tajawal", "Cairo", "Noto Kufi Arabic", "Almarai", "Readex Pro", "Amiri"], "the first eight Arabic fonts are the version 1 ones");
@@ -250,6 +260,7 @@ section("Python and JavaScript generators agree on a modified site");
     fs.copyFileSync(path.join(ROOT, "tools", "build-arabic.py"), path.join(tmp, "tools", "build-arabic.py"));
     fs.writeFileSync(path.join(tmp, "index.html"), added.files["index.html"]);
     fs.writeFileSync(path.join(tmp, "publications.html"), added.files["publications.html"]);
+    pythonNeeds(tmp);
     execFileSync("python3", [path.join(tmp, "tools", "build-arabic.py")], { stdio: "ignore" });
     ["index.html", "publications.html"].forEach((page) => {
       const py = fs.readFileSync(path.join(tmp, "ar", page), "utf8");
@@ -634,6 +645,7 @@ function pythonArabic(index, pubs) {
   fs.copyFileSync(path.join(ROOT, "tools", "build-arabic.py"), path.join(tmp, "tools", "build-arabic.py"));
   fs.writeFileSync(path.join(tmp, "index.html"), index);
   fs.writeFileSync(path.join(tmp, "publications.html"), pubs);
+  pythonNeeds(tmp);
   execFileSync("python3", [path.join(tmp, "tools", "build-arabic.py")], { stdio: "ignore" });
   const res = { index: fs.readFileSync(path.join(tmp, "ar", "index.html"), "utf8"), pubs: fs.readFileSync(path.join(tmp, "ar", "publications.html"), "utf8") };
   fs.rmSync(tmp, { recursive: true, force: true });
@@ -971,7 +983,7 @@ section("v2: custom sections");
 section("v2: lists (courses and career)");
 {
   const idx = files["index.html"];
-  I.LISTS.forEach((list) => ok(list.render(model[list.key]) === inner(idx, list.block), list.key + " block reproduced"));
+  I.LISTS.forEach((list) => ok(list.render(model[list.key], I.blockLines(idx, list.block)) === inner(idx, list.block), list.key + " block reproduced"));
   eq([model.flagship.length, model.courses.length, model.timeline.length, model.timelineEarlier.length], [4, 8, 5, 3], "items read");
   eq(model.flagship[0], { code: "IS453", en: "Technology Trends in Digital Transformation", ar: "اتجاهات التقنية في التحول الرقمي" }, "flagship course");
   eq(model.timeline[0].time, "2026 — Present", "the 'Present' span reads as plain text");
@@ -1431,6 +1443,273 @@ section("v2: CV module wiring");
     eq(changed(L.build(site, L.read(site), { today: TODAY })), [], "real module: stable after reading back");
   }
   I.setCV(null);
+}
+
+/* ------------------------------------------------------------------ */
+section("v3: API shape");
+eq(Object.keys(L.PAGES), ["index.html", "publications.html", "cv.html"], "pages with an Arabic twin");
+eq(L.PAGES["cv.html"], { out: "ar/cv.html", en: "https://dromaia.github.io/cv.html", ar: "https://dromaia.github.io/ar/cv.html" }, "cv.html page spec");
+eq(I.LISTS_V3.map((l) => [l.key, l.block]), [["leadBullets", "dash:lead-bullets"], ["leadCards", "dash:lead-cards"], ["contacts", "dash:contacts"],
+  ["contactLinks", "dash:contact-links"], ["degreeCards", "dash:degrees"], ["thesisItems", "dash:theses"]], "version 3 lists and their markers");
+ok(!/analytics|goatcounter/i.test(read("admin/lib.js").replace(/Decision analytics/g, "")) && !("analytics" in model), "no visitor-statistics code or model field");
+["index.html", "publications.html"].forEach((page) => ok(files[page].indexOf("dash:analytics") < 0 && !/goatcounter|gc\.zgo\.at/i.test(files[page]), page + " carries no statistics block or script"));
+
+section("v3: leadership, contact and degree lists");
+{
+  const idx = files["index.html"];
+  eq(model.warnings, [], "no read warnings");
+  eq([model.leadBullets.length, model.leadCards.length, model.contacts.length, model.contactLinks.length, model.degreeCards.length, model.thesisItems.length], [5, 3, 4, 3, 3, 2], "items read");
+  eq(model.leadBullets[0], { en: "Academic leadership of the department within CCIS", ar: "القيادة الأكاديمية للقسم في كلية علوم الحاسب والمعلومات" }, "a bullet");
+  eq(model.leadCards.map((c) => [c.rich, c.ref === undefined ? null : c.ref, c.titleClass || ""]), [[false, null, ""], [true, 1, ""], [false, null, "volunteer-highlight"]], "plain and rich cards");
+  eq(model.leadCards[1].title.en, "Editorial Board, Babylonian Journal of Networking", "a rich card still shows its title");
+  eq(model.leadCards[0].tag, { en: "Conference leadership", ar: "قيادة المؤتمرات" }, "a plain card's tag");
+  // the page uses non-breaking spaces in these texts; they must survive as they are
+  eq(model.contacts[2], { label: { en: "Mobile\u00a0·\u00a0KSA", ar: "الجوال · السعودية" }, value: "+966\u00a059\u00a0837\u00a07884", valueAr: "", hint: { en: "Tap\u00a0to\u00a0call", ar: "اضغط للاتصال" }, href: "tel:+966598377884", hrefAr: "", phone: true }, "a phone contact (non-breaking spaces kept)");
+  ok(model.contacts[0].hrefAr.indexOf("mailto:oalomari@psu.edu.sa?subject=") === 0 && model.contacts[3].valueAr === "الملف المهني ↗", "Arabic link and Arabic value kept");
+  eq(model.contactLinks.map((l) => [l.en, l.primary]), [["View Academic CV ↗", true], ["Official PSU profile ↗", false], ["ORCID ↗", false]], "contact buttons");
+  eq(model.degreeCards.map((d) => [d.year, d.title.en, !!d.link]), [["2021", "PhD in Computer Science (AI)", true], ["2009", "MSc in IT and Computer Sciences", false], ["2006", "BSc in IT and Computer Sciences", false]], "degree cards");
+  eq(model.degreeCards[0].link.href, "https://www.topuniversities.com/universities/universiti-kebangsaan-malaysia-ukm", "a degree's link");
+  eq(model.thesisItems[1], { label: { en: "Thesis", ar: "عنوان الرسالة" }, text: { en: "Evaluation of the Effect of Stemming on Clustering of Arabic Documents", ar: "تقييم أثر التجذير في عنقدة الوثائق العربية" } }, "a thesis title");
+  // the read-only fields the CV module uses keep their types
+  eq(model.degrees.map((d) => [typeof d.year, typeof d.title, typeof d.institution]), [["string", "string", "string"], ["string", "string", "string"], ["string", "string", "string"]], "model.degrees keeps plain strings");
+  eq(model.theses, model.thesisItems.map((t) => t.text.en), "model.theses keeps plain strings");
+  // texts: a plain card is edited as a list item; a rich card keeps its texts in the texts list
+  const en = model.texts.filter((t) => t.page === "index.html").map((t) => t.en);
+  ok(en.indexOf("Conference leadership") < 0 && en.indexOf("700+ volunteer hours") < 0 && en.indexOf("Tap to call") < 0 && en.indexOf("PhD in Computer Science (AI)") < 0, "plain cards, contacts and degrees are not in the texts list");
+  ok(en.indexOf("Editorial & reviewing") >= 0 && en.indexOf("2026–present. Reviewer for ") >= 0 && en.indexOf("Editorial team page ↗") >= 0, "the rich card's texts are in the texts list");
+
+  // bullets
+  const m = copy(model);
+  m.leadBullets.push({ en: 'New <bullet> & "more"', ar: "نقطة <جديدة>" });
+  let out = L.build(files, m, { today: TODAY });
+  eq(changed(out), HOME_ONLY, "a bullet changes only the home page");
+  eq(out.warnings, [], "no warnings");
+  eq(out.summary, ["حُدّث قسم نقاط بطاقة القيادة."], "summary line");
+  eq(I.blockLines(out.files["index.html"], "dash:lead-bullets")[5], '<li data-ar="نقطة &lt;جديدة&gt;">New &lt;bullet&gt; &amp; "more"</li>', "new bullet, escaped");
+  ok(out.files["ar/index.html"].indexOf("<li>نقطة &lt;جديدة&gt;</li>") > 0, "Arabic page follows");
+  eq(L.read(overlay(files, out)).leadBullets[5], { en: 'New <bullet> & "more"', ar: "نقطة <جديدة>" }, "and reads back");
+
+  // cards: reorder with the rich card, edit a plain one, add one, and edit a text of the rich card in the same build
+  const mc = copy(model);
+  mc.leadCards = [mc.leadCards[1], mc.leadCards[2], mc.leadCards[0]];
+  mc.leadCards[2].text.en = "Edited & plain.";
+  mc.leadCards.push({ tag: { en: "New", ar: "جديد" }, title: { en: "Fourth card", ar: "" }, text: { en: "", ar: "" }, rich: false });
+  const richText = mc.texts.filter((t) => t.en === "Editorial team page ↗")[0];
+  richText.en = "Editorial team ↗";
+  out = L.build(files, mc, { today: TODAY });
+  eq(changed(out), HOME_ONLY, "cards change only the home page");
+  const lines = I.blockLines(out.files["index.html"], "dash:lead-cards");
+  const before = I.blockLines(idx, "dash:lead-cards");
+  eq(lines.length, 4, "four cards");
+  ok(lines[0] === before[1].replace("Editorial team page ↗", "Editorial team ↗"), "the rich card moved, kept its markup, and took the text edit");
+  ok(lines[1] === before[2], "an untouched plain card is byte-identical (class on its title kept)");
+  ok(lines[2].indexOf("<p data-ar=") > 0 && lines[2].indexOf(">Edited &amp; plain.</p></article>") > 0, "the edited plain card");
+  eq(lines[3], '<article class="card"><span class="tag" data-ar="جديد">New</span><h3>Fourth card</h3><p></p></article>', "a new plain card");
+  ok(out.summary.indexOf("حُدّث قسم بطاقات القيادة.") >= 0 && out.summary.indexOf("عُدّل نص واحد.") >= 0, "summary lines");
+  const back = L.read(overlay(files, out));
+  eq(back.leadCards.map((c) => [c.rich, c.title.en]), [[true, "Editorial Board, Babylonian Journal of Networking"], [false, "700+ volunteer hours"], [false, "CCIS EXPO 2026 · ICEGOV 2026"], [false, "Fourth card"]], "cards read back in the new order");
+  eq(changed(L.build(overlay(files, out), back, { today: TODAY })), [], "stable after reading back");
+  // deleting the rich card removes its line and nothing else
+  const md = copy(model);
+  md.leadCards.splice(1, 1);
+  out = L.build(files, md, { today: TODAY });
+  eq(I.blockLines(out.files["index.html"], "dash:lead-cards"), [before[0], before[2]], "deleting the rich card");
+
+  // contacts and buttons
+  const mk = copy(model);
+  mk.contacts[2].value = "+966 50 000 0000"; mk.contacts[2].href = "tel:+966500000000";
+  mk.contacts.push({ label: { en: "Scholar", ar: "" }, value: "Google Scholar ↗", valueAr: "", hint: { en: "Publications", ar: "المنشورات" }, href: "https://scholar.google.com/citations?user=TJnHJX8AAAAJ&hl=en", hrefAr: "", phone: false });
+  mk.contactLinks.push({ en: "Portfolio ↗", ar: "ملف الأبحاث ↗", href: "portfolio.html", hrefAr: "../portfolio.html", primary: false });
+  mk.contactLinks[0].primary = false;
+  out = L.build(files, mk, { today: TODAY });
+  eq(changed(out), HOME_ONLY, "contacts change only the home page");
+  const cl = I.blockLines(out.files["index.html"], "dash:contacts");
+  eq(cl.slice(0, 2).concat(cl[3]), I.blockLines(idx, "dash:contacts").filter((x, i) => i !== 2), "untouched contact lines are byte-identical");
+  eq(cl[2], '<a class="contact-path phone" href="tel:+966500000000"><span class="contact-label" data-ar="الجوال · السعودية">Mobile\u00a0·\u00a0KSA</span><strong>+966 50 000 0000</strong><span data-ar="اضغط للاتصال">Tap\u00a0to\u00a0call</span></a>', "edited phone line");
+  eq(cl[4], '<a class="contact-path" href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ&amp;hl=en" rel="noopener" target="_blank"><span class="contact-label">Scholar</span><strong>Google Scholar ↗</strong><span data-ar="المنشورات">Publications</span></a>', "a web contact opens in a new tab; & escaped in the link");
+  const bl = I.blockLines(out.files["index.html"], "dash:contact-links");
+  eq(bl[0].indexOf('<a class="btn" data-ar='), 0, "primary flag removed");
+  eq(bl[3], '<a class="btn" data-ar="ملف الأبحاث ↗" href="portfolio.html" data-ar-href="../portfolio.html" rel="noopener" target="_blank">Portfolio ↗</a>', "a new button with its Arabic link");
+  ok(out.files["ar/index.html"].indexOf('<a class="btn" href="../portfolio.html" rel="noopener" target="_blank">ملف الأبحاث ↗</a>') > 0, "Arabic page uses the Arabic link");
+  eq(changed(L.build(overlay(files, out), L.read(overlay(files, out)), { today: TODAY })), [], "stable after reading back");
+
+  // degrees and theses
+  const mg = copy(model);
+  mg.degreeCards.unshift({ year: "2028", title: { en: "Postgraduate Certificate", ar: "شهادة دراسات عليا" }, institution: { en: "Test University", ar: "" }, link: { en: "Programme ↗", ar: "", href: "https://example.org/p" } });
+  mg.degreeCards[1].link = null;
+  mg.thesisItems.push({ label: { en: "Project", ar: "مشروع" }, text: { en: "A third title", ar: "" } });
+  out = L.build(files, mg, { today: TODAY });
+  eq(changed(out), HOME_ONLY, "degrees change only the home page (CV module off)");
+  const dl = I.blockLines(out.files["index.html"], "dash:degrees");
+  eq(dl[0], '<article class="degree-card"><div class="degree-top"><span class="degree-year">2028</span></div><h3 data-ar="شهادة دراسات عليا">Postgraduate Certificate</h3><div class="degree-institution">Test University</div><a class="ranking-link" href="https://example.org/p" rel="noopener" target="_blank">Programme ↗</a></article>', "a new degree card");
+  ok(dl[1].indexOf("ranking-link") < 0 && dl[1].indexOf("PhD in Computer Science (AI)") > 0, "a degree's link removed");
+  eq(dl.slice(2), I.blockLines(idx, "dash:degrees").slice(1), "untouched degree lines are byte-identical");
+  eq(I.blockLines(out.files["index.html"], "dash:theses")[2], '<div class="degree-detail"><small data-ar="مشروع">Project</small><p>A third title</p></div>', "a new thesis line");
+  const rg = L.read(overlay(files, out));
+  eq([rg.degrees.length, rg.degrees[0].title, rg.theses.length, rg.theses[2]], [4, "Postgraduate Certificate", 3, "A third title"], "the read-only CV fields follow the cards");
+
+  // validate
+  const bad = copy(model);
+  bad.leadBullets[0].en = "";
+  bad.leadCards[0].title.en = "";
+  bad.leadCards[1].title.en = ""; // rich: not checked
+  bad.contacts[0].href = "javascript:alert(1)";
+  bad.contacts[1].value = "";
+  bad.contactLinks[1].href = "https://a b";
+  bad.degreeCards[0].link.href = "";
+  bad.degreeCards[1].title.en = "";
+  bad.thesisItems[0].text.en = "";
+  const errs = L.validate(bad);
+  eq(errs.length, 8, "eight errors: " + JSON.stringify(errs));
+  ok(errs.some((e) => e.indexOf("وسائل التواصل (1)") === 0 && e.indexOf("الرابط") > 0) && errs.some((e) => e.indexOf("الشهادات العلمية (1)") === 0), "errors name the list and the item");
+  L.setLang("en");
+  ok(L.validate(bad).some((e) => e === "contact paths (1): the link is not valid.") && !L.validate(bad).some((e) => /[؀-ۿ]/.test(e)), "English messages");
+  L.setLang("ar");
+  eq(L.validate(model), [], "the current site is valid");
+
+  // an older page without the new markers: read warns, the other blocks still work
+  const old = Object.assign({}, files, { "index.html": idx.replace("<!-- dash:lead-bullets -->", "").replace("<!-- /dash:lead-bullets -->", "") });
+  const ro = L.read(old);
+  ok(ro.warnings.length === 1 && ro.warnings[0].indexOf("dash:lead-bullets") >= 0 && ro.leadBullets.length === 0 && ro.contacts.length === 4, "a missing marker is one read warning");
+  const mo = copy(ro); mo.leadBullets = [{ en: "x", ar: "" }]; mo.contacts[2].value = "+966 50 111 1111";
+  const oo = L.build(old, mo, { today: TODAY });
+  ok(oo.warnings.some((w) => w.indexOf("dash:lead-bullets") >= 0) && oo.files["index.html"].indexOf("+966 50 111 1111") > 0, "build warns for the missing block and updates the others");
+}
+
+section("v3: page modules (portfolio page, Arabic CV)");
+{
+  // --- portfolio: a stand-in module records what it is given
+  const pfCalls = [];
+  const pfStub = {
+    read(html) { const m = /<!-- pf:t -->([\s\S]*?)<!-- \/pf:t -->/.exec(html); return { trajectory: m && m[1] ? m[1].split("|") : [] }; },
+    buildDetailed(m, html) {
+      pfCalls.push(m);
+      const facts = [m.works.length, (m.meta || {}).total, (m.meta || {}).verificationCutoff].join(",");
+      return { html: html.replace(/<!-- pf:t -->[\s\S]*?<!-- \/pf:t -->/, "<!-- pf:t -->" + m.portfolio.trajectory.join("|") + "<!-- /pf:t -->")
+        .replace(/<!-- pf:a -->[\s\S]*?<!-- \/pf:a -->/, "<!-- pf:a -->" + facts + "<!-- /pf:a -->"), warnings: m.portfolio.trajectory.length ? [] : ["PF-WARNING"], changed: [] };
+    },
+    build(m, html) { return this.buildDetailed(m, html).html; },
+  };
+  const meta0 = dataOf(files["research-data.js"]).meta;
+  const pfPage = "<html><!-- pf:t -->one|two<!-- /pf:t --><!-- pf:a -->" + [N, meta0.total, meta0.verificationCutoff].join(",") + "<!-- /pf:a --></html>";
+  const withPf = Object.assign({}, files, { "portfolio.html": pfPage });
+  I.setPortfolio(pfStub);
+  const p0 = L.read(withPf);
+  eq(p0.portfolio, { trajectory: ["one", "two"] }, "read() adds model.portfolio from the module");
+  const same = L.build(withPf, p0, { today: TODAY });
+  eq(changed(same), [], "an unchanged model changes nothing, portfolio.html included");
+  ok(pfCalls.length === 1 && pfCalls[0].today === TODAY && pfCalls[0].meta.total === meta0.total && pfCalls[0].meta.verificationCutoff === meta0.verificationCutoff && pfCalls[0].cutoff === meta0.verificationCutoff,
+    "the module is given today and the catalogue header (cutoff, total)");
+  const p1 = copy(p0);
+  p1.portfolio.trajectory.push("three");
+  let out = L.build(withPf, p1, { today: TODAY });
+  eq(changed(out), ["portfolio.html"], "an owner edit changes only portfolio.html");
+  eq(out.summary, ["حُدّثت صفحة ملف الأبحاث."], "summary line");
+  const p2 = copy(p0);
+  p2.works = p2.works.concat([NEW_WORK]);
+  out = L.build(withPf, p2, { today: TODAY });
+  ok(out.files["portfolio.html"].indexOf("<!-- pf:a -->" + [N + 1, N + 1, TODAY].join(",") + "<!-- /pf:a -->") > 0, "a new work reaches the page with the header as it will be after the build");
+  const p3 = copy(p0); p3.portfolio.trajectory = [];
+  out = L.build(withPf, p3, { today: TODAY });
+  ok(out.warnings.indexOf("PF-WARNING") >= 0, "the module's warnings are passed on");
+  const p4 = copy(p0); delete p4.portfolio;
+  eq(changed(L.build(withPf, p4, { today: TODAY })), [], "a model without portfolio keeps the page as it is");
+  const callsBefore = pfCalls.length;
+  const noPf = Object.assign({}, files, { "portfolio.html": "" });
+  ok(!("portfolio" in L.read(noPf)) && changed(L.build(noPf, p2, { today: TODAY })).indexOf("portfolio.html") < 0 && pfCalls.length === callsBefore, "an empty or missing portfolio.html: the module is not called");
+  const noFile = Object.assign({}, files); delete noFile["portfolio.html"];
+  ok(!("portfolio" in L.read(noFile)) && changed(L.build(noFile, L.read(noFile), { today: TODAY })).length === 0, "no portfolio.html among the files: round trip still clean");
+  I.setPortfolio({ read() { throw new Error("boom"); }, build() { throw new Error("boom"); } });
+  const rf = L.read(withPf);
+  ok(!("portfolio" in rf) && rf.warnings.some((w) => w.indexOf("portfolio.html") > 0), "read: a failing module gives a warning");
+  const of = L.build(withPf, p2, { today: TODAY });
+  ok(changed(of).indexOf("portfolio.html") < 0 && changed(of).indexOf("index.html") >= 0 && of.warnings.some((w) => w.indexOf("portfolio.html") > 0), "build: a failing module gives a warning; the rest is built");
+  const sandbox = { self: { DashPortfolio: pfStub } };
+  vm.createContext(sandbox);
+  vm.runInContext(read("admin/lib.js"), sandbox);
+  eq(JSON.parse(JSON.stringify(sandbox.self.DashLib.read(withPf).portfolio)), { trajectory: ["one", "two"] }, "browser: window.DashPortfolio is used");
+  I.setPortfolio(null);
+
+  // --- Arabic CV: ar/cv.html is an output of a cv.html that carries data-ar
+  const arStub = {
+    read(html) { const m = /<p id="p" data-ar="([^"]*)">([^<]*)<\/p>/.exec(html); return { profile: { en: m ? m[2] : "", ar: m ? m[1] : "" } }; },
+    build(m, html) { return html.replace(/<p id="p" data-ar="[^"]*">[^<]*<\/p>/, '<p id="p" data-ar="' + m.cv.profile.ar + '">' + m.cv.profile.en + "</p>"); },
+  };
+  const cvPage = '<!DOCTYPE html>\n<html lang="en" dir="ltr" data-ar-lang="ar" data-ar-dir="rtl"><head><link rel="canonical" href="https://dromaia.github.io/cv.html" data-ar-href="https://dromaia.github.io/ar/cv.html">' +
+    '<script type="application/ld+json">{"@type":"ProfilePage","inLanguage":"en","url":"https://dromaia.github.io/cv.html"}</script></head><body>' +
+    '<a href="index.html" data-ar="الرئيسية">Home</a><img src="PhotoDrOmaia.webp" alt=""><p id="p" data-ar="نبذة">Profile</p></body></html>\n';
+  const withCv = Object.assign({}, files, { "cv.html": cvPage });
+  I.setCV(arStub);
+  const c0 = L.read(withCv);
+  eq(changed(L.build(withCv, c0, { today: TODAY })), [], "round trip: ar/cv.html is not produced when nothing changed");
+  const c1 = copy(c0); c1.cv.profile.en = "New profile"; c1.cv.profile.ar = "نبذة جديدة";
+  out = L.build(withCv, c1, { today: TODAY });
+  eq(changed(out), ["ar/cv.html", "cv.html"], "a CV edit writes cv.html and its Arabic page");
+  const arCv = out.files["ar/cv.html"];
+  ok(arCv === L.buildArabic("cv.html", out.files["cv.html"]), "ar/cv.html is buildArabic of the new cv.html");
+  ok(arCv.indexOf('<html lang="ar" dir="rtl">') > 0 && arCv.indexOf('<p id="p">نبذة جديدة</p>') > 0 && arCv.indexOf(" data-ar") < 0, "Arabic page: language, direction, Arabic text, no leftovers");
+  ok(arCv.indexOf('href="https://dromaia.github.io/ar/cv.html"') > 0 && arCv.indexOf('"url":"https://dromaia.github.io/ar/cv.html"') > 0 && arCv.indexOf('"inLanguage":"ar"') > 0, "Arabic page: canonical and structured data");
+  ok(arCv.indexOf('src="../PhotoDrOmaia.webp"') > 0 && arCv.indexOf('<a href="index.html">الرئيسية</a>') > 0, "Arabic page: asset paths move up, page links stay local");
+  ok(arCv.indexOf("<!DOCTYPE html>\n<!-- Generated by tools/build-arabic.py from ../cv.html.") === 0, "Arabic page: banner");
+  // the caller may supply ar/cv.html: then it is compared, and repaired when out of step
+  const stale = Object.assign({}, withCv, { "ar/cv.html": "old" });
+  eq(changed(L.build(stale, L.read(stale), { today: TODAY })), ["ar/cv.html"], "a supplied ar/cv.html that is out of step is rewritten");
+  const fresh = Object.assign({}, withCv, { "ar/cv.html": L.buildArabic("cv.html", cvPage) });
+  eq(changed(L.build(fresh, L.read(fresh), { today: TODAY })), [], "a supplied ar/cv.html that is current is left alone");
+  // a CV without data-ar has no Arabic page
+  const plainCv = Object.assign({}, files, { "cv.html": cvPage.replace(/ data-ar(-[a-z]+)?="[^"]*"/g, "") });
+  I.setCV({ read() { return { n: 1 }; }, build(m, html) { return html.replace("Profile", "Profile " + m.cv.n); } });
+  const pm = L.read(plainCv); pm.cv.n = 2;
+  eq(changed(L.build(plainCv, pm, { today: TODAY })), ["cv.html"], "a CV without Arabic texts has no ar/cv.html");
+  I.setCV(null);
+  // the Python generator, once it lists cv.html, must give the same Arabic page
+  let python = true;
+  try { execFileSync("python3", ["--version"], { stdio: "ignore" }); } catch (e) { python = false; }
+  if (!python || !PY_LISTS_CV) console.log("  CASE RUN: Python comparison of ar/cv.html skipped (" + (python ? "tools/build-arabic.py does not list cv.html yet" : "python3 not available") + ")");
+  else {
+    console.log("  CASE RUN: tools/build-arabic.py lists cv.html: comparing its ar/cv.html with the JavaScript output");
+    const realCv = fs.existsSync(path.join(ROOT, "cv.html")) ? read("cv.html") : "";
+    [["stand-in CV page", cvPage]].concat(/\sdata-ar="/.test(realCv) ? [["the repository's cv.html", realCv]] : []).forEach(([name, page]) => {
+      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "dash-"));
+      fs.mkdirSync(path.join(tmp, "tools"));
+      fs.copyFileSync(path.join(ROOT, "tools", "build-arabic.py"), path.join(tmp, "tools", "build-arabic.py"));
+      fs.writeFileSync(path.join(tmp, "index.html"), files["index.html"]);
+      fs.writeFileSync(path.join(tmp, "publications.html"), files["publications.html"]);
+      pythonNeeds(tmp, page);
+      execFileSync("python3", [path.join(tmp, "tools", "build-arabic.py")], { stdio: "ignore" });
+      const py = fs.readFileSync(path.join(tmp, "ar", "cv.html"), "utf8");
+      ok(py === L.buildArabic("cv.html", page), "ar/cv.html (python) equals the JavaScript output: " + name + (py === L.buildArabic("cv.html", page) ? "" : " " + firstDiff(py, L.buildArabic("cv.html", page))));
+      fs.rmSync(tmp, { recursive: true, force: true });
+    });
+  }
+
+  // --- the real modules together, when their files are there
+  I.setCV(undefined); I.setPortfolio(undefined);
+  const off = process.env.DASH_CV === "off";
+  if (off) { I.setCV(null); I.setPortfolio(null); }
+  const hasPf = !off && !!I.getPortfolio() && fs.existsSync(path.join(ROOT, "portfolio.html"));
+  const hasCv = !off && !!I.getCV() && fs.existsSync(path.join(ROOT, "cv.html"));
+  console.log("  CASE RUN: real portfolio module " + (hasPf ? "present" : "absent") + ", real CV module " + (hasCv ? "present" : "absent") +
+    (hasCv ? " (cv.html " + (/\sdata-ar="/.test(read("cv.html")) ? "carries" : "does not carry") + " Arabic texts)" : ""));
+  const real = loadFiles();
+  const rm = L.read(real);
+  const rt = L.build(real, rm, { today: TODAY });
+  eq(changed(rt), [], "real modules: an unchanged model changes nothing");
+  eq(rt.warnings, [], "real modules: no warnings");
+  if (hasPf) {
+    ok(Array.isArray(rm.portfolio.trajectory) && rm.portfolio.trajectory.length > 0, "real portfolio module: read() returns the trajectory lines");
+    const add = copy(rm);
+    add.works = add.works.concat([NEW_WORK]);
+    add.portfolio.trajectory.push("2027: a test line.");
+    const ro = L.build(real, add, { today: TODAY });
+    ok(typeof ro.files["portfolio.html"] === "string" && ro.files["portfolio.html"].indexOf("Trustworthy Agents for Clinical Triage") > 0 && ro.files["portfolio.html"].indexOf("2027: a test line.") > 0,
+      "real portfolio module: a new work and an owner line reach portfolio.html");
+    ok(ro.files["portfolio.html"].indexOf("5 January 2027") > 0, "real portfolio module: the new cutoff date is on the page");
+    const site = overlay(real, ro);
+    eq(changed(L.build(site, L.read(site), { today: TODAY })), [], "real portfolio module: stable after reading back");
+    if (hasCv && /\sdata-ar="/.test(real["cv.html"])) ok(typeof ro.files["ar/cv.html"] === "string" && ro.files["ar/cv.html"] === L.buildArabic("cv.html", ro.files["cv.html"]), "real CV module: ar/cv.html follows cv.html");
+  }
+  I.setCV(null); I.setPortfolio(null);
 }
 
 /* ------------------------------------------------------------------ */

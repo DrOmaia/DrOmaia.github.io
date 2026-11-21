@@ -14,6 +14,9 @@ Private control panel for the owner of https://dromaia.github.io/ — open https
   restoring one adds a commit with that version's tree. The site updates about a minute after any of these.
 - `cv.html` is the live CV (short and full versions: `cv.html` and `cv.html#full`), rebuilt on every publish from the
   same data by `cv.js`; blocks are marked `<!-- cv:NAME -->`.
+  It carries its Arabic as `data-ar`, and `ar/cv.html` is generated from it like the other Arabic pages.
+- `portfolio.html` is the live research portfolio (all works, annotated), rebuilt on every publish by `portfolio.js`;
+  blocks are marked `<!-- pf:NAME -->`. The old portfolio PDF is no longer linked.
 - The page edits the site files themselves (see the `dash:*` markers in `index.html` / `publications.html`), so
   edits made by hand or by other tools stay in sync. Contract and design notes: [`SPEC.md`](SPEC.md).
 - Modules: `lib.js` (all page rewriting, no DOM), `cv.js` (CV page), `cvimport.js` (reads PDF / DOCX in the browser;
@@ -22,6 +25,6 @@ Private control panel for the owner of https://dromaia.github.io/ — open https
   `deleteVersion`), `app.js` (interface).
 - The two PDF files in the repository root (old CV and research portfolio) are not rebuilt by the dashboard.
 
-Tests: `node admin/tests/lib.test.js`, `node admin/tests/cv.test.js`, `python3 admin/tests/ui_test.py` and
+Tests: `node admin/tests/lib.test.js`, `node admin/tests/cv.test.js`, `node admin/tests/portfolio.test.js`, `python3 admin/tests/ui_test.py` and
 `python3 admin/tests/cvimport_test.py` (Playwright + Chromium, fake GitHub API).
 After changing a file here, bump the cache tag `?v=YYYYMMDDx` in `admin/index.html`.

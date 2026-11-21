@@ -1,24 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr" data-ar-lang="ar" data-ar-dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dr. Omaia Al-Omari · Academic CV</title>
-<meta name="description" content="Academic curriculum vitae of Dr. Omaia Al-Omari, Chair of the Information Systems Department and Assistant Professor at Prince Sultan University: appointments, education, publications, teaching and service.">
+<title data-ar="د. أمية العمري · السيرة الذاتية الأكاديمية">Dr. Omaia Al-Omari · Academic CV</title>
+<meta name="description" content="Academic curriculum vitae of Dr. Omaia Al-Omari, Chair of the Information Systems Department and Assistant Professor at Prince Sultan University: appointments, education, publications, teaching and service." data-ar-content="السيرة الذاتية الأكاديمية للدكتور أمية العمري، رئيس قسم نظم المعلومات والأستاذ المساعد في جامعة الأمير سلطان: التعيينات الأكاديمية والتعليم والمنشورات والتدريس والخدمة.">
 <meta name="author" content="Dr. Omaia Al-Omari">
-<link rel="canonical" href="https://dromaia.github.io/cv.html">
+<link rel="canonical" href="https://dromaia.github.io/cv.html" data-ar-href="https://dromaia.github.io/ar/cv.html">
+<link rel="alternate" hreflang="en" href="https://dromaia.github.io/cv.html">
+<link rel="alternate" hreflang="ar" href="https://dromaia.github.io/ar/cv.html">
 <meta property="og:type" content="profile">
-<meta property="og:title" content="Dr. Omaia Al-Omari · Academic CV">
-<meta property="og:url" content="https://dromaia.github.io/cv.html">
-<meta property="og:description" content="Academic curriculum vitae: appointments, education, publications, teaching and service.">
+<meta property="og:title" content="Dr. Omaia Al-Omari · Academic CV" data-ar-content="د. أمية العمري · السيرة الذاتية الأكاديمية">
+<meta property="og:url" content="https://dromaia.github.io/cv.html" data-ar-content="https://dromaia.github.io/ar/cv.html">
+<meta property="og:description" content="Academic curriculum vitae: appointments, education, publications, teaching and service." data-ar-content="السيرة الذاتية الأكاديمية: التعيينات الأكاديمية والتعليم والمنشورات والتدريس والخدمة.">
 <link rel="icon" href="site-icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" data-ar-href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap">
 <!-- This page is the owner's live CV. The blocks marked cv:NAME are written by the dashboard (admin/cv.js):
      keep the markers and keep one item per line inside them. Text outside the blocks is static.
      Two versions in one page: the short CV (default) and the full CV (class "cv-full" on <html>, or #full in the
-     address). class="full-only" shows only in the full version, class="short-only" only in the short one. -->
+     address). class="full-only" shows only in the full version, class="short-only" only in the short one.
+     Arabic: every translatable element carries its Arabic next to it (README.md, "How the two languages work");
+     tools/build-arabic.py generates ar/cv.html from this file. References, titles and DOIs stay in English there. -->
 <script>if (location.hash === "#full") document.documentElement.classList.add("cv-full");</script>
 <style>
 :root { --bg: #f6f3ec; --paper: #fffdf8; --text: #22303b; --head: #1a2a35; --muted: #5f6c76; --accent: #1f6f63; --line: #d9d3c5; --soft: #eef2ec; --link: #1f5a8a; }
@@ -31,6 +35,9 @@ html.cv-full .short-only { display: none !important; }
 .cv-data { display: none !important; }
 .bar { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 12px; padding: 10px 16px; background: rgba(246, 243, 236, .94); border-bottom: 1px solid var(--line); }
 .bar a { color: var(--text); font-weight: 700; text-decoration: none; font-size: .92rem; }
+.bar .links { display: flex; align-items: center; gap: 6px 10px; flex-wrap: wrap; }
+.bar a.lang { display: inline-flex; align-items: center; min-height: 36px; padding: 0 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); font-family: "IBM Plex Sans Arabic", "Noto Naskh Arabic", Tahoma, Arial, sans-serif; }
+html[lang="ar"] .bar a.lang { font-family: Manrope, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif; }
 .tabs { display: flex; gap: 4px; padding: 4px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; }
 .tabs a { display: flex; align-items: center; min-height: 36px; padding: 0 16px; border-radius: 999px; color: var(--muted); white-space: nowrap; }
 html:not(.cv-full) .tabs a[href="#short"], html.cv-full .tabs a[href="#full"] { background: var(--accent); color: #fff; }
@@ -78,6 +85,21 @@ li { margin: 0 0 4px; }
 .pd-item b { display: block; color: var(--head); font-size: .92rem; }
 .pd-item span { display: block; }
 .langs, .open { margin: 0 0 4px; }
+/* Arabic page (ar/cv.html, generated): right to left; references, DOIs and addresses stay left to right */
+html[lang="ar"] body { font-family: Manrope, "IBM Plex Sans Arabic", "Noto Naskh Arabic", Tahoma, Arial, sans-serif; line-height: 1.7; }
+html[lang="ar"] h1, html[lang="ar"] h2, html[lang="ar"] .meta, html[lang="ar"] .pillar b { letter-spacing: 0; }
+html[lang="ar"] h1 { line-height: 1.3; }
+html[lang="ar"] .it, html[lang="ar"] .note { font-style: normal; }
+html[dir="rtl"] ul, html[dir="rtl"] .details { padding-left: 0; padding-right: 20px; }
+html[dir="rtl"] .pillar { border-left: 0; border-right: 1px solid var(--line); }
+html[dir="rtl"] .pillar:first-child { border-right: 0; }
+html[dir="rtl"] .pd-item { border-left: 0; border-right: 1px solid var(--line); }
+html[dir="rtl"] .pd-item:nth-child(odd) { border-right: 0; }
+html[dir="rtl"] .pub { direction: ltr; text-align: left; }
+html[dir="rtl"] .pub[dir="rtl"] { direction: rtl; text-align: right; padding-left: 0; padding-right: 14px; }
+html[dir="rtl"] .pubhead, html[dir="rtl"] .themes, html[dir="rtl"] .note { text-align: right; }
+html[dir="rtl"] .contact a, html[dir="rtl"] .contact span, html[dir="rtl"] .row .d { unicode-bidi: isolate; }
+html[dir="rtl"] .ltr { direction: ltr; }
 @media (max-width: 640px) {
   body { font-size: 14.5px; }
   .paper { margin: 0; padding: 22px 16px 32px; border: 0; border-radius: 0; box-shadow: none; }
@@ -90,10 +112,14 @@ li { margin: 0 0 4px; }
   .row { flex-direction: column; gap: 0; }
   .pd { grid-template-columns: 1fr; }
   .pd-item { border-left: 0; }
+  html[dir="rtl"] .pillar:nth-child(odd) { border-right: 0; }
+  html[dir="rtl"] .pillar:nth-child(even) { border-right: 1px solid var(--line); }
+  html[dir="rtl"] .pd-item { border-right: 0; }
+  html[dir="rtl"] .row { align-items: flex-start; }
   .pd-item:nth-child(2) { border-top: 1px solid var(--line); }
   .pub a { white-space: normal; }
-  .bar a.back { order: 1; }
-  .bar button { order: 2; }
+  .bar .links { order: 1; }
+  .bar button { order: 2; padding: 9px 14px; }
   .tabs { order: 3; width: 100%; }
   .tabs a { flex: 1; justify-content: center; }
 }
@@ -122,6 +148,9 @@ li { margin: 0 0 4px; }
   .it, .note { font-size: 8.6pt; }
   .pubhead { margin: 7pt 0 4pt; break-after: avoid; }
   .pub { font-size: 8.7pt; line-height: 1.33; margin-bottom: 4pt; padding-left: 10pt; text-indent: -10pt; }
+  html[dir="rtl"] .pub[dir="rtl"] { padding-left: 0; padding-right: 10pt; }
+  html[lang="ar"] body { line-height: 1.45; }
+  html[lang="ar"] .pd { break-inside: avoid; }
   .pd-item { font-size: 8pt; padding: 4pt 7pt 5pt; }
   .pd-item b { font-size: 8.6pt; }
   .details, .rolelist { font-size: 8.8pt; }
@@ -132,72 +161,72 @@ li { margin: 0 0 4px; }
 </style>
 </head>
 <body>
-<div class="bar"><a class="back" href="./">← dromaia.github.io</a><nav class="tabs" aria-label="CV version"><a href="#short">Short CV</a><a href="#full">Full CV</a></nav><button type="button" id="savePdf">Save as PDF</button></div>
+<div class="bar"><span class="links"><a class="back" href="./" data-ar-href="index.html" data-ar="→ الرئيسية">← dromaia.github.io</a><a class="lang" id="lang" href="ar/cv.html" hreflang="ar" lang="ar" aria-label="Arabic version of this CV" data-ar-href="../cv.html" data-ar-hreflang="en" data-ar-lang="en" data-ar-aria-label="النسخة الإنجليزية من السيرة" data-ar="English">العربية</a></span><nav class="tabs" aria-label="CV version" data-ar-aria-label="نسخة السيرة"><a href="#short" data-ar="السيرة المختصرة">Short CV</a><a href="#full" data-ar="السيرة الكاملة">Full CV</a></nav><button type="button" id="savePdf" data-ar="حفظ بصيغة PDF">Save as PDF</button></div>
 <main class="paper">
 <header>
 <!-- cv:header -->
-<h1>Dr. Omaia Al-Omari</h1>
-<p class="sub"><span>Chair, Information Systems Department</span><span>Assistant Professor</span><span class="keep">AI Researcher</span></p>
-<p class="contact"><a href="mailto:oalomari@psu.edu.sa"><b>oalomari@psu.edu.sa</b></a> <i>|</i> <a href="https://dromaia.github.io/">dromaia.github.io</a> <i>|</i> <span>Riyadh, Saudi Arabia</span></p>
-<p class="contact"><a href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ">Google Scholar</a> <i>|</i> <a href="https://orcid.org/0000-0002-1638-1771">ORCID 0000-0002-1638-1771</a> <i>|</i> <a href="https://linkedin.com/in/omaiaomari">LinkedIn</a> <i>|</i> <a href="https://facultyportal.psu.edu.sa/ViewProfile.aspx?instructorID=1345">Official PSU Profile</a></p>
+<h1 data-ar="د. أمية العمري">Dr. Omaia Al-Omari</h1>
+<p class="sub"><span data-ar="رئيس قسم نظم المعلومات">Chair, Information Systems Department</span><span data-ar="أستاذ مساعد">Assistant Professor</span><span class="keep" data-ar="باحث في الذكاء الاصطناعي">AI Researcher</span></p>
+<p class="contact"><a class="ltr" href="mailto:oalomari@psu.edu.sa"><b>oalomari@psu.edu.sa</b></a> <i>|</i> <a class="ltr" href="https://dromaia.github.io/" data-ar-href="https://dromaia.github.io/ar/">dromaia.github.io</a> <i>|</i> <span data-ar="الرياض، المملكة العربية السعودية">Riyadh, Saudi Arabia</span></p>
+<p class="contact"><a href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ">Google Scholar</a> <i>|</i> <a class="ltr" href="https://orcid.org/0000-0002-1638-1771">ORCID 0000-0002-1638-1771</a> <i>|</i> <a href="https://linkedin.com/in/omaiaomari">LinkedIn</a> <i>|</i> <a href="https://facultyportal.psu.edu.sa/ViewProfile.aspx?instructorID=1345" data-ar="الملف الرسمي في جامعة الأمير سلطان">Official PSU Profile</a></p>
 <!-- /cv:header -->
-<p class="meta">Academic curriculum vitae ·
+<p class="meta"><span data-ar="السيرة الذاتية الأكاديمية">Academic curriculum vitae</span> ·
 <!-- cv:updated -->
-<span class="updated">Last updated: November 2026</span>
+<span class="updated" data-ar="آخر تحديث: نوفمبر 2026">Last updated: November 2026</span>
 <!-- /cv:updated -->
 </p>
 </header>
 
 <section>
-<h2>Professional profile</h2>
+<h2 data-ar="الملف المهني">Professional profile</h2>
 <!-- cv:profile -->
-<p>Chair of the Information Systems Department and Assistant Professor at Prince Sultan University, with more than 18 years of academic and IT experience. Research and teaching connect applied artificial intelligence, trustworthy and explainable AI, information systems, and digital transformation. Experienced in curriculum development, quality assurance, conference leadership, editorial service, and translating complex research into practical, responsible systems.</p>
+<p data-ar="رئيس قسم نظم المعلومات وأستاذ مساعد في جامعة الأمير سلطان، بخبرة تزيد على 18 عاماً في العمل الأكاديمي وتقنية المعلومات. تجمع أبحاثه وتدريسه بين الذكاء الاصطناعي التطبيقي، والذكاء الاصطناعي الموثوق والقابل للتفسير، ونظم المعلومات، والتحول الرقمي. يمتلك خبرة في تطوير المناهج، وضمان الجودة، وقيادة المؤتمرات، والعمل التحريري، وتحويل الأبحاث المعقدة إلى أنظمة عملية ومسؤولة.">Chair of the Information Systems Department and Assistant Professor at Prince Sultan University, with more than 18 years of academic and IT experience. Research and teaching connect applied artificial intelligence, trustworthy and explainable AI, information systems, and digital transformation. Experienced in curriculum development, quality assurance, conference leadership, editorial service, and translating complex research into practical, responsible systems.</p>
 <!-- /cv:profile -->
 <div class="pillars">
 <!-- cv:pillars -->
-<div class="pillar"><b>APPLIED AI</b><span>Machine Learning · NLP</span></div>
-<div class="pillar"><b>TRUSTWORTHY AI</b><span>XAI · Ethics · Governance</span></div>
-<div class="pillar"><b>VISION &amp; ANALYTICS</b><span>Computer Vision · Healthcare</span></div>
-<div class="pillar"><b>INFORMATION SYSTEMS</b><span>EA · Digital Transformation</span></div>
+<div class="pillar"><b data-ar="الذكاء الاصطناعي التطبيقي">APPLIED AI</b><span data-ar="التعلم الآلي · معالجة اللغة الطبيعية">Machine Learning · NLP</span></div>
+<div class="pillar"><b data-ar="الذكاء الاصطناعي الموثوق">TRUSTWORTHY AI</b><span data-ar="قابلية التفسير · الأخلاقيات · الحوكمة">XAI · Ethics · Governance</span></div>
+<div class="pillar"><b data-ar="الرؤية الحاسوبية والتحليلات">VISION &amp; ANALYTICS</b><span data-ar="الرؤية الحاسوبية · الرعاية الصحية">Computer Vision · Healthcare</span></div>
+<div class="pillar"><b data-ar="نظم المعلومات">INFORMATION SYSTEMS</b><span data-ar="هندسة المؤسسات · التحول الرقمي">EA · Digital Transformation</span></div>
 <!-- /cv:pillars -->
 </div>
 </section>
 
 <section>
-<h2>Academic appointments</h2>
+<h2 data-ar="التعيينات الأكاديمية">Academic appointments</h2>
 <!-- cv:appointments -->
-<div class="entry"><div class="row"><span class="t"><b>Chair, Information Systems Department</b> — Prince Sultan University</span><span class="d">2026–Present</span></div><p class="desc">Academic leadership of the Information Systems Department, CCIS, alongside teaching, research, advising, curriculum, and institutional service.</p><ul class="details full-only"><li>Prince Sultan University (PSU), College of Computer and Information Sciences (CCIS) · Riyadh, Saudi Arabia.</li></ul></div>
-<div class="entry"><div class="row"><span class="t"><b>Assistant Professor</b> — Prince Sultan University</span><span class="d">2024–Present</span></div><p class="desc">Information Systems Department, CCIS · Teaching, research, advising, curriculum, and institutional service.</p><ul class="details full-only"><li>Prince Sultan University (PSU), College of Computer and Information Sciences (CCIS) · Riyadh, Saudi Arabia.</li><li>Teach Information Systems and digital transformation courses; supervise senior projects and cooperative training; advise students.</li><li>Contribute to curriculum, quality assurance, assessment, textbook review, examination coordination, and college-wide academic initiatives.</li></ul></div>
-<div class="entry"><div class="row"><span class="t"><b>Lecturer / Faculty Member</b> — Shaqra University</span><span class="d">2014–2024</span></div><p class="desc">Teaching across computing programs with leadership in academic advising, student activities, community service, and quality assurance.</p><ul class="details full-only"><li>College of Computing and IT · Saudi Arabia.</li><li>Taught computing and information systems courses and supported academic advising, student activities, accreditation, and quality assurance.</li><li>Served in academic administration and contributed to program development and institutional service.</li></ul></div>
-<div class="entry"><div class="row"><span class="t"><b>Graduate Research Assistant</b> — UKM</span><span class="d">2013–2014</span></div><p class="desc">Research support in analysis and preparation of Malay-language compound-noun data.</p><ul class="details full-only"><li>Universiti Kebangsaan Malaysia (UKM) · Bangi, Malaysia.</li></ul></div>
-<div class="entry"><div class="row"><span class="t"><b>Lecturer</b> — University of Ha’il</span><span class="d">2009–2012</span></div><p class="desc">Undergraduate teaching in internet protocols, database systems, and web application development.</p><ul class="details full-only"><li>Ha’il, Saudi Arabia.</li></ul></div>
-<p class="note short-only">Earlier academic roles: Instructor, Jerash Private University (2009); Computer Instructor, Kufr Asad Secondary School (2007–2009); Teaching Assistant, Yarmouk University (2006–2007).</p>
-<div class="entry full-only"><div class="row"><span class="t"><b>Instructor</b> — Jerash Private University</span><span class="d">2009</span></div><p class="desc">Systems analysis, programming concepts, and introductory computing.</p></div>
-<div class="entry full-only"><div class="row"><span class="t"><b>Computer Instructor</b> — Kufr Asad Secondary School</span><span class="d">2007–2009</span></div><p class="desc">Computer courses and laboratories for grades 7–12.</p><ul class="details full-only"><li>Ministry of Education, Jordan.</li></ul></div>
-<div class="entry full-only"><div class="row"><span class="t"><b>Teaching Assistant</b> — Yarmouk University</span><span class="d">2006–2007</span></div><p class="desc">Supported Multimedia Systems teaching and assessment.</p></div>
+<div class="entry"><div class="row"><span class="t"><b data-ar="رئيس قسم نظم المعلومات">Chair, Information Systems Department</b> — <span data-ar="جامعة الأمير سلطان">Prince Sultan University</span></span><span class="d" data-ar="2026–حتى الآن">2026–Present</span></div><p class="desc" data-ar="القيادة الأكاديمية لقسم نظم المعلومات في كلية علوم الحاسب والمعلومات، إلى جانب التدريس والبحث والإرشاد والمناهج والخدمة المؤسسية.">Academic leadership of the Information Systems Department, CCIS, alongside teaching, research, advising, curriculum, and institutional service.</p><ul class="details full-only"><li data-ar="جامعة الأمير سلطان، كلية علوم الحاسب والمعلومات · الرياض، المملكة العربية السعودية.">Prince Sultan University (PSU), College of Computer and Information Sciences (CCIS) · Riyadh, Saudi Arabia.</li></ul></div>
+<div class="entry"><div class="row"><span class="t"><b data-ar="أستاذ مساعد">Assistant Professor</b> — <span data-ar="جامعة الأمير سلطان">Prince Sultan University</span></span><span class="d" data-ar="2024–حتى الآن">2024–Present</span></div><p class="desc" data-ar="قسم نظم المعلومات، كلية علوم الحاسب والمعلومات · التدريس والبحث والإرشاد والمناهج والخدمة المؤسسية.">Information Systems Department, CCIS · Teaching, research, advising, curriculum, and institutional service.</p><ul class="details full-only"><li data-ar="جامعة الأمير سلطان، كلية علوم الحاسب والمعلومات · الرياض، المملكة العربية السعودية.">Prince Sultan University (PSU), College of Computer and Information Sciences (CCIS) · Riyadh, Saudi Arabia.</li><li data-ar="تدريس مقررات نظم المعلومات والتحول الرقمي؛ والإشراف على مشاريع التخرج والتدريب التعاوني؛ وإرشاد الطلبة أكاديمياً.">Teach Information Systems and digital transformation courses; supervise senior projects and cooperative training; advise students.</li><li data-ar="المساهمة في تطوير المناهج، وضمان الجودة، والتقييم، ومراجعة الكتب الدراسية، وتنسيق الاختبارات، والمبادرات الأكاديمية على مستوى الكلية.">Contribute to curriculum, quality assurance, assessment, textbook review, examination coordination, and college-wide academic initiatives.</li></ul></div>
+<div class="entry"><div class="row"><span class="t"><b data-ar="محاضر / عضو هيئة تدريس">Lecturer / Faculty Member</b> — <span data-ar="جامعة شقراء">Shaqra University</span></span><span class="d">2014–2024</span></div><p class="desc" data-ar="التدريس في برامج الحوسبة مع قيادة أعمال الإرشاد الأكاديمي والأنشطة الطلابية والخدمة المجتمعية وضمان الجودة.">Teaching across computing programs with leadership in academic advising, student activities, community service, and quality assurance.</p><ul class="details full-only"><li data-ar="كلية الحوسبة وتقنية المعلومات · المملكة العربية السعودية.">College of Computing and IT · Saudi Arabia.</li><li data-ar="تدريس مقررات الحوسبة ونظم المعلومات، ودعم الإرشاد الأكاديمي والأنشطة الطلابية والاعتماد الأكاديمي وضمان الجودة.">Taught computing and information systems courses and supported academic advising, student activities, accreditation, and quality assurance.</li><li data-ar="العمل في الإدارة الأكاديمية والمساهمة في تطوير البرامج والخدمة المؤسسية.">Served in academic administration and contributed to program development and institutional service.</li></ul></div>
+<div class="entry"><div class="row"><span class="t"><b data-ar="مساعد باحث للدراسات العليا">Graduate Research Assistant</b> — <span data-ar="UKM">UKM</span></span><span class="d">2013–2014</span></div><p class="desc" data-ar="دعم بحثي في تحليل بيانات الأسماء المركبة باللغة الماليزية وإعدادها.">Research support in analysis and preparation of Malay-language compound-noun data.</p><ul class="details full-only"><li data-ar="الجامعة الوطنية الماليزية (UKM) · بانغي، ماليزيا.">Universiti Kebangsaan Malaysia (UKM) · Bangi, Malaysia.</li></ul></div>
+<div class="entry"><div class="row"><span class="t"><b data-ar="محاضر">Lecturer</b> — <span data-ar="جامعة حائل">University of Ha’il</span></span><span class="d">2009–2012</span></div><p class="desc" data-ar="تدريس بروتوكولات الإنترنت ونظم قواعد البيانات وتطوير تطبيقات الويب.">Undergraduate teaching in internet protocols, database systems, and web application development.</p><ul class="details full-only"><li data-ar="حائل، المملكة العربية السعودية.">Ha’il, Saudi Arabia.</li></ul></div>
+<p class="note short-only" data-ar="الأدوار الأكاديمية السابقة: مدرس، جامعة جرش الخاصة (2009)؛ مدرس حاسوب، مدرسة كفر أسد الثانوية (2007–2009)؛ مساعد تدريس، جامعة اليرموك (2006–2007).">Earlier academic roles: Instructor, Jerash Private University (2009); Computer Instructor, Kufr Asad Secondary School (2007–2009); Teaching Assistant, Yarmouk University (2006–2007).</p>
+<div class="entry full-only"><div class="row"><span class="t"><b data-ar="مدرس">Instructor</b> — <span data-ar="جامعة جرش الخاصة">Jerash Private University</span></span><span class="d">2009</span></div><p class="desc" data-ar="تحليل النظم ومفاهيم البرمجة ومقدمة في الحوسبة.">Systems analysis, programming concepts, and introductory computing.</p></div>
+<div class="entry full-only"><div class="row"><span class="t"><b data-ar="مدرس حاسوب">Computer Instructor</b> — <span data-ar="مدرسة كفر أسد الثانوية">Kufr Asad Secondary School</span></span><span class="d">2007–2009</span></div><p class="desc" data-ar="مقررات ومختبرات الحاسوب للصفوف من السابع إلى الثاني عشر.">Computer courses and laboratories for grades 7–12.</p><ul class="details full-only"><li data-ar="وزارة التربية والتعليم، الأردن.">Ministry of Education, Jordan.</li></ul></div>
+<div class="entry full-only"><div class="row"><span class="t"><b data-ar="مساعد تدريس">Teaching Assistant</b> — <span data-ar="جامعة اليرموك">Yarmouk University</span></span><span class="d">2006–2007</span></div><p class="desc" data-ar="المساعدة في تدريس نظم الوسائط المتعددة والتقييم.">Supported Multimedia Systems teaching and assessment.</p></div>
 <!-- /cv:appointments -->
 </section>
 
 <section>
-<h2>Education</h2>
+<h2 data-ar="التعليم">Education</h2>
 <!-- cv:education -->
-<div class="entry"><div class="row"><span class="t"><b>PhD in Computer Science (AI)</b> — The National University of Malaysia (UKM)</span><span class="d">2021</span></div><p class="it">Thesis: “Noun Verb Extraction and Hybrid Krill Herd as Feature Selection for Document Classification.”</p></div>
-<div class="entry"><div class="row"><span class="t"><b>MSc in IT and Computer Sciences</b> — Yarmouk University · Jordan</span><span class="d">2009</span></div><p class="it"><span class="keep">Specialization: Computer Information Systems.</span> Thesis: “Evaluation of the Effect of Stemming on Clustering of Arabic Documents.”</p></div>
-<div class="entry"><div class="row"><span class="t"><b>BSc in IT and Computer Sciences</b> — Yarmouk University · Jordan</span><span class="d">2006</span></div><p class="it"><span class="keep">Specialization: Computer Information Systems.</span></p></div>
+<div class="entry"><div class="row"><span class="t"><b data-ar="دكتوراه علوم الحاسب — الذكاء الاصطناعي">PhD in Computer Science (AI)</b> — <span data-ar="الجامعة الوطنية الماليزية (UKM)">The National University of Malaysia (UKM)</span></span><span class="d">2021</span></div><p class="it"><span data-ar="عنوان الرسالة: «استخراج الأسماء والأفعال وخوارزمية قطيع الكريل الهجينة لاختيار السمات في تصنيف الوثائق».">Thesis: “Noun Verb Extraction and Hybrid Krill Herd as Feature Selection for Document Classification.”</span></p></div>
+<div class="entry"><div class="row"><span class="t"><b data-ar="ماجستير تقنية المعلومات وعلوم الحاسب">MSc in IT and Computer Sciences</b> — <span data-ar="جامعة اليرموك · الأردن">Yarmouk University · Jordan</span></span><span class="d">2009</span></div><p class="it"><span class="keep" data-ar="التخصص: نظم المعلومات الحاسوبية.">Specialization: Computer Information Systems.</span> <span data-ar="عنوان الرسالة: «تقييم أثر التجذير في عنقدة الوثائق العربية».">Thesis: “Evaluation of the Effect of Stemming on Clustering of Arabic Documents.”</span></p></div>
+<div class="entry"><div class="row"><span class="t"><b data-ar="بكالوريوس تقنية المعلومات وعلوم الحاسب">BSc in IT and Computer Sciences</b> — <span data-ar="جامعة اليرموك · الأردن">Yarmouk University · Jordan</span></span><span class="d">2006</span></div><p class="it"><span class="keep" data-ar="التخصص: نظم المعلومات الحاسوبية.">Specialization: Computer Information Systems.</span></p></div>
 <!-- /cv:education -->
 </section>
 
 <section>
-<h2><span class="short-only">Selected research &amp; publications</span><span class="full-only">Research &amp; publications</span></h2>
-<p class="short-only"><b>Research themes:</b> applied and explainable AI, computer vision, NLP and multimodal learning, healthcare analytics, cybersecurity, AI governance, and information systems. Complete record: <a href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ">Google Scholar ↗</a></p>
+<h2><span class="short-only" data-ar="مختارات من البحث والمنشورات">Selected research &amp; publications</span><span class="full-only" data-ar="البحث والمنشورات">Research &amp; publications</span></h2>
+<p class="short-only"><b data-ar="محاور البحث:">Research themes:</b> <span data-ar="الذكاء الاصطناعي التطبيقي والقابل للتفسير، والرؤية الحاسوبية، ومعالجة اللغة الطبيعية والتعلم متعدد الوسائط، وتحليلات الرعاية الصحية، والأمن السيبراني، وحوكمة الذكاء الاصطناعي، ونظم المعلومات.">applied and explainable AI, computer vision, NLP and multimodal learning, healthcare analytics, cybersecurity, AI governance, and information systems.</span> <span data-ar="السجل الكامل:">Complete record:</span> <a href="https://scholar.google.com/citations?user=TJnHJX8AAAAJ">Google Scholar ↗</a></p>
 <!-- cv:accepted -->
-<p class="pubhead">Accepted / in press</p>
+<p class="pubhead" data-ar="مقبولة للنشر / قيد الطبع">Accepted / in press</p>
 <p class="pub"><b class="y">2026</b> “Explainable AI-Based Classification of Environmental, Technical, and Cyber Anomalies in Solar PV Systems Under UAE Desert Conditions.” Co-author. ICAMAC 2026, Rochester Institute of Technology Dubai (accepted for oral presentation, October 2026).</p>
 <p class="pub"><b class="y">2026</b> “Harnessing Artificial Intelligence and Emerging Technologies for Environmental Protection: Legal, Ethical, and Policy Perspectives.” Co-author. International Journal of Artificial Intelligence and Machine Learning (accepted, September 2026).</p>
 <!-- /cv:accepted -->
 <div class="short-only">
 <!-- cv:publications -->
-<p class="pubhead">Published</p>
+<p class="pubhead" data-ar="الأعمال المنشورة">Published</p>
 <p class="pub"><b class="y">2026</b> M. Akour, O. Al-Omari, and M. Alzoubi. “From Generation to Verification: A Reproducible Empirical Study of Verification-Guided LLM Workflows for Software Engineering.” Computers, 15(11), 825. <a href="https://doi.org/10.3390/computers15110825">doi:10.3390/computers15110825</a></p>
 <p class="pub"><b class="y">2026</b> E. Ali et al. “Hybrid Deep Feature Fusion Framework with Maximum Entropy Based Selection for Accurate Diabetic Foot Ulcer Diagnosis from Enhanced and Segmented Medical Images.” Scientific Reports. <a href="https://doi.org/10.1038/s41598-026-74375-w">doi:10.1038/s41598-026-74375-w</a></p>
 <p class="pub"><b class="y">2026</b> M. Alenezi, M. Akour, and O. Al-Omari. “Agentic Artificial Intelligence in Software Engineering: Integration Points, Architectural Frameworks, Empirical Evaluation, and Governance.” International Journal of Technology, 17(4), 1245–1262. <a href="https://doi.org/10.14716/ijtech.v17i4.8380">doi:10.14716/ijtech.v17i4.8380</a></p>
@@ -215,13 +244,13 @@ li { margin: 0 0 4px; }
 <p class="pub"><b class="y">2025</b> A. Alyousef and O. Al-Omari. “Artificial Intelligence in Healthcare: Bridging Innovation and Regulation.” Journal of Ecohumanism, 3(8). <a href="https://doi.org/10.62754/joe.v3i8.5673">doi:10.62754/joe.v3i8.5673</a></p>
 <p class="pub"><b class="y">2025</b> O. Al-Omari, A. Alyousef, S. Fati, F. Shannaq, and A. Omari. “Governance and Ethical Frameworks for AI Integration in Higher Education.” Journal of Ecohumanism, 4(2). <a href="https://doi.org/10.62754/joe.v3i8.5781">doi:10.62754/joe.v3i8.5781</a></p>
 <p class="pub"><b class="y">2025</b> D. Nimma et al. “Object Detection in Real-Time Video Surveillance Using Attention-Based Transformer-YOLOv8 Model.” Alexandria Engineering Journal, 118, 482–495. <a href="https://doi.org/10.1016/j.aej.2025.01.032">doi:10.1016/j.aej.2025.01.032</a></p>
-<p class="note" data-selected="17">The 17 most recent of <a href="https://dromaia.github.io/publications.html">40 verified works on dromaia.github.io ↗</a></p>
+<p class="note" data-selected="17"><span data-ar="أحدث 17 من أصل">The 17 most recent of</span> <a href="https://dromaia.github.io/publications.html" data-ar-href="https://dromaia.github.io/ar/publications.html" data-ar="40 عملاً موثقاً على dromaia.github.io ↗">40 verified works on dromaia.github.io ↗</a></p>
 <!-- /cv:publications -->
 </div>
 <div class="full-only">
 <!-- cv:publications-full -->
-<p class="themes"><b>Research themes (40 works):</b> Cybersecurity, IoT, and cloud infrastructure (9); NLP, education, and knowledge systems (8); Healthcare and clinical decision support (7); Decision analytics and intelligent systems (6); Computer vision and environmental intelligence (5); Responsible AI, governance, and society (5).</p>
-<p class="pubhead">Journal articles (23)</p>
+<p class="themes"><b data-ar="محاور البحث (40 عملاً):">Research themes (40 works):</b> <span data-ar="الأمن السيبراني وإنترنت الأشياء والبنية السحابية (9)؛ معالجة اللغة الطبيعية والتعليم ونظم المعرفة (8)؛ الرعاية الصحية ودعم القرار السريري (7)؛ تحليلات القرار والأنظمة الذكية (6)؛ الرؤية الحاسوبية والذكاء البيئي (5)؛ الذكاء الاصطناعي المسؤول والحوكمة والمجتمع (5).">Cybersecurity, IoT, and cloud infrastructure (9); NLP, education, and knowledge systems (8); Healthcare and clinical decision support (7); Decision analytics and intelligent systems (6); Computer vision and environmental intelligence (5); Responsible AI, governance, and society (5).</span></p>
+<p class="pubhead" data-ar="مقالات في دوريات (23)">Journal articles (23)</p>
 <p class="pub"><b class="n">J1</b> <b class="y">2026</b> M. Akour, O. Al-Omari, and M. Alzoubi. “From Generation to Verification: A Reproducible Empirical Study of Verification-Guided LLM Workflows for Software Engineering.” Computers, 15(11), 825. <a href="https://doi.org/10.3390/computers15110825">doi:10.3390/computers15110825</a></p>
 <p class="pub"><b class="n">J2</b> <b class="y">2026</b> E. Ali, E. M. Senan, N. El Hakim, M. A. Khan, I. A. Ahmed, O. Al-Omari, and S. M. Fati. “Hybrid Deep Feature Fusion Framework with Maximum Entropy Based Selection for Accurate Diabetic Foot Ulcer Diagnosis from Enhanced and Segmented Medical Images.” Scientific Reports. <a href="https://doi.org/10.1038/s41598-026-74375-w">doi:10.1038/s41598-026-74375-w</a></p>
 <p class="pub"><b class="n">J3</b> <b class="y">2026</b> M. Alenezi, M. Akour, and O. Al-Omari. “Agentic Artificial Intelligence in Software Engineering: Integration Points, Architectural Frameworks, Empirical Evaluation, and Governance.” International Journal of Technology, 17(4), 1245–1262. <a href="https://doi.org/10.14716/ijtech.v17i4.8380">doi:10.14716/ijtech.v17i4.8380</a></p>
@@ -245,7 +274,7 @@ li { margin: 0 0 4px; }
 <p class="pub"><b class="n">J21</b> <b class="y">2017</b> O. M. A. Al Omari, N. A. Khan, and R. Mahafdah. “Ranking and Reputation Based Resource Allocation in P2P System.” Mediterranean Journal of Basic and Applied Sciences, 1(1), 293–301.</p>
 <p class="pub"><b class="n">J22</b> <b class="y">2014</b> R. Mahafdah, N. Omar, and O. Al-Omari. “Arabic Part of Speech Tagging Using K-Nearest Neighbour and Naive Bayes Classifiers Combination.” Journal of Computer Science, 10(9), 1865–1873. <a href="https://doi.org/10.3844/jcssp.2014.1865.1873">doi:10.3844/jcssp.2014.1865.1873</a></p>
 <p class="pub"><b class="n">J23</b> <b class="y">2011</b> O. M. Al-Omari. “Evaluating the Effect of Stemming in Clustering of Arabic Documents.” Academic Research International, 1(1), 284–291.</p>
-<p class="pubhead">Conference papers (13)</p>
+<p class="pubhead" data-ar="أوراق في مؤتمرات (13)">Conference papers (13)</p>
 <p class="pub"><b class="n">C1</b> <b class="y">2025</b> O. Al-Omari, Y. AlShboul, R. Mahafdah, M. Y. Alzoubi, A. Omari, and A. A. Alrashed. “XAI-Driven Decision Aid for Chronic Disease Progression.” 2025 International Conference on Decision Aid Sciences and Applications (DASA) (pp. 1015–1019). IEEE. <a href="https://doi.org/10.1109/DASA68193.2025.11498906">doi:10.1109/DASA68193.2025.11498906</a></p>
 <p class="pub"><b class="n">C2</b> <b class="y">2025</b> O. Al-Omari, M. Y. Alzoubi, A. Alyousef, E. Othman, A. Omari, and A. A. Alrashed. “KAN-ALSTM: A Clinical Decision Aid for Predicting Parkinson's Disease Progression.” 2025 International Conference on Decision Aid Sciences and Applications (DASA) (pp. 2190–2194). IEEE. <a href="https://doi.org/10.1109/DASA68193.2025.11498856">doi:10.1109/DASA68193.2025.11498856</a></p>
 <p class="pub"><b class="n">C3</b> <b class="y">2025</b> D. Raju, O. Al-Omari, G. K. Anbazhagan, K. M. Selladurai, M. B. Alazzam, and M. Karthik. “LSTM Networks for Improved Environmental Monitoring and Biodiversity Conservation.” 2025 International Conference on Emerging Smart Computing and Informatics (ESCI) (pp. 1–5). IEEE. <a href="https://doi.org/10.1109/ESCI63694.2025.10988428">doi:10.1109/ESCI63694.2025.10988428</a></p>
@@ -259,77 +288,81 @@ li { margin: 0 0 4px; }
 <p class="pub"><b class="n">C11</b> <b class="y">2023</b> M. M. Alotibi, S. Rajeyyagari, O. M. Al-Omari, and M. Alymani. “IoT and Machine Learning Models to Develop the Architecture for Assessment of Security Threats.” 2023 International Conference on New Frontiers in Communication, Automation, Management and Security (ICCAMS) (pp. 1–6). IEEE. <a href="https://doi.org/10.1109/ICCAMS60113.2023.10526005">doi:10.1109/ICCAMS60113.2023.10526005</a></p>
 <p class="pub"><b class="n">C12</b> <b class="y">2019</b> N. A. Khan, R. F. Mahafdah, M. A. M. Nasimuddin, O. M. Alomari, A. M. U. Siddiqi, and D. Ahamad. “Intrusion Management to Avoid Web-Form Spamming in Cloud-Based Architectures.” 2019 International Conference on Computational Intelligence and Knowledge Economy (ICCIKE) (pp. 437–442). IEEE. <a href="https://doi.org/10.1109/ICCIKE47802.2019.9004302">doi:10.1109/ICCIKE47802.2019.9004302</a></p>
 <p class="pub"><b class="n">C13</b> <b class="y">2019</b> N. A. Khan, A. M. U. Siddiqi, M. A. Mohammad, D. Ahmad, S. A. Hameed, and O. M. Al Omari. “Prevention of Web-Form Spamming for Cloud-Based Applications: A Proposed Model.” 2019 Amity International Conference on Artificial Intelligence (AICAI) (pp. 249–254). IEEE. <a href="https://doi.org/10.1109/AICAI.2019.8701302">doi:10.1109/AICAI.2019.8701302</a></p>
-<p class="pubhead">Book chapters (4)</p>
+<p class="pubhead" data-ar="فصول في كتب (4)">Book chapters (4)</p>
 <p class="pub"><b class="n">B1</b> <b class="y">2025</b> O. Al-Omari, Y. AlShboul, A. Alyousef, F. Shannaq, and A. Omari. “Applying Artificial Intelligence Techniques on Cyber Attacks Dataset.” Lecture Notes on Data Engineering and Communications Technologies (pp. 74–84). Springer. <a href="https://doi.org/10.1007/978-3-031-87778-0_7">doi:10.1007/978-3-031-87778-0_7</a></p>
 <p class="pub"><b class="n">B2</b> <b class="y">2025</b> F. A. Alijoyo, N. Venkatramana, O. Al-Omari, S. A. Khan, and B. K. Bala. “A Deep Learning Approach for Proactive Detection and Mitigation of Zero-Day Attacks in IoT Environment.” Lecture Notes in Networks and Systems (pp. 47–61). Springer. <a href="https://doi.org/10.1007/978-981-96-6429-0_5">doi:10.1007/978-981-96-6429-0_5</a></p>
 <p class="pub"><b class="n">B3</b> <b class="y">2024</b> S. R. Nallola, O. M. Al-Omari, V. Ayyasamy, and A. Inbavalli. “Smart Cloud Data Management Based on Deep Reinforcement Learning with Spider Swarm Optimization.” Advancing Sustainable Science and Technology for a Resilient Future (pp. 11–15). CRC Press. <a href="https://doi.org/10.1201/9781003490210-3">doi:10.1201/9781003490210-3</a></p>
 <p class="pub"><b class="n">B4</b> <b class="y">2023</b> N. A. Khan, O. M. Al-Omari, and S. M. Alshahrani. “An Empirical Study on the Future of Publication Repositories and Its Adaptability in Public Universities.” Computational Intelligence (pp. 823–829). Springer. <a href="https://doi.org/10.1007/978-981-19-7346-8_71">doi:10.1007/978-981-19-7346-8_71</a></p>
-<p class="note">Methods, contributions and citation counts for all 40 works: <a href="https://dromaia.github.io/publications.html">dromaia.github.io/publications.html ↗</a></p>
+<p class="note"><span data-ar="المنهجيات والإسهامات وأعداد الاستشهادات لجميع الأعمال الـ40:">Methods, contributions and citation counts for all 40 works:</span> <a href="https://dromaia.github.io/publications.html" data-ar-href="https://dromaia.github.io/ar/publications.html" data-ar="dromaia.github.io/ar/publications.html ↗">dromaia.github.io/publications.html ↗</a></p>
 <!-- /cv:publications-full -->
 </div>
 </section>
 
 <section>
-<h2>Teaching &amp; mentorship</h2>
+<h2 data-ar="التدريس والإرشاد">Teaching &amp; mentorship</h2>
 <!-- cv:teaching -->
-<p class="short-only">Current and recent courses at Prince Sultan University include Introduction to Information Technology (IS101), Introduction to Information Systems (IS201), Systems Analysis and Design (IS231), Enterprise Architecture (IS321), Change Management for Digital Transformation (IS452), Technology Trends in Digital Transformation (IS453), Cooperative Training (IS492), and Senior Project (IS499).</p>
-<p class="full-only"><b>Flagship courses:</b> Technology Trends in Digital Transformation (IS453); Change Management for Digital Transformation (IS452); Enterprise Architecture (IS321); Senior Project (IS499).</p>
-<p class="full-only"><b>Other recent courses:</b> Introduction to Information Technology (IS101); Introduction to Information Systems (IS201); Systems Analysis and Design (IS231); Cooperative Training (IS492).</p>
+<p class="short-only" data-ar="تشمل المقررات الحالية والحديثة في جامعة الأمير سلطان: مقدمة في تقنية المعلومات (IS101)، ومقدمة في نظم المعلومات (IS201)، وتحليل وتصميم النظم (IS231)، وهندسة المؤسسات (IS321)، وإدارة التغيير للتحول الرقمي (IS452)، واتجاهات التقنية في التحول الرقمي (IS453)، والتدريب التعاوني (IS492)، ومشروع التخرج (IS499).">Current and recent courses at Prince Sultan University include Introduction to Information Technology (IS101), Introduction to Information Systems (IS201), Systems Analysis and Design (IS231), Enterprise Architecture (IS321), Change Management for Digital Transformation (IS452), Technology Trends in Digital Transformation (IS453), Cooperative Training (IS492), and Senior Project (IS499).</p>
+<p class="full-only"><b data-ar="المقررات الرئيسية:">Flagship courses:</b> <span data-ar="اتجاهات التقنية في التحول الرقمي (IS453)؛ إدارة التغيير للتحول الرقمي (IS452)؛ هندسة المؤسسات (IS321)؛ مشروع التخرج (IS499).">Technology Trends in Digital Transformation (IS453); Change Management for Digital Transformation (IS452); Enterprise Architecture (IS321); Senior Project (IS499).</span></p>
+<p class="full-only"><b data-ar="مقررات حديثة أخرى:">Other recent courses:</b> <span data-ar="مقدمة في تقنية المعلومات (IS101)؛ مقدمة في نظم المعلومات (IS201)؛ تحليل وتصميم النظم (IS231)؛ التدريب التعاوني (IS492).">Introduction to Information Technology (IS101); Introduction to Information Systems (IS201); Systems Analysis and Design (IS231); Cooperative Training (IS492).</span></p>
 <!-- /cv:teaching -->
 <ul>
-<li>Teaching approach: problem-based learning, case analysis, applied projects, and responsible use of emerging technologies.</li>
-<li>Mentorship: senior projects, academic advising, research development, and cooperative training supervision.</li>
-<li>Curriculum and quality: curriculum review, learning-outcome alignment, assessment coordination, and accreditation support.</li>
+<li data-ar="منهج التدريس: التعلم القائم على حل المشكلات، وتحليل الحالات، والمشاريع التطبيقية، والاستخدام المسؤول للتقنيات الناشئة.">Teaching approach: problem-based learning, case analysis, applied projects, and responsible use of emerging technologies.</li>
+<li data-ar="التوجيه والإشراف: مشاريع التخرج، والإرشاد الأكاديمي، والتطوير البحثي، والإشراف على التدريب التعاوني.">Mentorship: senior projects, academic advising, research development, and cooperative training supervision.</li>
+<li data-ar="المناهج والجودة: مراجعة المناهج، ومواءمة مخرجات التعلم، وتنسيق التقييم، ودعم الاعتماد الأكاديمي.">Curriculum and quality: curriculum review, learning-outcome alignment, assessment coordination, and accreditation support.</li>
 </ul>
 </section>
 
 <section>
-<h2>Academic leadership &amp; professional service</h2>
+<h2 data-ar="القيادة الأكاديمية والخدمة المهنية">Academic leadership &amp; professional service</h2>
 <!-- cv:service -->
-<div class="entry x"><div class="row"><span class="t"><b>Chair, Information Systems Department</b> — Prince Sultan University</span><span class="d">2026–Present</span></div><p class="desc">The BSc Information Systems program holds full ABET accreditation through 2031 (announced August 2026).</p></div>
-<div class="entry x"><div class="row"><span class="t"><b>Editorial Board Member</b> — Babylonian Journal of Networking (BJN)</span><span class="d">2026–Present</span></div><p class="desc">Contribute to peer review and support the journal’s academic quality and publication standards.</p></div>
-<div class="entry x"><div class="row"><span class="t"><b>CCIS Curriculum Committee and IS Curriculum Committee</b> — Prince Sultan University</span></div></div>
-<p class="svc short-only"><b>PSU:</b> CCIS website administrator; Intercollegiate Committee; Exam Coordination Committee 2026; IS Textbooks Update; Chair, CCIS EXPO 2026.</p>
-<p class="svc short-only"><b>Shaqra University:</b> Quality Assurance Committee; Student activities, competitions, and community-service coordination.</p>
-<p class="svc short-only"><b>ICDR 2026:</b> Judging Committee Member, AI Hackathon for Persons with Disabilities, 7th International Conference on Disability and Rehabilitation (King Salman Center for Disability Research, Riyadh, 11–13 October 2026).</p>
-<p class="svc short-only"><b>ICEGOV 2026:</b> Track Chair (appointed), International Conference on Theory and Practice of Electronic Governance · event postponed.</p>
+<div class="entry x"><div class="row"><span class="t"><b data-ar="رئيس قسم نظم المعلومات">Chair, Information Systems Department</b> — <span data-ar="جامعة الأمير سلطان">Prince Sultan University</span></span><span class="d" data-ar="2026–حتى الآن">2026–Present</span></div><p class="desc" data-ar="برنامج بكالوريوس نظم المعلومات حاصل على الاعتماد الكامل من ABET حتى 2031 (أُعلن في أغسطس 2026).">The BSc Information Systems program holds full ABET accreditation through 2031 (announced August 2026).</p></div>
+<div class="entry x"><div class="row"><span class="t"><b data-ar="عضو هيئة التحرير">Editorial Board Member</b> — <span data-ar="المجلة البابلية للشبكات (BJN)">Babylonian Journal of Networking (BJN)</span></span><span class="d" data-ar="2026–حتى الآن">2026–Present</span></div><p class="desc" data-ar="المساهمة في التحكيم العلمي ودعم الجودة الأكاديمية للمجلة ومعايير النشر فيها.">Contribute to peer review and support the journal’s academic quality and publication standards.</p></div>
+<div class="entry x"><div class="row"><span class="t"><b data-ar="لجنتا المناهج في كلية علوم الحاسب والمعلومات وقسم نظم المعلومات">CCIS Curriculum Committee and IS Curriculum Committee</b> — <span data-ar="جامعة الأمير سلطان">Prince Sultan University</span></span></div></div>
+<p class="svc short-only"><b data-ar="جامعة الأمير سلطان:">PSU:</b> <span data-ar="مسؤول موقع كلية علوم الحاسب والمعلومات؛ اللجنة المشتركة بين الكليات؛ لجنة تنسيق الاختبارات 2026؛ تحديث الكتب الدراسية لنظم المعلومات؛ مشرف مشاريع التخرج الفائزة بجائزة أفضل مشروع في معرض CCIS EXPO (الفصلان 252 و261)؛ رئيس معرض كلية علوم الحاسب والمعلومات 2026.">CCIS website administrator; Intercollegiate Committee; Exam Coordination Committee 2026; IS Textbooks Update; Supervisor of Best Project award winners, CCIS EXPO (terms 252 and 261); Chair, CCIS EXPO 2026.</span></p>
+<p class="svc short-only"><b data-ar="جامعة شقراء:">Shaqra University:</b> <span data-ar="عضو لجنة ضمان الجودة؛ تنسيق الأنشطة الطلابية والمسابقات والخدمة المجتمعية.">Quality Assurance Committee; Student activities, competitions, and community-service coordination.</span></p>
+<p class="svc short-only"><b>ICDSIC 2027:</b> <span data-ar="عضو اللجنة الفنية للمؤتمر الدولي الثالث للمجتمع الرقمي والحوسبة الذكية (شيامن، مايو 2027).">Technical Program Committee Member, 3rd International Conference on Digital Society and Intelligent Computing (Xiamen, May 2027).</span></p>
+<p class="svc short-only"><b>ICDR 2026:</b> <span data-ar="عضو لجنة تحكيم هاكاثون الذكاء الاصطناعي للأشخاص ذوي الإعاقة، ضمن المؤتمر الدولي السابع للإعاقة والتأهيل (مركز الملك سلمان لأبحاث الإعاقة، الرياض، 11–13 أكتوبر 2026).">Judging Committee Member, AI Hackathon for Persons with Disabilities, 7th International Conference on Disability and Rehabilitation (King Salman Center for Disability Research, Riyadh, 11–13 October 2026).</span></p>
+<p class="svc short-only"><b>ICEGOV 2026:</b> <span data-ar="رئيس مسار (تعيين) في المؤتمر الدولي لنظرية وممارسة الحوكمة الإلكترونية · المؤتمر مؤجَّل.">Track Chair (appointed), International Conference on Theory and Practice of Electronic Governance · event postponed.</span></p>
 <ul class="rolelist full-only">
-<li><b>PSU:</b> CCIS website administrator</li>
-<li><b>PSU:</b> Intercollegiate Committee</li>
-<li><b>PSU:</b> Exam Coordination Committee 2026</li>
-<li><b>PSU:</b> IS Textbooks Update</li>
-<li><b>PSU:</b> Chair, CCIS EXPO 2026</li>
-<li><b>Shaqra University:</b> Quality Assurance Committee</li>
-<li><b>Shaqra University:</b> Student activities, competitions, and community-service coordination</li>
-<li><b>ICDR 2026:</b> Judging Committee Member, AI Hackathon for Persons with Disabilities, 7th International Conference on Disability and Rehabilitation (King Salman Center for Disability Research, Riyadh, 11–13 October 2026)</li>
-<li><b>ICEGOV 2026:</b> Track Chair (appointed), International Conference on Theory and Practice of Electronic Governance · event postponed</li>
+<li><b data-ar="جامعة الأمير سلطان:">PSU:</b> <span data-ar="مسؤول موقع كلية علوم الحاسب والمعلومات">CCIS website administrator</span></li>
+<li><b data-ar="جامعة الأمير سلطان:">PSU:</b> <span data-ar="اللجنة المشتركة بين الكليات">Intercollegiate Committee</span></li>
+<li><b data-ar="جامعة الأمير سلطان:">PSU:</b> <span data-ar="لجنة تنسيق الاختبارات 2026">Exam Coordination Committee 2026</span></li>
+<li><b data-ar="جامعة الأمير سلطان:">PSU:</b> <span data-ar="تحديث الكتب الدراسية لنظم المعلومات">IS Textbooks Update</span></li>
+<li><b data-ar="جامعة الأمير سلطان:">PSU:</b> <span data-ar="مشرف مشاريع التخرج الفائزة بجائزة أفضل مشروع في معرض CCIS EXPO (الفصلان 252 و261)">Supervisor of Best Project award winners, CCIS EXPO (terms 252 and 261)</span></li>
+<li><b data-ar="جامعة الأمير سلطان:">PSU:</b> <span data-ar="رئيس معرض كلية علوم الحاسب والمعلومات 2026">Chair, CCIS EXPO 2026</span></li>
+<li><b data-ar="جامعة شقراء:">Shaqra University:</b> <span data-ar="عضو لجنة ضمان الجودة">Quality Assurance Committee</span></li>
+<li><b data-ar="جامعة شقراء:">Shaqra University:</b> <span data-ar="تنسيق الأنشطة الطلابية والمسابقات والخدمة المجتمعية">Student activities, competitions, and community-service coordination</span></li>
+<li><b>ICDSIC 2027:</b> <span data-ar="عضو اللجنة الفنية للمؤتمر الدولي الثالث للمجتمع الرقمي والحوسبة الذكية (شيامن، مايو 2027)">Technical Program Committee Member, 3rd International Conference on Digital Society and Intelligent Computing (Xiamen, May 2027)</span></li>
+<li><b>ICDR 2026:</b> <span data-ar="عضو لجنة تحكيم هاكاثون الذكاء الاصطناعي للأشخاص ذوي الإعاقة، ضمن المؤتمر الدولي السابع للإعاقة والتأهيل (مركز الملك سلمان لأبحاث الإعاقة، الرياض، 11–13 أكتوبر 2026)">Judging Committee Member, AI Hackathon for Persons with Disabilities, 7th International Conference on Disability and Rehabilitation (King Salman Center for Disability Research, Riyadh, 11–13 October 2026)</span></li>
+<li><b>ICEGOV 2026:</b> <span data-ar="رئيس مسار (تعيين) في المؤتمر الدولي لنظرية وممارسة الحوكمة الإلكترونية · المؤتمر مؤجَّل">Track Chair (appointed), International Conference on Theory and Practice of Electronic Governance · event postponed</span></li>
 </ul>
 <!-- /cv:service -->
 </section>
 
 <section>
-<h2>Community engagement &amp; recognition</h2>
+<h2 data-ar="المشاركة المجتمعية والتقدير">Community engagement &amp; recognition</h2>
 <ul>
 <!-- cv:community -->
-<li><b>747.5 certified volunteer hours:</b> Saudi National Volunteer Work Platform, Ministry of Human Resources and Social Development (as of August 2026); community activity recorded since 2021.</li>
-<li><b>Certificate of appreciation:</b> King Salman Center for Disability Research, for judging the AI Hackathon for Persons with Disabilities at ICDR 2026 (October 2026).</li>
-<li><b>Practicing Quality Ambassador:</b> Quality Ambassadors Program, Membership No. 20230035, 2023.</li>
-<li><b>Institutional recognition:</b> Recognized for contributions to Computer Science program accreditation at Shaqra University, 2023.</li>
-<li><b>Graduate and undergraduate scholarships:</b> Scholarship awards from Jordan’s Ministry of Higher Education and Yarmouk University.</li>
-<li><b>Dean’s Honor List:</b> Recognized across five semesters during undergraduate study.</li>
+<li><b data-ar="747.5 ساعة تطوعية معتمدة:">747.5 certified volunteer hours:</b> <span data-ar="المنصة الوطنية للعمل التطوعي، وزارة الموارد البشرية والتنمية الاجتماعية (حتى أغسطس 2026)؛ مع نشاط مجتمعي موثّق منذ 2021.">Saudi National Volunteer Work Platform, Ministry of Human Resources and Social Development (as of August 2026); community activity recorded since 2021.</span></li>
+<li><b data-ar="جائزة أفضل مشروع:">Best Project awards:</b> <span data-ar="الإشراف على مشاريع التخرج الفائزة بجائزة أفضل مشروع في معرض CCIS EXPO بجامعة الأمير سلطان للفصلين 252 و261 (2026).">Supervisor of the senior projects named Best Project at CCIS EXPO, Prince Sultan University, in terms 252 and 261 (2026).</span></li>
+<li><b data-ar="شهادة شكر وتقدير:">Certificate of appreciation:</b> <span data-ar="من مركز الملك سلمان لأبحاث الإعاقة، لتحكيم هاكاثون الذكاء الاصطناعي للأشخاص ذوي الإعاقة ضمن مؤتمر ICDR 2026 (أكتوبر 2026).">King Salman Center for Disability Research, for judging the AI Hackathon for Persons with Disabilities at ICDR 2026 (October 2026).</span></li>
+<li><b data-ar="سفير جودة ممارس:">Practicing Quality Ambassador:</b> <span data-ar="برنامج سفراء الجودة، رقم العضوية 20230035، عام 2023.">Quality Ambassadors Program, Membership No. 20230035, 2023.</span></li>
+<li><b data-ar="تكريم مؤسسي:">Institutional recognition:</b> <span data-ar="تكريم للمساهمة في اعتماد برنامج علوم الحاسب في جامعة شقراء، عام 2023.">Recognized for contributions to Computer Science program accreditation at Shaqra University, 2023.</span></li>
+<li><b data-ar="منح دراسية في الدراسات العليا والبكالوريوس:">Graduate and undergraduate scholarships:</b> <span data-ar="منح دراسية من وزارة التعليم العالي الأردنية ومن جامعة اليرموك.">Scholarship awards from Jordan’s Ministry of Higher Education and Yarmouk University.</span></li>
+<li><b data-ar="قائمة شرف العميد:">Dean’s Honor List:</b> <span data-ar="الإدراج في قائمة شرف العميد في خمسة فصول دراسية خلال مرحلة البكالوريوس.">Recognized across five semesters during undergraduate study.</span></li>
 <!-- /cv:community -->
 </ul>
 </section>
 
 <section>
-<h2>Selected professional development</h2>
+<h2 data-ar="مختارات من التطوير المهني">Selected professional development</h2>
 <div class="pd">
 <!-- cv:development -->
-<div class="pd-item"><b>Artificial Intelligence Analyst</b><span>IBM Mastery Award</span></div>
-<div class="pd-item"><b>Artificial Intelligence Fundamentals</b><span>IBM SkillsBuild</span></div>
-<div class="pd-item"><b>Course Design Institute</b><span>Coursera · 2024</span></div>
-<div class="pd-item"><b>AWS Immersion Day</b><span>Cloud Computing Workshop</span></div>
-<div class="pd-item"><b>Cisco Networking</b><span>IoT &amp; Cybersecurity</span></div>
+<div class="pd-item"><b data-ar="محلل ذكاء اصطناعي">Artificial Intelligence Analyst</b><span data-ar="جائزة الإتقان من IBM">IBM Mastery Award</span></div>
+<div class="pd-item"><b data-ar="أساسيات الذكاء الاصطناعي">Artificial Intelligence Fundamentals</b><span>IBM SkillsBuild</span></div>
+<div class="pd-item"><b data-ar="معهد تصميم المقررات">Course Design Institute</b><span>Coursera · 2024</span></div>
+<div class="pd-item"><b>AWS Immersion Day</b><span data-ar="ورشة عمل في الحوسبة السحابية">Cloud Computing Workshop</span></div>
+<div class="pd-item"><b data-ar="شبكات Cisco">Cisco Networking</b><span data-ar="إنترنت الأشياء والأمن السيبراني">IoT &amp; Cybersecurity</span></div>
 <div class="pd-item"><b>Agile Meets Design Thinking</b><span>Coursera</span></div>
 <!-- /cv:development -->
 </div>
@@ -339,21 +372,21 @@ li { margin: 0 0 4px; }
 <!-- /cv:full-extra -->
 
 <section>
-<h2>Languages &amp; availability</h2>
+<h2 data-ar="اللغات ومجالات التعاون">Languages &amp; availability</h2>
 <!-- cv:languages -->
-<p class="langs"><b>Languages:</b> Arabic (native); English (professional proficiency).</p>
-<p class="open"><b>Open to:</b> research collaboration, academic leadership opportunities, and responsible AI initiatives.</p>
+<p class="langs"><b data-ar="اللغات:">Languages:</b> <span data-ar="العربية (اللغة الأم)؛ الإنجليزية (إتقان مهني).">Arabic (native); English (professional proficiency).</span></p>
+<p class="open"><b data-ar="منفتح على:">Open to:</b> <span data-ar="التعاون البحثي، وفرص القيادة الأكاديمية، ومبادرات الذكاء الاصطناعي المسؤول.">research collaboration, academic leadership opportunities, and responsible AI initiatives.</span></p>
 <!-- /cv:languages -->
 </section>
 </main>
 <div class="cv-data" hidden>
 <!-- cv:appointment-details -->
-<div data-match="Chair, Information Systems Department"><span>Prince Sultan University (PSU), College of Computer and Information Sciences (CCIS) · Riyadh, Saudi Arabia.</span></div>
-<div data-match="Assistant Professor"><span>Prince Sultan University (PSU), College of Computer and Information Sciences (CCIS) · Riyadh, Saudi Arabia.</span><span>Teach Information Systems and digital transformation courses; supervise senior projects and cooperative training; advise students.</span><span>Contribute to curriculum, quality assurance, assessment, textbook review, examination coordination, and college-wide academic initiatives.</span></div>
-<div data-match="Lecturer / Faculty Member"><span>College of Computing and IT · Saudi Arabia.</span><span>Taught computing and information systems courses and supported academic advising, student activities, accreditation, and quality assurance.</span><span>Served in academic administration and contributed to program development and institutional service.</span></div>
-<div data-match="Graduate Research Assistant"><span>Universiti Kebangsaan Malaysia (UKM) · Bangi, Malaysia.</span></div>
-<div data-match="University of Ha’il"><span>Ha’il, Saudi Arabia.</span></div>
-<div data-match="Kufr Asad"><span>Ministry of Education, Jordan.</span></div>
+<div data-match="Chair, Information Systems Department"><span data-ar="جامعة الأمير سلطان، كلية علوم الحاسب والمعلومات · الرياض، المملكة العربية السعودية.">Prince Sultan University (PSU), College of Computer and Information Sciences (CCIS) · Riyadh, Saudi Arabia.</span></div>
+<div data-match="Assistant Professor"><span data-ar="جامعة الأمير سلطان، كلية علوم الحاسب والمعلومات · الرياض، المملكة العربية السعودية.">Prince Sultan University (PSU), College of Computer and Information Sciences (CCIS) · Riyadh, Saudi Arabia.</span><span data-ar="تدريس مقررات نظم المعلومات والتحول الرقمي؛ والإشراف على مشاريع التخرج والتدريب التعاوني؛ وإرشاد الطلبة أكاديمياً.">Teach Information Systems and digital transformation courses; supervise senior projects and cooperative training; advise students.</span><span data-ar="المساهمة في تطوير المناهج، وضمان الجودة، والتقييم، ومراجعة الكتب الدراسية، وتنسيق الاختبارات، والمبادرات الأكاديمية على مستوى الكلية.">Contribute to curriculum, quality assurance, assessment, textbook review, examination coordination, and college-wide academic initiatives.</span></div>
+<div data-match="Lecturer / Faculty Member"><span data-ar="كلية الحوسبة وتقنية المعلومات · المملكة العربية السعودية.">College of Computing and IT · Saudi Arabia.</span><span data-ar="تدريس مقررات الحوسبة ونظم المعلومات، ودعم الإرشاد الأكاديمي والأنشطة الطلابية والاعتماد الأكاديمي وضمان الجودة.">Taught computing and information systems courses and supported academic advising, student activities, accreditation, and quality assurance.</span><span data-ar="العمل في الإدارة الأكاديمية والمساهمة في تطوير البرامج والخدمة المؤسسية.">Served in academic administration and contributed to program development and institutional service.</span></div>
+<div data-match="Graduate Research Assistant"><span data-ar="الجامعة الوطنية الماليزية (UKM) · بانغي، ماليزيا.">Universiti Kebangsaan Malaysia (UKM) · Bangi, Malaysia.</span></div>
+<div data-match="University of Ha’il"><span data-ar="حائل، المملكة العربية السعودية.">Ha’il, Saudi Arabia.</span></div>
+<div data-match="Kufr Asad"><span data-ar="وزارة التربية والتعليم، الأردن.">Ministry of Education, Jordan.</span></div>
 <!-- /cv:appointment-details -->
 </div>
 <script>
@@ -371,6 +404,8 @@ li { margin: 0 0 4px; }
   window.addEventListener("hashchange", apply);
   apply();
   document.getElementById("savePdf").addEventListener("click", function () { window.print(); });
+  var lang = document.getElementById("lang");
+  if (lang) lang.addEventListener("click", function () { try { localStorage.setItem("lang", root.lang === "ar" ? "en" : "ar"); } catch (e) {} });
 })();
 </script>
 </body>

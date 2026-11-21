@@ -1,8 +1,10 @@
-/* TEST STAND-IN for admin/lib.js and admin/cv.js (version 2 shapes of SPEC.md, deliberately simple logic).
+/* TEST STAND-IN for admin/lib.js, admin/cv.js and admin/portfolio.js (version 2 and 3 shapes of SPEC.md, deliberately simple logic).
    Used only by admin/tests/ui_test.py (routed in place of lib.js); never loaded by index.html. */
 (function (root) {
   "use strict";
-  var FILES = ["index.html", "publications.html", "research-data.js", "data/metrics.json", "sitemap.xml", "cv.html"];
+  var FILES = ["index.html", "publications.html", "research-data.js", "data/metrics.json", "sitemap.xml", "cv.html", "portfolio.html"];
+  var OPTIONAL_FILES = ["cv.html", "portfolio.html"];
+  var PAGES = { "index.html": { out: "ar/index.html" }, "publications.html": { out: "ar/publications.html" }, "cv.html": { out: "ar/cv.html" } };
   var THEMES = [
     { en: "Cybersecurity, IoT, and cloud infrastructure", ar: "الأمن السيبراني وإنترنت الأشياء والسحابة" },
     { en: "NLP, education, and knowledge systems", ar: "معالجة اللغة والتعليم ونظم المعرفة" },
@@ -57,7 +59,8 @@
 
   /* ---------- stand-in CV module ---------- */
   var CV_DEFAULT = {
-    profile: { en: "Chair of the Information Systems Department and Assistant Professor at Prince Sultan University." },
+    profile: { en: "Chair of the Information Systems Department and Assistant Professor at Prince Sultan University.", ar: "رئيس قسم نظم المعلومات وأستاذ مساعد في جامعة الأمير سلطان." },
+    languagesAr: "العربية (اللغة الأم)؛ الإنجليزية (إتقان مهني).", openToAr: "",
     pillars: [{ title: "APPLIED AI", text: "Machine Learning · NLP" }, { title: "TRUSTWORTHY AI", text: "XAI · Ethics · Governance" }],
     accepted: [{ year: "2026", text: "Accepted test paper. ICAMAC 2026." }],
     selected: 17,
@@ -68,7 +71,7 @@
     extraService: [{ title: "Track Chair (appointed)", org: "ICEGOV 2026", date: "2026", text: "Event postponed." }]
   };
   var DashCV = {
-    MOCK: true,
+    MOCK: true, ARABIC: true,
     read: function (html) {
       var m = /<!--mock-cv:([\s\S]*?)-->/.exec(String(html || ""));
       if (m) { try { return JSON.parse(decodeURIComponent(m[1])); } catch (e) { /* fall through */ } }
@@ -80,7 +83,7 @@
       var li = function (list, f) { return (list || []).map(function (x) { return "<li>" + f(x) + "</li>"; }).join(""); };
       return "<!DOCTYPE html>\n<html lang=\"en\" dir=\"ltr\"><head><meta charset=\"utf-8\"><title>Dr. Omaia Al-Omari - Academic CV</title>" +
         "<!--mock-cv:" + encodeURIComponent(JSON.stringify(cv)) + "--><style>.full-only{display:none}.cv-full .full-only{display:block}</style></head><body>" +
-        "<h1>DR. OMAIA AL-OMARI</h1><h2>PROFESSIONAL PROFILE</h2><p id=\"cvProfile\">" + esc((cv.profile || {}).en) + "</p>" +
+        "<h1>DR. OMAIA AL-OMARI</h1><h2 data-ar=\"النبذة المهنية\">PROFESSIONAL PROFILE</h2><p id=\"cvProfile\" data-ar=\"" + esc((cv.profile || {}).ar || (cv.profile || {}).en) + "\">" + esc((cv.profile || {}).en) + "</p>" +
         "<h2>ACCEPTED / IN PRESS</h2><ul>" + li(cv.accepted, function (x) { return esc(x.year) + " " + esc(x.text); }) + "</ul>" +
         "<h2>SERVICE</h2><ul>" + li((model.roles || []).slice(0, 3), function (x) { return esc(x.org) + " — " + esc(x.en); }) +
         li(cv.extraService, function (x) { return esc(x.title) + " — " + esc(x.org) + " " + esc(x.date) + " " + esc(x.text); }) + "</ul>" +
@@ -91,6 +94,88 @@
         "<p>" + esc(cv.languages) + " " + esc(cv.openTo) + "</p><button type=\"button\">Save as PDF</button></body></html>\n";
     }
   };
+
+  /* ---------- stand-in portfolio module ---------- */
+  var DashPortfolio = {
+    MOCK: true,
+    read: function (html) {
+      var m = /<!-- pf:trajectory -->([\s\S]*?)<!-- \/pf:trajectory -->/.exec(String(html || ""));
+      var lines = m ? m[1].split("\n").map(function (l) { return unesc(l.replace(/<[^>]*>/g, "")).trim(); }).filter(Boolean) : [];
+      return { trajectory: lines };
+    },
+    build: function (model, html) { return DashPortfolio.buildDetailed(model, html).html; },
+    buildDetailed: function (model, html) {
+      var src = String(html || ""), now = DashPortfolio.read(src), want = (model.portfolio || now).trajectory || [];
+      if (JSON.stringify(want) === JSON.stringify(now.trajectory)) return { html: src, warnings: [], changed: [] };
+      var block = "<!-- pf:trajectory -->\n" + want.map(function (l) { return "<p>" + esc(l) + "</p>"; }).join("\n") + "\n<!-- /pf:trajectory -->";
+      var out = /<!-- pf:trajectory -->[\s\S]*?<!-- \/pf:trajectory -->/.test(src) ? src.replace(/<!-- pf:trajectory -->[\s\S]*?<!-- \/pf:trajectory -->/, function () { return block; })
+        : "<!DOCTYPE html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><title>Portfolio</title></head><body><h1>Verified Research Portfolio</h1>" + block + "</body></html>\n";
+      return { html: out, warnings: [], changed: ["trajectory"] };
+    }
+  };
+
+  /* ---------- version 3 lists (leadership, contact, degrees) ---------- */
+  function lines(idx, name) {
+    try { return block(idx, name).text.split("\n").filter(function (l) { return l.trim() !== ""; }); } catch (e) { return null; }
+  }
+  function two(ar, en) { return { en: unesc(en || ""), ar: ar ? unesc(ar) : "" }; }
+  var V3 = {
+    leadBullets: { block: "lead-bullets",
+      read: function (l) { var m = /^<li(?: data-ar="([^"]*)")?>([^<]*)<\/li>$/.exec(l.trim()); return m ? two(m[1], m[2]) : null; },
+      write: function (x) { return "<li" + (x.ar ? ' data-ar="' + esc(x.ar) + '"' : "") + ">" + esc(x.en) + "</li>"; } },
+    leadCards: { block: "lead-cards",
+      read: function (l, i) {
+        var m = /^<article class="card"><span class="tag"(?: data-ar="([^"]*)")?>([^<]*)<\/span><h3(?: class="([^"]*)")?(?: data-ar="([^"]*)")?>([^<]*)<\/h3><p(?: data-ar="([^"]*)")?>([^<]*)<\/p><\/article>$/.exec(l.trim());
+        if (m) { var c = { tag: two(m[1], m[2]), title: two(m[4], m[5]), text: two(m[6], m[7]), rich: false }; if (m[3]) c.titleClass = m[3]; return c; }
+        var h = /<span class="tag"(?: data-ar="([^"]*)")?>([^<]*)<\/span><h3[^>]*?(?: data-ar="([^"]*)")?>([^<]*)<\/h3>/.exec(l);
+        return { tag: h ? two(h[1], h[2]) : two("", ""), title: h ? two(h[3], h[4]) : two("", ""), text: two("", ""), rich: true, ref: i };
+      },
+      write: function (x, cur) {
+        if (x.rich) return (cur[x.ref] || "").trim();
+        return '<article class="card"><span class="tag"' + (x.tag.ar ? ' data-ar="' + esc(x.tag.ar) + '"' : "") + ">" + esc(x.tag.en) + "</span><h3" + (x.titleClass ? ' class="' + x.titleClass + '"' : "") +
+          (x.title.ar ? ' data-ar="' + esc(x.title.ar) + '"' : "") + ">" + esc(x.title.en) + "</h3><p" + (x.text.ar ? ' data-ar="' + esc(x.text.ar) + '"' : "") + ">" + esc(x.text.en) + "</p></article>";
+      } },
+    contacts: { block: "contacts",
+      read: function (l) {
+        var m = /^<a class="contact-path( phone)?"(?: data-ar-href="([^"]*)")? href="([^"]*)"(?: rel="noopener" target="_blank")?><span class="contact-label"(?: data-ar="([^"]*)")?>([^<]*)<\/span><strong(?: data-ar="([^"]*)")?>([^<]*)<\/strong><span(?: data-ar="([^"]*)")?>([^<]*)<\/span><\/a>$/.exec(l.trim());
+        return m ? { label: two(m[4], m[5]), value: unesc(m[7]), valueAr: m[6] ? unesc(m[6]) : "", hint: two(m[8], m[9]), href: unesc(m[3]), hrefAr: m[2] ? unesc(m[2]) : "", phone: !!m[1] } : null;
+      },
+      write: function (x) {
+        return '<a class="contact-path' + (x.phone ? " phone" : "") + '"' + (x.hrefAr ? ' data-ar-href="' + esc(x.hrefAr) + '"' : "") + ' href="' + esc(x.href) + '"' + (/^https?:/.test(x.href) ? ' rel="noopener" target="_blank"' : "") +
+          '><span class="contact-label"' + (x.label.ar ? ' data-ar="' + esc(x.label.ar) + '"' : "") + ">" + esc(x.label.en) + "</span><strong" + (x.valueAr ? ' data-ar="' + esc(x.valueAr) + '"' : "") + ">" + esc(x.value) +
+          "</strong><span" + (x.hint.ar ? ' data-ar="' + esc(x.hint.ar) + '"' : "") + ">" + esc(x.hint.en) + "</span></a>";
+      } },
+    contactLinks: { block: "contact-links",
+      read: function (l) {
+        var m = /^<a class="btn( primary)?"(?: data-ar="([^"]*)")? href="([^"]*)"(?: data-ar-href="([^"]*)")? rel="noopener" target="_blank">([^<]*)<\/a>$/.exec(l.trim());
+        return m ? { en: unesc(m[5]), ar: m[2] ? unesc(m[2]) : "", href: unesc(m[3]), hrefAr: m[4] ? unesc(m[4]) : "", primary: !!m[1] } : null;
+      },
+      write: function (x) {
+        return '<a class="btn' + (x.primary ? " primary" : "") + '"' + (x.ar ? ' data-ar="' + esc(x.ar) + '"' : "") + ' href="' + esc(x.href) + '"' + (x.hrefAr ? ' data-ar-href="' + esc(x.hrefAr) + '"' : "") +
+          ' rel="noopener" target="_blank">' + esc(x.en) + "</a>";
+      } },
+    degreeCards: { block: "degrees",
+      read: function (l) {
+        var m = /^<article class="degree-card"><div class="degree-top"><span class="degree-year">([^<]*)<\/span><\/div><h3(?: data-ar="([^"]*)")?>([^<]*)<\/h3><div class="degree-institution"(?: data-ar="([^"]*)")?>([^<]*)<\/div>(?:<a class="ranking-link"(?: data-ar="([^"]*)")? href="([^"]*)" rel="noopener" target="_blank">([^<]*)<\/a>)?<\/article>$/.exec(l.trim());
+        return m ? { year: unesc(m[1]), title: two(m[2], m[3]), institution: two(m[4], m[5]), link: m[7] != null ? { en: unesc(m[8]), ar: m[6] ? unesc(m[6]) : "", href: unesc(m[7]) } : null } : null;
+      },
+      write: function (x) {
+        var k = x.link && x.link.href ? x.link : null;
+        return '<article class="degree-card"><div class="degree-top"><span class="degree-year">' + esc(x.year) + "</span></div><h3" + (x.title.ar ? ' data-ar="' + esc(x.title.ar) + '"' : "") + ">" + esc(x.title.en) +
+          '</h3><div class="degree-institution"' + (x.institution.ar ? ' data-ar="' + esc(x.institution.ar) + '"' : "") + ">" + esc(x.institution.en) + "</div>" +
+          (k ? '<a class="ranking-link"' + (k.ar ? ' data-ar="' + esc(k.ar) + '"' : "") + ' href="' + esc(k.href) + '" rel="noopener" target="_blank">' + esc(k.en) + "</a>" : "") + "</article>";
+      } },
+    thesisItems: { block: "theses",
+      read: function (l) { var m = /^<div class="degree-detail"><small(?: data-ar="([^"]*)")?>([^<]*)<\/small><p(?: data-ar="([^"]*)")?>([^<]*)<\/p><\/div>$/.exec(l.trim()); return m ? { label: two(m[1], m[2]), text: two(m[3], m[4]) } : null; },
+      write: function (x) { return '<div class="degree-detail"><small' + (x.label.ar ? ' data-ar="' + esc(x.label.ar) + '"' : "") + ">" + esc(x.label.en) + "</small><p" + (x.text.ar ? ' data-ar="' + esc(x.text.ar) + '"' : "") + ">" + esc(x.text.en) + "</p></div>"; } }
+  };
+  function readV3(idx, out) {
+    Object.keys(V3).forEach(function (key) {
+      var l = lines(idx, V3[key].block);
+      if (!l) return; // an older page without these markers: the editors are then hidden
+      out[key] = l.map(function (line, i) { return V3[key].read(line, i); }).filter(Boolean);
+    });
+  }
 
   /* ---------- read ---------- */
   function readSections(idx) {
@@ -150,7 +235,7 @@
     var citations = {};
     try { (JSON.parse(files["data/metrics.json"]).per_work || []).forEach(function (r) { if (r.doi && typeof r.crossref === "number") citations[String(r.doi).toLowerCase()] = r.crossref; }); } catch (e) { /* none */ }
     var pv = /PhotoDrOmaia\.webp\?v=(\d+)/.exec(idx);
-    return {
+    var model = {
       works: works, metrics: metrics, news: news, roles: roles, texts: texts,
       fonts: { ar: fm[2], en: fm[1], head: fm[3] || "Georgia" }, theme: readTheme(idx),
       sections: readSections(idx), nav: readNav(idx),
@@ -158,6 +243,9 @@
       timeline: readTimeline(idx, "timeline"), timelineEarlier: readTimeline(idx, "timeline-earlier"),
       photoVersion: pv ? pv[1] : "", citations: citations, cv: DashCV.read(files["cv.html"]), warnings: []
     };
+    readV3(idx, model);
+    if (files["portfolio.html"]) model.portfolio = DashPortfolio.read(files["portfolio.html"]);
+    return model;
   }
 
   /* ---------- build ---------- */
@@ -271,9 +359,23 @@
       outFiles["data/metrics.json"] = JSON.stringify(mj, null, 1) + "\n";
       say("الاستشهادات: حُدّثت.", "Citations updated.");
     }
+    Object.keys(V3).forEach(function (key) {
+      if (!model[key] || !base[key] || !diff(key)) return;
+      var cur = lines(idx, V3[key].block) || [];
+      idx = setBlock(idx, V3[key].block, "\n" + model[key].map(function (x) { return V3[key].write(x, cur); }).filter(Boolean).join("\n") + "\n");
+      say("القوائم: " + key + " (" + model[key].length + ").", "Lists: " + key + " (" + model[key].length + ").");
+    });
     if (diff("cv") || diff("works") || diff("roles")) {
       var cv = DashCV.build(model, files["cv.html"]);
-      if (cv !== files["cv.html"]) { outFiles["cv.html"] = cv; if (diff("cv")) say("السيرة: حُدّثت.", "CV updated."); }
+      if (cv !== files["cv.html"]) {
+        outFiles["cv.html"] = cv;
+        if (/\sdata-ar="/.test(cv)) outFiles["ar/cv.html"] = buildArabic("cv.html", cv);
+        if (diff("cv")) say("السيرة: حُدّثت.", "CV updated.");
+      }
+    }
+    if (files["portfolio.html"] && model.portfolio && diff("portfolio")) {
+      var pf = DashPortfolio.build(model, files["portfolio.html"]);
+      if (pf !== files["portfolio.html"]) { outFiles["portfolio.html"] = pf; say("ملف الأبحاث: حُدّث.", "Portfolio updated."); }
     }
     if (idx !== files["index.html"]) { outFiles["index.html"] = idx; outFiles["ar/index.html"] = buildArabic("index.html", idx); }
     if (pub !== files["publications.html"]) { outFiles["publications.html"] = pub; outFiles["ar/publications.html"] = buildArabic("publications.html", pub); }
@@ -332,7 +434,7 @@
   }
 
   var api = {
-    MOCK: true, FILES: FILES, THEMES: THEMES, TYPES: TYPES, FONTS: FONTS, PALETTES: PALETTES,
+    MOCK: true, FILES: FILES, OPTIONAL_FILES: OPTIONAL_FILES, PAGES: PAGES, THEMES: THEMES, TYPES: TYPES, FONTS: FONTS, PALETTES: PALETTES,
     setLang: function (l) { lang = l === "en" ? "en" : "ar"; }, contrast: contrast,
     read: read, build: build, validate: validate, nextId: nextId, fromCrossref: fromCrossref, buildArabic: buildArabic,
     parseAchievements: parseAchievements, normalizeDoi: function (v) { return "https://doi.org/" + bareDoi(v); }
@@ -340,6 +442,7 @@
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   root.DashLib = api;
   root.DashCV = DashCV;
+  root.DashPortfolio = DashPortfolio;
 })(typeof window !== "undefined" ? window : globalThis);
 
 /*IMPORT-STANDIN-START*/

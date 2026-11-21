@@ -76,7 +76,9 @@
   }
 
   /* Files that may not exist yet in the repository: a 404 for them reads as an empty file. */
-  var OPTIONAL = { "cv.html": true };
+  /* Files that may not exist yet on main: a 404 for one of them is an empty string, not a failure. */
+  var OPTIONAL = { "cv.html": true, "portfolio.html": true };
+  ((root.DashLib && root.DashLib.OPTIONAL_FILES) || []).forEach(function (p) { OPTIONAL[p] = true; });
 
   /* Read the site files at the current head of main. */
   async function load(token, paths) {
